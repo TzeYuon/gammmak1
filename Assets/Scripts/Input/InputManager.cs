@@ -5,90 +5,57 @@ using Unity.Mathematics;
 
 public class InputManager : MonoBehaviour
 {
-    private GameInputActions GameInput;
-    public static AbstractInputState GameplayInputState { get; private set; }
-    public static AbstractInputState CameraInputState { get; private set; }
-    static List<AbstractInputState> ActiveStates { get; set; }
+    private GameInputActions gameInput;
 
     [SerializeField] SceneManager sceneManager;
     [SerializeField] CameraManager cameraManager;
 
     private void Start()
     {
-        GameInput ??= new GameInputActions();
-        GameInput.Enable();
-
-        InitControlStates();
+        gameInput ??= new GameInputActions();
 
         sceneManager.OnSceneChanged += OnSceneChanged;
     }
 
     private void OnDisable()
     {
-        GameInput.Disable();
+        gameInput.Dispose();
 
         sceneManager.OnSceneChanged -= OnSceneChanged;
     }
 
     private void Update()
     {
-        foreach (AbstractInputState state in ActiveStates)
+        if (gameInput == null) return;
+
+        HandleGameplayInput();
+    }
+
+    void HandleGameplayInput()
+    {
+        if (gameInput.Gameplay.enabled)
         {
-            state.Update();
+            // Handle camera update
+            Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
+            float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
+            cameraManager.MoveCamera(cameraMove, cameraZoom);
+
+
         }
-    }
-
-    private void InitControlStates()
-    {
-        ActiveStates = new();
-
-        GameplayInputState = new GameplayInputState(this, GameInput);
-        CameraInputState = new CameraInputState(this, GameInput, cameraManager);
-    }
-
-    public void AddState(AbstractInputState state, EnterStateArgs args = null)
-    {
-        if (ActiveStates.Contains(state))
-            return;
-
-        ActiveStates.Add(state);
-        state.Enter(args);
-    }
-
-    public void RemoveState(AbstractInputState state)
-    {
-        if (ActiveStates.Contains(state))
+        else
         {
-            ActiveStates.Remove(state);
-            state.Exit();
-        }
-    }
 
-    public void SwapStates(AbstractInputState outgoingState, AbstractInputState incomingState, EnterStateArgs args = null)
-    {
-        RemoveState(outgoingState);
-        AddState(incomingState, args);
-    }
-
-    void ClearStates()
-    {
-        while (ActiveStates.Count > 0)
-        {
-            AbstractInputState state = ActiveStates[0];
-            ActiveStates.Remove(state);
-            state.Exit();
         }
     }
 
     void EnterGameplayScene()
     {
-        AddState(GameplayInputState);
-        AddState(CameraInputState);
+        gameInput.Gameplay.Enable();
     }
 
     void ExitGameplayScene()
     {
-        ClearStates();
+        gameInput.Gameplay.Disable();
     }
 
     #region EVENTS
@@ -108,4 +75,18 @@ public class InputManager : MonoBehaviour
         }
     }
     #endregion
+}
+
+public static class InputBridge
+{
+    public static float2 MouseWorldPosition;
+    public static bool IsRightClickPressed;
+    public static bool IsLeftClickHeld;
+}
+
+public struct PlayerInputData : IComponentData
+{
+    public float2 MouseWorldPosition;
+    public bool IsRightClickPressed;
+    public bool IsLeftClickHeld;
 }
