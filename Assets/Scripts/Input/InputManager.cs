@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class InputManager : MonoBehaviour
             float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
             cameraManager.MoveCamera(cameraMove, cameraZoom);
 
-
+            InputBridge.MouseWorldPosition = (Vector2)Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         }
         else
         {
