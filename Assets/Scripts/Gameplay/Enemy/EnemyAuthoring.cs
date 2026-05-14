@@ -9,6 +9,8 @@ class EnemyAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
+            AddComponent(entity, new SwarmTag());
+
             AddComponent(entity, new PathFollowerComponent());
             AddComponent(entity, new VelocityComponent());
         }
