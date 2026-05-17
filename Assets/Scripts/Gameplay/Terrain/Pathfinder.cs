@@ -1,0 +1,145 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Pathfinder : MonoBehaviour
+{
+    public static Pathfinder Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public static List<Vector2Int> Astar(Vector2Int a, Vector2Int b, bool forcePath = false)
+    {
+        if (GridManager.Instance == null || GridManager.Instance.grid == null)
+        {
+            return null;
+        }
+        
+        if (a.x < 0 || a.x >= GridManager.Instance.width || a.y < 0 || a.y >= GridManager.Instance.height) return null;
+        if (b.x < 0 || b.x >= GridManager.Instance.width || b.y < 0 || b.y >= GridManager.Instance.height) return null;
+
+        Node currNode = new Node(a.x, a.y, true);
+        Node destNode = new Node(b.x, b.y, true);
+
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+        // Note: Using a List for Priority Queue until you move the MinHeap over
+        List<Node> pq = new List<Node>();
+        pq.Add(currNode);
+
+        var adj = new List<(int, int)> { (0, 1), (1, 0), (-1, 0), (0, -1) };
+        var resPath = new List<Vector2Int>();
+
+        while (pq.Count > 0)
+        {
+            // Simple List-based PQ (you can swap to MinHeap later for max speed)
+            int lowestIndex = 0;
+            for (int i = 1; i < pq.Count; i++)
+            {
+                if (pq[i].fCost < pq[lowestIndex].fCost || (pq[i].fCost == pq[lowestIndex].fCost && pq[i].hCost < pq[lowestIndex].hCost))
+                {
+                    lowestIndex = i;
+                }
+            }
+            currNode = pq[lowestIndex];
+            pq.RemoveAt(lowestIndex);
+
+            Vector2Int currPos = new Vector2Int(currNode.x, currNode.y);
+            if (visited.Contains(currPos)) continue;
+            visited.Add(currPos);
+
+            // SUCCESS CONDITION
+            if (currNode.x == destNode.x && currNode.y == destNode.y)
+            {
+                Node temp = currNode;
+                while (temp != null)
+                {
+                    resPath.Add(new Vector2Int(temp.x, temp.y));
+                    temp = temp.parent;
+                }
+                resPath.Reverse();
+
+                return SmoothPath(resPath); // Returns the smoothed path!
+            }
+
+            foreach (var tup in adj)
+            {
+                int tempX = tup.Item1 + currNode.x;
+                int tempY = tup.Item2 + currNode.y;
+                Vector2Int tempPos = new Vector2Int(tempX, tempY);
+
+                if (0 <= tempX && tempX < GridManager.Instance.width && 0 <= tempY && tempY < GridManager.Instance.height)
+                {
+                    int tileType = GridManager.Instance.grid[tempX, tempY];
+
+                    // If it's a wall (1), we can't walk there at all
+                    if (tileType == 1) continue;
+                    if (visited.Contains(tempPos)) continue;
+
+                    // Terrain Cost Logic!
+                    int moveCost = 1;
+                    if (!forcePath)
+                    {
+                        if (tileType == 2) moveCost = 5;       // Mud
+                        if (tileType == 3) moveCost = 50;      // Poison
+                    }
+
+                    Node tempNode = new Node(tempX, tempY, true);
+                    tempNode.gCost = currNode.gCost + moveCost;
+                    tempNode.hCost = Mathf.Abs(destNode.x - tempNode.x) + Mathf.Abs(destNode.y - tempNode.y);
+                    tempNode.parent = currNode;
+
+                    pq.Add(tempNode);
+                }
+            }
+        }
+        return resPath;
+    }
+
+    private static bool HasLineOfSight(Vector2Int start, Vector2Int end)
+    {
+        int x = start.x, y = start.y;
+        int dx = Mathf.Abs(end.x - start.x), dy = Mathf.Abs(end.y - start.y);
+        int sx = start.x < end.x ? 1 : -1, sy = start.y < end.y ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            if (GridManager.Instance.grid[x, y] == 1) return false; // Hit a wall
+            if (x == end.x && y == end.y) break;
+            int e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x += sx; }
+            if (e2 < dx) { err += dx; y += sy; }
+        }
+        return true;
+    }
+
+    private static List<Vector2Int> SmoothPath(List<Vector2Int> path)
+    {
+        if (path == null || path.Count <= 2) return path;
+        List<Vector2Int> smoothedPath = new List<Vector2Int> { path[0] };
+        int currentIndex = 0;
+
+        while (currentIndex < path.Count - 1)
+        {
+            int furthestVisibleIndex = currentIndex + 1;
+            for (int i = currentIndex + 2; i < path.Count; i++)
+            {
+                if (HasLineOfSight(path[currentIndex], path[i])) furthestVisibleIndex = i;
+                else break;
+            }
+            smoothedPath.Add(path[furthestVisibleIndex]);
+            currentIndex = furthestVisibleIndex;
+        }
+        return smoothedPath;
+    }
+}

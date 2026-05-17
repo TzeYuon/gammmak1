@@ -1,0 +1,77 @@
+using UnityEngine;
+
+public class GridManager : MonoBehaviour
+{
+    public static GridManager Instance { get; private set; }
+
+    public int width = 50;
+    public int height = 50;
+
+    // Noise settings to make the terrain look natural
+    public float scale = 0.15f;
+    public float randomOffset = 0f;
+
+    public int[,] grid; // 0 = Walkable, 1 = Wall, 2 = Mud, 3 = Poison
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        grid = new int[width, height];
+        randomOffset = Random.Range(0f, 9999f);
+        GenerateTerrain();
+        Debug.Log("Terrain Generated!");
+    }
+
+    void GenerateTerrain()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                //Always keep the corners safe for spawning
+                if (x < 3 && y < 3) 
+                { 
+                    grid[x, y] = 0;
+                    continue;
+                }
+                float noise = Mathf.PerlinNoise((x + randomOffset) * scale, (y + randomOffset) * scale);
+
+                //Create terrain based on the noise heightmap
+                if (noise > 0.75f)
+                    grid[x, y] = 1;
+                else if (noise > 0.65f)
+                    grid[x, y] = 3;
+                else if (noise < 0.25f)
+                    grid[x, y] = 2;
+                else
+                    grid[x, y] = 0;
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (grid == null) return;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y] == 0) continue;
+
+                if (grid[x, y] == 1) Gizmos.color = Color.black;
+                else if (grid[x, y] == 2) Gizmos.color = new Color(0.5f, 0.25f, 0f);
+                else if (grid[x, y] == 3) Gizmos.color = Color.green;
+
+                Gizmos.DrawCube(new Vector3(x, y, -2f), Vector3.one * 0.9f);
+            }
+        }
+    }
+}
