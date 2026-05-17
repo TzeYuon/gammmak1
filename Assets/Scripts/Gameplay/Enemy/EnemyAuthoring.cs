@@ -13,6 +13,15 @@ class EnemyAuthoring : MonoBehaviour
 
             AddComponent(entity, new PathFollowerComponent());
             AddComponent(entity, new VelocityComponent());
+
+            AddComponent(entity, new HealthComponent
+            {
+                MaxValue = 1,
+                Value = 1,
+            });
+
+            AddComponent(entity, new DeadTag());
+            SetComponentEnabled<DeadTag>(entity, false);
         }
     }
 }

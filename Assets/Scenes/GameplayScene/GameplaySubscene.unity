@@ -377,7 +377,7 @@ MonoBehaviour:
   MapWidth: 2000
   MapHeight: 2000
   CoarseCellSize: 10
-  FineCellSizeMultiplier: 2
+  FineCellSizeMultiplier: 5
 --- !u!4 &1092293266
 Transform:
   m_ObjectHideFlags: 0
