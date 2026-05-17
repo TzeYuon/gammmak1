@@ -25,9 +25,27 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Select",
+                    "name": "PrimaryAction",
                     "type": "Button",
                     "id": "9d8ab46b-63d0-46af-b34d-c61cc3ec5c1d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SecondaryAction",
+                    "type": "Button",
+                    "id": "f58cdeb1-93c3-42a9-9667-506c83cd6eee",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectionModifier",
+                    "type": "Button",
+                    "id": "8d6fa440-c206-4f5c-bedd-61c27077d1ab",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -130,7 +148,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Select",
+                    "action": "PrimaryAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0d968036-6171-4b43-a5dd-d669c95d42f9",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SecondaryAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3fb23b89-799a-4443-af9a-397bfcf002b6",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SelectionModifier",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

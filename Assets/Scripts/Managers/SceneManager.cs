@@ -16,6 +16,8 @@ public enum SceneId
 /// </summary>
 public class SceneManager : MonoBehaviour
 {
+    public static SceneManager Instance { get; private set; }
+
     [SerializeField] UIScreenManager uiScreenManager;
 
     SceneId curScene;
@@ -24,7 +26,10 @@ public class SceneManager : MonoBehaviour
 
     private void Awake()
     {
-        InitScenes();
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+            InitScenes();
     }
 
     void InitScenes()

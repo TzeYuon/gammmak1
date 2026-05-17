@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
+    public static CameraManager Instance { get; private set; }
+
     Transform cameraTransform;
     Camera cameraComponent;
 
@@ -12,6 +14,12 @@ public class CameraManager : MonoBehaviour
     float cameraTargetZoom;
     float zoomSpeed = 700f;
     float minZoom = 14, maxZoom = 150;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     private void Start()
     {
@@ -24,6 +32,8 @@ public class CameraManager : MonoBehaviour
 
     public void MoveCamera(Vector2 moveDir, float zoomDir)
     {
+        if (cameraComponent == null) return;
+
         ManageMove();
         ManageZoom();
 
