@@ -23,7 +23,7 @@ public class LaserVFXManager : MonoBehaviour
         var world = World.DefaultGameObjectInjectionWorld;
         if (world == null) return;
 
-        var weaponSystem = world.GetExistingSystemManaged<LaserWeaponFireSystem>();
+        var weaponSystem = world.GetExistingSystemManaged<PrecisionWeaponFireSystem>();
         if (weaponSystem == null) return;
 
         var queue = weaponSystem.GetLaserQueue();

@@ -14,3 +14,8 @@ public struct ShipMovementStatsComponent : IComponentData
     public float Thrust;
     public float MaxSpeed;
 }
+
+public struct ShipReference : IComponentData
+{
+    public Entity Value;
+}

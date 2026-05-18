@@ -1,9 +1,48 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct WeaponStats : IComponentData
+/// <summary>
+/// For weapons that target specific enemies
+/// </summary>
+public struct PrecisionTargetingComponent : IComponentData
 {
     public float Range;
+    public float AngleBias;
+}
+
+/// <summary>
+/// For weapons that target the highest density
+/// </summary>
+public struct HeatmapTargetingComponent : IComponentData
+{
+    public float Range;
+    public float AngleBias;
+}
+
+/// <summary>
+/// The angles that the weapon is allowed to point towards
+/// </summary>
+public struct WeaponFiringArc : IComponentData
+{
+    public float3 BaseDirection;
+    public float MaxAngle;
+}
+
+public struct TurretComponent : IComponentData
+{
+    public float TurnSpeed;
+}
+
+public struct HitScanWeapon : IComponentData
+{
+    public float Damage;
+}
+
+public struct ProjectileWeapon : IComponentData
+{
+    public Entity ProjectilePrefab;
+    public float Damage;
+    public float Spread;
 }
 
 public struct WeaponState : IComponentData

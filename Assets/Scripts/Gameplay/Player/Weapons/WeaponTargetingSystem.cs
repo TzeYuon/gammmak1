@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -12,7 +13,7 @@ partial struct WeaponTargetingSystem : ISystem
     {
         state.RequireForUpdate<CoarseEnemyHeatmapComponent>();
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
-        state.RequireForUpdate<WeaponStats>();
+        state.RequireForUpdate<WeaponState>();
     }
 
     [BurstCompile]
@@ -21,7 +22,9 @@ partial struct WeaponTargetingSystem : ISystem
         CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>().ValueRW;
 
-        ClosestTargetingJob job = new()
+        ComponentLookup<LocalToWorld> worldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
+
+        PrecisionTargetingJob precisionJob = new()
         {
             CoarseCellSize = coarseHeatmap.CellSize,
             CoarseGridWidth = coarseHeatmap.GridWidth,
@@ -33,7 +36,19 @@ partial struct WeaponTargetingSystem : ISystem
             FineEntityMap = fineEntityMap.Map,
         };
 
-        state.Dependency = job.ScheduleParallel(state.Dependency);
+        HeatmapTargetingJob heatmapJob = new()
+        {
+            FineDensityMap = fineEntityMap.DensityMap,
+            GridWidth = fineEntityMap.GridWidth,
+            GridHeight = fineEntityMap.GridHeight,
+            CellSize = fineEntityMap.CellSize,
+            WorldLookup = worldLookup
+        };
+
+        state.Dependency = JobHandle.CombineDependencies(
+            precisionJob.ScheduleParallel(state.Dependency),
+            heatmapJob.ScheduleParallel(state.Dependency)
+        );
     }
 
     [BurstCompile]
@@ -44,7 +59,7 @@ partial struct WeaponTargetingSystem : ISystem
 }
 
 [BurstCompile]
-public partial struct ClosestTargetingJob : IJobEntity
+public partial struct PrecisionTargetingJob : IJobEntity
 {
     public float CoarseCellSize;
     public int CoarseGridWidth;
@@ -58,7 +73,7 @@ public partial struct ClosestTargetingJob : IJobEntity
 
     private void Execute(
         in LocalToWorld transform,
-        in WeaponStats stats,
+        in PrecisionTargetingComponent stats,
         ref WeaponState state
         )
     {
@@ -121,6 +136,81 @@ public partial struct ClosestTargetingJob : IJobEntity
             state.HasTarget = true;
             state.TargetPos = bestTarget;
         } 
+        else
+        {
+            state.HasTarget = false;
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct HeatmapTargetingJob : IJobEntity
+{
+    [ReadOnly] public NativeArray<int> FineDensityMap;
+    public int GridWidth;
+    public int GridHeight;
+    public float CellSize;
+
+    [ReadOnly] public ComponentLookup<LocalToWorld> WorldLookup;
+
+    private void Execute(
+        ref WeaponState state,
+        in HeatmapTargetingComponent stats,
+        in WeaponFiringArc arc,
+        in LocalToWorld weaponWorld,
+        in ShipReference ship
+        ) 
+    {
+        LocalToWorld shipWorld = WorldLookup[ship.Value];
+        float3 shipForwardWorld = math.rotate(shipWorld.Rotation, arc.BaseDirection);
+        float3 currentBarrelForward = weaponWorld.Up;
+
+        float bestScore = -1f;
+        float2 bestTarget = float2.zero;
+
+        int radiusCells = (int)math.ceil(stats.Range / CellSize);
+        int2 centerCell = (int2)math.floor(weaponWorld.Position.xy / CellSize);
+
+        for (int x = -radiusCells; x <= radiusCells; x++)
+        {
+            for (int y = -radiusCells; y <= radiusCells; y++)
+            {
+                int2 checkCell = centerCell + new int2(x, y);
+                if (checkCell.x < 0 || checkCell.x >= GridWidth || checkCell.y < 0 || checkCell.y >= GridHeight) continue;
+
+                int density = FineDensityMap[checkCell.x + (checkCell.y * GridWidth)];
+                if (density <= 0) continue;
+
+                float2 cellWorldPos = new(checkCell.x * CellSize + CellSize * 0.5f, checkCell.y * CellSize + CellSize * 0.5f);
+                float2 vectorToCell = cellWorldPos - weaponWorld.Position.xy;
+                float distSq = math.lengthsq(vectorToCell);
+
+                if (distSq > stats.Range * stats.Range) continue;
+
+                float2 dirToCell = math.normalize(vectorToCell);
+
+                // check if the cell is in the weapon firing arc
+                float angleToShipResting = math.degrees(math.acos(math.dot(shipForwardWorld.xy, dirToCell)));
+                if (angleToShipResting > arc.MaxAngle) continue;
+
+                // add bias based on how much the turret needs to rotate
+                float alignment = math.dot(currentBarrelForward.xy, dirToCell);
+                float biasMultiplier = math.pow(math.max(0.1f, (alignment + 1f) * 0.5f), stats.AngleBias);
+
+                float score = density * biasMultiplier;
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestTarget = cellWorldPos;
+                }
+            }
+        }
+
+        if (bestScore > 0)
+        {
+            state.HasTarget = true;
+            state.TargetPos = bestTarget;
+        }
         else
         {
             state.HasTarget = false;

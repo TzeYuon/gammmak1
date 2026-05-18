@@ -6,7 +6,7 @@ using Unity.Transforms;
 
 [BurstCompile]
 [UpdateInGroup(typeof(CombatSystemGroup))]
-public partial class LaserWeaponFireSystem : SystemBase
+public partial class PrecisionWeaponFireSystem : SystemBase
 {
     private NativeQueue<LaserEvent> laserQueue;
 
@@ -14,7 +14,7 @@ public partial class LaserWeaponFireSystem : SystemBase
     protected override void OnCreate()
     {
         RequireForUpdate<FineEnemyHeatmapComponent>();
-        RequireForUpdate<WeaponState>();
+        RequireForUpdate<PrecisionTargetingComponent>();
         RequireForUpdate<HealthComponent>();
 
         laserQueue = new NativeQueue<LaserEvent>(Allocator.Persistent);
@@ -30,7 +30,7 @@ public partial class LaserWeaponFireSystem : SystemBase
         ComponentLookup<HealthComponent> healthLookup = SystemAPI.GetComponentLookup<HealthComponent>(false);
         ComponentLookup<LocalTransform> transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
 
-        foreach (var (weaponState, transform, parent) in SystemAPI.Query<RefRW<WeaponState>, RefRO<LocalToWorld>, RefRO<Parent>>())
+        foreach (var (weaponState, transform, parent) in SystemAPI.Query<RefRW<WeaponState>, RefRO<LocalToWorld>, RefRO<Parent>>().WithAll<PrecisionTargetingComponent>())
         {
             weaponState.ValueRW.FireTimer -= SystemAPI.Time.DeltaTime;
             if (weaponState.ValueRO.FireTimer > 0) continue; // on cooldown
