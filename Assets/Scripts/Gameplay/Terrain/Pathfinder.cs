@@ -17,15 +17,30 @@ public class Pathfinder : MonoBehaviour
         }
     }
 
-    public static List<Vector2Int> Astar(Vector2Int a, Vector2Int b, bool forcePath = false)
+    public static List<Vector2Int> Astar(Vector2Int worldStart, Vector2Int worldEnd, bool forcePath = false)
     {
         if (GridManager.Instance == null || GridManager.Instance.grid == null)
         {
             return null;
         }
-        
-        if (a.x < 0 || a.x >= GridManager.Instance.width || a.y < 0 || a.y >= GridManager.Instance.height) return null;
-        if (b.x < 0 || b.x >= GridManager.Instance.width || b.y < 0 || b.y >= GridManager.Instance.height) return null;
+
+        Vector2Int origin = GridManager.Instance.worldOrigin;
+        Vector2Int a = worldStart - origin;
+        Vector2Int b = worldEnd - origin;
+
+        a.x = Mathf.Clamp(a.x, 0, GridManager.Instance.width - 1);
+        a.y = Mathf.Clamp(a.y, 0, GridManager.Instance.height - 1);
+
+        b.x = Mathf.Clamp(b.x, 0, GridManager.Instance.width - 1);
+        b.y = Mathf.Clamp(b.y, 0, GridManager.Instance.height - 1);
+
+        //if (a.x < 0 || a.x >= GridManager.Instance.width || a.y < 0 || a.y >= GridManager.Instance.height) return null;
+        //if (b.x < 0 || b.x >= GridManager.Instance.width || b.y < 0 || b.y >= GridManager.Instance.height) return null;
+        if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
+
+        // 2. Emergency Brake to prevent the game from crashing if a path is too hard to find
+        int maxIterations = 2000;
+        int currentLoop = 0;
 
         Node currNode = new Node(a.x, a.y, true);
         Node destNode = new Node(b.x, b.y, true);
@@ -42,6 +57,12 @@ public class Pathfinder : MonoBehaviour
         while (pq.Count > 0)
         {
             // Simple List-based PQ (you can swap to MinHeap later for max speed)
+            currentLoop++;
+            if (currentLoop > maxIterations)
+            {
+                Debug.Log("Pathfinder Emergency Brake! Path was too complex.");
+                return null;
+            }
             int lowestIndex = 0;
             for (int i = 1; i < pq.Count; i++)
             {
@@ -67,8 +88,17 @@ public class Pathfinder : MonoBehaviour
                     temp = temp.parent;
                 }
                 resPath.Reverse();
-
-                return SmoothPath(resPath); // Returns the smoothed path!
+                for (int i = 0; i < resPath.Count; i++)
+                {
+                    resPath[i] = resPath[i] + origin;
+                }
+                return resPath;
+                //var smoothedPath = SmoothPath(resPath);
+                //for (int i = 0; i < smoothedPath.Count; i++)
+                //{
+                //    smoothedPath[i] = smoothedPath[i] + origin;
+                //}
+                //return smoothedPath; // Returns the smoothed path!
             }
 
             foreach (var tup in adj)
@@ -81,11 +111,9 @@ public class Pathfinder : MonoBehaviour
                 {
                     int tileType = GridManager.Instance.grid[tempX, tempY];
 
-                    // If it's a wall (1), we can't walk there at all
                     if (tileType == 1) continue;
                     if (visited.Contains(tempPos)) continue;
 
-                    // Terrain Cost Logic!
                     int moveCost = 1;
                     if (!forcePath)
                     {

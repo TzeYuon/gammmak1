@@ -4,8 +4,10 @@ public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
 
-    public int width = 50;
-    public int height = 50;
+    public int width = 200;
+    public int height = 200;
+
+    public Vector2Int worldOrigin = new Vector2Int(1000, 1000);
 
     // Noise settings to make the terrain look natural
     public float scale = 0.15f;
@@ -70,7 +72,7 @@ public class GridManager : MonoBehaviour
                 else if (grid[x, y] == 2) Gizmos.color = new Color(0.5f, 0.25f, 0f);
                 else if (grid[x, y] == 3) Gizmos.color = Color.green;
 
-                Gizmos.DrawCube(new Vector3(x, y, -2f), Vector3.one * 0.9f);
+                Gizmos.DrawCube(new Vector3(x + worldOrigin.x, y + worldOrigin.y, -2f), Vector3.one * 0.9f);
             }
         }
     }

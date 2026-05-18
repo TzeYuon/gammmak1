@@ -17,37 +17,51 @@ partial struct PathLeaderSystem : ISystem
     //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        int offsetX = 1000;
-        int offsetY = 1000;
         var input = SystemAPI.GetSingleton<PlayerInputData>();
         float deltaTime = SystemAPI.Time.DeltaTime;
         float2 mousePos = input.MouseWorldPosition;
         foreach (var (pathLeader, transform, buffer) in SystemAPI.Query<RefRW<PathLeaderComponent>, RefRW<LocalTransform>, DynamicBuffer<PathPosition>>())
         {
             float3 curPos = transform.ValueRO.Position;
+            float2 targetDir = float2.zero;
             //float2 targetDir = mousePos - curPos.xy;
             //17/5/26 addon for A*
-            Vector2Int startGrid = new Vector2Int((int)math.round(curPos.x - offsetX), (int)math.round(curPos.y - offsetY));
-            Vector2Int endGrid = new Vector2Int((int)math.round(mousePos.x - offsetX), (int)math.round(mousePos.y - offsetY));
-            float2 targetDir = float2.zero;
+            Vector2Int startGrid = new Vector2Int((int)math.round(curPos.x), (int)math.round(curPos.y));
+            Vector2Int endGrid = new Vector2Int((int)math.round(mousePos.x), (int)math.round(mousePos.y));
+            Vector2Int lastEnd = new Vector2Int((int)math.round(pathLeader.ValueRO.LastTargetPos.x), (int)math.round(pathLeader.ValueRO.LastTargetPos.y));
             List<Vector2Int> path = Pathfinder.Astar(startGrid, endGrid);
 
-            if (path != null && path.Count > 1)
+            if (path != null && path.Count > 0)
             {
-                // We don't want to look at the very end of the path...
-                // We want to look at the VERY NEXT CORNER (Index 1) so we steer around the walls!
-                float2 nextWaypoint = new float2(path[1].x, path[1].y);
-                targetDir = nextWaypoint - curPos.xy;
+                if (path.Count > 1)
+                {
+                    float2 nextWaypoint = new float2(path[1].x, path[1].y);
+
+                    if (math.distance(curPos.xy, nextWaypoint) < 0.15f && path.Count > 2)
+                    {
+                        nextWaypoint = new float2(path[2].x, path[2].y);
+                    }
+                    targetDir = nextWaypoint - curPos.xy;
+                }
+                else
+                {
+                    targetDir = mousePos - curPos.xy;
+                }
             }
             else
             {
-                targetDir = mousePos - curPos.xy;
+                targetDir = float2.zero;
             }
+
+            pathLeader.ValueRW.LastTargetPos = mousePos;
+
+            
             targetDir = math.normalizesafe(targetDir);
-            float2 moveDir = math.lerp(pathLeader.ValueRO.MoveDirection, targetDir, 10f * deltaTime);
+
+            float2 moveDir = math.lerp(pathLeader.ValueRO.MoveDirection, targetDir, 40f * deltaTime);
             pathLeader.ValueRW.MoveDirection = moveDir;
 
-            float3 newPos = curPos + math.float3(moveDir, 0) * pathLeader.ValueRO.Speed;
+            float3 newPos = curPos + math.float3(moveDir, 0) * pathLeader.ValueRO.Speed * deltaTime;
             transform.ValueRW.Position = newPos;
 
             if (buffer.IsEmpty)
@@ -56,9 +70,8 @@ partial struct PathLeaderSystem : ISystem
             }
             else
             {
-                // Add to buffer if min distance reached
                 float3 lastPoint = buffer[buffer.Length - 1].Value;
-                if (math.distancesq(newPos, lastPoint) >= 1.0f)
+                if (math.distancesq(newPos, lastPoint) >= 0.1f)
                 {
                     buffer.Add(new PathPosition { Value = newPos });
                     if (buffer.Length > pathLeader.ValueRO.MaxPathLength) buffer.RemoveAt(0);
