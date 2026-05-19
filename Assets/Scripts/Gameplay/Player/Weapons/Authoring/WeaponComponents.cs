@@ -33,7 +33,7 @@ public struct TurretComponent : IComponentData
     public float TurnSpeed;
 }
 
-public struct HitScanWeapon : IComponentData
+public struct HitscanWeapon : IComponentData
 {
     public float Damage;
 }

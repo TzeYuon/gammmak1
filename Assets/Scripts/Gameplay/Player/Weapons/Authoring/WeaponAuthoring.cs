@@ -27,10 +27,7 @@ class WeaponAuthoring : MonoBehaviour
             //    Spread = 1f
             //});
 
-            AddComponent(entity, new HitScanWeapon
-            {
-                Damage = 1,
-            });
+            AddComponent(entity, new HitscanWeapon { Damage = 1 });
 
             AddComponent(entity, new ShipReference());
         }
