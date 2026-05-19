@@ -12,15 +12,21 @@ partial struct EnemySwarmMovementSystem : ISystem
         state.RequireForUpdate<PathFollowerComponent>();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
+
         var moveJob = new SwarmFollowerMovementJob
         {
             ElapsedTime = SystemAPI.Time.ElapsedTime,
             DeltaTime = SystemAPI.Time.DeltaTime,
             PathLeaderLookup = SystemAPI.GetComponentLookup<PathLeaderComponent>(),
             PathLookup = SystemAPI.GetBufferLookup<PathPosition>(),
+            Grid = GridManager.Instance.nativeGrid,
+            GridWidth = GridManager.Instance.width,
+            GridHeight = GridManager.Instance.height,
+            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y)
         };
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
     }
@@ -40,6 +46,10 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
     public float DeltaTime;
     [ReadOnly] public ComponentLookup<PathLeaderComponent> PathLeaderLookup;
     [ReadOnly] public BufferLookup<PathPosition> PathLookup;
+    [ReadOnly] public NativeArray<int> Grid;
+    public int GridWidth;
+    public int GridHeight;
+    public int2 WorldOrigin;
 
     void Execute(
         Entity entity,
@@ -66,7 +76,7 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
         uint uniqueSeed = (uint)(entity.Index + (ElapsedTime * 3140));
         var rng = Random.CreateFromIndex(uniqueSeed);
 
-        float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width);
+        float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width, pathLeader);
         SetDynamicSpeed(curVel, ref steeringForce, ref finalMoveSpeed, maxSpeedMult, toTarget);
 
         // Calculate noise
@@ -79,6 +89,49 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
         float smoothRandom = noise.snoise(noiseInput);
 
         steeringForce += 5 * smoothRandom * sidewaysVec.xy;
+
+        // force exerting from walls to swarm
+        float2 wallPushForce = float2.zero;
+        int2 gridPos = new int2((int)math.round(curPos.x), (int)math.round(curPos.y)) - WorldOrigin;
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                int checkX = gridPos.x + x;
+                int checkY = gridPos.y + y;
+
+                if (checkX >= 0 && checkX < GridWidth && checkY >= 0 && checkY < GridHeight)
+                {
+                    if (Grid[checkX + checkY * GridWidth] == 1) // only wall
+                    {
+                        float2 wallCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
+
+                        float2 pushDir = curPos.xy - wallCenter;
+                        float distSq = math.lengthsq(pushDir);
+
+                        if (distSq < 2.25f && distSq > 0.01f)
+                        {
+                            float distance = math.sqrt(distSq);
+                            float pushStrength = (1.5f - distance) * 100.0f;
+                            wallPushForce += (math.normalize(pushDir) * pushStrength);
+
+                            // Calculate push away and sideways
+                            float2 pushNormal = pushDir / distance;
+
+                            float2 slideTangent = new float2(-pushNormal.y, pushNormal.x);
+                            wallPushForce += (pushNormal * pushStrength) + (slideTangent * (pushStrength * 0.5f));
+                        }
+                    }
+                }
+            }
+        }
+        steeringForce += wallPushForce;
+
+        // Slow the agent down so that it doesn't go through walls
+        if (math.lengthsq(wallPushForce) > 10f)
+        {
+            finalMoveSpeed = math.min(finalMoveSpeed, baseSpeed * 0.5f);
+        }
 
         // update velocity
         float2 newVel = curVel + (steeringForce * DeltaTime);
@@ -99,11 +152,23 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
             transform.Rotation = quaternion.RotateZ(angle);
         }
 
-        static float3 GetTargetDirection(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width)
+        static float3 GetTargetDirection(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, PathLeaderComponent pathLeader)
         {
             // Find target position based on rank
             float headIndex = pathBuffer.Length - 1;
-            float targetIndex = headIndex - follower.PathPosition;
+            //float targetIndex = headIndex - follower.PathPosition;
+            float dynamicRankOffset = follower.PathPosition;
+            float leaderMoveSpeedSq = math.lengthsq(pathLeader.MoveDirection);
+
+            if (leaderMoveSpeedSq < 1.0f)
+            {
+                // Shrink their snake rank towards 0 based on how stopped the leader is.
+                // When leader speed is 0, rank is 0, and EVERYONE targets the exact head!
+                dynamicRankOffset = math.lerp(0, follower.PathPosition, leaderMoveSpeedSq);
+            }
+
+            float targetIndex = headIndex - dynamicRankOffset;
+            // end of edit
 
             if (targetIndex < 0) targetIndex = 0;
 
@@ -116,7 +181,12 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
 
             // Determine path forward and right for width
             float3 pathForward = posB - posA;
-            if (math.lengthsq(pathForward) < 0.001f) pathForward = new float3(0, 1, 0);
+            //if (math.lengthsq(pathForward) < 0.001f) pathForward = new float3(0, 1, 0); // snake
+            if (math.lengthsq(pathForward) < 0.001f) // clump
+            {
+                float angle = follower.Rank * 2.4f;
+                pathForward = new float3(math.cos(angle), math.sin(angle), 0);
+            }
             else pathForward = math.normalize(pathForward);
             float3 pathRight = math.cross(pathForward, new float3(0, 0, 1));
 
