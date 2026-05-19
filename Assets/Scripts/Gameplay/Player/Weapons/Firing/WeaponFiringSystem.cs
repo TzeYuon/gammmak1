@@ -6,18 +6,14 @@ using Unity.Transforms;
 
 [BurstCompile]
 [UpdateInGroup(typeof(CombatSystemGroup))]
-public partial class PrecisionWeaponFireSystem : SystemBase
+public partial class WeaponFiringSystem : SystemBase
 {
-    private NativeQueue<LaserEvent> laserQueue;
-
     [BurstCompile]
     protected override void OnCreate()
     {
         RequireForUpdate<FineEnemyHeatmapComponent>();
         RequireForUpdate<PrecisionTargetingComponent>();
         RequireForUpdate<HealthComponent>();
-
-        laserQueue = new NativeQueue<LaserEvent>(Allocator.Persistent);
     }
 
     [BurstCompile]
@@ -29,6 +25,8 @@ public partial class PrecisionWeaponFireSystem : SystemBase
 
         ComponentLookup<HealthComponent> healthLookup = SystemAPI.GetComponentLookup<HealthComponent>(false);
         ComponentLookup<LocalTransform> transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
+
+        var vfxWriter = SystemAPI.GetSingleton<GlobalVFXQueue>().Queue.AsParallelWriter();
 
         foreach (var (weaponState, transform, parent) in SystemAPI.Query<RefRW<WeaponState>, RefRO<LocalToWorld>, RefRO<Parent>>().WithAll<PrecisionTargetingComponent>())
         {
@@ -60,27 +58,15 @@ public partial class PrecisionWeaponFireSystem : SystemBase
             float distance = math.length(direction);
             float3 midpoint = startPos + (direction * 0.5f);
 
-            float angleRadians = math.atan2(direction.y, direction.x);
-            float angleDegrees = math.degrees(angleRadians);
+            float angleDegrees = math.degrees(math.atan2(direction.y, direction.x));
 
-            laserQueue.Enqueue(new LaserEvent
+            vfxWriter.Enqueue(new VFXPayload
             {
-                Midpoint = midpoint,
-                Length = distance,
-                AngleZ = angleDegrees,
-                Color = new float4(0.0f, 1.0f, 1.0f, 3.0f)
+                Position = midpoint,
+                Type = (uint)VFXType.Laser,
+                Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
+                CustomData = new float4(angleDegrees, distance, 0, 0),
             });
         }
-    }
-
-    [BurstCompile]
-    protected override void OnDestroy()
-    {
-        if (laserQueue.IsCreated) laserQueue.Dispose();
-    }
-
-    public NativeQueue<LaserEvent> GetLaserQueue()
-    {
-        return laserQueue;
     }
 }

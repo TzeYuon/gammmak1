@@ -8,14 +8,14 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(PostHealthUpdateSystemGroup))]
 public partial class DeathSystem : SystemBase
 {
-    private NativeQueue<DeathEvent> deathQueue;
+    private NativeQueue<DeathVFXEvent> deathQueue;
 
     [BurstCompile]
     protected override void OnCreate()
     {
         RequireForUpdate<HealthComponent>();
 
-        deathQueue = new NativeQueue<DeathEvent>(Allocator.Persistent);
+        deathQueue = new NativeQueue<DeathVFXEvent>(Allocator.Persistent);
     }
 
     [BurstCompile]
@@ -38,7 +38,7 @@ public partial class DeathSystem : SystemBase
         if (deathQueue.IsCreated) deathQueue.Dispose();
     }
 
-    public NativeQueue<DeathEvent> GetDeathQueue()
+    public NativeQueue<DeathVFXEvent> GetDeathQueue()
     {
         Dependency.Complete();
         return deathQueue;
@@ -49,7 +49,7 @@ public partial class DeathSystem : SystemBase
 public partial struct ProcessDeathJob : IJobEntity
 {
     public EntityCommandBuffer.ParallelWriter ECB;
-    public NativeQueue<DeathEvent>.ParallelWriter DeathQueueWriter;
+    public NativeQueue<DeathVFXEvent>.ParallelWriter DeathQueueWriter;
 
     private void Execute(
         Entity entity,
@@ -61,7 +61,7 @@ public partial struct ProcessDeathJob : IJobEntity
         // Check if dead
         if (health.Value > 0) return;
 
-        DeathQueueWriter.Enqueue(new DeathEvent
+        DeathQueueWriter.Enqueue(new DeathVFXEvent
         {
             Position = transform.Position,
             Colour = new float3(255, 0, 0)

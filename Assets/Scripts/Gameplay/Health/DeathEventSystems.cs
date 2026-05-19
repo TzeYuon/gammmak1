@@ -6,7 +6,7 @@ using Unity.Collections;
 
 public struct DeathVFXQueueSingleton : IComponentData
 {
-    public NativeQueue<DeathEvent> Queue;
+    public NativeQueue<DeathVFXEvent> Queue;
 }
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -16,7 +16,7 @@ public partial struct DeathVFXQueueLifecycleSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         // Create deathVFXQueue
-        var queue = new NativeQueue<DeathEvent>(Allocator.Persistent);
+        var queue = new NativeQueue<DeathVFXEvent>(Allocator.Persistent);
 
         var entity = state.EntityManager.CreateEntity();
         state.EntityManager.AddComponentData(entity, new DeathVFXQueueSingleton
@@ -45,7 +45,7 @@ public partial class SwarmDeathEventSystem : SystemBase
     [BurstCompile]
     protected override void OnUpdate()
     {
-        if (!SystemAPI.TryGetSingleton<DeathVFXQueueSingleton>(out var vfxSingleton)) return;
+        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
         var vfxQueue = vfxSingleton.Queue;
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
@@ -57,9 +57,9 @@ public partial class SwarmDeathEventSystem : SystemBase
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, SwarmTag>().WithEntityAccess())
         {
             // Create death visual
-            vfxQueue.Enqueue(new DeathEvent { 
+            vfxQueue.Enqueue(new VFXPayload { 
                 Position = transform.ValueRO.Position, 
-                Colour = new float3(1, 0, 0) 
+                Colour = new float4(1, 0, 0, 0), 
             });
 
             //// Random chance to drop biomass
@@ -91,14 +91,14 @@ public partial class PlayerDeathEventSystem : SystemBase
     [BurstCompile]
     protected override void OnUpdate()
     {
-        if(!SystemAPI.TryGetSingleton<DeathVFXQueueSingleton>(out var vfxSingleton)) return;
+        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
         var vfxQueue = vfxSingleton.Queue;
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, PlayerTag>())
         {
-            vfxQueue.Enqueue(new DeathEvent
+            vfxQueue.Enqueue(new VFXPayload
             {
                 Position = transform.ValueRO.Position,
-                Colour = new float3(0, 1, 1)
+                Colour = new float4(0, 1, 1, 0)
             });
         }
     }
