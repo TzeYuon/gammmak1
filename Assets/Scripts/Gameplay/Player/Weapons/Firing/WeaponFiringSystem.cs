@@ -86,15 +86,14 @@ public partial struct WeaponFiringSystem : ISystem
         {
             DeltaTime = deltaTime,
             ECB = ecb,
-        }.ScheduleParallel(state.Dependency);
+        }.ScheduleParallel(hitscan);
 
-        state.Dependency = JobHandle.CombineDependencies(hitscan, projectile);
+        state.Dependency = projectile;
         state.CompleteDependency();
     }
 }
 
 [BurstCompile]
-[WithAll(typeof(HitscanWeapon))]
 public partial struct HitscanFiringJob : IJobEntity
 {
     public float DeltaTime;
@@ -149,7 +148,6 @@ public partial struct HitscanFiringJob : IJobEntity
 }
 
 [BurstCompile]
-[WithAll(typeof(ProjectileWeapon))]
 public partial struct ProjectileFiringJob : IJobEntity
 {
     public float DeltaTime;
@@ -166,21 +164,27 @@ public partial struct ProjectileFiringJob : IJobEntity
         if (state.FireTimer > 0 || !state.HasTarget || state.FireRate == 0) return;
         state.FireTimer = 1 / state.FireRate;
 
-        float3 barrelForward = localToWorld.Up;
+        float3 weaponForward = localToWorld.Up;
         float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
 
-        if (math.dot(barrelForward, dirToTarget) < 0.95f) return; // mostly facing target
+        if (math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
 
-        Entity bullet = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
+        Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
 
-        ECB.SetComponent(chunkIndex, bullet, LocalTransform.FromPositionRotation(
+        ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
             localToWorld.Position,
             localToWorld.Rotation)
         );
 
-        ECB.SetComponent(chunkIndex, bullet, new VelocityComponent
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
         {
-            Value = barrelForward.xy * projectileWeapon.ProjectileSpeed
+            Velocity = weaponForward.xy * projectileWeapon.ProjectileSpeed,
+            HitRadiusSq = 1,
+        });
+
+        ECB.SetComponent(chunkIndex, projectile, new StandardProjectile
+        {
+            Damage = projectileWeapon.Damage,
         });
     }
 }
