@@ -46,7 +46,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd2470d09cd58047a40f681a8dab57f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponAuthoring
+  Damage: 1
+  FireRate: 12
+  Range: 30
+  Targeting: 0
+  AngleBias: 2
+  HasTurret: 1
+  TurnSpeed: 5
+  BaseDirection: {x: 0, y: 1, z: 0}
+  MaxAngle: 180
+  Firing: 1
   ProjectilePrefab: {fileID: 1688938411433637448, guid: 77a19a51527bc79478d98b3152afd6e7, type: 3}
+  ProjectileSpeed: 50
+  Spread: 0
 --- !u!1 &954237318640528480
 GameObject:
   m_ObjectHideFlags: 0

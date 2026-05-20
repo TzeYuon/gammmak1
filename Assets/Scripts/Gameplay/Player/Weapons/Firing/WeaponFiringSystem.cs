@@ -31,46 +31,9 @@ public partial struct WeaponFiringSystem : ISystem
 
         var vfxWriter = SystemAPI.GetSingleton<GlobalVFXQueue>().Queue.AsParallelWriter();
 
-        //foreach (var (weaponState, transform, parent) in SystemAPI.Query<RefRW<WeaponState>, RefRO<LocalToWorld>, RefRO<Parent>>().WithAll<PrecisionTargetingComponent>())
-        //{
-        //    weaponState.ValueRW.FireTimer -= SystemAPI.Time.DeltaTime;
-        //    if (weaponState.ValueRO.FireTimer > 0) continue; // on cooldown
-        //    if (!weaponState.ValueRO.HasTarget) continue; // no target
-        //    if (weaponState.ValueRO.FireRate == 0) continue; // invalid fire rate
-        //    weaponState.ValueRW.FireTimer = 1 / weaponState.ValueRO.FireRate;
+        ComponentLookup<TurretComponent> turretLookup = SystemAPI.GetComponentLookup<TurretComponent>(true);
 
-        //    // Calculate positions for laser vfx
-        //    float3 startPos = transform.ValueRO.Position;
-        //    float3 endPos = new(weaponState.ValueRO.TargetPos.x, weaponState.ValueRO.TargetPos.y, startPos.z);
-
-        //    // Use spatial map to find target hit
-        //    int index = GridUtility.WorldPosToIndex(weaponState.ValueRO.TargetPos, fineEntityMap.CellSize, fineEntityMap.GridWidth);
-        //    if (map.TryGetFirstValue(index, out Entity e, out _))
-        //    {
-        //        if (transformLookup.HasComponent(e)) endPos = transformLookup[e].Position;
-
-        //        // Get health component and subtract health
-        //        if (healthLookup.HasComponent(e))
-        //        {
-        //            RefRW<HealthComponent> health = healthLookup.GetRefRW(e);
-        //            if (health.ValueRO.Value > 0) health.ValueRW.Value = 0;
-        //        }    
-        //    }
-
-        //    float3 direction = endPos - startPos;
-        //    float distance = math.length(direction);
-        //    float3 midpoint = startPos + (direction * 0.5f);
-
-        //    float angleDegrees = math.degrees(math.atan2(direction.y, direction.x));
-
-        //    vfxWriter.Enqueue(new VFXPayload
-        //    {
-        //        Position = midpoint,
-        //        Type = (uint)VFXType.Laser,
-        //        Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
-        //        CustomData = new float4(angleDegrees, distance, 0, 0),
-        //    });
-        //}
+        uint randomSeed = (uint)(SystemAPI.Time.ElapsedTime * 1000.0);
 
         JobHandle hitscan = new HitscanFiringJob
         {
@@ -80,12 +43,15 @@ public partial struct WeaponFiringSystem : ISystem
             FineHeatmap = map,
             CellSize = fineEntityMap.CellSize,
             GridWidth = fineEntityMap.GridWidth,
+            TurretLookup = turretLookup,
         }.ScheduleParallel(state.Dependency);
 
         JobHandle projectile = new ProjectileFiringJob
         {
             DeltaTime = deltaTime,
             ECB = ecb,
+            TurretLookup = turretLookup,
+            RandomSeed = randomSeed,
         }.ScheduleParallel(hitscan);
 
         state.Dependency = projectile;
@@ -105,7 +71,10 @@ public partial struct HitscanFiringJob : IJobEntity
 
     public NativeQueue<VFXPayload>.ParallelWriter VFXWriter;
 
+    [ReadOnly] public ComponentLookup<TurretComponent> TurretLookup;
+
     private void Execute(
+        Entity entity,
         [ChunkIndexInQuery] int chunkIndex,
         ref WeaponState state,
         in HitscanWeapon hitscanWeapon,
@@ -119,7 +88,7 @@ public partial struct HitscanFiringJob : IJobEntity
         float3 barrelForward = localToWorld.Up;
         float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
 
-        if (math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
+        if (!TurretLookup.HasComponent(entity) || math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
 
         int index = GridUtility.WorldPosToIndex(state.TargetPos, CellSize, GridWidth);
         if (FineHeatmap.TryGetFirstValue(index, out Entity enemy, out var it))
@@ -153,7 +122,12 @@ public partial struct ProjectileFiringJob : IJobEntity
     public float DeltaTime;
     public EntityCommandBuffer.ParallelWriter ECB;
 
+    [ReadOnly] public ComponentLookup<TurretComponent> TurretLookup;
+
+    public uint RandomSeed;
+
     private void Execute(
+        Entity entity,
         [ChunkIndexInQuery] int chunkIndex,
         ref WeaponState state,
         in ProjectileWeapon projectileWeapon,
@@ -167,18 +141,25 @@ public partial struct ProjectileFiringJob : IJobEntity
         float3 weaponForward = localToWorld.Up;
         float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
 
-        if (math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
+        if (!TurretLookup.HasComponent(entity) || math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
 
         Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
 
+        // Add spread
+        var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
+        float randomAngleOffset = math.radians(rng.NextFloat(-projectileWeapon.Spread, projectileWeapon.Spread));
+        float baseAngle = math.atan2(dirToTarget.y, dirToTarget.x);
+        float finalAngle = baseAngle + randomAngleOffset;
+        float2 finalDirection = new(math.cos(finalAngle), math.sin(finalAngle));
+
         ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
             localToWorld.Position,
-            localToWorld.Rotation)
+            quaternion.RotateZ(finalAngle - (math.PI / 2f)))
         );
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
         {
-            Velocity = weaponForward.xy * projectileWeapon.ProjectileSpeed,
+            Velocity = finalDirection * projectileWeapon.ProjectileSpeed,
             HitRadiusSq = 1,
         });
 
