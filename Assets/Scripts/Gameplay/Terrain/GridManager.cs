@@ -11,7 +11,6 @@ public class GridManager : MonoBehaviour
 
     public Vector2Int worldOrigin = new Vector2Int(1000, 1000);
 
-    // Noise settings to make the terrain look natural
     // Noise settings
     public float scale = 0.15f;
     public float randomOffset = 0f;
@@ -31,9 +30,6 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         grid = new int[width, height];
-        randomOffset = Random.Range(0f, 9999f);
-        GenerateTerrain();
-        Debug.Log("Terrain Generated!");
         nativeGrid = new NativeArray<int>(width * height, Allocator.Persistent);
         randomOffset = Random.Range(0f, 9999f);
         GenerateTerrain();
@@ -45,29 +41,13 @@ public class GridManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                //Always keep the corners safe for spawning
-                if (x < 3 && y < 3) 
-                { 
-                    grid[x, y] = 0;
-                    continue;
-                }
-                float noise = Mathf.PerlinNoise((x + randomOffset) * scale, (y + randomOffset) * scale);
-
-                //Create terrain based on the noise heightmap
-                if (noise > 0.75f)
-                    grid[x, y] = 1;
-                else if (noise > 0.65f)
-                    grid[x, y] = 3;
-                else if (noise < 0.25f)
-                    grid[x, y] = 2;
-                else
-                    grid[x, y] = 0;
                 if (x < 3 && y < 3) 
                 { 
                     grid[x, y] = 0;
                     nativeGrid[x + y * width] = 0;
                     continue;
                 }
+                
                 float noise = Mathf.PerlinNoise((x + randomOffset) * scale, (y + randomOffset) * scale);
                 int tileType = 0;
                 if (noise > 0.75f) tileType = 1;

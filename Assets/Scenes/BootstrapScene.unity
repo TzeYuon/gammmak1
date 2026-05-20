@@ -959,8 +959,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3043c5b1d82d2a147b281fa71717a317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
-  width: 50
-  height: 50
   width: 200
   height: 200
   worldOrigin: {x: 1000, y: 1000}

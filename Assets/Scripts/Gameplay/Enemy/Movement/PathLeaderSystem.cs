@@ -7,6 +7,7 @@ using UnityEngine;
 
 partial struct PathLeaderSystem : ISystem
 {
+
     //[BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -20,6 +21,7 @@ partial struct PathLeaderSystem : ISystem
         var input = SystemAPI.GetSingleton<PlayerInputData>();
         float deltaTime = SystemAPI.Time.DeltaTime;
         float2 mousePos = input.MouseWorldPosition;
+
         foreach (var (pathLeader, transform, buffer) in SystemAPI.Query<RefRW<PathLeaderComponent>, RefRW<LocalTransform>, DynamicBuffer<PathPosition>>())
         {
             float3 curPos = transform.ValueRO.Position;
@@ -71,7 +73,7 @@ partial struct PathLeaderSystem : ISystem
             else
             {
                 float3 lastPoint = buffer[buffer.Length - 1].Value;
-                if (math.distancesq(newPos, lastPoint) >= 0.1f)
+                if (math.distancesq(newPos, lastPoint) >= 1.0f)
                 {
                     buffer.Add(new PathPosition { Value = newPos });
                     if (buffer.Length > pathLeader.ValueRO.MaxPathLength) buffer.RemoveAt(0);

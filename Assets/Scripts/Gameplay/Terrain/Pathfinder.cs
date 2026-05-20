@@ -36,16 +36,13 @@ public class Pathfinder : MonoBehaviour
 
         if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
 
-        // 2. Emergency Brake to prevent the game from crashing if a path is too hard to find
-        int maxIterations = 2000;
+        int maxIterations = 40000;
         int currentLoop = 0;
 
         Node currNode = new Node(a.x, a.y, true);
         Node destNode = new Node(b.x, b.y, true);
 
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-
-        // Note: Using a List for Priority Queue until you move the MinHeap over
         PriorityQueue<Node> pq = new PriorityQueue<Node>();
         pq.Enqueue(currNode, currNode.fCost);
 
@@ -55,21 +52,7 @@ public class Pathfinder : MonoBehaviour
         while (pq.Count > 0)
         {
             currentLoop++;
-            if (currentLoop > maxIterations)
-            {
-                Debug.Log("Pathfinder Emergency Brake! Path was too complex.");
-                return null;
-            }
-            int lowestIndex = 0;
-            for (int i = 1; i < pq.Count; i++)
-            {
-                if (pq[i].fCost < pq[lowestIndex].fCost || (pq[i].fCost == pq[lowestIndex].fCost && pq[i].hCost < pq[lowestIndex].hCost))
-                {
-                    lowestIndex = i;
-                }
-            }
-            currNode = pq[lowestIndex];
-            pq.RemoveAt(lowestIndex);
+            if (currentLoop > maxIterations) { return null; }
             currNode = pq.Dequeue();
 
             Vector2Int currPos = new Vector2Int(currNode.x, currNode.y);
@@ -85,23 +68,17 @@ public class Pathfinder : MonoBehaviour
                     temp = temp.parent;
                 }
                 resPath.Reverse();
-                for (int i = 0; i < resPath.Count; i++)
-                {
-                    resPath[i] = resPath[i] + origin;
-                }
-                return resPath;
-                //var smoothedPath = SmoothPath(resPath);
-                //for (int i = 0; i < smoothedPath.Count; i++)
+                //for (int i = 0; i < resPath.Count; i++)
                 //{
-                //    smoothedPath[i] = smoothedPath[i] + origin;
+                //    resPath[i] = resPath[i] + origin;
                 //}
-                //return smoothedPath; // Returns the smoothed path!
+                //return resPath;
                 var smoothedPath = SmoothPath(resPath, forcePath);
                 for (int i = 0; i < smoothedPath.Count; i++)
                 {
                     smoothedPath[i] = smoothedPath[i] + origin;
                 }
-                return smoothedPath; // Bresenham path smoothing
+                return smoothedPath; 
             }
 
             foreach (var tup in adj)
@@ -146,6 +123,8 @@ public class Pathfinder : MonoBehaviour
 
         while (true)
         {
+            if (x < 0 || x >= GridManager.Instance.width || y < 0 || y >= GridManager.Instance.height) return false;
+
             int tileType = GridManager.Instance.grid[x, y];
             if (GridManager.Instance.grid[x, y] == 1) return false; // Hit a wall
             if (!forcePath && (tileType == 2 || tileType == 3)) return false;
