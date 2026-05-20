@@ -151,11 +151,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HiveAuthoring
   Prefab: {fileID: 8958559792771996627, guid: 45f282945948bad40a005a786f0a0f8f, type: 3}
   SpawnAmount: 50
-  EnemySpeed: 30
+  EnemySpeed: 7
   DynamicSpeedMultiplier: 2
   Density: 0.5
   Width: 0.5
-  SpawnCooldown: 5
+  SpawnCooldown: 10000
   SpawnTimer: 2
 --- !u!4 &263363428
 Transform:
@@ -243,6 +243,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerShip
       objectReference: {fileID: 0}
+    - target: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1001.3947
@@ -299,6 +303,10 @@ PrefabInstance:
     - target: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_Name
       value: PlayerShip (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.x

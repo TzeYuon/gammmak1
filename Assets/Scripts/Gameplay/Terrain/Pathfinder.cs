@@ -34,8 +34,6 @@ public class Pathfinder : MonoBehaviour
         b.x = Mathf.Clamp(b.x, 0, GridManager.Instance.width - 1);
         b.y = Mathf.Clamp(b.y, 0, GridManager.Instance.height - 1);
 
-        //if (a.x < 0 || a.x >= GridManager.Instance.width || a.y < 0 || a.y >= GridManager.Instance.height) return null;
-        //if (b.x < 0 || b.x >= GridManager.Instance.width || b.y < 0 || b.y >= GridManager.Instance.height) return null;
         if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
 
         // 2. Emergency Brake to prevent the game from crashing if a path is too hard to find
@@ -48,15 +46,14 @@ public class Pathfinder : MonoBehaviour
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
         // Note: Using a List for Priority Queue until you move the MinHeap over
-        List<Node> pq = new List<Node>();
-        pq.Add(currNode);
+        PriorityQueue<Node> pq = new PriorityQueue<Node>();
+        pq.Enqueue(currNode, currNode.fCost);
 
         var adj = new List<(int, int)> { (0, 1), (1, 0), (-1, 0), (0, -1) };
         var resPath = new List<Vector2Int>();
 
         while (pq.Count > 0)
         {
-            // Simple List-based PQ (you can swap to MinHeap later for max speed)
             currentLoop++;
             if (currentLoop > maxIterations)
             {
@@ -73,12 +70,12 @@ public class Pathfinder : MonoBehaviour
             }
             currNode = pq[lowestIndex];
             pq.RemoveAt(lowestIndex);
+            currNode = pq.Dequeue();
 
             Vector2Int currPos = new Vector2Int(currNode.x, currNode.y);
             if (visited.Contains(currPos)) continue;
             visited.Add(currPos);
 
-            // SUCCESS CONDITION
             if (currNode.x == destNode.x && currNode.y == destNode.y)
             {
                 Node temp = currNode;
@@ -99,6 +96,12 @@ public class Pathfinder : MonoBehaviour
                 //    smoothedPath[i] = smoothedPath[i] + origin;
                 //}
                 //return smoothedPath; // Returns the smoothed path!
+                var smoothedPath = SmoothPath(resPath, forcePath);
+                for (int i = 0; i < smoothedPath.Count; i++)
+                {
+                    smoothedPath[i] = smoothedPath[i] + origin;
+                }
+                return smoothedPath; // Bresenham path smoothing
             }
 
             foreach (var tup in adj)
@@ -117,8 +120,8 @@ public class Pathfinder : MonoBehaviour
                     int moveCost = 1;
                     if (!forcePath)
                     {
-                        if (tileType == 2) moveCost = 5;       // Mud
-                        if (tileType == 3) moveCost = 50;      // Poison
+                        if (tileType == 2) moveCost = 5; // Mud
+                        if (tileType == 3) moveCost = 15; // Poison
                     }
 
                     Node tempNode = new Node(tempX, tempY, true);
@@ -126,14 +129,15 @@ public class Pathfinder : MonoBehaviour
                     tempNode.hCost = Mathf.Abs(destNode.x - tempNode.x) + Mathf.Abs(destNode.y - tempNode.y);
                     tempNode.parent = currNode;
 
-                    pq.Add(tempNode);
+
+                    pq.Enqueue(tempNode, tempNode.fCost);
                 }
             }
         }
         return resPath;
     }
 
-    private static bool HasLineOfSight(Vector2Int start, Vector2Int end)
+    private static bool HasLineOfSight(Vector2Int start, Vector2Int end, bool forcePath = false)
     {
         int x = start.x, y = start.y;
         int dx = Mathf.Abs(end.x - start.x), dy = Mathf.Abs(end.y - start.y);
@@ -142,7 +146,9 @@ public class Pathfinder : MonoBehaviour
 
         while (true)
         {
+            int tileType = GridManager.Instance.grid[x, y];
             if (GridManager.Instance.grid[x, y] == 1) return false; // Hit a wall
+            if (!forcePath && (tileType == 2 || tileType == 3)) return false;
             if (x == end.x && y == end.y) break;
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x += sx; }
@@ -151,7 +157,7 @@ public class Pathfinder : MonoBehaviour
         return true;
     }
 
-    private static List<Vector2Int> SmoothPath(List<Vector2Int> path)
+    private static List<Vector2Int> SmoothPath(List<Vector2Int> path, bool forcePath)
     {
         if (path == null || path.Count <= 2) return path;
         List<Vector2Int> smoothedPath = new List<Vector2Int> { path[0] };
@@ -162,7 +168,7 @@ public class Pathfinder : MonoBehaviour
             int furthestVisibleIndex = currentIndex + 1;
             for (int i = currentIndex + 2; i < path.Count; i++)
             {
-                if (HasLineOfSight(path[currentIndex], path[i])) furthestVisibleIndex = i;
+                if (HasLineOfSight(path[currentIndex], path[i], forcePath)) furthestVisibleIndex = i;
                 else break;
             }
             smoothedPath.Add(path[furthestVisibleIndex]);

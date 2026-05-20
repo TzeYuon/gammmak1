@@ -961,6 +961,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
   width: 50
   height: 50
+  width: 200
+  height: 200
+  worldOrigin: {x: 1000, y: 1000}
   scale: 0.15
   randomOffset: 0
 --- !u!114 &9188605543483897464
