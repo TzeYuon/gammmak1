@@ -33,6 +33,7 @@ class PlayerShipAuthoring : MonoBehaviour
                 Value = authoring.Health,
                 MaxValue = authoring.Health,
             });
+            AddBuffer<DamageEvent>(entity);
 
             // Death tag
             AddComponent(entity, new DeadTag());

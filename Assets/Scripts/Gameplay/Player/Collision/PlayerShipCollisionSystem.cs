@@ -66,8 +66,7 @@ public partial struct ContactDamageJob : IJobEntity
         [ChunkIndexInQuery] int chunkIndex,
         in LocalTransform transform,
         in HitboxCombined combinedRadius,
-        in DynamicBuffer<Hitbox> hitboxes,
-        ref HealthComponent shipHealth
+        in DynamicBuffer<Hitbox> hitboxes
         )
     {
         float2 pos = transform.Position.xy;
@@ -141,11 +140,8 @@ public partial struct ContactDamageJob : IJobEntity
                             var enemyHealth = HealthLookup[enemyEntity];
                             if (enemyHealth.Value <= 0) continue;
 
-                            shipHealth.Value -= 1;
-                            enemyHealth.Value = 0;
-                            ECB.SetComponent(chunkIndex, enemyEntity, enemyHealth);
-
-                            if (shipHealth.Value <= 0) return;
+                            ECB.AppendToBuffer(chunkIndex, entity, new DamageEvent { Value = 1 });
+                            ECB.AppendToBuffer(chunkIndex, enemyEntity, new DamageEvent { Value = enemyHealth.Value });
                         }
                     } while (Map.TryGetNextValue(out enemyEntity, ref iterator));
                 }

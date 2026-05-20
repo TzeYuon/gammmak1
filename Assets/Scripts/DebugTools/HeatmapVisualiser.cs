@@ -20,34 +20,34 @@ public class HeatmapVisualiser : MonoBehaviour
         var entityManager = world.EntityManager;
 
         // 2. Find the Singleton Entity that holds our Heatmap data
-        var query = entityManager.CreateEntityQuery(typeof(CoarseEnemyHeatmapComponent));
+        var query = entityManager.CreateEntityQuery(typeof(FineEnemyHeatmapComponent));
         if (query.IsEmptyIgnoreFilter) return;
         query.CompleteDependency();
         var entity = query.GetSingletonEntity();
 
         // 3. Read the data
-        var coarseHeatmap = entityManager.GetComponentData<CoarseEnemyHeatmapComponent>(entity);
-        var arr = coarseHeatmap.Map;
+        var heatmap = entityManager.GetComponentData<FineEnemyHeatmapComponent>(entity);
+        var arr = heatmap.DensityMap;
 
         // 4. Draw the Grid
         // A 100x100 grid is 10,000 cells. Drawing 10,000 empty cubes will lag the Unity Editor.
         // So, we ONLY draw cells that actually contain bugs!
 
-        float halfCell = coarseHeatmap.CellSize * 0.5f;
-        Vector3 size = new Vector3(coarseHeatmap.CellSize, coarseHeatmap.CellSize, 0.1f); // Adjust Z for 2D/3D
+        float halfCell = heatmap.CellSize * 0.5f;
+        Vector3 size = new Vector3(heatmap.CellSize, heatmap.CellSize, 0.1f); // Adjust Z for 2D/3D
 
-        for (int x = 0; x < coarseHeatmap.GridWidth; x++)
+        for (int x = 0; x < heatmap.GridWidth; x++)
         {
-            for (int y = 0; y < coarseHeatmap.GridHeight; y++)
+            for (int y = 0; y < heatmap.GridHeight; y++)
             {
-                int flatIndex = x + (y * coarseHeatmap.GridWidth);
+                int flatIndex = x + (y * heatmap.GridWidth);
                 int density = arr[flatIndex];
 
                 if (density > 0)
                 {
                     // Calculate World Position (Center of the cell)
-                    float worldX = (x * coarseHeatmap.CellSize) + halfCell;
-                    float worldY = (y * coarseHeatmap.CellSize) + halfCell;
+                    float worldX = (x * heatmap.CellSize) + halfCell;
+                    float worldY = (y * heatmap.CellSize) + halfCell;
                     Vector3 cellCenter = new Vector3(worldX, worldY, 0);
 
                     // Interpolate color: Blue (1 bug) to Red (Max bugs)

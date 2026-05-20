@@ -29,6 +29,13 @@ partial struct HeatmapUpdateSystem : ISystem
         };
         JobHandle clearCoarseHandle = clearCoarseEnemyJob.Schedule(coarseEnemyHeatmap.Map.Length, 4096, state.Dependency);
 
+        var clearFineEnemyJob = new ClearFineEnemyJob
+        {
+            Map = fineEnemyHeatmap.DensityMap,
+        };
+        JobHandle clearFineHandle = clearFineEnemyJob.Schedule(fineEnemyHeatmap.DensityMap.Length, 4096, state.Dependency);
+        JobHandle clearHandles = JobHandle.CombineDependencies(clearCoarseHandle, clearFineHandle);
+
         var updateEnemyHeatmapJob = new UpdateEnemyHeatmapJob
         {
             CoarseMap = coarseEnemyHeatmap.Map,
@@ -37,12 +44,13 @@ partial struct HeatmapUpdateSystem : ISystem
             CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
 
             FineMap = fineEnemyHeatmap.Map.AsParallelWriter(),
+            FineDensityMap = fineEnemyHeatmap.DensityMap,
             FineCellSize = fineEnemyHeatmap.CellSize,
             FineGridWidth = fineEnemyHeatmap.GridWidth,
             FineGridHeight = fineEnemyHeatmap.GridHeight,
         };
 
-        state.Dependency = updateEnemyHeatmapJob.ScheduleParallel(clearCoarseHandle);
+        state.Dependency = updateEnemyHeatmapJob.ScheduleParallel(clearHandles);
     }
 
     [BurstCompile]
@@ -64,6 +72,17 @@ public struct ClearCoarseEnemyJob : IJobParallelFor
 }
 
 [BurstCompile]
+public struct ClearFineEnemyJob : IJobParallelFor
+{
+    [WriteOnly] public NativeArray<int> Map;
+
+    public void Execute(int index)
+    {
+        Map[index] = 0;
+    }
+}
+
+[BurstCompile]
 [WithAll(typeof(SwarmTag))]
 public partial struct UpdateEnemyHeatmapJob : IJobEntity
 {
@@ -73,6 +92,7 @@ public partial struct UpdateEnemyHeatmapJob : IJobEntity
     public int CoarseGridHeight;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
+    [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
     public float FineCellSize;
     public int FineGridWidth;
     public int FineGridHeight;
@@ -95,6 +115,7 @@ public partial struct UpdateEnemyHeatmapJob : IJobEntity
         {
             int fineCellIndex = GridUtility.CellToIndex(fineCell, FineGridWidth);
             FineMap.Add(fineCellIndex, entity);
+            FineDensityMap.InterlockedAdd(fineCellIndex, 1);
         }
     }
 }
