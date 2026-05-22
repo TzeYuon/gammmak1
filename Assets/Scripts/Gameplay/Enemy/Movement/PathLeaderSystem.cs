@@ -31,6 +31,11 @@ partial struct PathLeaderSystem : ISystem
             Vector2Int startGrid = new Vector2Int((int)math.round(curPos.x), (int)math.round(curPos.y));
             Vector2Int endGrid = new Vector2Int((int)math.round(mousePos.x), (int)math.round(mousePos.y));
             Vector2Int lastEnd = new Vector2Int((int)math.round(pathLeader.ValueRO.LastTargetPos.x), (int)math.round(pathLeader.ValueRO.LastTargetPos.y));
+            if (endGrid.x != lastEnd.x || endGrid.y != lastEnd.y)
+            {
+                buffer.Clear();
+                buffer.Add(new PathPosition { Value = curPos }); // Add current pos so it doesn't crash
+            }
             List<Vector2Int> path = Pathfinder.Astar(startGrid, endGrid);
 
             if (path != null && path.Count > 0)

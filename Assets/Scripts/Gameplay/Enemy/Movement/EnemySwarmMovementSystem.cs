@@ -79,7 +79,7 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
         var rng = Random.CreateFromIndex(uniqueSeed);
 
         //float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width, pathLeader);
-        float3 toTarget = GetHordeTarget(follower, pathBuffer, curPos, width, Grid, GridWidth, GridHeight, WorldOrigin);
+        float3 toTarget = GetHordeTarget(follower, pathBuffer, curPos, width, Grid, GridWidth, GridHeight, WorldOrigin, pathLeader);
         SetDynamicSpeed(curVel, ref steeringForce, ref finalMoveSpeed, maxSpeedMult, toTarget);
 
         // Calculate noise
@@ -155,43 +155,16 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
             transform.Rotation = quaternion.RotateZ(angle);
         }
 
-        //static float3 GetTargetDirection(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, PathLeaderComponent pathLeader)
-        //{
-        //    // Find target position based on rank
-        //    float headIndex = pathBuffer.Length - 1;
-        //    float targetIndex = headIndex - follower.PathPosition;
-
-        //    if (targetIndex < 0) targetIndex = 0;
-
-        //    int indexA = (int)math.floor(targetIndex);
-        //    int indexB = math.min(indexA + 1, pathBuffer.Length - 1);
-        //    float t = targetIndex - indexA;
-
-        //    float3 posA = pathBuffer[indexA].Value;
-        //    float3 posB = pathBuffer[indexB].Value;
-
-        //    // Determine path forward and right for width
-        //    float3 pathForward = posB - posA;
-        //    if (math.lengthsq(pathForward) < 0.001f)
-        //    {
-        //        float angle = follower.Rank * 2.4f;
-        //        pathForward = new float3(math.cos(angle), math.sin(angle), 0);
-        //    }
-        //    else pathForward = math.normalize(pathForward);
-        //    float3 pathRight = math.cross(pathForward, new float3(0, 0, 1));
-
-        //    float3 targetPosition = math.lerp(posA, posB, t) + follower.Offset * width * pathRight;
-        //    float3 toTarget = targetPosition - curPos;
-        //    return toTarget;
-        //}
-
-        static float3 GetHordeTarget(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, NativeArray<int> grid, int gridWidth, int gridHeight, int2 origin)
+        static float3 GetHordeTarget(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, NativeArray<int> grid, int gridWidth, int gridHeight, int2 origin, PathLeaderComponent pathLeader)
         {
             int headIndex = pathBuffer.Length - 1;
             int targetIndex = headIndex;
             bool foundLOS = false;
 
-            while (targetIndex > 0)
+            int searchLimit = math.max(0, headIndex - 30);
+
+            // 1. Line of Sight Check
+            while (targetIndex >= searchLimit)
             {
                 float3 checkPos = pathBuffer[targetIndex].Value;
                 if (HasBurstLOS(curPos.xy, checkPos.xy, grid, gridWidth, gridHeight, origin))
@@ -205,8 +178,8 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
             if (!foundLOS)
             {
                 float minDistSq = float.MaxValue;
-                int closestIndex = 0;
-                for (int i = 0; i <= headIndex; i++)
+                int closestIndex = searchLimit;
+                for (int i = searchLimit; i <= headIndex; i++)
                 {
                     float distSq = math.distancesq(curPos, pathBuffer[i].Value);
                     if (distSq < minDistSq)
@@ -215,13 +188,17 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
                         closestIndex = i;
                     }
                 }
-                targetIndex = math.min(headIndex, closestIndex + 3);
+                targetIndex = math.min(headIndex, closestIndex + 2);
             }
 
+            if (targetIndex < 0) targetIndex = 0;
             float3 posA = pathBuffer[math.max(0, targetIndex - 1)].Value;
             float3 posB = pathBuffer[targetIndex].Value;
             float3 pathForward = posB - posA;
-            if (math.lengthsq(pathForward) < 0.001f) // Clump into a circle if stationary
+
+            float leaderSpeedSq = math.lengthsq(pathLeader.MoveDirection);
+            // Clump into a circle if stationary
+            if (math.lengthsq(pathForward) < 0.001f || (targetIndex == headIndex && leaderSpeedSq < 0.1f)   )
             {
                 float angle = follower.Rank * 2.4f;
                 pathForward = new float3(math.cos(angle), math.sin(angle), 0);
@@ -235,9 +212,11 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
 
             float3 targetPosition = posB + follower.Offset * width * pathRight;
 
-            float depth = (follower.Rank % 10) * 0.2f;
-            targetPosition -= pathForward * depth;
-
+            if (!(targetIndex == headIndex && leaderSpeedSq < 0.1f))
+            {
+                float depth = (follower.Rank % 10) * 0.2f;
+                targetPosition -= pathForward * depth;
+            }
             return targetPosition - curPos;
         }
 
