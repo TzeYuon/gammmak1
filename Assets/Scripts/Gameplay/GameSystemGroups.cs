@@ -7,10 +7,10 @@ using Unity.Transforms;
     1. Spatial Grid Phase: Build spatial grid and update grid values
     2. Player Input Phase: Process player inputs
     3. PreCombat Phase: Enemy AI decisions, weapon targeting
-    4. Combat Phase: Ships aim, fire hitscans, apply damage
+    4. Combat Phase: Ships aim, fire hitscans
     5. Movement Phase: Projectiles fly, Swarm moves, Ships move
     6. Post Movement Phase: Apply collision damage, Collect biomass
-    7. Post Health Update Phase: Set dead tag on dead entities
+    7. Process Damage Phase: Apply damage, add dead tag
     8. Event Phase: Dead entities trigger events
     9. Purge Phase: Dead entities are wiped from memory
 */
@@ -29,7 +29,7 @@ public partial class PlayerInputSystemGroup : ComponentSystemGroup { }
 [UpdateAfter(typeof(PlayerInputSystemGroup))]
 public partial class PreCombatSystemGroup : ComponentSystemGroup { }
 
-// Combat Phase: Ships aim, fire hitscans, apply damage
+// Combat Phase: Ships aim, fire hitscans
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(PreCombatSystemGroup))]
 public partial class CombatSystemGroup : ComponentSystemGroup { }
@@ -45,14 +45,14 @@ public partial class MovementSystemGroup : ComponentSystemGroup { }
 [UpdateAfter(typeof(MovementSystemGroup))]
 public partial class PostMovementSystemGroup : ComponentSystemGroup { }
 
-// Post Health Update Phase: Set dead tag on dead entities
+// Process Damage Phase: Apply damage, add dead tag
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(PostMovementSystemGroup))]
-public partial class PostHealthUpdateSystemGroup : ComponentSystemGroup { }
+public partial class ProcessDamageSystemGroup : ComponentSystemGroup { }
 
 // Event Phase: Dead entities trigger events, update swarm entity rank
 [UpdateInGroup(typeof(SimulationSystemGroup))]
-[UpdateAfter(typeof(PostHealthUpdateSystemGroup))]
+[UpdateAfter(typeof(ProcessDamageSystemGroup))]
 public partial class PostUpdateSystemGroup : ComponentSystemGroup { }
 
 // Purge Phase: Dead entities are wiped from memory

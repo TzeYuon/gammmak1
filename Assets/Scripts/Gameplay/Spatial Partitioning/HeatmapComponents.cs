@@ -12,6 +12,7 @@ public struct CoarseEnemyHeatmapComponent : IComponentData
 public struct FineEnemyHeatmapComponent : IComponentData
 {
     public NativeParallelMultiHashMap<int, Entity> Map;
+    public NativeArray<int> DensityMap;
     public int GridWidth;
     public int GridHeight;
     public float CellSize;

@@ -19,6 +19,7 @@ class EnemyAuthoring : MonoBehaviour
                 MaxValue = 1,
                 Value = 1,
             });
+            AddBuffer<DamageEvent>(entity);
 
             AddComponent(entity, new DeadTag());
             SetComponentEnabled<DeadTag>(entity, false);

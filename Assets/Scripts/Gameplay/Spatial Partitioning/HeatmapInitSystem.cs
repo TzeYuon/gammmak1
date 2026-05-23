@@ -6,6 +6,7 @@ partial struct HeatmapInitSystem : ISystem
 {
     private NativeArray<int> coarseEnemyArray;
     private NativeParallelMultiHashMap<int, Entity> fineEnemyHashmap;
+    private NativeArray<int> fineEnemyArray;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -31,9 +32,12 @@ partial struct HeatmapInitSystem : ISystem
         });
 
         fineEnemyHashmap = new NativeParallelMultiHashMap<int, Entity>(10000, Allocator.Persistent);
+        int fineEnemySize = settings.FineWidth * settings.FineHeight;
+        fineEnemyArray = new NativeArray<int>(fineEnemySize, Allocator.Persistent);
         state.EntityManager.AddComponentData(e, new FineEnemyHeatmapComponent
         {
             Map = fineEnemyHashmap,
+            DensityMap = fineEnemyArray,
             CellSize = settings.FineCellSize,
             GridWidth = settings.FineWidth,
             GridHeight = settings.FineHeight
@@ -47,5 +51,6 @@ partial struct HeatmapInitSystem : ISystem
     {
         if (coarseEnemyArray.IsCreated) coarseEnemyArray.Dispose();
         if (fineEnemyHashmap.IsCreated) fineEnemyHashmap.Dispose();
+        if (fineEnemyArray.IsCreated) fineEnemyArray.Dispose();
     }
 }
