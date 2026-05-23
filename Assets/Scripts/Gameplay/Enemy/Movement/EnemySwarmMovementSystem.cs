@@ -78,8 +78,7 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
         uint uniqueSeed = (uint)(entity.Index + (ElapsedTime * 3140));
         var rng = Random.CreateFromIndex(uniqueSeed);
 
-        //float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width, pathLeader);
-        float3 toTarget = GetHordeTarget(follower, pathBuffer, curPos, width, Grid, GridWidth, GridHeight, WorldOrigin, pathLeader);
+        float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width, Grid, GridWidth, GridHeight, WorldOrigin, pathLeader);
         SetDynamicSpeed(curVel, ref steeringForce, ref finalMoveSpeed, maxSpeedMult, toTarget);
 
         // Calculate noise
@@ -116,7 +115,7 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
                         {
                             float distance = math.sqrt(distSq);
                             float pushStrength = (1.5f - distance) * 100.0f;
-                            wallPushForce += (math.normalize(pushDir) * pushStrength);
+                            //wallPushForce += (math.normalize(pushDir) * pushStrength);
 
                             // Calculate push away and sideways
                             float2 pushNormal = pushDir / distance;
@@ -139,9 +138,10 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
         // update velocity
         float2 newVel = curVel + (steeringForce * DeltaTime);
         float speedSq = math.lengthsq(newVel);
-        if (speedSq > baseSpeed * baseSpeed * maxSpeedMult * maxSpeedMult)
+        float absoluteMaxSpeed = baseSpeed * maxSpeedMult;
+        if (speedSq > absoluteMaxSpeed * absoluteMaxSpeed)
         {
-            newVel = maxSpeedMult * baseSpeed * math.normalize(newVel);
+            newVel = absoluteMaxSpeed * math.normalize(newVel);
         }
         velocity.Value = newVel;
 
@@ -155,7 +155,7 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
             transform.Rotation = quaternion.RotateZ(angle);
         }
 
-        static float3 GetHordeTarget(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, NativeArray<int> grid, int gridWidth, int gridHeight, int2 origin, PathLeaderComponent pathLeader)
+        static float3 GetTargetDirection(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, NativeArray<int> grid, int gridWidth, int gridHeight, int2 origin, PathLeaderComponent pathLeader)
         {
             int headIndex = pathBuffer.Length - 1;
             int targetIndex = headIndex;
@@ -239,11 +239,10 @@ public partial struct SwarmFollowerMovementJob : IJobEntity
                 {
                     if (x0 >= 0 && x0 < gridWidth && y0 >= 0 && y0 < gridHeight)
                     {
-                        if (grid[x0 + y0 * gridWidth] == 1) return false;
+                        if (grid[x0 + y0 * gridWidth] != 0) return false;
                     }
                     else return false;
                 }
-
                 else return false; // Off grid
 
                 if (x0 == x1 && y0 == y1) break; // Reached target
