@@ -11,7 +11,7 @@ class EnemyAuthoring : MonoBehaviour
 
             AddComponent(entity, new SwarmTag());
 
-            AddComponent(entity, new PathFollowerComponent());
+            //AddComponent(entity, new PathFollowerComponent());
             AddComponent(entity, new VelocityComponent());
 
             AddComponent(entity, new HealthComponent
