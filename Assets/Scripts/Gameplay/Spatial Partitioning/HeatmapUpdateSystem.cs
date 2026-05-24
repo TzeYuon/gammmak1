@@ -36,7 +36,7 @@ partial struct HeatmapUpdateSystem : ISystem
         JobHandle clearFineHandle = clearFineEnemyJob.Schedule(fineEnemyHeatmap.DensityMap.Length, 4096, state.Dependency);
         JobHandle clearHandles = JobHandle.CombineDependencies(clearCoarseHandle, clearFineHandle);
 
-        var updateEnemyHeatmapJob = new UpdateEnemyHeatmapJob
+        var swarmHeatmapHandle = new SwarmHeatmapJob
         {
             CoarseMap = coarseEnemyHeatmap.Map,
             CoarseCellSize = coarseEnemyHeatmap.CellSize,
@@ -48,9 +48,23 @@ partial struct HeatmapUpdateSystem : ISystem
             FineCellSize = fineEnemyHeatmap.CellSize,
             FineGridWidth = fineEnemyHeatmap.GridWidth,
             FineGridHeight = fineEnemyHeatmap.GridHeight,
-        };
+        }.ScheduleParallel(clearHandles);
 
-        state.Dependency = updateEnemyHeatmapJob.ScheduleParallel(clearHandles);
+        var hiveHeatmapHandle = new HiveHeatmapJob
+        {
+            CoarseMap = coarseEnemyHeatmap.Map,
+            CoarseCellSize = coarseEnemyHeatmap.CellSize,
+            CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
+            CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
+
+            FineMap = fineEnemyHeatmap.Map.AsParallelWriter(),
+            FineDensityMap = fineEnemyHeatmap.DensityMap,
+            FineCellSize = fineEnemyHeatmap.CellSize,
+            FineGridWidth = fineEnemyHeatmap.GridWidth,
+            FineGridHeight = fineEnemyHeatmap.GridHeight,
+        }.ScheduleParallel(swarmHeatmapHandle);
+
+        state.Dependency = hiveHeatmapHandle;
     }
 
     [BurstCompile]
@@ -84,7 +98,7 @@ public struct ClearFineEnemyJob : IJobParallelFor
 
 [BurstCompile]
 [WithAll(typeof(SwarmTag))]
-public partial struct UpdateEnemyHeatmapJob : IJobEntity
+public partial struct SwarmHeatmapJob : IJobEntity
 {
     [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
     public float CoarseCellSize;
@@ -116,6 +130,72 @@ public partial struct UpdateEnemyHeatmapJob : IJobEntity
             int fineCellIndex = GridUtility.CellToIndex(fineCell, FineGridWidth);
             FineMap.Add(fineCellIndex, entity);
             FineDensityMap.InterlockedAdd(fineCellIndex, 1);
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct HiveHeatmapJob : IJobEntity
+{
+    [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
+    public float CoarseCellSize;
+    public int CoarseGridWidth;
+    public int CoarseGridHeight;
+
+    public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
+    [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
+    public float FineCellSize;
+    public int FineGridWidth;
+    public int FineGridHeight;
+
+    void Execute(
+        Entity entity,
+        in HiveComponent hive,
+        in LocalTransform transform
+        )
+    {
+        // Update coarse heatmap
+        int coarseRadiusCells = (int)math.ceil(hive.Size / CoarseCellSize);
+        int2 coarseCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, CoarseCellSize);
+        float radiusSq = hive.Size * hive.Size;
+        for (int x = -coarseRadiusCells; x <= coarseRadiusCells; x++)
+        {
+            for (int y = -coarseRadiusCells; y <= coarseRadiusCells; y++)
+            {
+                int2 checkCell = coarseCenterCell + new int2(x, y);
+                float2 cellWorldPos = GridUtility.CellToWorldPos(checkCell, CoarseCellSize);
+
+                if (math.distancesq(transform.Position.xy, cellWorldPos) <= radiusSq)
+                {
+                    if (GridUtility.IsWithinBounds(checkCell, CoarseGridWidth, CoarseGridHeight))
+                    {
+                        int coarseIndex = GridUtility.CellToIndex(checkCell, CoarseGridWidth);
+                        CoarseMap.InterlockedAdd(coarseIndex, 1);
+                    }
+                }
+            }
+        }
+
+        // Update fine heatmap
+        int fineRadiusCells = (int)math.ceil(hive.Size / FineCellSize);
+        int2 fineCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, FineCellSize);
+        for (int x = -fineRadiusCells; x <= fineRadiusCells; x++)
+        {
+            for (int y = -fineRadiusCells; y <= fineRadiusCells; y++)
+            {
+                int2 checkCell = fineCenterCell + new int2(x, y);
+                float2 cellWorldPos = GridUtility.CellToWorldPos(checkCell, FineCellSize);
+
+                if (math.distancesq(transform.Position.xy, cellWorldPos) <= radiusSq)
+                {
+                    if (GridUtility.IsWithinBounds(checkCell, FineGridWidth, FineGridHeight))
+                    {
+                        int fineCellIndex = GridUtility.CellToIndex(checkCell, FineGridWidth);
+                        FineMap.Add(fineCellIndex, entity);
+                        FineDensityMap.InterlockedAdd(fineCellIndex, 1);
+                    }
+                }
+            }
         }
     }
 }

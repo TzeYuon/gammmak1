@@ -14,6 +14,8 @@ class HiveAuthoring : MonoBehaviour
     public float SpawnCooldown;
     public float SpawnTimer;
 
+    public float Size;
+
     class HiveAuthoringBaker : Baker<HiveAuthoring>
     {
         public override void Bake(HiveAuthoring authoring)
@@ -34,7 +36,19 @@ class HiveAuthoring : MonoBehaviour
 
                 SpawnCooldown = authoring.SpawnCooldown,
                 SpawnTimer = authoring.SpawnTimer,
+
+                Size = authoring.Size
             });
+
+            AddComponent(entity, new HealthComponent
+            {
+                MaxValue = 200,
+                Value = 200,
+            });
+            AddBuffer<DamageEvent>(entity);
+
+            AddComponent(entity, new DeadTag());
+            SetComponentEnabled<DeadTag>(entity, false);
         }
     }
 }

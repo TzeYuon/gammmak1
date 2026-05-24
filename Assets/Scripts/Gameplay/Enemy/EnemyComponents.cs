@@ -13,6 +13,8 @@ public struct HiveComponent : IComponentData
 
     public float SpawnCooldown;
     public float SpawnTimer;
+
+    public float Size;
 }
 
 public struct PathLeaderComponent : IComponentData
