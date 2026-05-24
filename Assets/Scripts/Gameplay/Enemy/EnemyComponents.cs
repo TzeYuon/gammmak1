@@ -24,6 +24,7 @@ public struct PathLeaderComponent : IComponentData
     public int MaxPathLength;
 
     public float2 MoveDirection;
+    public float2 LastTargetPos;
 }
 
 [InternalBufferCapacity(128)]

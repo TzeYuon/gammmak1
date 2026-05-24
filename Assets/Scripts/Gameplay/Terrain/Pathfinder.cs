@@ -36,15 +36,13 @@ public class Pathfinder : MonoBehaviour
 
         if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
 
-        // 2. Emergency Brake to prevent the game from crashing if a path is too hard to find
-        int maxIterations = 2000;
+        int maxIterations = 40000;
         int currentLoop = 0;
 
         Node currNode = new Node(a.x, a.y, true);
         Node destNode = new Node(b.x, b.y, true);
 
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-
         PriorityQueue<Node> pq = new PriorityQueue<Node>();
         pq.Enqueue(currNode, currNode.fCost);
 
@@ -54,11 +52,7 @@ public class Pathfinder : MonoBehaviour
         while (pq.Count > 0)
         {
             currentLoop++;
-            if (currentLoop > maxIterations)
-            {
-                Debug.Log("Pathfinder Emergency Brake! Path was too complex.");
-                return null;
-            }
+            if (currentLoop > maxIterations) { return null; }
             currNode = pq.Dequeue();
 
             Vector2Int currPos = new Vector2Int(currNode.x, currNode.y);
@@ -74,12 +68,17 @@ public class Pathfinder : MonoBehaviour
                     temp = temp.parent;
                 }
                 resPath.Reverse();
+                //for (int i = 0; i < resPath.Count; i++)
+                //{
+                //    resPath[i] = resPath[i] + origin;
+                //}
+                //return resPath;
                 var smoothedPath = SmoothPath(resPath, forcePath);
                 for (int i = 0; i < smoothedPath.Count; i++)
                 {
                     smoothedPath[i] = smoothedPath[i] + origin;
                 }
-                return smoothedPath; // Bresenham path smoothing
+                return smoothedPath; 
             }
 
             foreach (var tup in adj)
@@ -98,14 +97,15 @@ public class Pathfinder : MonoBehaviour
                     int moveCost = 1;
                     if (!forcePath)
                     {
-                        if (tileType == 2) moveCost = 20; // Mud
-                        if (tileType == 3) moveCost = 50; // Poison
+                        if (tileType == 2) moveCost = 5; // Mud
+                        if (tileType == 3) moveCost = 15; // Poison
                     }
 
                     Node tempNode = new Node(tempX, tempY, true);
                     tempNode.gCost = currNode.gCost + moveCost;
                     tempNode.hCost = Mathf.Abs(destNode.x - tempNode.x) + Mathf.Abs(destNode.y - tempNode.y);
                     tempNode.parent = currNode;
+
 
                     pq.Enqueue(tempNode, tempNode.fCost);
                 }
@@ -123,10 +123,11 @@ public class Pathfinder : MonoBehaviour
 
         while (true)
         {
+            if (x < 0 || x >= GridManager.Instance.width || y < 0 || y >= GridManager.Instance.height) return false;
+
             int tileType = GridManager.Instance.grid[x, y];
             if (GridManager.Instance.grid[x, y] == 1) return false; // Hit a wall
             if (!forcePath && (tileType == 2 || tileType == 3)) return false;
-
             if (x == end.x && y == end.y) break;
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x += sx; }

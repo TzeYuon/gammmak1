@@ -1,3 +1,4 @@
+
 using Unity.Collections;
 using UnityEngine;
 
@@ -46,6 +47,7 @@ public class GridManager : MonoBehaviour
                     nativeGrid[x + y * width] = 0;
                     continue;
                 }
+                
                 float noise = Mathf.PerlinNoise((x + randomOffset) * scale, (y + randomOffset) * scale);
                 int tileType = 0;
                 if (noise > 0.75f) tileType = 1;
