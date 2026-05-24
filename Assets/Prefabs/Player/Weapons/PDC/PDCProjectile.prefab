@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3865878300869473861}
   - component: {fileID: -1867012942114045799}
   m_Layer: 0
-  m_Name: PDC Projectile
+  m_Name: PDCProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -104,3 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d96226ff6adaef346a332895e283543b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileAuthoring
+  Movement: 1
+  Trigger: 0
+  Payload: 2

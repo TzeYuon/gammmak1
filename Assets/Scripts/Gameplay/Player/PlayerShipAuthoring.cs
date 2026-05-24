@@ -4,7 +4,7 @@ using UnityEngine;
 
 class PlayerShipAuthoring : MonoBehaviour
 {
-    [Header("Movement Stats")]
+    [Header("Health Stats")]
     [SerializeField] float Health = 10f;
 
     [Header("Movement Stats")]

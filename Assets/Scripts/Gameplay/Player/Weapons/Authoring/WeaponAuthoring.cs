@@ -25,8 +25,12 @@ class WeaponAuthoring : MonoBehaviour
     // Firing
     public FiringType Firing = FiringType.Hitscan;
     public GameObject ProjectilePrefab;
+    public float HitRadius;
+    public float ExplosionRadius;
+    public int PierceCount;
     public float ProjectileSpeed;
     public float Spread;
+    public float TriggerTime;
 
     class Baker : Baker<WeaponAuthoring>
     {
@@ -61,8 +65,12 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new ProjectileWeapon { 
                     Damage = authoring.Damage,
                     ProjectilePrefab = GetEntity(authoring.ProjectilePrefab, TransformUsageFlags.Dynamic),
+                    HitRadiusSq = authoring.HitRadius * authoring.HitRadius,
+                    ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
+                    PierceCount = authoring.PierceCount,
                     ProjectileSpeed = authoring.ProjectileSpeed,
                     Spread = authoring.Spread,
+                    TriggerTime = authoring.TriggerTime,
                 });
             }
 
@@ -79,7 +87,7 @@ public class WeaponAuthoringEditor : Editor
     SerializedProperty p_Damage, p_FireRate, p_Range;
     SerializedProperty p_Targeting, p_AngleBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
-    SerializedProperty p_Firing, p_ProjectilePrefab, p_ProjectileSpeed, p_Spread;
+    SerializedProperty p_Firing, p_ProjectilePrefab, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_Spread, p_TriggerTime;
 
     private void OnEnable()
     {
@@ -97,8 +105,12 @@ public class WeaponAuthoringEditor : Editor
 
         p_Firing = serializedObject.FindProperty("Firing");
         p_ProjectilePrefab = serializedObject.FindProperty("ProjectilePrefab");
+        p_HitRadius = serializedObject.FindProperty("HitRadius");
+        p_ExplosionRadius = serializedObject.FindProperty("ExplosionRadius");
+        p_PierceCount = serializedObject.FindProperty("PierceCount");
         p_ProjectileSpeed = serializedObject.FindProperty("ProjectileSpeed");
         p_Spread = serializedObject.FindProperty("Spread");
+        p_TriggerTime = serializedObject.FindProperty("TriggerTime");
     }
 
     public override void OnInspectorGUI()
@@ -148,8 +160,12 @@ public class WeaponAuthoringEditor : Editor
         {
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(p_ProjectilePrefab);
+            EditorGUILayout.PropertyField(p_HitRadius);
+            EditorGUILayout.PropertyField(p_ExplosionRadius);
+            EditorGUILayout.PropertyField(p_PierceCount);
             EditorGUILayout.PropertyField(p_ProjectileSpeed);
             EditorGUILayout.PropertyField(p_Spread);
+            EditorGUILayout.PropertyField(p_TriggerTime);
             EditorGUI.indentLevel--;
         }
 

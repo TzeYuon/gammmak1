@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(PostMovementSystemGroup))]
 partial struct PlayerShipCollisionSystem : ISystem
 {
     [BurstCompile]
@@ -35,7 +36,6 @@ partial struct PlayerShipCollisionSystem : ISystem
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);
-        state.Dependency.Complete();
     }
 
     [BurstCompile]
