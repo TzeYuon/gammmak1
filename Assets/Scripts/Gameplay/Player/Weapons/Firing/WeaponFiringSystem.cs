@@ -22,6 +22,7 @@ public partial struct WeaponFiringSystem : ISystem
     {
         state.CompleteDependency();
         float deltaTime = SystemAPI.Time.DeltaTime;
+        double elapsedTime = SystemAPI.Time.ElapsedTime;
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
             .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
@@ -49,6 +50,7 @@ public partial struct WeaponFiringSystem : ISystem
         JobHandle projectile = new ProjectileFiringJob
         {
             DeltaTime = deltaTime,
+            ElapsedTime = elapsedTime,
             ECB = ecb,
             TurretLookup = turretLookup,
             RandomSeed = randomSeed,
@@ -88,7 +90,7 @@ public partial struct HitscanFiringJob : IJobEntity
         float3 barrelForward = localToWorld.Up;
         float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
 
-        if (!TurretLookup.HasComponent(entity) || math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
+        if (TurretLookup.HasComponent(entity) && math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
 
         int index = GridUtility.WorldPosToIndex(state.TargetPos, CellSize, GridWidth);
         if (FineHeatmap.TryGetFirstValue(index, out Entity enemy, out var it))
@@ -120,6 +122,7 @@ public partial struct HitscanFiringJob : IJobEntity
 public partial struct ProjectileFiringJob : IJobEntity
 {
     public float DeltaTime;
+    public double ElapsedTime;
     public EntityCommandBuffer.ParallelWriter ECB;
 
     [ReadOnly] public ComponentLookup<TurretComponent> TurretLookup;
@@ -139,33 +142,55 @@ public partial struct ProjectileFiringJob : IJobEntity
         state.FireTimer = 1 / state.FireRate;
 
         float3 weaponForward = localToWorld.Up;
-        float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
+        float2 targetPos = state.TargetPos;
+        float3 dirToTarget = math.normalize(new float3(targetPos, localToWorld.Position.z) - localToWorld.Position);
 
-        if (!TurretLookup.HasComponent(entity) || math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
+        if (TurretLookup.HasComponent(entity) && math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
 
         Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
 
         // Add spread
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
         float randomAngleOffset = math.radians(rng.NextFloat(-projectileWeapon.Spread, projectileWeapon.Spread));
-        float baseAngle = math.atan2(dirToTarget.y, dirToTarget.x);
+        float baseAngle = math.atan2(dirToTarget.y, dirToTarget.x); 
         float finalAngle = baseAngle + randomAngleOffset;
-        float2 finalDirection = new(math.cos(finalAngle), math.sin(finalAngle));
+        //float2 finalDirection = new(math.cos(finalAngle), math.sin(finalAngle));
+        //if (!TurretLookup.HasComponent(entity)) finalDirection = weaponForward.xy;
 
         ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
             localToWorld.Position,
             quaternion.RotateZ(finalAngle - (math.PI / 2f)))
         );
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
         {
-            Velocity = finalDirection * projectileWeapon.ProjectileSpeed,
-            HitRadiusSq = 1,
+            Speed = projectileWeapon.ProjectileSpeed,
+            HomingRange = 60f
         });
 
-        ECB.SetComponent(chunkIndex, projectile, new StandardProjectile
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerState
+        {
+            IsTriggered = false,
+            EntityHit = Entity.Null,
+            RemainingHits = projectileWeapon.PierceCount
+        });
+
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerStats
+        {
+            TargetPos = targetPos,
+            HitRadiusSq = projectileWeapon.HitRadiusSq,
+            TriggerTime = projectileWeapon.TriggerTime,
+        });
+
+        ECB.SetComponent(chunkIndex, projectile, new ProjectilePayloadStats
         {
             Damage = projectileWeapon.Damage,
+            ExplosionRadiusSq = projectileWeapon.ExplosionRadiusSq
+        });
+
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
+        {
+            ExpirationTime = ElapsedTime + 5.0
         });
     }
 }

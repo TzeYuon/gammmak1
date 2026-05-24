@@ -10,6 +10,8 @@ public partial struct ProcessDamageSystem : ISystem
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
             .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
+        state.CompleteDependency();
+
         var job = new ApplyDamageJob
         {
             ECB = ecb

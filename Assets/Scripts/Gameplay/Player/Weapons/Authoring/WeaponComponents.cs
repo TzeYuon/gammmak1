@@ -42,8 +42,12 @@ public struct ProjectileWeapon : IComponentData
 {
     public Entity ProjectilePrefab;
     public float Damage;
+    public float HitRadiusSq;
+    public float ExplosionRadiusSq;
+    public int PierceCount;
     public float ProjectileSpeed;
     public float Spread;
+    public float TriggerTime;
 }
 
 public struct WeaponState : IComponentData

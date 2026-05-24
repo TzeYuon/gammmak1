@@ -4,40 +4,6 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Collections;
 
-public struct DeathVFXQueueSingleton : IComponentData
-{
-    public NativeQueue<DeathVFXEvent> Queue;
-}
-
-[UpdateInGroup(typeof(InitializationSystemGroup))]
-public partial struct DeathVFXQueueLifecycleSystem : ISystem
-{
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-        // Create deathVFXQueue
-        var queue = new NativeQueue<DeathVFXEvent>(Allocator.Persistent);
-
-        var entity = state.EntityManager.CreateEntity();
-        state.EntityManager.AddComponentData(entity, new DeathVFXQueueSingleton
-        {
-            Queue = queue
-        });
-    }
-
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-        if (SystemAPI.TryGetSingleton<DeathVFXQueueSingleton>(out var singleton))
-        {
-            if (singleton.Queue.IsCreated)
-            {
-                singleton.Queue.Dispose();
-            }
-        }
-    }
-}
-
 [BurstCompile]
 [UpdateInGroup(typeof(PostUpdateSystemGroup))]
 public partial class SwarmDeathEventSystem : SystemBase

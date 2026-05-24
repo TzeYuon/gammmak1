@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 936379319015275703}
   - component: {fileID: 3324436105751502001}
   m_Layer: 0
-  m_Name: LaserWeapon
+  m_Name: PDC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -57,8 +57,11 @@ MonoBehaviour:
   MaxAngle: 180
   Firing: 1
   ProjectilePrefab: {fileID: 1688938411433637448, guid: 77a19a51527bc79478d98b3152afd6e7, type: 3}
+  ExplosionRadius: 10
+  PierceCount: 0
   ProjectileSpeed: 50
-  Spread: 0
+  Spread: 4
+  ProjectileLifetime: 5
 --- !u!1 &954237318640528480
 GameObject:
   m_ObjectHideFlags: 0
