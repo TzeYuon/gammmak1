@@ -19,3 +19,8 @@ public struct ShipReference : IComponentData
 {
     public Entity Value;
 }
+
+public struct ShipCollectionRadiusComponent : IComponentData
+{
+    public float RadiusSq;
+}

@@ -104,6 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d96226ff6adaef346a332895e283543b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileAuthoring
-  Movement: 1
+  Movement: 0
   Trigger: 0
-  Payload: 2
+  Payload: 0

@@ -8,7 +8,7 @@ public class CameraManager : MonoBehaviour
     Camera cameraComponent;
 
     Vector3 cameraTargetPos;
-    float moveSpeed = 0.5f;
+    float moveSpeed = 50f;
     Bounds cameraBounds;
 
     float cameraTargetZoom;
@@ -40,7 +40,7 @@ public class CameraManager : MonoBehaviour
         void ManageMove()
         {
             float zoomRatio = cameraComponent.orthographicSize / minZoom;
-            cameraTargetPos += zoomRatio * moveSpeed * (Vector3)moveDir;
+            cameraTargetPos += moveSpeed * Time.unscaledDeltaTime * zoomRatio * (Vector3)moveDir;
             cameraTargetPos.z = cameraTransform.position.z;
 
             cameraTransform.position = Vector3.Lerp(cameraTransform.position, cameraTargetPos, 5 * Time.unscaledDeltaTime);

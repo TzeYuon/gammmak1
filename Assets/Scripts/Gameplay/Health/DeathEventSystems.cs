@@ -8,6 +8,11 @@ using Unity.Collections;
 [UpdateInGroup(typeof(PostUpdateSystemGroup))]
 public partial class SwarmDeathEventSystem : SystemBase
 {
+    protected override void OnCreate()
+    {
+        RequireForUpdate<BiomassConfig>();
+    }
+
     [BurstCompile]
     protected override void OnUpdate()
     {
@@ -17,8 +22,8 @@ public partial class SwarmDeathEventSystem : SystemBase
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(World.Unmanaged);
 
-        //BiomassConfig prefabSingleton = SystemAPI.GetSingleton<BiomassConfig>();
-        //Entity biomassPrefab = prefabSingleton.BiomassPrefab;
+        BiomassConfig prefabSingleton = SystemAPI.GetSingleton<BiomassConfig>();
+        Entity biomassPrefab = prefabSingleton.BiomassPrefab;
 
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, SwarmTag>().WithEntityAccess())
         {
@@ -28,24 +33,24 @@ public partial class SwarmDeathEventSystem : SystemBase
                 Colour = new float4(1, 0, 0, 0), 
             });
 
-            //// Random chance to drop biomass
-            //var rng = Random.CreateFromIndex((uint)(entity.Index * SystemAPI.Time.ElapsedTime));
-            //if (rng.NextFloat() <= 0.1f)
-            //{
-            //    Entity loot = ecb.Instantiate(biomassPrefab);
+            // Random chance to drop biomass
+            var rng = Random.CreateFromIndex((uint)(entity.Index * SystemAPI.Time.ElapsedTime));
+            if (rng.NextFloat() <= 0.1f)
+            {
+                Entity loot = ecb.Instantiate(biomassPrefab);
 
-            //    float2 scatter = rng.NextFloat2Direction() * rng.NextFloat(0.5f, 1.5f);
-            //    float3 spawnPos = transform.ValueRO.Position + new float3(scatter.x, scatter.y, 0);
+                float2 scatter = rng.NextFloat2Direction() * rng.NextFloat(0.5f, 1.5f);
+                float3 spawnPos = transform.ValueRO.Position + new float3(scatter.x, scatter.y, 0);
 
-            //    ecb.SetComponent(loot, LocalTransform.FromPosition(spawnPos));
+                ecb.SetComponent(loot, LocalTransform.FromPosition(spawnPos));
 
-            //    // Arbitrary 5 second lifespan and a value of 1
-            //    ecb.SetComponent(loot, new BiomassLoot
-            //    {
-            //        Value = 1.0f,
-            //        TimeRemaining = 5.0f
-            //    });
-            //}
+                // Arbitrary 5 second lifespan and a value of 1
+                ecb.SetComponent(loot, new BiomassLoot
+                {
+                    Value = 1.0f,
+                    TimeRemaining = 5.0f
+                });
+            }
         }
     }
 }

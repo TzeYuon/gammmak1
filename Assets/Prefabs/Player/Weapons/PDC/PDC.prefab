@@ -57,11 +57,12 @@ MonoBehaviour:
   MaxAngle: 180
   Firing: 1
   ProjectilePrefab: {fileID: 1688938411433637448, guid: 77a19a51527bc79478d98b3152afd6e7, type: 3}
-  ExplosionRadius: 10
+  HitRadius: 1
+  ExplosionRadius: 0
   PierceCount: 0
   ProjectileSpeed: 50
   Spread: 4
-  ProjectileLifetime: 5
+  TriggerTime: 0
 --- !u!1 &954237318640528480
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,6 +11,9 @@ class PlayerShipAuthoring : MonoBehaviour
     [SerializeField] float Thrust = 10f;
     [SerializeField] float MaxSpeed = 4f;
 
+    [Header("Biomass Collection Stats")]
+    [SerializeField] float BiomassCollectionRadius = 10f;
+
     class PlayerShipAuthoringBaker : Baker<PlayerShipAuthoring>
     {
         public override void Bake(PlayerShipAuthoring authoring)
@@ -46,6 +49,11 @@ class PlayerShipAuthoring : MonoBehaviour
             AddComponent<MoveCommand>(entity);
             SetComponentEnabled<MoveCommand>(entity, false);
 
+            // Collection radius for biomass
+            AddComponent(entity, new ShipCollectionRadiusComponent 
+            { 
+                RadiusSq = authoring.BiomassCollectionRadius * authoring.BiomassCollectionRadius 
+            });
 
             // Add children to linked group to delete them together when the ship dies
             var linkedGroup = AddBuffer<LinkedEntityGroup>(entity);
