@@ -8,24 +8,21 @@ partial struct EnemySwarmMovementSystem : ISystem
 {
     public void OnUpdate(ref SystemState state)
     {
-        if (GridManager.Instance == null || FlowFieldManager.Instance == null) return;
-        if (!GridManager.Instance.nativeGrid.IsCreated) return;
-        if (!FlowFieldManager.Instance.flowField.IsCreated) return;
-
-        var input = SystemAPI.GetSingleton<PlayerInputData>();
+        if (GridManager.Instance == null) return;
+        if (!GridManager.Instance.nativeGrid.IsCreated || !GridManager.Instance.nativeFlowField.IsCreated) return;
 
         var moveJob = new FlowFieldMovementJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
+            ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
 
-            FlowField = FlowFieldManager.Instance.flowField,
+            FlowField = GridManager.Instance.nativeFlowField,
             Grid = GridManager.Instance.nativeGrid,
             GridWidth = GridManager.Instance.width,
             GridHeight = GridManager.Instance.height,
-            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y),
-            MousePos = input.MouseWorldPosition
-
+            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y)
         };
+
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
     }
 }
@@ -35,13 +32,13 @@ partial struct EnemySwarmMovementSystem : ISystem
 public partial struct FlowFieldMovementJob : IJobEntity
 {
     public float DeltaTime;
+    public float ElapsedTime;
 
     [ReadOnly] public NativeArray<float2> FlowField;
     [ReadOnly] public NativeArray<int> Grid;
     public int GridWidth;
     public int GridHeight;
     public int2 WorldOrigin;
-    public float2 MousePos;
 
     public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity)
     {
@@ -57,12 +54,21 @@ public partial struct FlowFieldMovementJob : IJobEntity
         {
             targetDir = FlowField[gridX + gridY * GridWidth];
         }
-        else
+
+        if (math.lengthsq(targetDir) < 0.01f)
         {
-            targetDir = math.normalize(MousePos - curPos.xy);
+            float2 tileCenter = new float2(gridX + WorldOrigin.x, gridY + WorldOrigin.y);
+
+            float2 noiseOffset = new float2(
+                noise.snoise(new float2(ElapsedTime * 5f, entity.Index)),
+                noise.snoise(new float2(ElapsedTime * 5f, entity.Index + 100))
+            );
+
+            targetDir = (tileCenter - curPos.xy) + (noiseOffset * 0.5f);
         }
 
-        float2 wallPushForce = float2.zero;
+        // Terrain & Wall Pushing
+        float2 terrainPushForce = float2.zero;
 
         for (int x = -1; x <= 1; x++)
         {
@@ -73,41 +79,57 @@ public partial struct FlowFieldMovementJob : IJobEntity
 
                 if (checkX >= 0 && checkX < GridWidth && checkY >= 0 && checkY < GridHeight)
                 {
-                    if (Grid[checkX + checkY * GridWidth] == 1) // Only walls push!
+                    int tileType = Grid[checkX + checkY * GridWidth];
+
+                    if (tileType != 0)
                     {
-                        float2 wallCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
-                        float2 pushDir = curPos.xy - wallCenter;
+                        float2 tileCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
+                        float2 pushDir = curPos.xy - tileCenter;
                         float distSq = math.lengthsq(pushDir);
 
                         if (distSq < 1.0f && distSq > 0.01f)
                         {
                             float distance = math.sqrt(distSq);
 
-                            float pushStrength = (1.1f - distance) * 15.0f;
-                            float2 pushNormal = pushDir / distance;
+                            float pushMultiplier = (tileType == 1) ? 15.0f : 5.0f;
+                            float pushStrength = (1.1f - distance) * pushMultiplier;
 
+                            float2 pushNormal = pushDir / distance;
                             float2 slideTangent = new float2(-pushNormal.y, pushNormal.x);
 
-                            wallPushForce += (pushNormal * pushStrength) + (slideTangent * pushStrength);
+                            terrainPushForce += (pushNormal * pushStrength) + (slideTangent * pushStrength);
                         }
                     }
                 }
             }
         }
 
+        // Steering & Organic Swarm Wobble
         float2 steeringForce = float2.zero;
-        float baseSpeed = 5.0f; // Replace with Hive speed value
+        float baseSpeed = 4.5f;
 
-        if (math.lengthsq(targetDir) > 0.1f)
+        if (math.lengthsq(targetDir) > 0.01f)
         {
-            float2 desiredVelocity = targetDir * baseSpeed;
-            steeringForce = (desiredVelocity - curVel) + wallPushForce;
+            float2 noiseInput = new float2(ElapsedTime * 2f, entity.Index);
+            float noiseValue = noise.snoise(noiseInput);
+
+            float3 sideways3D = math.cross(new float3(math.normalizesafe(targetDir), 0), new float3(0, 0, 1));
+            float2 sidewaysDir = sideways3D.xy;
+
+            float2 wobblyTargetDir = math.normalize(targetDir + (sidewaysDir * noiseValue * 0.5f));
+
+            float uniqueSpeedVariation = 1.0f - ((entity.Index % 10) * 0.02f);
+            float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;
+
+            float2 desiredVelocity = wobblyTargetDir * finalDesiredSpeed;
+            steeringForce = (desiredVelocity - curVel) * 3.0f + terrainPushForce;
         }
         else
         {
-            steeringForce = (-curVel * 5.0f) + wallPushForce;
+            steeringForce = (-curVel * 5.0f) + terrainPushForce;
         }
 
+        // Apply Velocity
         float2 newVel = curVel + (steeringForce * DeltaTime);
 
         if (math.lengthsq(newVel) > baseSpeed * baseSpeed * 1.5f)

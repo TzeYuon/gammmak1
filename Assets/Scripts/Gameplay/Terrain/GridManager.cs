@@ -1,5 +1,6 @@
 
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -17,6 +18,7 @@ public class GridManager : MonoBehaviour
 
     public int[,] grid; // 0 = Walkable, 1 = Wall, 2 = Mud, 3 = Poison
     public NativeArray<int> nativeGrid;
+    public NativeArray<float2> nativeFlowField;
     private void Awake()
     {
         if (Instance == null)
@@ -31,7 +33,8 @@ public class GridManager : MonoBehaviour
     {
         grid = new int[width, height];
         nativeGrid = new NativeArray<int>(width * height, Allocator.Persistent);
-        randomOffset = Random.Range(0f, 9999f);
+        nativeFlowField = new NativeArray<float2>(width * height, Allocator.Persistent);
+        randomOffset = UnityEngine.Random.Range(0f, 9999f);
         GenerateTerrain();
     }
 
@@ -63,6 +66,7 @@ public class GridManager : MonoBehaviour
     private void OnDestroy()
     {
         if (nativeGrid.IsCreated) nativeGrid.Dispose();
+        if (nativeFlowField.IsCreated) nativeFlowField.Dispose();
     }
 
     public void UpdateGridTile(Vector3 worldPosition, int newTileType)

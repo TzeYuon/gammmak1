@@ -29,7 +29,7 @@ partial struct HiveSystem : ISystem
             // Spawn enemies
             Entity prefab = hive.ValueRO.Prefab;
             var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
-            float spawnRadius = hive.ValueRO.Width * 3.0f;
+            float spawnRadius = hive.ValueRO.Width * 1.0f;
             for (int i = 0; i < hive.ValueRO.SpawnAmount; i++)
             {
                 Entity enemy = ecb.Instantiate(prefab);
@@ -39,7 +39,7 @@ partial struct HiveSystem : ISystem
 
                 float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
-                ecb.SetComponent(enemy, new VelocityComponent { Value = randomOffset });
+                ecb.SetComponent(enemy, new VelocityComponent { Value = float2.zero });
                 ecb.SetComponent(enemy, LocalTransform.FromPosition(spawnPos));
             }
         }
