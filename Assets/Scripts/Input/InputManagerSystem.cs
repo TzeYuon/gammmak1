@@ -61,7 +61,14 @@ public partial class InputManagerSystem : SystemBase
             Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
             float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
             CameraManager.Instance.MoveCamera(cameraMove, cameraZoom);
-            inputData.MouseWorldPosition = (Vector2)mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            Vector2 screenMousePos = Mouse.current.position.ReadValue();
+            float2 mousePos = (Vector2)mainCamera.ScreenToWorldPoint(screenMousePos);
+            inputData.MouseWorldPosition = mousePos;
+
+            if (inputData.WasPressed(PlayerAction.Primary)) // Set start drag position when mouse first pressed
+            {
+                inputData.MouseStartDragPosition = mousePos;
+            }
         }
 
         SystemAPI.SetSingleton(inputData);
@@ -106,6 +113,7 @@ public enum PlayerAction : uint
 public struct PlayerInputData : IComponentData
 {
     public float2 MouseWorldPosition;
+    public float2 MouseStartDragPosition;
 
     public PlayerAction CurrentState;
     public PlayerAction PreviousState;

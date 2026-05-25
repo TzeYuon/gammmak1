@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -20,28 +21,15 @@ partial struct FleetCommandSystem : ISystem
         var input = SystemAPI.GetSingleton<PlayerInputData>();
         float2 mousePos = input.MouseWorldPosition;
 
-        if (input.WasPressed(PlayerAction.Primary))
+        if (input.WasReleased(PlayerAction.Primary))
         {
-            // Select ships nearby to click
-            float selectionRadiusSq = 25f;
-            foreach (var (transform, entity) in 
-                SystemAPI.Query<RefRO<LocalTransform>>()
-                         .WithAll<PlayerTag>()
-                         .WithDisabled<DeadTag>()
-                         .WithAbsent<MothershipTag>()
-                         .WithEntityAccess())
+            float2 startPos = input.MouseStartDragPosition;
+            state.Dependency = new CheckSelectionBoxJob
             {
-                float distSq = math.distancesq(transform.ValueRO.Position.xy, mousePos);
-
-                if (distSq <= selectionRadiusSq)
-                {
-                    SystemAPI.SetComponentEnabled<SelectedTag>(entity, true);
-                }
-                else if (!input.IsHeld(PlayerAction.SelectionModifier))
-                {
-                    SystemAPI.SetComponentEnabled<SelectedTag>(entity, false);
-                }
-            }
+                Min = math.min(mousePos, startPos),
+                Max = math.max(mousePos, startPos),
+                AddToSelection = input.IsHeld(PlayerAction.SelectionModifier)
+            }.ScheduleParallel(state.Dependency);
         }
 
         if (input.WasPressed(PlayerAction.Secondary))
@@ -59,5 +47,29 @@ partial struct FleetCommandSystem : ISystem
     public void OnDestroy(ref SystemState state)
     {
         
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag))]
+[WithAbsent(typeof(MothershipTag))]
+[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+public partial struct CheckSelectionBoxJob : IJobEntity
+{
+    public float2 Min;
+    public float2 Max;
+    public bool AddToSelection;
+
+    private void Execute(
+        in LocalTransform transform, 
+        EnabledRefRW<SelectedTag> selected
+        )
+    {
+        float2 pos = transform.Position.xy;
+        bool inBox = pos.x >= Min.x && pos.x <= Max.x &&
+                     pos.y >= Min.y && pos.y <= Max.y;
+
+        if (inBox) selected.ValueRW = true;
+        else if (!AddToSelection) selected.ValueRW = false;
     }
 }
