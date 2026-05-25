@@ -8,8 +8,10 @@ class PlayerShipAuthoring : MonoBehaviour
     [SerializeField] float Health = 10f;
 
     [Header("Movement Stats")]
-    [SerializeField] float Thrust = 10f;
-    [SerializeField] float MaxSpeed = 4f;
+    [SerializeField] float MaxSpeed = 15f;
+    [SerializeField] float Acceleration = 10;
+    [SerializeField] float TurnSpeed = 15;
+    [SerializeField] float BrakingDistance = 1;
 
     [Header("Biomass Collection Stats")]
     [SerializeField] float BiomassCollectionRadius = 10f;
@@ -23,8 +25,15 @@ class PlayerShipAuthoring : MonoBehaviour
             // Ship movement stats
             AddComponent(entity, new ShipMovementStatsComponent
             {
-                Thrust = authoring.Thrust,
                 MaxSpeed = authoring.MaxSpeed,
+                Acceleration = authoring.Acceleration,
+                TurnSpeed = authoring.TurnSpeed,
+                BrakingDistance = authoring.BrakingDistance,
+            });
+
+            AddComponent(entity, new ShipVelocity
+            {
+                Value = float2.zero,
             });
 
             // Identity components

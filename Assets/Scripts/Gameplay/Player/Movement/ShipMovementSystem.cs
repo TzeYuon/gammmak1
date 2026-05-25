@@ -28,30 +28,41 @@ public partial struct MoveShipJob : IJobEntity
         ref LocalTransform transform,
         EnabledRefRW<MoveCommand> moveEnabled,
         ref MoveCommand command,
-        in ShipMovementStatsComponent ship)
+        in ShipMovementStatsComponent stats,
+        ref ShipVelocity velocity
+        )
     {
         float2 currentPos = transform.Position.xy;
         float2 targetPos = command.MoveTarget;
 
-        float2 direction = targetPos - currentPos;
-        float distanceSq = math.lengthsq(direction);
+        float2 directionToTarget = targetPos - currentPos;
+        float distToTarget = math.length(directionToTarget);
 
-        // Stop distance
-        if (distanceSq < 0.25f)
+        if (distToTarget < 0.1f)
         {
             moveEnabled.ValueRW = false;
+            velocity.Value = float2.zero;
             return;
         }
 
-        // Normalize direction
-        float distance = math.sqrt(distanceSq);
-        float2 moveDir = direction / distance;
+        float2 desiredDirection = directionToTarget / distToTarget;
+        float targetSpeed = stats.MaxSpeed;
 
-        // Move
-        transform.Position.xy += DeltaTime * ship.MaxSpeed * moveDir;
+        if (distToTarget < stats.BrakingDistance)
+        {
+            targetSpeed = stats.MaxSpeed * (distToTarget / stats.BrakingDistance);
+        }
 
-        // Rotate towards target smoothly
-        float angle = math.atan2(moveDir.y, moveDir.x);
-        transform.Rotation = quaternion.RotateZ(angle - math.PI / 2f);
+        float2 desiredVelocity = desiredDirection * targetSpeed;
+        velocity.Value = math.lerp(velocity.Value, desiredVelocity, stats.Acceleration * DeltaTime);
+
+        transform.Position.xy += velocity.Value * DeltaTime;
+
+        if (math.lengthsq(velocity.Value) > 0.01f)
+        {
+            float angle = math.atan2(velocity.Value.y, velocity.Value.x) - (math.PI / 2f);
+            quaternion targetRotation = quaternion.RotateZ(angle);
+            transform.Rotation = math.slerp(transform.Rotation, targetRotation, stats.TurnSpeed * DeltaTime);
+        }
     }
 }

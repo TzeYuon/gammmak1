@@ -12,10 +12,20 @@ public struct MoveCommand : IComponentData, IEnableableComponent
 
 public struct ShipMovementStatsComponent : IComponentData
 {
-    public float Thrust;
     public float MaxSpeed;
+    public float Acceleration;
+    public float TurnSpeed;
+    public float BrakingDistance;
 }
 
+public struct ShipVelocity : IComponentData
+{
+    public float2 Value;
+}
+
+/// <summary>
+/// Used by other parts of the ships (weapons) to get ship components
+/// </summary>
 public struct ShipReference : IComponentData
 {
     public Entity Value;
