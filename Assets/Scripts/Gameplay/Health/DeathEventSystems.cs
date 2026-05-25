@@ -29,7 +29,8 @@ public partial class SwarmDeathEventSystem : SystemBase
         {
             // Create death visual
             vfxQueue.Enqueue(new VFXPayload { 
-                Position = transform.ValueRO.Position, 
+                Position = transform.ValueRO.Position,
+                Type = (uint)VFXType.DeathExplosion,
                 Colour = new float4(1, 0, 0, 0), 
             });
 
@@ -64,11 +65,34 @@ public partial class PlayerDeathEventSystem : SystemBase
     {
         if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
         var vfxQueue = vfxSingleton.Queue;
-        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, PlayerTag>())
+        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, PlayerTag>().WithAbsent<MothershipTag>())
         {
             vfxQueue.Enqueue(new VFXPayload
             {
                 Position = transform.ValueRO.Position,
+                Type = (uint)VFXType.DeathExplosion,
+                Colour = new float4(0, 1, 1, 0)
+            });
+        }
+    }
+}
+
+[BurstCompile]
+[UpdateInGroup(typeof(PostUpdateSystemGroup))]
+public partial struct MothershipDeathEventSystem : ISystem
+{
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
+        var vfxQueue = vfxSingleton.Queue;
+        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, MothershipTag>())
+        {
+            // 1. Spawn the biggest explosion in the game
+            vfxQueue.Enqueue(new VFXPayload
+            {
+                Position = transform.ValueRO.Position,
+                Type = (uint)VFXType.DeathExplosion,
                 Colour = new float4(0, 1, 1, 0)
             });
         }

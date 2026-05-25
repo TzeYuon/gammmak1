@@ -52,3 +52,8 @@ public struct VelocityComponent : IComponentData
 }
 
 public struct SwarmTag : IComponentData { }
+
+public struct CollisionRadius : IComponentData
+{
+    public float Value;
+}

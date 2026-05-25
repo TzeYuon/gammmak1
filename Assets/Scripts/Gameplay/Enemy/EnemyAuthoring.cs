@@ -21,6 +21,11 @@ class EnemyAuthoring : MonoBehaviour
             });
             AddBuffer<DamageEvent>(entity);
 
+            AddComponent(entity, new CollisionRadius
+            {
+                Value = 1,
+            });
+
             AddComponent(entity, new DeadTag());
             SetComponentEnabled<DeadTag>(entity, false);
         }

@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 public struct PlayerTag : IComponentData { }
+public struct MothershipTag : IComponentData { }
 public struct SelectedTag : IComponentData, IEnableableComponent { }
 
 public struct MoveCommand : IComponentData, IEnableableComponent

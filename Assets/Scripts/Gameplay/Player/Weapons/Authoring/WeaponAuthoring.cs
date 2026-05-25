@@ -65,7 +65,7 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new ProjectileWeapon { 
                     Damage = authoring.Damage,
                     ProjectilePrefab = GetEntity(authoring.ProjectilePrefab, TransformUsageFlags.Dynamic),
-                    HitRadiusSq = authoring.HitRadius * authoring.HitRadius,
+                    HitRadius = authoring.HitRadius,
                     ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
                     PierceCount = authoring.PierceCount,
                     ProjectileSpeed = authoring.ProjectileSpeed,

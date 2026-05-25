@@ -47,6 +47,11 @@ class HiveAuthoring : MonoBehaviour
             });
             AddBuffer<DamageEvent>(entity);
 
+            AddComponent(entity, new CollisionRadius
+            {
+                Value = authoring.Size,
+            });
+
             AddComponent(entity, new DeadTag());
             SetComponentEnabled<DeadTag>(entity, false);
         }

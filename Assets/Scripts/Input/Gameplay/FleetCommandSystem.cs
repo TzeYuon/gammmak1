@@ -24,7 +24,12 @@ partial struct FleetCommandSystem : ISystem
         {
             // Select ships nearby to click
             float selectionRadiusSq = 25f;
-            foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>().WithDisabled<DeadTag>().WithEntityAccess())
+            foreach (var (transform, entity) in 
+                SystemAPI.Query<RefRO<LocalTransform>>()
+                         .WithAll<PlayerTag>()
+                         .WithDisabled<DeadTag>()
+                         .WithAbsent<MothershipTag>()
+                         .WithEntityAccess())
             {
                 float distSq = math.distancesq(transform.ValueRO.Position.xy, mousePos);
 

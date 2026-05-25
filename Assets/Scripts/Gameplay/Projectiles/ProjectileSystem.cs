@@ -11,11 +11,13 @@ using Unity.Transforms;
 partial struct ProjectileSystem : ISystem
 {
     private ComponentLookup<LocalTransform> transformLookup;
+    private ComponentLookup<CollisionRadius> collisionLookup;
     private ComponentLookup<HealthComponent> healthLookup;
 
     public void OnCreate(ref SystemState state)
     {
         transformLookup = state.GetComponentLookup<LocalTransform>(true);
+        collisionLookup = state.GetComponentLookup<CollisionRadius>(true);
         healthLookup = state.GetComponentLookup<HealthComponent>(false);
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
     }
@@ -24,6 +26,7 @@ partial struct ProjectileSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         transformLookup.Update(ref state);
+        collisionLookup.Update(ref state);
         healthLookup.Update(ref state);
 
         var fineHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
@@ -54,6 +57,7 @@ partial struct ProjectileSystem : ISystem
         {
             Map = fineHeatmap.Map,
             TransformLookup = transformLookup,
+            RadiusLookup = collisionLookup,
             CellSize = fineHeatmap.CellSize,
             GridWidth = fineHeatmap.GridWidth,
         }.ScheduleParallel(homingHandle);
@@ -187,6 +191,7 @@ public partial struct ContactTriggerJob : IJobEntity
 {
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+    [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
     public float CellSize;
     public int GridWidth;
 
@@ -205,7 +210,16 @@ public partial struct ContactTriggerJob : IJobEntity
             {
                 if (!TransformLookup.HasComponent(bug)) continue;
 
-                if (math.distancesq(transform.Position.xy, TransformLookup[bug].Position.xy) <= stats.HitRadiusSq)
+                float targetRadius = 0.5f;
+                if (RadiusLookup.HasComponent(bug))
+                {
+                    targetRadius = RadiusLookup[bug].Value;
+                }
+
+                float combinedRadius = stats.HitRadius + targetRadius;
+                float maxHitDistSq = combinedRadius * combinedRadius;
+
+                if (math.distancesq(transform.Position.xy, TransformLookup[bug].Position.xy) <= maxHitDistSq)
                 {
                     state.IsTriggered = true;
                     state.EntityHit = bug;

@@ -178,7 +178,7 @@ public partial struct ProjectileFiringJob : IJobEntity
         ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerStats
         {
             TargetPos = targetPos,
-            HitRadiusSq = projectileWeapon.HitRadiusSq,
+            HitRadius = projectileWeapon.HitRadius,
             TriggerTime = projectileWeapon.TriggerTime,
         });
 

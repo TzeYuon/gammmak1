@@ -36,7 +36,7 @@ public struct ProjectileTriggerState : IComponentData
 
 public struct ProjectileTriggerStats : IComponentData
 {
-    public float HitRadiusSq;
+    public float HitRadius;
     public float2 TargetPos;
     public float TriggerTime;
 }
