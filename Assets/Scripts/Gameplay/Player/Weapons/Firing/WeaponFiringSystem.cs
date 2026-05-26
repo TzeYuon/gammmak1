@@ -54,6 +54,7 @@ public partial struct WeaponFiringSystem : ISystem
             ECB = ecb,
             TurretLookup = turretLookup,
             RandomSeed = randomSeed,
+            VFXWriter = vfxWriter,
         }.ScheduleParallel(hitscan);
 
         state.Dependency = projectile;
@@ -106,7 +107,10 @@ public partial struct HitscanFiringJob : IJobEntity
         float distance = math.length(dir);
         float3 midpoint = startPos + (dir * 0.5f);
 
-        float angleDegrees = math.degrees(math.atan2(dir.y, dir.x));
+        float angleRadians = math.atan2(dir.y, dir.x);
+        float angleDegrees = math.degrees(angleRadians);
+        quaternion rotation = quaternion.RotateZ(angleRadians - (math.PI / 2f));
+        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(hitscanWeapon.WeaponStartPosition, 0));
 
         VFXWriter.Enqueue(new VFXPayload
         {
@@ -114,6 +118,14 @@ public partial struct HitscanFiringJob : IJobEntity
             Type = (uint)VFXType.Laser,
             Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
             CustomData = new float4(angleDegrees, distance, 0, 0),
+        });
+
+        VFXWriter.Enqueue(new VFXPayload
+        {
+            Position = spawnPoint,
+            Type = (uint)VFXType.MuzzleFlash,
+            Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
+            CustomData = new float4(angleRadians - (math.PI / 2f), 0, 0, 0)
         });
     }
 }
@@ -128,6 +140,8 @@ public partial struct ProjectileFiringJob : IJobEntity
     [ReadOnly] public ComponentLookup<TurretComponent> TurretLookup;
 
     public uint RandomSeed;
+
+    public NativeQueue<VFXPayload>.ParallelWriter VFXWriter;
 
     private void Execute(
         Entity entity,
@@ -154,12 +168,12 @@ public partial struct ProjectileFiringJob : IJobEntity
         float randomAngleOffset = math.radians(rng.NextFloat(-projectileWeapon.Spread, projectileWeapon.Spread));
         float baseAngle = math.atan2(dirToTarget.y, dirToTarget.x); 
         float finalAngle = baseAngle + randomAngleOffset;
-        //float2 finalDirection = new(math.cos(finalAngle), math.sin(finalAngle));
-        //if (!TurretLookup.HasComponent(entity)) finalDirection = weaponForward.xy;
+        quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
+        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(projectileWeapon.ProjectileSpawnPoint, 0));
 
         ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
-            localToWorld.Position,
-            quaternion.RotateZ(finalAngle - (math.PI / 2f)))
+            spawnPoint,
+            rotation)
         );
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
@@ -191,6 +205,14 @@ public partial struct ProjectileFiringJob : IJobEntity
         ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
         {
             ExpirationTime = ElapsedTime + 5.0
+        });
+
+        VFXWriter.Enqueue(new VFXPayload
+        {
+            Position = spawnPoint,
+            Type = (uint)VFXType.MuzzleFlash,
+            Colour = new float4(1, 1, 0, 1),
+            CustomData = new float4(baseAngle - (math.PI / 2f), 0, 0, 0)
         });
     }
 }

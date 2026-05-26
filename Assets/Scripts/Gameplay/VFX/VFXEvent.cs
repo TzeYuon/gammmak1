@@ -6,6 +6,7 @@ public enum VFXType : uint
     Laser = 1,
     Explosion = 2,
     Trail = 3,
+    MuzzleFlash = 4,
 }
 
 // Must be 48 bytes for HLSL

@@ -25,6 +25,7 @@ class WeaponAuthoring : MonoBehaviour
     // Firing
     public FiringType Firing = FiringType.Hitscan;
     public GameObject ProjectilePrefab;
+    public Transform WeaponStartPoint;
     public float HitRadius;
     public float ExplosionRadius;
     public int PierceCount;
@@ -58,13 +59,17 @@ class WeaponAuthoring : MonoBehaviour
             // Firing
             if (authoring.Firing == FiringType.Hitscan)
             {
-                AddComponent(entity, new HitscanWeapon { Damage = authoring.Damage });
+                AddComponent(entity, new HitscanWeapon { 
+                    WeaponStartPosition = (Vector2)authoring.WeaponStartPoint.localPosition,
+                    Damage = authoring.Damage 
+                });
             }
             else
             {
                 AddComponent(entity, new ProjectileWeapon { 
                     Damage = authoring.Damage,
                     ProjectilePrefab = GetEntity(authoring.ProjectilePrefab, TransformUsageFlags.Dynamic),
+                    ProjectileSpawnPoint = (Vector2)authoring.WeaponStartPoint.localPosition,
                     HitRadius = authoring.HitRadius,
                     ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
                     PierceCount = authoring.PierceCount,
@@ -87,7 +92,7 @@ public class WeaponAuthoringEditor : Editor
     SerializedProperty p_Damage, p_FireRate, p_Range;
     SerializedProperty p_Targeting, p_AngleBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
-    SerializedProperty p_Firing, p_ProjectilePrefab, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_Spread, p_TriggerTime;
+    SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_Spread, p_TriggerTime;
 
     private void OnEnable()
     {
@@ -105,6 +110,7 @@ public class WeaponAuthoringEditor : Editor
 
         p_Firing = serializedObject.FindProperty("Firing");
         p_ProjectilePrefab = serializedObject.FindProperty("ProjectilePrefab");
+        p_WeaponStartPoint = serializedObject.FindProperty("WeaponStartPoint");
         p_HitRadius = serializedObject.FindProperty("HitRadius");
         p_ExplosionRadius = serializedObject.FindProperty("ExplosionRadius");
         p_PierceCount = serializedObject.FindProperty("PierceCount");
@@ -169,6 +175,7 @@ public class WeaponAuthoringEditor : Editor
             EditorGUI.indentLevel--;
         }
 
+        EditorGUILayout.PropertyField(p_WeaponStartPoint);
         EditorGUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();

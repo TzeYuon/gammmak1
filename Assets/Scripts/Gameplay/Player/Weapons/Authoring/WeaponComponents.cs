@@ -35,12 +35,14 @@ public struct TurretComponent : IComponentData
 
 public struct HitscanWeapon : IComponentData
 {
+    public float2 WeaponStartPosition;
     public float Damage;
 }
 
 public struct ProjectileWeapon : IComponentData
 {
     public Entity ProjectilePrefab;
+    public float2 ProjectileSpawnPoint;
     public float Damage;
     public float HitRadius;
     public float ExplosionRadiusSq;
