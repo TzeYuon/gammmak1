@@ -41,6 +41,11 @@ partial struct HiveSystem : ISystem
 
                 ecb.SetComponent(enemy, new VelocityComponent { Value = float2.zero });
                 ecb.SetComponent(enemy, LocalTransform.FromPosition(spawnPos));
+                ecb.SetComponent(enemy, new SwarmComponent
+                {
+                    BaseSpeed = hive.ValueRO.EnemySpeed,
+                    WiggleOffset = i
+                });
             }
         }
 

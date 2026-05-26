@@ -1,3 +1,4 @@
+using System.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -40,7 +41,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
     public int GridHeight;
     public int2 WorldOrigin;
 
-    public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity)
+    public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity, ref SwarmComponent agentData)
     {
         float3 curPos = transform.Position;
         float2 curVel = velocity.Value;
@@ -53,6 +54,11 @@ public partial struct FlowFieldMovementJob : IJobEntity
         if (gridX >= 0 && gridX < GridWidth && gridY >= 0 && gridY < GridHeight)
         {
             targetDir = FlowField[gridX + gridY * GridWidth];
+        }
+        else
+        {
+            float2 mapCenter = new float2(GridWidth / 2.0f, GridHeight / 2.0f) + WorldOrigin;
+            targetDir = math.normalize(mapCenter - curPos.xy);
         }
 
         if (math.lengthsq(targetDir) < 0.01f)
@@ -91,7 +97,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
                         {
                             float distance = math.sqrt(distSq);
 
-                            float pushMultiplier = (tileType == 1) ? 15.0f : 5.0f;
+                            float pushMultiplier = (tileType == 1) ? 20.0f : 5.0f;
                             float pushStrength = (1.1f - distance) * pushMultiplier;
 
                             float2 pushNormal = pushDir / distance;
@@ -106,7 +112,17 @@ public partial struct FlowFieldMovementJob : IJobEntity
 
         // Steering & Organic Swarm Wobble
         float2 steeringForce = float2.zero;
-        float baseSpeed = 4.5f;
+        float baseSpeed = agentData.BaseSpeed;
+
+        int currentTileType = 0;
+
+        if (gridX >= 0 && gridX < GridWidth && gridY >= 0 && gridY < GridHeight)
+        {
+            currentTileType = Grid[gridX + gridY * GridWidth];
+        }
+
+        if (currentTileType == 2) baseSpeed *= 0.5f; // Mud
+        if (currentTileType == 3) baseSpeed *= 0.2f; // Poison
 
         if (math.lengthsq(targetDir) > 0.01f)
         {
@@ -118,7 +134,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
 
             float2 wobblyTargetDir = math.normalize(targetDir + (sidewaysDir * noiseValue * 0.5f));
 
-            float uniqueSpeedVariation = 1.0f - ((entity.Index % 10) * 0.02f);
+            float uniqueSpeedVariation = 1.0f - ((agentData.WiggleOffset % 10) * 0.02f);
             float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;
 
             float2 desiredVelocity = wobblyTargetDir * finalDesiredSpeed;

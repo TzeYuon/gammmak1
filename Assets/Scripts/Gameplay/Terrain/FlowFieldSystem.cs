@@ -20,7 +20,6 @@ partial struct FlowFieldSystem : ISystem
     {
         if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
 
-        // Throttle updates to 4 times a second so the game doesn't lag
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
         _timer = 0.25f;
@@ -29,14 +28,12 @@ partial struct FlowFieldSystem : ISystem
         int gridHeight = GridManager.Instance.height;
         int totalCells = gridWidth * gridHeight;
 
-        // Allocate the Integration Field memory once
         if (!_integrationField.IsCreated || _integrationField.Length != totalCells)
         {
             if (_integrationField.IsCreated) _integrationField.Dispose();
             _integrationField = new NativeArray<int>(totalCells, Allocator.Persistent);
         }
 
-        // 1. Gather ALL Player Ship positions
         NativeList<int2> targetPositions = new NativeList<int2>(Allocator.TempJob);
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
         {
@@ -48,21 +45,18 @@ partial struct FlowFieldSystem : ISystem
             targetPositions.Add(gridPos);
         }
 
-        // 2. Schedule the Burst Dijkstra Job
         var job = new GenerateFlowFieldJob
         {
             Grid = GridManager.Instance.nativeGrid,
             IntegrationField = _integrationField,
             FlowField = GridManager.Instance.nativeFlowField,
-            TargetPositions = targetPositions, // Pass all ships in!
+            TargetPositions = targetPositions,
             GridWidth = gridWidth,
             GridHeight = gridHeight
         };
 
-        // Notice we use Schedule() instead of ScheduleParallel() because Dijkstra must run sequentially
         state.Dependency = job.Schedule(state.Dependency);
 
-        // Dispose the temporary list after the job finishes
         targetPositions.Dispose(state.Dependency);
     }
 
@@ -85,7 +79,7 @@ public struct GenerateFlowFieldJob : IJob
 
     public void Execute()
     {
-        // 1. Reset Arrays
+        // Reset Arrays
         for (int i = 0; i < IntegrationField.Length; i++)
         {
             IntegrationField[i] = 99999;
@@ -94,13 +88,13 @@ public struct GenerateFlowFieldJob : IJob
 
         NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.Temp);
 
-        // 2. MULTI-TARGET START: Drop all "pebbles" into the pond at once!
+        // multi-target start
         for (int i = 0; i < TargetPositions.Length; i++)
         {
             int2 pos = TargetPositions[i];
             if (pos.x >= 0 && pos.x < GridWidth && pos.y >= 0 && pos.y < GridHeight)
             {
-                if (Grid[pos.x + pos.y * GridWidth] != 1) // If ship isn't inside a wall
+                if (Grid[pos.x + pos.y * GridWidth] != 1)
                 {
                     IntegrationField[pos.x + pos.y * GridWidth] = 0;
                     cellsToCheck.Enqueue(pos);
@@ -108,7 +102,7 @@ public struct GenerateFlowFieldJob : IJob
             }
         }
 
-        // 3. Dijkstra Flood Fill
+        // Dijkstra Flood Fill
         NativeArray<int2> neighbors = new NativeArray<int2>(4, Allocator.Temp);
         neighbors[0] = new int2(0, 1);
         neighbors[1] = new int2(0, -1);
@@ -126,7 +120,7 @@ public struct GenerateFlowFieldJob : IJob
                     int tileType = Grid[neighbor.x + neighbor.y * GridWidth];
                     if (tileType == 1) continue; // Wall
 
-                    int cost = (tileType == 2) ? 5 : (tileType == 3) ? 15 : 1;
+                    int cost = (tileType == 2) ? 5 : (tileType == 3) ? 25 : 1;
                     int current1D = current.x + current.y * GridWidth;
                     int neighbor1D = neighbor.x + neighbor.y * GridWidth;
 
@@ -141,7 +135,7 @@ public struct GenerateFlowFieldJob : IJob
             }
         }
 
-        // 4. Generate Flow Field Vectors (8-way check)
+        // Generate Flow Field Vectors
         for (int x = 0; x < GridWidth; x++)
         {
             for (int y = 0; y < GridHeight; y++)
@@ -150,6 +144,12 @@ public struct GenerateFlowFieldJob : IJob
                 if (Grid[idx] == 1) continue;
 
                 int bestCost = IntegrationField[idx];
+
+                if (bestCost >= 99999 && TargetPositions.Length > 0)
+                {
+                    FlowField[idx] = float2.zero;
+                    continue;
+                }
                 int2 bestDir = int2.zero;
 
                 for (int dx = -1; dx <= 1; dx++)
@@ -163,10 +163,10 @@ public struct GenerateFlowFieldJob : IJob
 
                         if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
                         {
-                            // Prevent corner cutting through walls
+                            //Prevent corner cutting through walls
                             if (dx != 0 && dy != 0)
                             {
-                                if (Grid[(x + dx) + y * GridWidth] == 1 || Grid[x + (y + dy) * GridWidth] == 1) continue;
+                                if (Grid[(x + dx) + y * GridWidth] != 0 || Grid[x + (y + dy) * GridWidth] != 0) continue;
                             }
 
                             int nIdx = nx + ny * GridWidth;
