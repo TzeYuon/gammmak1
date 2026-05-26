@@ -5,7 +5,7 @@ using Unity.Transforms;
 
 [WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
 [UpdateInGroup(typeof(PostBakingSystemGroup))] 
-public partial struct WeaponInitSystem : ISystem
+public partial struct ShipReferencesInitSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
@@ -13,7 +13,7 @@ public partial struct WeaponInitSystem : ISystem
         var parentLookup = SystemAPI.GetComponentLookup<Parent>(isReadOnly: true);
         var shipLookup = SystemAPI.GetComponentLookup<PlayerTag>(isReadOnly: true);
 
-        var job = new LinkWeaponsJob
+        var job = new LinkShipReferencesJob
         {
             ParentLookup = parentLookup,
             ShipLookup = shipLookup
@@ -24,12 +24,12 @@ public partial struct WeaponInitSystem : ISystem
 }
 
 [BurstCompile]
-public partial struct LinkWeaponsJob : IJobEntity
+public partial struct LinkShipReferencesJob : IJobEntity
 {
     [ReadOnly] public ComponentLookup<Parent> ParentLookup;
     [ReadOnly] public ComponentLookup<PlayerTag> ShipLookup;
 
-    private void Execute(Entity weaponEntity, ref ShipReference shipRef, in Parent initialParent)
+    private void Execute(Entity entity, ref ShipReference shipRef, in Parent initialParent)
     {
         Entity currentEntity = initialParent.Value;
 
