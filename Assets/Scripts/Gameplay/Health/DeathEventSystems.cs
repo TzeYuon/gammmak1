@@ -2,7 +2,6 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
-using Unity.Collections;
 
 [BurstCompile]
 [UpdateInGroup(typeof(PostUpdateSystemGroup))]
@@ -58,10 +57,10 @@ public partial class SwarmDeathEventSystem : SystemBase
 
 [BurstCompile]
 [UpdateInGroup(typeof(PostUpdateSystemGroup))]
-public partial class PlayerDeathEventSystem : SystemBase
+public partial struct PlayerDeathEventSystem : ISystem
 {
     [BurstCompile]
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
         var vfxQueue = vfxSingleton.Queue;
