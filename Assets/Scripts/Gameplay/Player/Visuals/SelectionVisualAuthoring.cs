@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -26,4 +27,9 @@ class SelectionVisualAuthoring : MonoBehaviour
 public struct SelectionVisualComponent : IComponentData
 {
     public float Scale;
+}
+
+public struct MovementLineVisualComponent : IComponentData
+{
+    public float Thickness;
 }
