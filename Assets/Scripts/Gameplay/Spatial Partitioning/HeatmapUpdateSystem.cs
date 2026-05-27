@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(SpatialGridSystemGroup))]
 partial struct HeatmapUpdateSystem : ISystem
 {
     [BurstCompile]
@@ -98,6 +99,7 @@ public struct ClearFineEnemyJob : IJobParallelFor
 
 [BurstCompile]
 [WithAll(typeof(SwarmTag))]
+[WithDisabled(typeof(DeadTag))]
 public partial struct SwarmHeatmapJob : IJobEntity
 {
     [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
@@ -135,6 +137,7 @@ public partial struct SwarmHeatmapJob : IJobEntity
 }
 
 [BurstCompile]
+[WithDisabled(typeof(DeadTag))]
 public partial struct HiveHeatmapJob : IJobEntity
 {
     [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
