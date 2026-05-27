@@ -80,6 +80,7 @@ class WeaponAuthoring : MonoBehaviour
             }
 
             AddComponent(entity, new ShipReference());
+            AddComponent<NeedsShipReferenceTag>(entity);
         }
     }
 }

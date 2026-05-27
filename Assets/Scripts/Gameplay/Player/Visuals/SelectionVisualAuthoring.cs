@@ -16,6 +16,8 @@ class SelectionVisualAuthoring : MonoBehaviour
                 Value = Entity.Null,
             });
 
+            AddComponent<NeedsShipReferenceTag>(entity);
+
             AddComponent(entity, new SelectionVisualComponent
             {
                 Scale = authoring.transform.localScale.x,

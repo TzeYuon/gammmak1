@@ -161,6 +161,7 @@ public partial struct HeatmapTargetingJob : IJobEntity
         in ShipReference ship
         ) 
     {
+        if (ship.Value == Entity.Null) return; // ship ref not set up yet
         LocalToWorld shipWorld = WorldLookup[ship.Value];
         float3 shipForwardWorld = math.rotate(shipWorld.Rotation, arc.BaseDirection);
         float3 currentBarrelForward = weaponWorld.Up;

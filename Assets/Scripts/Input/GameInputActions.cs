@@ -136,6 +136,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleReinforcementPopup"",
+                    ""type"": ""Button"",
+                    ""id"": ""c4e797da-dcdb-44a0-941c-08b84ca6920d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -257,6 +266,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""SelectionModifier"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""922a8b65-32d6-4f56-b192-a1ff436d4ec9"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""ToggleReinforcementPopup"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -869,6 +889,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Gameplay_PrimaryAction = m_Gameplay.FindAction("PrimaryAction", throwIfNotFound: true);
         m_Gameplay_SecondaryAction = m_Gameplay.FindAction("SecondaryAction", throwIfNotFound: true);
         m_Gameplay_SelectionModifier = m_Gameplay.FindAction("SelectionModifier", throwIfNotFound: true);
+        m_Gameplay_ToggleReinforcementPopup = m_Gameplay.FindAction("ToggleReinforcementPopup", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -968,6 +989,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_PrimaryAction;
     private readonly InputAction m_Gameplay_SecondaryAction;
     private readonly InputAction m_Gameplay_SelectionModifier;
+    private readonly InputAction m_Gameplay_ToggleReinforcementPopup;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -999,6 +1021,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/SelectionModifier".
         /// </summary>
         public InputAction @SelectionModifier => m_Wrapper.m_Gameplay_SelectionModifier;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/ToggleReinforcementPopup".
+        /// </summary>
+        public InputAction @ToggleReinforcementPopup => m_Wrapper.m_Gameplay_ToggleReinforcementPopup;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1040,6 +1066,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @SelectionModifier.started += instance.OnSelectionModifier;
             @SelectionModifier.performed += instance.OnSelectionModifier;
             @SelectionModifier.canceled += instance.OnSelectionModifier;
+            @ToggleReinforcementPopup.started += instance.OnToggleReinforcementPopup;
+            @ToggleReinforcementPopup.performed += instance.OnToggleReinforcementPopup;
+            @ToggleReinforcementPopup.canceled += instance.OnToggleReinforcementPopup;
         }
 
         /// <summary>
@@ -1066,6 +1095,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @SelectionModifier.started -= instance.OnSelectionModifier;
             @SelectionModifier.performed -= instance.OnSelectionModifier;
             @SelectionModifier.canceled -= instance.OnSelectionModifier;
+            @ToggleReinforcementPopup.started -= instance.OnToggleReinforcementPopup;
+            @ToggleReinforcementPopup.performed -= instance.OnToggleReinforcementPopup;
+            @ToggleReinforcementPopup.canceled -= instance.OnToggleReinforcementPopup;
         }
 
         /// <summary>
@@ -1412,6 +1444,13 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSelectionModifier(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleReinforcementPopup" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleReinforcementPopup(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

@@ -53,6 +53,7 @@ public partial class InputManagerSystem : SystemBase
         if (gameInput.Gameplay.PrimaryAction.IsPressed()) newState |= PlayerAction.Primary;
         if (gameInput.Gameplay.SecondaryAction.IsPressed()) newState |= PlayerAction.Secondary;
         if (gameInput.Gameplay.SelectionModifier.IsPressed()) newState |= PlayerAction.SelectionModifier;
+        if (gameInput.Gameplay.ToggleReinforcementPopup.IsPressed()) newState |= PlayerAction.ToggleReinforcementPopup;
         inputData.CurrentState = newState;
 
         // Handle camera update
@@ -108,6 +109,7 @@ public enum PlayerAction : uint
     Primary = 1 << 0,
     Secondary = 1 << 1,
     SelectionModifier = 1 << 2,
+    ToggleReinforcementPopup = 1 << 3,
 }
 
 public struct PlayerInputData : IComponentData
