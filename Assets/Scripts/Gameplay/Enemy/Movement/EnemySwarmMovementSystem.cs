@@ -75,6 +75,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
 
         // Terrain & Wall Pushing
         float2 terrainPushForce = float2.zero;
+        float2 positionCorrection = float2.zero;
 
         for (int x = -1; x <= 1; x++)
         {
@@ -87,18 +88,33 @@ public partial struct FlowFieldMovementJob : IJobEntity
                 {
                     int tileType = Grid[checkX + checkY * GridWidth];
 
-                    if (tileType != 0)
+                    if (tileType == 1)
                     {
                         float2 tileCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
                         float2 pushDir = curPos.xy - tileCenter;
                         float distSq = math.lengthsq(pushDir);
 
-                        if (distSq < 1.0f && distSq > 0.01f)
+                        // If really near wall
+                        if (distSq < 0.56f && distSq > 0.001f)
+                        {
+                            float distance = math.sqrt(distSq);
+                            float2 pushNormal = pushDir / distance;
+
+                            float overlap = 0.75f - distance;
+                            positionCorrection += pushNormal * overlap;
+
+                            float velIntoWall = math.dot(curVel, pushNormal);
+                            if (velIntoWall < 0)
+                            {
+                                curVel -= pushNormal * velIntoWall;
+                            }
+                        }
+
+                        if (distSq < 1.44f && distSq > 0.01f)
                         {
                             float distance = math.sqrt(distSq);
 
-                            float pushMultiplier = (tileType == 1) ? 20.0f : 5.0f;
-                            float pushStrength = (1.1f - distance) * pushMultiplier;
+                            float pushStrength = (1.2f - distance) * 20.0f;
 
                             float2 pushNormal = pushDir / distance;
                             float2 slideTangent = new float2(-pushNormal.y, pushNormal.x);
@@ -110,7 +126,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
             }
         }
 
-        // Steering & Organic Swarm Wobble
+        // Steering & Swarm Wobble
         float2 steeringForce = float2.zero;
         float baseSpeed = agentData.BaseSpeed;
 
@@ -138,7 +154,8 @@ public partial struct FlowFieldMovementJob : IJobEntity
             float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;
 
             float2 desiredVelocity = wobblyTargetDir * finalDesiredSpeed;
-            steeringForce = (desiredVelocity - curVel) * 3.0f + terrainPushForce;
+
+            steeringForce = ((desiredVelocity + terrainPushForce) - curVel) * 3.0f;
         }
         else
         {
@@ -148,9 +165,12 @@ public partial struct FlowFieldMovementJob : IJobEntity
         // Apply Velocity
         float2 newVel = curVel + (steeringForce * DeltaTime);
 
-        if (math.lengthsq(newVel) > baseSpeed * baseSpeed * 1.5f)
+        float currentSpeedSq = math.lengthsq(newVel);
+        float absoluteMaxSpeed = baseSpeed * 1.2f;
+
+        if (currentSpeedSq > absoluteMaxSpeed * absoluteMaxSpeed)
         {
-            newVel = math.normalize(newVel) * baseSpeed * 1.2f;
+            newVel = math.normalize(newVel) * absoluteMaxSpeed;
         }
 
         velocity.Value = newVel;

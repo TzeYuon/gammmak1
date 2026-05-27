@@ -798,6 +798,9 @@ MonoBehaviour:
   worldOrigin: {x: 1000, y: 1000}
   scale: 0.15
   randomOffset: 0
+  wallPrefab: {fileID: 1667765430307784710, guid: 7c9764d7cd155e44db4566d150eaf598, type: 3}
+  mudPrefab: {fileID: 5912557210755108530, guid: 03260ede275a4c347a8038f8ca29cc19, type: 3}
+  poisonPrefab: {fileID: 6594686672918771132, guid: 2634575ab0fac7442a3868ab82e2bedd, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

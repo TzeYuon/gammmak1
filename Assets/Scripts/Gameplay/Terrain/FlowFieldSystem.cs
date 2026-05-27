@@ -147,7 +147,10 @@ public struct GenerateFlowFieldJob : IJob
 
                 if (bestCost >= 99999 && TargetPositions.Length > 0)
                 {
-                    FlowField[idx] = float2.zero;
+                    int2 dir = TargetPositions[0] - new int2(x, y);
+                    float2 fallbackDir = new float2(dir.x, dir.y);
+                    if (math.lengthsq(fallbackDir) > 0.1f)
+                        FlowField[idx] = math.normalize(fallbackDir);
                     continue;
                 }
                 int2 bestDir = int2.zero;
