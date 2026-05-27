@@ -16,6 +16,8 @@ class MovementLineVisualAuthoring : MonoBehaviour
                 Value = Entity.Null,
             });
 
+            AddComponent<NeedsShipReferenceTag>(entity);
+
             AddComponent(entity, new MovementLineVisualComponent
             {
                 Thickness = 0.15f

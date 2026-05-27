@@ -3,8 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 
-[WorldSystemFilter(WorldSystemFilterFlags.BakingSystem)]
-[UpdateInGroup(typeof(PostBakingSystemGroup))] 
+[UpdateInGroup(typeof(SpatialGridSystemGroup))] 
 public partial struct ShipReferencesInitSystem : ISystem
 {
     [BurstCompile]
@@ -13,10 +12,14 @@ public partial struct ShipReferencesInitSystem : ISystem
         var parentLookup = SystemAPI.GetComponentLookup<Parent>(isReadOnly: true);
         var shipLookup = SystemAPI.GetComponentLookup<PlayerTag>(isReadOnly: true);
 
+        var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
+
         var job = new LinkShipReferencesJob
         {
             ParentLookup = parentLookup,
-            ShipLookup = shipLookup
+            ShipLookup = shipLookup,
+            ECB = ecb
         };
 
         job.ScheduleParallel();
@@ -24,12 +27,17 @@ public partial struct ShipReferencesInitSystem : ISystem
 }
 
 [BurstCompile]
+[WithAll(typeof(NeedsShipReferenceTag))]
 public partial struct LinkShipReferencesJob : IJobEntity
 {
     [ReadOnly] public ComponentLookup<Parent> ParentLookup;
     [ReadOnly] public ComponentLookup<PlayerTag> ShipLookup;
+    public EntityCommandBuffer.ParallelWriter ECB;
 
-    private void Execute(Entity entity, ref ShipReference shipRef, in Parent initialParent)
+    private void Execute(Entity entity,
+        [ChunkIndexInQuery] int chunkIndex,
+        ref ShipReference shipRef,
+        in Parent initialParent)
     {
         Entity currentEntity = initialParent.Value;
 
@@ -38,6 +46,7 @@ public partial struct LinkShipReferencesJob : IJobEntity
             if (ShipLookup.HasComponent(currentEntity))
             {
                 shipRef.Value = currentEntity;
+                ECB.RemoveComponent<NeedsShipReferenceTag>(chunkIndex, entity);
                 return;
             }
 

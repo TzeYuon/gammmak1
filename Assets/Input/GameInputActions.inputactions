@@ -50,6 +50,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleReinforcementPopup",
+                    "type": "Button",
+                    "id": "c4e797da-dcdb-44a0-941c-08b84ca6920d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -171,6 +180,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "SelectionModifier",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "922a8b65-32d6-4f56-b192-a1ff436d4ec9",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ToggleReinforcementPopup",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

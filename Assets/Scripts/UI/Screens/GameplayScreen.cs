@@ -1,35 +1,84 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class GameplayScreen : UIScreen
 {
-    private VisualElement selectionBox;
     private EntityManager entityManager;
-
     private EntityQuery inputQuery;
+
     private Camera camera;
+
+    private VisualElement selectionBox;
+
+    private Label biomassCounter;
+    private EntityQuery economyQuery;
+
+    private VisualElement reinforcementPopup;
+    private bool isReinforcementPopupOpen;
+    private float2 spawnPosition;
+    private EntityQuery queueQuery;
+
 
     public GameplayScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
-        selectionBox = new VisualElement();
-        selectionBox.style.position = Position.Absolute;
-        selectionBox.style.borderLeftWidth = 1.5f;
-        selectionBox.style.borderLeftColor = Color.green;
-        selectionBox.style.backgroundColor = new Color(0f, 1f, 0f, 0.15f);
-        selectionBox.style.display = DisplayStyle.None;
+        InitInput();
 
-        root.Add(selectionBox);
+        selectionBox = root.Q<VisualElement>("SelectionBox");
 
-        var world = World.DefaultGameObjectInjectionWorld;
-        if (world != null)
-        {
-            entityManager = world.EntityManager;
-            inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
-        }
+        biomassCounter = root.Q<Label>("BiomassCounter");
+
+        reinforcementPopup = root.Q<VisualElement>("ReinforcementPopup");
+        InitReinforcementPopup();
 
         camera = Camera.main;
+
+        void InitInput()
+        {
+            var world = World.DefaultGameObjectInjectionWorld;
+            if (world != null)
+            {
+                entityManager = world.EntityManager;
+                inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
+                economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
+                queueQuery = world.EntityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
+            }
+        }
+
+        void InitReinforcementPopup()
+        {
+            isReinforcementPopupOpen = false;
+            reinforcementPopup.Add(CreateButton("Frigate (10)", 0));
+            reinforcementPopup.Add(CreateButton("Destroyer (30)", 1));
+            reinforcementPopup.Add(CreateButton("Cruiser (50)", 2));
+        }
+
+        Button CreateButton(string text, int shipType)
+        {
+            var btn = new Button { text = text };
+            btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
+            btn.style.color = Color.cyan;
+            btn.style.marginTop = 5;
+
+            btn.clicked += () =>
+            {
+                if (queueQuery.IsEmptyIgnoreFilter) return;
+
+                queueQuery.CompleteDependency();
+                var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
+                queue.Enqueue(new SpawnRequest 
+                { 
+                    ShipType = shipType, 
+                    Position = GetSpawnPosition() 
+                });
+
+                CloseReinforcementPopup();
+            };
+
+            return btn;
+        }
     }
 
     protected override void OnHide()
@@ -47,27 +96,64 @@ public class GameplayScreen : UIScreen
         if (inputQuery.IsEmptyIgnoreFilter) return;
         var inputData = inputQuery.GetSingleton<PlayerInputData>();
 
-        if (inputData.IsHeld(PlayerAction.Primary))
+        UpdateSelectionBox();
+
+        UpdateBiomassCounter();
+
+        UpdateReinforcementPopup();
+
+        void UpdateSelectionBox()
         {
-            selectionBox.style.display = DisplayStyle.Flex;
+            if (inputData.IsHeld(PlayerAction.Primary))
+            {
+                selectionBox.style.display = DisplayStyle.Flex;
 
-            Vector2 uiStart = ScreenToUI(inputData.MouseStartDragPosition);
-            Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
+                Vector2 uiStart = ScreenToUI(inputData.MouseStartDragPosition);
+                Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
 
-            float left = math.min(uiStart.x, uiCurrent.x);
-            float top = math.min(uiStart.y, uiCurrent.y);
-            float width = math.abs(uiStart.x - uiCurrent.x);
-            float height = math.abs(uiStart.y - uiCurrent.y);
+                float left = math.min(uiStart.x, uiCurrent.x);
+                float top = math.min(uiStart.y, uiCurrent.y);
+                float width = math.abs(uiStart.x - uiCurrent.x);
+                float height = math.abs(uiStart.y - uiCurrent.y);
 
-            selectionBox.style.left = left;
-            selectionBox.style.top = top;
-            selectionBox.style.width = width;
-            selectionBox.style.height = height;
+                selectionBox.style.left = left;
+                selectionBox.style.top = top;
+                selectionBox.style.width = width;
+                selectionBox.style.height = height;
+            }
+            else
+            {
+                // Hide selection box
+                selectionBox.style.display = DisplayStyle.None;
+            }
         }
-        else
+
+        void UpdateReinforcementPopup()
         {
-            // Hide selection box
-            selectionBox.style.display = DisplayStyle.None;
+            spawnPosition = inputData.MouseWorldPosition;
+            if (inputData.WasPressed(PlayerAction.ToggleReinforcementPopup))
+            {
+                if (isReinforcementPopupOpen)
+                {
+                    CloseReinforcementPopup();
+                }
+                else
+                {
+                    reinforcementPopup.style.display = DisplayStyle.Flex;
+                    isReinforcementPopupOpen = true;
+
+                    Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
+
+                    reinforcementPopup.style.left = uiCurrent.x;
+                    reinforcementPopup.style.top = uiCurrent.y;
+                }
+            }
+        }
+
+        void UpdateBiomassCounter()
+        {
+            var economy = economyQuery.GetSingleton<PlayerEconomy>();
+            biomassCounter.text = "Biomass: " + economy.TotalBiomass;
         }
     }
 
@@ -75,5 +161,16 @@ public class GameplayScreen : UIScreen
     {
         float2 screenPos = (Vector2)camera.WorldToScreenPoint((Vector2)worldPos);
         return new Vector2(screenPos.x, Screen.height - screenPos.y);
+    }
+
+    private void CloseReinforcementPopup()
+    {
+        reinforcementPopup.style.display = DisplayStyle.None;
+        isReinforcementPopupOpen = false;
+    }
+
+    private float2 GetSpawnPosition()
+    {
+        return spawnPosition;
     }
 }
