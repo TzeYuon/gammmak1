@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
+using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 public static class GridUtility
 {
@@ -72,5 +74,69 @@ public static class GridUtility
     public static bool IsWithinBounds(float2 checkWorldPos, float cellSize, int gridWidth, int gridHeight)
     {
         return IsWithinBounds(WorldPosToCell(checkWorldPos, cellSize), gridWidth, gridHeight);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool HasLineOfSight(
+        float2 start, 
+        float2 end,
+        NativeArray<int> obstacleGrid,
+        int2 worldOrigin,
+        int width,
+        int height)
+    {
+        float dist = math.distance(start, end);
+
+        int steps = (int)math.ceil(dist / 0.5f);
+
+        if (steps <= 0) return true;
+
+        float2 stepVector = (end - start) / steps;
+        float2 currentPos = start;
+
+        for (int i = 0; i < steps; i++)
+        {
+            if (GetTerrainAtWorldPos(currentPos, obstacleGrid, worldOrigin, width, height) == 1)
+            {
+                return false;
+            }
+
+            currentPos += stepVector;
+        }
+
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsValidGridManagerWorldPos(float2 pos, int2 worldOrigin, int width, int height) {
+        var gridPos = WorldPosToGridManagerPos(pos, worldOrigin);
+
+        if (gridPos.x < 0 || gridPos.x >= width ||
+            gridPos.y < 0 || gridPos.y >= height)
+            return false;
+
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int2 WorldPosToGridManagerPos(float2 pos, int2 worldOrigin)
+    {
+        int gridX = (int)math.round(pos.x) - worldOrigin.x;
+        int gridY = (int)math.round(pos.y) - worldOrigin.y;
+        return new int2(gridX, gridY);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int WorldPosToGridManagerIndex(float2 pos, int2 worldOrigin, int width)
+    {
+        var gridPos = WorldPosToGridManagerPos(pos, worldOrigin);
+        return gridPos.x + gridPos.y * width;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetTerrainAtWorldPos(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height)
+    {
+        if (!IsValidGridManagerWorldPos(pos, worldOrigin, width, height)) return -1;
+        return obstacleGrid[WorldPosToGridManagerIndex(pos, worldOrigin, width)];
     }
 }
