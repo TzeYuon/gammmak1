@@ -1,3 +1,4 @@
+using System.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -6,271 +7,179 @@ using Unity.Transforms;
 
 partial struct EnemySwarmMovementSystem : ISystem
 {
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
-    {
-        state.RequireForUpdate<PathFollowerComponent>();
-    }
-
-    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
+        if (GridManager.Instance == null) return;
+        if (!GridManager.Instance.nativeGrid.IsCreated || !GridManager.Instance.nativeFlowField.IsCreated) return;
 
-        var moveJob = new SwarmFollowerMovementJob
+        var moveJob = new FlowFieldMovementJob
         {
-            ElapsedTime = SystemAPI.Time.ElapsedTime,
             DeltaTime = SystemAPI.Time.DeltaTime,
-            PathLeaderLookup = SystemAPI.GetComponentLookup<PathLeaderComponent>(),
-            PathLookup = SystemAPI.GetBufferLookup<PathPosition>(),
+            ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
+
+            FlowField = GridManager.Instance.nativeFlowField,
             Grid = GridManager.Instance.nativeGrid,
             GridWidth = GridManager.Instance.width,
             GridHeight = GridManager.Instance.height,
             WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y)
         };
-        state.Dependency = moveJob.ScheduleParallel(state.Dependency);
-    }
 
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-        
+        state.Dependency = moveJob.ScheduleParallel(state.Dependency);
     }
 }
 
 [BurstCompile]
 [WithAll(typeof(SwarmTag))]
-public partial struct SwarmFollowerMovementJob : IJobEntity
+public partial struct FlowFieldMovementJob : IJobEntity
 {
-    public double ElapsedTime;
     public float DeltaTime;
-    [ReadOnly] public ComponentLookup<PathLeaderComponent> PathLeaderLookup;
-    [ReadOnly] public BufferLookup<PathPosition> PathLookup;
+    public float ElapsedTime;
+
+    [ReadOnly] public NativeArray<float2> FlowField;
     [ReadOnly] public NativeArray<int> Grid;
     public int GridWidth;
     public int GridHeight;
     public int2 WorldOrigin;
 
-    void Execute(
-        Entity entity,
-        in PathFollowerComponent follower,
-        ref LocalTransform transform,
-        ref VelocityComponent velocity
-        )
+    public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity, ref SwarmComponent agentData)
     {
-        // Get path leader and path buffer
-        Entity pathLeaderEntity = follower.PathLeaderEntity;
-        if (!PathLeaderLookup.EntityExists(pathLeaderEntity) || !PathLookup.EntityExists(pathLeaderEntity)) return;
-        PathLeaderComponent pathLeader = PathLeaderLookup[follower.PathLeaderEntity];
-        DynamicBuffer<PathPosition> pathBuffer = PathLookup[pathLeaderEntity];
-
-        if (pathBuffer.Length == 0) return;
-
         float3 curPos = transform.Position;
         float2 curVel = velocity.Value;
-        float2 steeringForce = float2.zero;
 
-        float width = pathLeader.Width;
-        float baseSpeed = pathLeader.Speed;
-        float finalMoveSpeed = baseSpeed;
-        float maxSpeedMult = pathLeader.MaxSpeedMult;
+        int gridX = (int)math.round(curPos.x) - WorldOrigin.x;
+        int gridY = (int)math.round(curPos.y) - WorldOrigin.y;
 
-        uint uniqueSeed = (uint)(entity.Index + (ElapsedTime * 3140));
-        var rng = Random.CreateFromIndex(uniqueSeed);
+        float2 targetDir = float2.zero;
 
-        float3 toTarget = GetTargetDirection(follower, pathBuffer, curPos, width, Grid, GridWidth, GridHeight, WorldOrigin, pathLeader);
-        SetDynamicSpeed(curVel, ref steeringForce, ref finalMoveSpeed, maxSpeedMult, toTarget);
+        if (gridX >= 0 && gridX < GridWidth && gridY >= 0 && gridY < GridHeight)
+        {
+            targetDir = FlowField[gridX + gridY * GridWidth];
+        }
+        else
+        {
+            float2 mapCenter = new float2(GridWidth / 2.0f, GridHeight / 2.0f) + WorldOrigin;
+            targetDir = math.normalize(mapCenter - curPos.xy);
+        }
 
-        // Calculate noise
-        float2 heading;
-        if (math.lengthsq(curVel) > 0.1f) heading = math.normalize(curVel);
-        else heading = rng.NextFloat2Direction();
-        float3 sidewaysVec = math.cross(math.float3(heading, 0), new float3(0, 0, 1));
+        if (math.lengthsq(targetDir) < 0.01f)
+        {
+            float2 tileCenter = new float2(gridX + WorldOrigin.x, gridY + WorldOrigin.y);
 
-        float2 noiseInput = new((float)ElapsedTime, entity.Index);
-        float smoothRandom = noise.snoise(noiseInput);
+            float2 noiseOffset = new float2(
+                noise.snoise(new float2(ElapsedTime * 5f, entity.Index)),
+                noise.snoise(new float2(ElapsedTime * 5f, entity.Index + 100))
+            );
 
-        steeringForce += 5 * smoothRandom * sidewaysVec.xy;
+            targetDir = (tileCenter - curPos.xy) + (noiseOffset * 0.5f);
+        }
 
-        // force exerting from walls to swarm
-        float2 wallPushForce = float2.zero;
-        int2 gridPos = new int2((int)math.round(curPos.x), (int)math.round(curPos.y)) - WorldOrigin;
+        // Terrain & Wall Pushing
+        float2 terrainPushForce = float2.zero;
+        float2 positionCorrection = float2.zero;
+
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
             {
-                int checkX = gridPos.x + x;
-                int checkY = gridPos.y + y;
+                int checkX = gridX + x;
+                int checkY = gridY + y;
 
                 if (checkX >= 0 && checkX < GridWidth && checkY >= 0 && checkY < GridHeight)
                 {
-                    if (Grid[checkX + checkY * GridWidth] == 1) // only wall
-                    {
-                        float2 wallCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
+                    int tileType = Grid[checkX + checkY * GridWidth];
 
-                        float2 pushDir = curPos.xy - wallCenter;
+                    if (tileType == 1)
+                    {
+                        float2 tileCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
+                        float2 pushDir = curPos.xy - tileCenter;
                         float distSq = math.lengthsq(pushDir);
 
-                        if (distSq < 2.25f && distSq > 0.01f)
+                        // If swarm is really near a wall
+                        if (distSq < 0.56f && distSq > 0.001f)
                         {
                             float distance = math.sqrt(distSq);
-                            float pushStrength = (1.5f - distance) * 100.0f;
-                            //wallPushForce += (math.normalize(pushDir) * pushStrength);
-
-                            // Calculate push away and sideways
                             float2 pushNormal = pushDir / distance;
 
+                            float overlap = 0.75f - distance;
+                            positionCorrection += pushNormal * overlap;
+
+                            float velIntoWall = math.dot(curVel, pushNormal);
+                            if (velIntoWall < 0)
+                            {
+                                curVel -= pushNormal * velIntoWall;
+                            }
+                        }
+
+                        if (distSq < 1.44f && distSq > 0.01f)
+                        {
+                            float distance = math.sqrt(distSq);
+
+                            float pushStrength = (1.2f - distance) * 20.0f;
+
+                            float2 pushNormal = pushDir / distance;
                             float2 slideTangent = new float2(-pushNormal.y, pushNormal.x);
-                            wallPushForce += (pushNormal * pushStrength) + (slideTangent * (pushStrength * 0.5f));
+
+                            terrainPushForce += (pushNormal * pushStrength) + (slideTangent * pushStrength);
                         }
                     }
                 }
             }
         }
-        steeringForce += wallPushForce;
 
-        // Slow the agent down so that it doesn't go through walls
-        if (math.lengthsq(wallPushForce) > 10f)
+        // Steering & Swarm Wobble
+        float2 steeringForce = float2.zero;
+        float baseSpeed = agentData.BaseSpeed;
+
+        int currentTileType = 0;
+
+        if (gridX >= 0 && gridX < GridWidth && gridY >= 0 && gridY < GridHeight)
         {
-            finalMoveSpeed = math.min(finalMoveSpeed, baseSpeed * 0.5f);
+            currentTileType = Grid[gridX + gridY * GridWidth];
         }
 
-        // update velocity
+        if (currentTileType == 2) baseSpeed *= 0.5f; // Mud
+        if (currentTileType == 3) baseSpeed *= 0.2f; // Poison
+
+        if (math.lengthsq(targetDir) > 0.01f)
+        {
+            float2 noiseInput = new float2(ElapsedTime * 2f, entity.Index);
+            float noiseValue = noise.snoise(noiseInput);
+
+            float3 sideways3D = math.cross(new float3(math.normalizesafe(targetDir), 0), new float3(0, 0, 1));
+            float2 sidewaysDir = sideways3D.xy;
+
+            float2 wobblyTargetDir = math.normalize(targetDir + (sidewaysDir * noiseValue * 0.5f));
+
+            float uniqueSpeedVariation = 1.0f - ((agentData.WiggleOffset % 10) * 0.02f);
+            float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;
+
+            float2 desiredVelocity = wobblyTargetDir * finalDesiredSpeed;
+
+            steeringForce = ((desiredVelocity + terrainPushForce) - curVel) * 3.0f;
+        }
+        else
+        {
+            steeringForce = (-curVel * 5.0f) + terrainPushForce;
+        }
+
+        // Apply Velocity
         float2 newVel = curVel + (steeringForce * DeltaTime);
-        float speedSq = math.lengthsq(newVel);
-        float absoluteMaxSpeed = baseSpeed * maxSpeedMult;
-        if (speedSq > absoluteMaxSpeed * absoluteMaxSpeed)
-        {
-            newVel = absoluteMaxSpeed * math.normalize(newVel);
-        }
-        velocity.Value = newVel;
 
-        // update position
+        float currentSpeedSq = math.lengthsq(newVel);
+        float absoluteMaxSpeed = baseSpeed * 1.2f;
+
+        if (currentSpeedSq > absoluteMaxSpeed * absoluteMaxSpeed)
+        {
+            newVel = math.normalize(newVel) * absoluteMaxSpeed;
+        }
+
+        velocity.Value = newVel;
         transform.Position += math.float3(velocity.Value, 0) * DeltaTime;
 
-        // rotate to face movement direction
-        if (speedSq > 0.001f)
+        if (math.lengthsq(newVel) > 0.001f)
         {
             float angle = math.atan2(newVel.y, newVel.x) - math.PI / 2;
             transform.Rotation = quaternion.RotateZ(angle);
-        }
-
-        static float3 GetTargetDirection(PathFollowerComponent follower, DynamicBuffer<PathPosition> pathBuffer, float3 curPos, float width, NativeArray<int> grid, int gridWidth, int gridHeight, int2 origin, PathLeaderComponent pathLeader)
-        {
-            int headIndex = pathBuffer.Length - 1;
-            int targetIndex = headIndex;
-            bool foundLOS = false;
-
-            int searchLimit = math.max(0, headIndex - 30);
-
-            // 1. Line of Sight Check
-            while (targetIndex >= searchLimit)
-            {
-                float3 checkPos = pathBuffer[targetIndex].Value;
-                if (HasBurstLOS(curPos.xy, checkPos.xy, grid, gridWidth, gridHeight, origin))
-                {
-                    foundLOS = true;
-                    break;
-                }
-                targetIndex -= 1;
-            }
-
-            if (!foundLOS)
-            {
-                float minDistSq = float.MaxValue;
-                int closestIndex = searchLimit;
-                for (int i = searchLimit; i <= headIndex; i++)
-                {
-                    float distSq = math.distancesq(curPos, pathBuffer[i].Value);
-                    if (distSq < minDistSq)
-                    {
-                        minDistSq = distSq;
-                        closestIndex = i;
-                    }
-                }
-                targetIndex = math.min(headIndex, closestIndex + 2);
-            }
-
-            if (targetIndex < 0) targetIndex = 0;
-            float3 posA = pathBuffer[math.max(0, targetIndex - 1)].Value;
-            float3 posB = pathBuffer[targetIndex].Value;
-            float3 pathForward = posB - posA;
-
-            float leaderSpeedSq = math.lengthsq(pathLeader.MoveDirection);
-            // Clump into a circle if stationary
-            if (math.lengthsq(pathForward) < 0.001f || (targetIndex == headIndex && leaderSpeedSq < 0.1f)   )
-            {
-                float angle = follower.Rank * 2.4f;
-                pathForward = new float3(math.cos(angle), math.sin(angle), 0);
-            }
-            else
-            {
-                pathForward = math.normalize(pathForward);
-            }
-
-            float3 pathRight = math.cross(pathForward, new float3(0, 0, 1));
-
-            float3 targetPosition = posB + follower.Offset * width * pathRight;
-
-            if (!(targetIndex == headIndex && leaderSpeedSq < 0.1f))
-            {
-                float depth = (follower.Rank % 10) * 0.2f;
-                targetPosition -= pathForward * depth;
-            }
-            return targetPosition - curPos;
-        }
-
-        // Bresenham Line Algorithm for Burst
-        static bool HasBurstLOS(float2 start, float2 end, NativeArray<int> grid, int gridWidth, int gridHeight, int2 worldOrigin)
-        {
-            int x0 = (int)math.round(start.x) - worldOrigin.x;
-            int y0 = (int)math.round(start.y) - worldOrigin.y;
-            int x1 = (int)math.round(end.x) - worldOrigin.x;
-            int y1 = (int)math.round(end.y) - worldOrigin.y;
-
-            int dx = math.abs(x1 - x0), dy = math.abs(y1 - y0);
-            int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-            int err = dx - dy;
-
-            int loopGuard = 0;
-            while (loopGuard++ < 1000)
-            {
-                if (loopGuard > 1)
-                {
-                    if (x0 >= 0 && x0 < gridWidth && y0 >= 0 && y0 < gridHeight)
-                    {
-                        if (grid[x0 + y0 * gridWidth] != 0) return false;
-                    }
-                    else return false;
-                }
-                else return false; // Off grid
-
-                if (x0 == x1 && y0 == y1) break; // Reached target
-
-                int e2 = 2 * err;
-                if (e2 > -dy) { err -= dy; x0 += sx; }
-                if (e2 < dx) { err += dx; y0 += sy; }
-            }
-            return true;
-        }
-
-        static void SetDynamicSpeed(float2 curVel, ref float2 steeringForce, ref float finalMoveSpeed, float maxSpeedMult, float3 toTarget)
-        {
-            float distSqToTarget = math.lengthsq(toTarget);
-
-            // Calculate dynamic speed to increase speed when behind desired position
-            if (distSqToTarget > 0.1f)
-            {
-                if (distSqToTarget > 1.0f) // If far from desired position
-                {
-                    float catchUpMultiplier = 1.0f + (distSqToTarget * 0.1f);
-                    catchUpMultiplier = math.min(catchUpMultiplier, maxSpeedMult);
-                    finalMoveSpeed *= catchUpMultiplier; // increase move speed
-                }
-
-                float3 desired = math.normalize(toTarget) * finalMoveSpeed;
-                steeringForce = desired.xy - curVel;
-            }
         }
     }
 }

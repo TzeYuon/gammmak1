@@ -24,41 +24,28 @@ partial struct HiveSystem : ISystem
             hive.ValueRW.SpawnTimer -= deltaTime;
             if (hive.ValueRO.SpawnTimer > 0) continue;
             hive.ValueRW.SpawnTimer += hive.ValueRW.SpawnCooldown;
-
-            // Spawn path leader
             float3 hivePosition = transform.ValueRO.Position;
-            Entity pathLeaderEntity = ecb.CreateEntity();
-            float density = hive.ValueRO.Density;
-            ecb.AddComponent(pathLeaderEntity, new PathLeaderComponent {
-                Density = density,
-                Width = hive.ValueRO.Width,
-                Speed = hive.ValueRO.EnemySpeed,
-                MaxSpeedMult = hive.ValueRO.MaxSpeedMult,
-
-                MoveDirection = new float2(0, 1),
-                MaxPathLength = 500
-            });
-            ecb.AddComponent(pathLeaderEntity, LocalTransform.FromPosition(hivePosition));
-            ecb.AddBuffer<PathPosition>(pathLeaderEntity);
-            ecb.AppendToBuffer(pathLeaderEntity, new PathPosition { Value = hivePosition });
 
             // Spawn enemies
             Entity prefab = hive.ValueRO.Prefab;
             var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
+            float spawnRadius = hive.ValueRO.Width * 1.0f;
             for (int i = 0; i < hive.ValueRO.SpawnAmount; i++)
             {
                 Entity enemy = ecb.Instantiate(prefab);
-                ecb.SetComponent(enemy, new PathFollowerComponent
+                float angle = rng.NextFloat(0, math.PI * 2);
+                float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
+                float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
+
+                float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
+
+                ecb.SetComponent(enemy, new VelocityComponent { Value = float2.zero });
+                ecb.SetComponent(enemy, LocalTransform.FromPosition(spawnPos));
+                ecb.SetComponent(enemy, new SwarmComponent
                 {
-                    PathLeaderEntity = pathLeaderEntity,
-
-                    Rank = i,
-                    PathPosition = i / density,
-
-                    Offset = rng.NextFloat(-1, 1),
-                    NoiseStrength = 2
+                    BaseSpeed = hive.ValueRO.EnemySpeed,
+                    WiggleOffset = i
                 });
-                ecb.SetComponent(enemy, LocalTransform.FromPosition(hivePosition));
             }
         }
 
