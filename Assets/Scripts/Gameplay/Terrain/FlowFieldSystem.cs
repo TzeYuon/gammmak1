@@ -144,15 +144,6 @@ public struct GenerateFlowFieldJob : IJob
                 if (Grid[idx] == 1) continue;
 
                 int bestCost = IntegrationField[idx];
-
-                if (bestCost >= 99999 && TargetPositions.Length > 0)
-                {
-                    int2 dir = TargetPositions[0] - new int2(x, y);
-                    float2 fallbackDir = new float2(dir.x, dir.y);
-                    if (math.lengthsq(fallbackDir) > 0.1f)
-                        FlowField[idx] = math.normalize(fallbackDir);
-                    continue;
-                }
                 int2 bestDir = int2.zero;
 
                 for (int dx = -1; dx <= 1; dx++)

@@ -94,7 +94,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
                         float2 pushDir = curPos.xy - tileCenter;
                         float distSq = math.lengthsq(pushDir);
 
-                        // If really near wall
+                        // If swarm is really near a wall
                         if (distSq < 0.56f && distSq > 0.001f)
                         {
                             float distance = math.sqrt(distSq);

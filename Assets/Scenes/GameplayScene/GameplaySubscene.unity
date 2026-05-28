@@ -249,11 +249,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1001.3947
+      value: 1100
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1003.9766
+      value: 1101
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -289,9 +289,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1092293266}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+--- !u!4 &314947553 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+  m_PrefabInstance: {fileID: 314947552}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1068645316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -394,18 +402,17 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1092293264}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1050, y: -1050, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 314947553}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 263363428}
-  - {fileID: 1092293266}
   - {fileID: 314947552}
   - {fileID: 1068645316}
