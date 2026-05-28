@@ -21,6 +21,10 @@ public class GameplayScreen : UIScreen
     private float2 spawnPosition;
     private EntityQuery queueQuery;
 
+    private VisualElement victoryScreen;
+    private VisualElement defeatScreen;
+    private EntityQuery levelStateQuery;
+    private bool hasTriggeredVictoryLoss;
 
     public GameplayScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
@@ -33,6 +37,8 @@ public class GameplayScreen : UIScreen
         reinforcementPopup = root.Q<VisualElement>("ReinforcementPopup");
         InitReinforcementPopup();
 
+        InitVictoryLoss();
+
         camera = Camera.main;
 
         void InitInput()
@@ -43,7 +49,8 @@ public class GameplayScreen : UIScreen
                 entityManager = world.EntityManager;
                 inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
                 economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
-                queueQuery = world.EntityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
+                queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
+                levelStateQuery = entityManager.CreateEntityQuery(typeof(LevelStateComponent));
             }
         }
 
@@ -68,16 +75,26 @@ public class GameplayScreen : UIScreen
 
                 queueQuery.CompleteDependency();
                 var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
-                queue.Enqueue(new SpawnRequest 
-                { 
-                    ShipType = shipType, 
-                    Position = GetSpawnPosition() 
+                queue.Enqueue(new SpawnRequest
+                {
+                    ShipType = shipType,
+                    Position = GetSpawnPosition()
                 });
 
                 CloseReinforcementPopup();
             };
 
             return btn;
+        }
+
+        void InitVictoryLoss()
+        {
+            hasTriggeredVictoryLoss = false;
+            victoryScreen = root.Q<VisualElement>("VictoryScreen");
+            defeatScreen = root.Q<VisualElement>("DefeatScreen");
+
+            victoryScreen.style.display = DisplayStyle.None;
+            defeatScreen.style.display = DisplayStyle.None;
         }
     }
 
@@ -101,6 +118,8 @@ public class GameplayScreen : UIScreen
         UpdateBiomassCounter();
 
         UpdateReinforcementPopup();
+
+        UpdateVictoryLoss();
 
         void UpdateSelectionBox()
         {
@@ -154,6 +173,29 @@ public class GameplayScreen : UIScreen
         {
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
+        }
+
+        void UpdateVictoryLoss()
+        {
+            if (hasTriggeredVictoryLoss) return;
+
+            var levelState = levelStateQuery.GetSingleton<LevelStateComponent>();
+            if (levelState.Result == LevelState.Playing) return;
+
+            if (levelState.Result == LevelState.Victory)
+            {
+                hasTriggeredVictoryLoss = true;
+                victoryScreen.style.display = DisplayStyle.Flex;
+
+                Time.timeScale = 0.2f;
+            }
+            else
+            {
+                hasTriggeredVictoryLoss = true;
+                defeatScreen.style.display = DisplayStyle.Flex;
+
+                Time.timeScale = 0.2f;
+            }
         }
     }
 

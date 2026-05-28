@@ -4,4 +4,10 @@
         <engine:Label text="REINFORCEMENTS" name="Title" style="color: rgb(255, 255, 255); -unity-font-style: bold; margin-top: 0; margin-right: 0; margin-bottom: 10px; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
     </engine:VisualElement>
     <engine:Label text="BiomassCounter" name="BiomassCounter" style="top: 10px; position: absolute; left: 10px; background-color: rgba(8, 13, 26, 0.9); color: rgb(255, 255, 255); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-left-color: rgb(0, 255, 255); border-right-color: rgb(0, 255, 255); border-top-color: rgb(0, 255, 255); border-bottom-color: rgb(0, 255, 255); font-size: 25px;"/>
+    <engine:VisualElement name="VictoryScreen" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; background-color: rgba(8, 12, 26, 0.85); justify-content: center; align-items: center; display: flex;">
+        <engine:Label text="MISSION OUTCOME:&#10;HIVES NEUTRALIZED&#10;VICTORY" name="Label" style="color: rgb(0, 255, 255); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(255, 255, 255, 0); font-size: 35px; -unity-font-style: bold;"/>
+    </engine:VisualElement>
+    <engine:VisualElement name="DefeatScreen" style="flex-grow: 1; position: absolute; align-items: center; justify-content: center; align-self: center; width: 100%; height: 100%; background-color: rgba(8, 12, 26, 0.85);">
+        <engine:Label text="MISSION OUTCOME:&#10;MOTHERSHIP DESTROYED&#10;DEFEAT" style="color: rgb(255, 0, 60); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(255, 255, 255, 0); font-size: 35px; -unity-font-style: bold;"/>
+    </engine:VisualElement>
 </engine:UXML>
