@@ -827,7 +827,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6504606915043013966}
   - component: {fileID: 9188605543483897463}
-  - component: {fileID: 9188605543483897464}
   m_Layer: 0
   m_Name: TerrainManager
   m_TagString: Untagged
@@ -849,21 +848,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
   width: 200
   height: 200
+  safezoneRadius: 20
   worldOrigin: {x: 1200, y: 1200}
   scale: 0.04
   randomOffset: 0
---- !u!114 &9188605543483897464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9188605543483897462}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75d17b8784aafa6438c973a94d6b79dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Pathfinder
+  wallPrefab: {fileID: 1667765430307784710, guid: 7c9764d7cd155e44db4566d150eaf598, type: 3}
+  mudPrefab: {fileID: 5912557210755108530, guid: 03260ede275a4c347a8038f8ca29cc19, type: 3}
+  poisonPrefab: {fileID: 6594686672918771132, guid: 2634575ab0fac7442a3868ab82e2bedd, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
