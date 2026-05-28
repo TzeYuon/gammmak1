@@ -166,7 +166,7 @@ public partial struct ProjectileFiringJob : IJobEntity
         // Add spread
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
         float randomAngleOffset = math.radians(rng.NextFloat(-projectileWeapon.Spread, projectileWeapon.Spread));
-        float baseAngle = math.atan2(dirToTarget.y, dirToTarget.x); 
+        float baseAngle = math.atan2(weaponForward.y, weaponForward.x); 
         float finalAngle = baseAngle + randomAngleOffset;
         quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
         float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(projectileWeapon.ProjectileSpawnPoint, 0));
