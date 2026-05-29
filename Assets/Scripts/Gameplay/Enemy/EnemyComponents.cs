@@ -4,7 +4,7 @@ using Unity.Mathematics;
 public struct HiveComponent : IComponentData
 {
     public Entity Prefab;
-    public float SpawnAmount;
+    public int SpawnAmount;
     
     public float EnemySpeed;
     public float MaxSpeedMult; // Max speed multiplier for enemies that are behind desired position
