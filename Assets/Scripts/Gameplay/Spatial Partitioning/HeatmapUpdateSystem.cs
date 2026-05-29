@@ -19,10 +19,18 @@ partial struct HeatmapUpdateSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingleton<CoarseEnemyHeatmapComponent>();
-        FineEnemyHeatmapComponent fineEnemyHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
-        
+        RefRW<FineEnemyHeatmapComponent> fineEnemyHeatmap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>();
+
+        int livingEnemiesCount = SystemAPI.QueryBuilder().WithAll<SwarmTag>().Build().CalculateEntityCount();
+        if (fineEnemyHeatmap.ValueRO.Map.Capacity <= livingEnemiesCount)
+        {
+            int newCapacity = (int)(livingEnemiesCount * 1.25f);
+            fineEnemyHeatmap.ValueRO.Map.Dispose();
+            fineEnemyHeatmap.ValueRW.Map = new NativeParallelMultiHashMap<int, Entity>(newCapacity, Allocator.Persistent);
+        }
+
         state.Dependency.Complete();
-        fineEnemyHeatmap.Map.Clear();
+        fineEnemyHeatmap.ValueRO.Map.Clear();
 
         var clearCoarseEnemyJob = new ClearCoarseEnemyJob
         {
@@ -32,9 +40,9 @@ partial struct HeatmapUpdateSystem : ISystem
 
         var clearFineEnemyJob = new ClearFineEnemyJob
         {
-            Map = fineEnemyHeatmap.DensityMap,
+            Map = fineEnemyHeatmap.ValueRO.DensityMap,
         };
-        JobHandle clearFineHandle = clearFineEnemyJob.Schedule(fineEnemyHeatmap.DensityMap.Length, 4096, state.Dependency);
+        JobHandle clearFineHandle = clearFineEnemyJob.Schedule(fineEnemyHeatmap.ValueRO.DensityMap.Length, 4096, state.Dependency);
         JobHandle clearHandles = JobHandle.CombineDependencies(clearCoarseHandle, clearFineHandle);
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
@@ -44,11 +52,11 @@ partial struct HeatmapUpdateSystem : ISystem
             CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
             CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
 
-            FineMap = fineEnemyHeatmap.Map.AsParallelWriter(),
-            FineDensityMap = fineEnemyHeatmap.DensityMap,
-            FineCellSize = fineEnemyHeatmap.CellSize,
-            FineGridWidth = fineEnemyHeatmap.GridWidth,
-            FineGridHeight = fineEnemyHeatmap.GridHeight,
+            FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
+            FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
+            FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
+            FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
+            FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
         }.ScheduleParallel(clearHandles);
 
         var hiveHeatmapHandle = new HiveHeatmapJob
@@ -58,11 +66,11 @@ partial struct HeatmapUpdateSystem : ISystem
             CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
             CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
 
-            FineMap = fineEnemyHeatmap.Map.AsParallelWriter(),
-            FineDensityMap = fineEnemyHeatmap.DensityMap,
-            FineCellSize = fineEnemyHeatmap.CellSize,
-            FineGridWidth = fineEnemyHeatmap.GridWidth,
-            FineGridHeight = fineEnemyHeatmap.GridHeight,
+            FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
+            FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
+            FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
+            FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
+            FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
         }.ScheduleParallel(swarmHeatmapHandle);
 
         state.Dependency = hiveHeatmapHandle;

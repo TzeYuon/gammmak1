@@ -6,10 +6,16 @@ using Unity.Transforms;
 
 partial struct HiveSystem : ISystem
 {
+    private EntityQuery swarmQuery;
+    private const int GlobalSwarmCap = 50000;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<HiveComponent>();
+        swarmQuery = SystemAPI.QueryBuilder()
+            .WithAll<SwarmTag>()
+            .Build();
     }
 
     [BurstCompile]
@@ -18,13 +24,26 @@ partial struct HiveSystem : ISystem
         float deltaTime = SystemAPI.Time.DeltaTime;
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
+        int currentEnemyCount = swarmQuery.CalculateEntityCount();
+
         foreach (var (hive, transform) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>())
         {
             // Manage cooldown
             hive.ValueRW.SpawnTimer -= deltaTime;
             if (hive.ValueRO.SpawnTimer > 0) continue;
+            
+            // Exceeded amount
+            if (currentEnemyCount + hive.ValueRO.SpawnAmount > GlobalSwarmCap)
+            {
+                // Skip spawning, and leave the timer at or near 0 so it tries again next frame.
+                continue;
+            }
+
             hive.ValueRW.SpawnTimer += hive.ValueRW.SpawnCooldown;
             float3 hivePosition = transform.ValueRO.Position;
+
+            // Add to enemy count
+            currentEnemyCount += hive.ValueRO.SpawnAmount;
 
             // Spawn enemies
             Entity prefab = hive.ValueRO.Prefab;

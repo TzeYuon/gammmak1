@@ -16,13 +16,19 @@ partial struct WeaponTargetingSystem : ISystem
         state.RequireForUpdate<WeaponState>();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>().ValueRW;
 
         ComponentLookup<LocalToWorld> worldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
+
+        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
+        NativeArray<int> obstacleGrid = GridManager.Instance.nativeGrid;
+        int2 obstacleWorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y);
+        int obstacleGridWidth = GridManager.Instance.width;
+        int obstacleGridHeight = GridManager.Instance.height;
 
         PrecisionTargetingJob precisionJob = new()
         {
@@ -34,6 +40,10 @@ partial struct WeaponTargetingSystem : ISystem
             FineGridWidth = fineEntityMap.GridWidth,
             FineGridHeight = fineEntityMap.GridHeight,
             FineEntityMap = fineEntityMap.Map,
+            ObstacleGrid = obstacleGrid,
+            ObstacleWorldOrigin = obstacleWorldOrigin,
+            ObstacleGridWidth = obstacleGridWidth,
+            ObstacleGridHeight = obstacleGridHeight,
         };
 
         HeatmapTargetingJob heatmapJob = new()
@@ -42,7 +52,11 @@ partial struct WeaponTargetingSystem : ISystem
             GridWidth = fineEntityMap.GridWidth,
             GridHeight = fineEntityMap.GridHeight,
             CellSize = fineEntityMap.CellSize,
-            WorldLookup = worldLookup
+            WorldLookup = worldLookup,
+            ObstacleGrid = obstacleGrid,
+            ObstacleWorldOrigin = obstacleWorldOrigin,
+            ObstacleGridWidth = obstacleGridWidth,
+            ObstacleGridHeight = obstacleGridHeight,
         };
 
         state.Dependency = JobHandle.CombineDependencies(
@@ -70,6 +84,11 @@ public partial struct PrecisionTargetingJob : IJobEntity
     public int FineGridWidth;
     public int FineGridHeight;
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> FineEntityMap;
+
+    [ReadOnly] public NativeArray<int> ObstacleGrid;
+    public int2 ObstacleWorldOrigin;
+    public int ObstacleGridWidth;
+    public int ObstacleGridHeight;
 
     private void Execute(
         in LocalToWorld transform,
@@ -118,6 +137,17 @@ public partial struct PrecisionTargetingJob : IJobEntity
                         float distSq = math.distancesq(weaponPos, p);
                         if (distSq > rangeSq) continue; // range check
 
+                        if (!GridUtility.HasLineOfSight(
+                            weaponPos,
+                            p,
+                            ObstacleGrid,
+                            ObstacleWorldOrigin,
+                            ObstacleGridWidth,
+                            ObstacleGridHeight))
+                        {
+                            continue; // no line of sight
+                        }
+
                         // Check best target
                         if (distSq < closestDistSq)
                         {
@@ -153,6 +183,11 @@ public partial struct HeatmapTargetingJob : IJobEntity
 
     [ReadOnly] public ComponentLookup<LocalToWorld> WorldLookup;
 
+    [ReadOnly] public NativeArray<int> ObstacleGrid;
+    public int2 ObstacleWorldOrigin;
+    public int ObstacleGridWidth;
+    public int ObstacleGridHeight;
+
     private void Execute(
         ref WeaponState state,
         in HeatmapTargetingComponent stats,
@@ -169,8 +204,9 @@ public partial struct HeatmapTargetingJob : IJobEntity
         float bestScore = -1f;
         float2 bestTarget = float2.zero;
 
+        float2 weaponPos = weaponWorld.Position.xy;
         int radiusCells = (int)math.ceil(stats.Range / CellSize);
-        int2 centerCell = (int2)math.floor(weaponWorld.Position.xy / CellSize);
+        int2 centerCell = (int2)math.floor(weaponPos / CellSize);
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
@@ -187,6 +223,17 @@ public partial struct HeatmapTargetingJob : IJobEntity
                 float distSq = math.lengthsq(vectorToCell);
 
                 if (distSq > stats.Range * stats.Range) continue;
+
+                if (!GridUtility.HasLineOfSight(
+                    weaponPos, 
+                    cellWorldPos, 
+                    ObstacleGrid,
+                    ObstacleWorldOrigin,
+                    ObstacleGridWidth,
+                    ObstacleGridHeight))
+                {
+                    continue; // no line of sight
+                }
 
                 float2 dirToCell = math.normalize(vectorToCell);
 

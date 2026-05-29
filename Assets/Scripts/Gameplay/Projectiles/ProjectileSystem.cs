@@ -22,7 +22,7 @@ partial struct ProjectileSystem : ISystem
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         transformLookup.Update(ref state);
@@ -35,6 +35,12 @@ partial struct ProjectileSystem : ISystem
 
         float deltaTime = SystemAPI.Time.DeltaTime;
         double elapsedTime = SystemAPI.Time.ElapsedTime;
+
+        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
+        NativeArray<int> obstacleGrid = GridManager.Instance.nativeGrid;
+        int2 obstacleWorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y);
+        int obstacleGridWidth = GridManager.Instance.width;
+        int obstacleGridHeight = GridManager.Instance.height;
 
         // Movement
         var linearHandle = new LinearFlightJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);
@@ -51,7 +57,7 @@ partial struct ProjectileSystem : ISystem
         // Trigger
         var timerHandle = new TimerTriggerJob { ElapsedTime = elapsedTime }.ScheduleParallel(homingHandle);
 
-        var coordHandle = new CoordinateTriggerJob().ScheduleParallel(homingHandle);
+        var coordHandle = new CoordinateTriggerJob().ScheduleParallel(timerHandle);
 
         var contactHandle = new ContactTriggerJob
         {
@@ -60,9 +66,17 @@ partial struct ProjectileSystem : ISystem
             RadiusLookup = collisionLookup,
             CellSize = fineHeatmap.CellSize,
             GridWidth = fineHeatmap.GridWidth,
-        }.ScheduleParallel(homingHandle);
+        }.ScheduleParallel(coordHandle);
 
-        var triggerhandle = JobHandle.CombineDependencies(timerHandle, JobHandle.CombineDependencies(coordHandle, contactHandle));
+        var obstacleHandle = new ObstacleTriggerJob
+        {
+            ObstacleGrid = obstacleGrid,
+            ObstacleWorldOrigin = obstacleWorldOrigin,
+            ObstacleGridWidth = obstacleGridWidth,
+            ObstacleGridHeight = obstacleGridHeight,
+        }.ScheduleParallel(contactHandle);
+
+        var triggerhandle = obstacleHandle;
 
         // Payload
         var kineticHandle = new KineticPayloadJob
@@ -285,7 +299,7 @@ public partial struct KineticPayloadJob : IJobEntity
         if (!trigger.IsTriggered) return;
 
         // Apply damage
-        ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
+        if (trigger.EntityHit != Entity.Null) ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
 
         // Destroy the projectile
         ECB.DestroyEntity(chunkIndex, entity);
@@ -308,7 +322,7 @@ public partial struct PiercingPayloadJob : IJobEntity
         if (!trigger.IsTriggered) return;
 
         // Apply damage
-        ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
+        if (trigger.EntityHit != Entity.Null) ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
 
         // Decrement pierce count
         trigger.RemainingHits--;
@@ -366,6 +380,28 @@ public partial struct ProjectileLifespanJob : IJobEntity
         if (ElapsedTime >= lifespan.ExpirationTime)
         {
             ECB.DestroyEntity(chunkIndex, entity);
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct ObstacleTriggerJob : IJobEntity
+{
+    [ReadOnly] public NativeArray<int> ObstacleGrid;
+    public int2 ObstacleWorldOrigin;
+    public int ObstacleGridWidth;
+    public int ObstacleGridHeight;
+
+    private void Execute(
+        ref ProjectileTriggerState state,
+        ref LocalTransform transform)
+    {
+        if (state.IsTriggered) return;
+
+        float2 currentPos = transform.Position.xy;
+        if (GridUtility.GetTerrainAtWorldPos(currentPos, ObstacleGrid, ObstacleWorldOrigin, ObstacleGridWidth, ObstacleGridHeight) == 1)
+        {
+            state.IsTriggered = true;
         }
     }
 }

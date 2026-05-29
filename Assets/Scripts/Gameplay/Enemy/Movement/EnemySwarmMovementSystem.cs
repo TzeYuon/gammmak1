@@ -7,10 +7,17 @@ using Unity.Transforms;
 
 partial struct EnemySwarmMovementSystem : ISystem
 {
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate<FineEnemyHeatmapComponent>();
+    }
+
     public void OnUpdate(ref SystemState state)
     {
         if (GridManager.Instance == null) return;
         if (!GridManager.Instance.nativeGrid.IsCreated || !GridManager.Instance.nativeFlowField.IsCreated) return;
+
+        FineEnemyHeatmapComponent fineEnemyHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
 
         var moveJob = new FlowFieldMovementJob
         {
@@ -21,7 +28,12 @@ partial struct EnemySwarmMovementSystem : ISystem
             Grid = GridManager.Instance.nativeGrid,
             GridWidth = GridManager.Instance.width,
             GridHeight = GridManager.Instance.height,
-            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y)
+            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y),
+
+            Heatmap = fineEnemyHeatmap.DensityMap,
+            HeatmapCellSize = fineEnemyHeatmap.CellSize,
+            HeatmapGridWidth = fineEnemyHeatmap.GridWidth,
+            HeatmapGridHeight = fineEnemyHeatmap.GridHeight,
         };
 
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
@@ -40,6 +52,11 @@ public partial struct FlowFieldMovementJob : IJobEntity
     public int GridWidth;
     public int GridHeight;
     public int2 WorldOrigin;
+
+    [ReadOnly] public NativeArray<int> Heatmap;
+    public float HeatmapCellSize;
+    public int HeatmapGridWidth;
+    public int HeatmapGridHeight;
 
     public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity, ref SwarmComponent agentData)
     {
@@ -126,6 +143,29 @@ public partial struct FlowFieldMovementJob : IJobEntity
             }
         }
 
+        // Separation calculation
+        // Use heatmap to move entity away from highly dense areas
+        float separationWeight = 0.5f;
+        if (GridUtility.IsWithinBounds(curPos.xy, HeatmapCellSize, HeatmapGridWidth, HeatmapGridHeight))
+        {
+            int heatmapIndex = GridUtility.WorldPosToIndex(curPos, HeatmapCellSize, HeatmapGridWidth);
+            int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1] : 100;
+            int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1] : 100;
+            int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth] : 100;
+            int densityDown = GridUtility.IsWithinBounds(heatmapIndex - HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - HeatmapGridWidth] : 100;
+
+            float gradientX = densityRight - densityLeft;
+            float gradientY = densityUp - densityDown;
+
+            // Point away from high density
+            float2 separationDir = new float2(-gradientX, -gradientY);
+            if (math.lengthsq(separationDir) > 0.01f)
+            {
+                separationDir = math.normalize(separationDir);
+                targetDir += separationDir * separationWeight;
+            }
+        }
+
         // Steering & Swarm Wobble
         float2 steeringForce = float2.zero;
         float baseSpeed = agentData.BaseSpeed;
@@ -148,7 +188,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
             float3 sideways3D = math.cross(new float3(math.normalizesafe(targetDir), 0), new float3(0, 0, 1));
             float2 sidewaysDir = sideways3D.xy;
 
-            float2 wobblyTargetDir = math.normalize(targetDir + (sidewaysDir * noiseValue * 0.5f));
+            float2 wobblyTargetDir = math.normalize(targetDir + (1 * noiseValue * sidewaysDir));
 
             float uniqueSpeedVariation = 1.0f - ((agentData.WiggleOffset % 10) * 0.02f);
             float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;

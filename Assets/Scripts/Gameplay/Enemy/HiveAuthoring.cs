@@ -4,7 +4,7 @@ using UnityEngine;
 class HiveAuthoring : MonoBehaviour
 {
     public GameObject Prefab;
-    public float SpawnAmount;
+    public int SpawnAmount;
 
     public float EnemySpeed;
     public float DynamicSpeedMultiplier; // Max speed multiplier for enemies that are behind desired position
