@@ -37,7 +37,12 @@ partial struct FleetCommandSystem : ISystem
             // Enables move command
             foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommand>().WithEntityAccess())
             {
-                SystemAPI.SetComponent(entity, new MoveCommand { MoveTarget = mousePos });
+                SystemAPI.SetComponent(entity, new MoveCommand
+                {
+                    MoveTarget = mousePos,
+                    Recalculate = true,
+                    ForcePath = false
+                });
                 SystemAPI.SetComponentEnabled<MoveCommand>(entity, true);
             }
         }

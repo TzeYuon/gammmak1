@@ -8,8 +8,17 @@ public struct SelectedTag : IComponentData, IEnableableComponent { }
 public struct MoveCommand : IComponentData, IEnableableComponent
 {
     public float2 MoveTarget;
+    public bool Recalculate;
+    public bool ForcePath;
+    public float2 NextWaypoint;
+    public bool PathExists;
 }
 
+[InternalBufferCapacity(20)]
+public struct ShipWaypoint : IBufferElementData
+{
+    public float2 Value;
+}
 public struct ShipMovementStatsComponent : IComponentData
 {
     public float MaxSpeed;

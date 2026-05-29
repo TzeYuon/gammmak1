@@ -57,6 +57,7 @@ class PlayerShipAuthoring : MonoBehaviour
 
             AddComponent<MoveCommand>(entity);
             SetComponentEnabled<MoveCommand>(entity, false);
+            AddBuffer<ShipWaypoint>(entity);
 
             // Collection radius for biomass
             AddComponent(entity, new ShipCollectionRadiusComponent 

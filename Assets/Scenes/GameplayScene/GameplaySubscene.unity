@@ -131,13 +131,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mothership
       objectReference: {fileID: 0}
+    - target: {fileID: 6753536424006035904, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 954
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
       propertyPath: m_LocalPosition.z
@@ -184,6 +188,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -2045320824258955567, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
+      propertyPath: MaxSpeed
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_Name
       value: PlayerShip
@@ -194,11 +202,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1008.1
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 962.4
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -251,7 +259,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -358,6 +366,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cruiser
       objectReference: {fileID: 0}
+    - target: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 984.63794
@@ -415,6 +427,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cruiser (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7485471362817036463, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1016.02673
@@ -468,6 +484,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1186587878523724928, guid: c8baea5da49927d458f13fb59d168496, type: 3}
+      propertyPath: SpawnCooldown
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2446960942375664435, guid: c8baea5da49927d458f13fb59d168496, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1000

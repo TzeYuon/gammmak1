@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -46,25 +47,16 @@ public class GridManager : MonoBehaviour
 
     bool IsInSafeZone(int x, int y)
     {
-        // 1. Bottom Left Spawn Zone
         if (x < safezoneRadius && y < safezoneRadius) return true;
 
-        // 2. Center Arena Zone
         if (x > (width / 2) - safezoneRadius && x < (width / 2) + safezoneRadius &&
-            y > (height / 2) - safezoneRadius && y < (height / 2) + safezoneRadius)
-        {
-            return true;
-        }
+            y > (height / 2) - safezoneRadius && y < (height / 2) + safezoneRadius) return true;
 
         return false;
     }
 
     void GenerateTerrain()
     {
-        // =========================================================
-        // PASS 1: THE PERLIN NOISE FOUNDATION
-        // We use Perlin noise to create the "blobs" of the galaxy.
-        // =========================================================
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -82,10 +74,12 @@ public class GridManager : MonoBehaviour
         }
 
         // Cellulat Automata
-        for (int i = 0; i < 3; i++) // Run the carver 3 times to smooth the walls
+        for (int i = 0; i < 3; i++)
         {
             grid = SmoothAsteroidCaves(grid);
         }
+
+        PurgeDisconnectedIslands();
 
         // Spawn mud and poison
         for (int x = 0; x < width; x++)
@@ -96,21 +90,15 @@ public class GridManager : MonoBehaviour
 
                 if (currentTile == 0 && !IsInSafeZone(x, y))
                 {
-                    int wallNeighbors = GetSurroundingWallCount(grid, x, y);
+                    float poisonNoise = Mathf.PerlinNoise((x + randomOffset + 5000f) * scale, (y + randomOffset + 5000f) * scale);
+                    float mudNoise = Mathf.PerlinNoise((x + randomOffset + 2000f) * scale, (y + randomOffset + 2000f) * scale);
 
-                    // If surrounded by walls (a narrow canyon), fill it with Nebula Gas (Mud - 2)!
-                    if (wallNeighbors >= 3)
-                    {
-                        grid[x, y] = 2;
-                    }
-                    else
-                    {
-                        float biome = Mathf.PerlinNoise((x + randomOffset + 5000f) * scale, (y + randomOffset + 5000f) * scale);
-                        if (biome > 0.75f) grid[x, y] = 3;
-                    }
+                    if (poisonNoise > 0.75f)
+                        grid[x, y] = 3; // Poison Patch
+                    else if (mudNoise > 0.75f)
+                        grid[x, y] = 2; // Mud Patch
                 }
 
-                // Sync the final data to the Native Grid for ECS
                 int finalTile = grid[x, y];
                 nativeGrid[x + y * width] = finalTile;
 
@@ -124,6 +112,78 @@ public class GridManager : MonoBehaviour
                     Instantiate(poisonPrefab, spawnPos, Quaternion.identity, this.transform);
             }
         }
+    }
+    void PurgeDisconnectedIslands()
+    {
+        int[,] mapFlags = new int[width, height];
+        List<List<Vector2Int>> allIslands = new List<List<Vector2Int>>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y] == 0 && mapFlags[x, y] == 0)
+                {
+                    List<Vector2Int> newIsland = GetIsland(x, y, mapFlags);
+                    allIslands.Add(newIsland);
+                }
+            }
+        }
+
+        // Find the biggest island
+        int biggestIslandIndex = 0;
+        int maxTiles = 0;
+
+        for (int i = 0; i < allIslands.Count; i++)
+        {
+            if (allIslands[i].Count > maxTiles)
+            {
+                maxTiles = allIslands[i].Count;
+                biggestIslandIndex = i;
+            }
+        }
+
+        // Turn every other island into walls
+        for (int i = 0; i < allIslands.Count; i++)
+        {
+            if (i != biggestIslandIndex)
+            {
+                foreach (Vector2Int tile in allIslands[i])
+                {
+                    grid[tile.x, tile.y] = 1;
+                }
+            }
+        }
+    }
+
+    List<Vector2Int> GetIsland(int startX, int startY, int[,] mapFlags)
+    {
+        List<Vector2Int> tiles = new List<Vector2Int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+
+        queue.Enqueue(new Vector2Int(startX, startY));
+        mapFlags[startX, startY] = 1;
+
+        while (queue.Count > 0)
+        {
+            Vector2Int tile = queue.Dequeue();
+            tiles.Add(tile);
+
+            Vector2Int[] neighbors = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+            foreach (Vector2Int dir in neighbors)
+            {
+                Vector2Int n = tile + dir;
+                if (n.x >= 0 && n.x < width && n.y >= 0 && n.y < height)
+                {
+                    if (grid[n.x, n.y] == 0 && mapFlags[n.x, n.y] == 0)
+                    {
+                        mapFlags[n.x, n.y] = 1;
+                        queue.Enqueue(n);
+                    }
+                }
+            }
+        }
+        return tiles;
     }
 
     // Cellular Automata Smoothing Function

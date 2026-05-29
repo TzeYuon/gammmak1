@@ -846,10 +846,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3043c5b1d82d2a147b281fa71717a317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
-  width: 200
-  height: 200
-  safezoneRadius: 20
-  worldOrigin: {x: 1200, y: 1200}
+  width: 400
+  height: 400
+  safezoneRadius: 40
+  worldOrigin: {x: 1000, y: 1000}
   scale: 0.04
   randomOffset: 0
   wallPrefab: {fileID: 1667765430307784710, guid: 7c9764d7cd155e44db4566d150eaf598, type: 3}
