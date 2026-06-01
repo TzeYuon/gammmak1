@@ -73,6 +73,7 @@ partial struct WeaponTargetingSystem : ISystem
 }
 
 [BurstCompile]
+[WithAll(typeof(PrecisionTargetingComponent))]
 public partial struct PrecisionTargetingJob : IJobEntity
 {
     public float CoarseCellSize;
@@ -92,7 +93,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
 
     private void Execute(
         in LocalToWorld transform,
-        in PrecisionTargetingComponent stats,
+        in WeaponTargetingStats stats,
         ref WeaponState state
         )
     {
@@ -174,6 +175,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
 }
 
 [BurstCompile]
+[WithAll(typeof(HeatmapTargetingComponent))]
 public partial struct HeatmapTargetingJob : IJobEntity
 {
     [ReadOnly] public NativeArray<int> FineDensityMap;
@@ -190,7 +192,7 @@ public partial struct HeatmapTargetingJob : IJobEntity
 
     private void Execute(
         ref WeaponState state,
-        in HeatmapTargetingComponent stats,
+        in WeaponTargetingStats stats,
         in WeaponFiringArc arc,
         in LocalToWorld weaponWorld,
         in ShipReference ship
@@ -243,9 +245,18 @@ public partial struct HeatmapTargetingJob : IJobEntity
 
                 // add bias based on how much the turret needs to rotate
                 float alignment = math.dot(currentBarrelForward.xy, dirToCell);
-                float biasMultiplier = math.pow(math.max(0.1f, (alignment + 1f) * 0.5f), stats.AngleBias);
+                float angleWeight = math.pow(math.max(0.1f, (alignment + 1f) * 0.5f), stats.AngleBias);
 
-                float score = density * biasMultiplier;
+                // add bias to prioritise targets by distance
+                float normalizedDistSq = math.sqrt(distSq) / stats.RangeSq; 
+                float distanceWeight = 1.0f;
+                if (stats.DistanceBias > 0f) distanceWeight = math.pow(1.0f - normalizedDistSq, stats.DistanceBias);
+                else if (stats.DistanceBias < 0f) distanceWeight = math.pow(normalizedDistSq, math.abs(stats.DistanceBias));
+
+                float score;
+                if (stats.DensityBias == 0) score = angleWeight * distanceWeight;
+                else score = density * stats.DensityBias * angleWeight * distanceWeight;
+
                 if (score > bestScore)
                 {
                     bestScore = score;

@@ -1,13 +1,21 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
+public struct WeaponTargetingStats : IComponentData
+{
+    public float Range;
+    public float RangeSq;
+    public float DensityBias;
+    public float AngleBias;
+    public float DistanceBias;
+}
+
 /// <summary>
 /// For weapons that target specific enemies
 /// </summary>
 public struct PrecisionTargetingComponent : IComponentData
 {
-    public float Range;
-    public float AngleBias;
+    
 }
 
 /// <summary>
@@ -15,8 +23,7 @@ public struct PrecisionTargetingComponent : IComponentData
 /// </summary>
 public struct HeatmapTargetingComponent : IComponentData
 {
-    public float Range;
-    public float AngleBias;
+
 }
 
 /// <summary>

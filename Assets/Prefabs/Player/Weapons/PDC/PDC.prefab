@@ -51,7 +51,9 @@ MonoBehaviour:
   FireRate: 12
   Range: 30
   Targeting: 0
-  AngleBias: 2
+  DensityBias: 0
+  AngleBias: 0
+  DistanceBias: 5
   HasTurret: 1
   TurnSpeed: 5
   BaseDirection: {x: 0, y: 1, z: 0}
