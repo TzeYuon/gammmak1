@@ -40,12 +40,11 @@ public class MenuScreen : UIScreen
 
     void OnSettingsClicked()
     {
-        uiScreenManager.Show(uiScreenManager.SettingsScreen);
+        uiScreenManager.ShowRootScreen(uiScreenManager.SettingsScreen);
     }
 
     void OnExitClicked()
     {
-        //ApplicationEvents.OnApplicationQuit?.Invoke(this, new());
         Application.Quit();
     }
 

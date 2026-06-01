@@ -22,8 +22,6 @@ public class SettingsScreen : UIScreen
 
         //ui = Root.Q<Slider>("UIVolumeSlider");
         //ui.RegisterCallback<ChangeEvent<float>>(OnUIVolumeSliderChange);
-
-        Root.Q<Button>("ExitButton").clicked += OnExitClicked;
     }
 
     protected override void OnShow()
@@ -64,12 +62,5 @@ public class SettingsScreen : UIScreen
     //{
     //    audioManager.SetVolume(category, evt.newValue);
     //}
-
-
-    void OnExitClicked()
-    {
-        uiScreenManager.BackToPrevScreen();
-    }
-
     #endregion
 }

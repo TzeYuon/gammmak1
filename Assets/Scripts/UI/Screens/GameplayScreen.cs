@@ -22,9 +22,10 @@ public class GameplayScreen : UIScreen
     private EntityQuery queueQuery;
 
     private VisualElement victoryScreen;
+    private Button victoryContinueButton;
     private VisualElement defeatScreen;
-    private EntityQuery levelStateQuery;
-    private bool hasTriggeredVictoryLoss;
+    private Button defeatContinueButton;
+    private EntityQuery gameStateQuery;
 
     public GameplayScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
@@ -50,7 +51,7 @@ public class GameplayScreen : UIScreen
                 inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
                 economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
                 queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
-                levelStateQuery = entityManager.CreateEntityQuery(typeof(LevelStateComponent));
+                gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
             }
         }
 
@@ -89,23 +90,46 @@ public class GameplayScreen : UIScreen
 
         void InitVictoryLoss()
         {
-            hasTriggeredVictoryLoss = false;
+            GameStateSystem.OnStateChanged += HandleStateChange;
+
             victoryScreen = root.Q<VisualElement>("VictoryScreen");
             defeatScreen = root.Q<VisualElement>("DefeatScreen");
 
             victoryScreen.style.display = DisplayStyle.None;
             defeatScreen.style.display = DisplayStyle.None;
+
+            victoryContinueButton = root.Q<Button>("VictoryContinueButton");
+            defeatContinueButton = root.Q<Button>("DefeatContinueButton");
+
+            victoryContinueButton.clicked += () =>
+            {
+                if (gameStateQuery.IsEmptyIgnoreFilter) return;
+                gameStateQuery.CompleteDependency();
+                var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
+                gameState.ValueRW.CurrentState = GameState.FleetCommandHub;
+            };
+
+            defeatContinueButton.clicked += () =>
+            {
+                if (gameStateQuery.IsEmptyIgnoreFilter) return;
+                gameStateQuery.CompleteDependency();
+                var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
+                gameState.ValueRW.CurrentState = GameState.MainMenu;
+            };
         }
     }
 
     protected override void OnHide()
     {
-
+        HideVictoryLoss();
+        CloseReinforcementPopup();
     }
 
     protected override void OnShow()
     {
-
+        HideVictoryLoss();
+        CloseReinforcementPopup();
+        biomassCounter.style.display = DisplayStyle.Flex;
     }
 
     public override void DoUpdate()
@@ -118,8 +142,6 @@ public class GameplayScreen : UIScreen
         UpdateBiomassCounter();
 
         UpdateReinforcementPopup();
-
-        UpdateVictoryLoss();
 
         void UpdateSelectionBox()
         {
@@ -174,28 +196,38 @@ public class GameplayScreen : UIScreen
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
         }
+    }
 
-        void UpdateVictoryLoss()
+    private void TriggerVictory()
+    {
+        victoryScreen.style.display = DisplayStyle.Flex;
+        biomassCounter.style.display = DisplayStyle.None;
+        Time.timeScale = 0.2f;
+    }
+
+    private void TriggerLoss()
+    {
+        defeatScreen.style.display = DisplayStyle.Flex;
+        biomassCounter.style.display = DisplayStyle.None;
+        Time.timeScale = 0.2f;
+    }
+
+    private void HideVictoryLoss()
+    {
+        victoryScreen.style.display = DisplayStyle.None;
+        defeatScreen.style.display = DisplayStyle.None;
+        Time.timeScale = 1f; // I dont know if this is the best way to do this
+    }
+
+    private void HandleStateChange(GameState prevState, GameState gameState)
+    {
+        if (gameState == GameState.Victory)
         {
-            if (hasTriggeredVictoryLoss) return;
-
-            var levelState = levelStateQuery.GetSingleton<LevelStateComponent>();
-            if (levelState.Result == LevelState.Playing) return;
-
-            if (levelState.Result == LevelState.Victory)
-            {
-                hasTriggeredVictoryLoss = true;
-                victoryScreen.style.display = DisplayStyle.Flex;
-
-                Time.timeScale = 0.2f;
-            }
-            else
-            {
-                hasTriggeredVictoryLoss = true;
-                defeatScreen.style.display = DisplayStyle.Flex;
-
-                Time.timeScale = 0.2f;
-            }
+            TriggerVictory();
+        }
+        else if (gameState == GameState.Defeat)
+        {
+            TriggerLoss();
         }
     }
 
