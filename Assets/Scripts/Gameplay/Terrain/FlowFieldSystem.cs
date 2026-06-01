@@ -22,7 +22,7 @@ partial struct FlowFieldSystem : ISystem
 
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
-        _timer = 0.25f;
+        _timer = 0.45f;
 
         int gridWidth = GridManager.Instance.width;
         int gridHeight = GridManager.Instance.height;

@@ -31,7 +31,6 @@ public class GridManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
@@ -47,12 +46,15 @@ public class GridManager : MonoBehaviour
 
     bool IsInSafeZone(int x, int y)
     {
-        if (x < safezoneRadius && y < safezoneRadius) return true;
+        bool corner =
+       (x < safezoneRadius || x >= width - safezoneRadius) &&
+       (y < safezoneRadius || y >= height - safezoneRadius);
 
-        if (x > (width / 2) - safezoneRadius && x < (width / 2) + safezoneRadius &&
-            y > (height / 2) - safezoneRadius && y < (height / 2) + safezoneRadius) return true;
+        bool center =
+            Mathf.Abs(x - width / 2) <= safezoneRadius &&
+            Mathf.Abs(y - height / 2) <= safezoneRadius;
 
-        return false;
+        return corner || center;
     }
 
     void GenerateTerrain()
@@ -73,13 +75,13 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        // Cellulat Automata
+        // Cellular Automata
         for (int i = 0; i < 3; i++)
         {
             grid = SmoothAsteroidCaves(grid);
         }
 
-        PurgeDisconnectedIslands();
+        ConnectDisconnectedIslands();
 
         // Spawn mud and poison
         for (int x = 0; x < width; x++)
@@ -94,9 +96,9 @@ public class GridManager : MonoBehaviour
                     float mudNoise = Mathf.PerlinNoise((x + randomOffset + 2000f) * scale, (y + randomOffset + 2000f) * scale);
 
                     if (poisonNoise > 0.75f)
-                        grid[x, y] = 3; // Poison Patch
+                        grid[x, y] = 3;
                     else if (mudNoise > 0.75f)
-                        grid[x, y] = 2; // Mud Patch
+                        grid[x, y] = 2;
                 }
 
                 int finalTile = grid[x, y];
@@ -113,10 +115,12 @@ public class GridManager : MonoBehaviour
             }
         }
     }
-    void PurgeDisconnectedIslands()
+    void ConnectDisconnectedIslands()
     {
         int[,] mapFlags = new int[width, height];
         List<List<Vector2Int>> allIslands = new List<List<Vector2Int>>();
+        int biggestIslandIndex = 0;
+        int maxTiles = 0;
 
         for (int x = 0; x < width; x++)
         {
@@ -125,37 +129,82 @@ public class GridManager : MonoBehaviour
                 if (grid[x, y] == 0 && mapFlags[x, y] == 0)
                 {
                     List<Vector2Int> newIsland = GetIsland(x, y, mapFlags);
+                    if (newIsland.Count > maxTiles)
+                    {
+                        maxTiles = newIsland.Count;
+                        biggestIslandIndex = allIslands.Count;
+                    }
                     allIslands.Add(newIsland);
                 }
             }
         }
 
-        // Find the biggest island
-        int biggestIslandIndex = 0;
-        int maxTiles = 0;
+        if (allIslands.Count <= 1) return; 
 
+        List<Vector2Int> mainIsland = allIslands[biggestIslandIndex];
+
+        // Carve a tunnel from every small island to the main island
         for (int i = 0; i < allIslands.Count; i++)
         {
-            if (allIslands[i].Count > maxTiles)
-            {
-                maxTiles = allIslands[i].Count;
-                biggestIslandIndex = i;
-            }
-        }
+            if (i == biggestIslandIndex) continue;
 
-        // Turn every other island into walls
-        for (int i = 0; i < allIslands.Count; i++)
-        {
-            if (i != biggestIslandIndex)
+            List<Vector2Int> smallIsland = allIslands[i];
+
+            // Find the two closest tiles between the small island and the main island
+            float bestDist = float.MaxValue;
+            Vector2Int bestStart = Vector2Int.zero;
+            Vector2Int bestEnd = Vector2Int.zero;
+
+            foreach (Vector2Int tileA in smallIsland)
             {
-                foreach (Vector2Int tile in allIslands[i])
+                foreach (Vector2Int tileB in mainIsland)
                 {
-                    grid[tile.x, tile.y] = 1;
+                    float dist = math.distancesq(new float2(tileA.x, tileA.y), new float2(tileB.x, tileB.y));
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestStart = tileA;
+                        bestEnd = tileB;
+                    }
                 }
             }
+
+            CarveTunnel(bestStart, bestEnd);
         }
     }
 
+    // A simple function to smash walls in a straight line between two points
+    void CarveTunnel(Vector2Int start, Vector2Int end)
+    {
+        int x = start.x;
+        int y = start.y;
+        int dx = Mathf.Abs(end.x - start.x);
+        int dy = Mathf.Abs(end.y - start.y);
+        int sx = start.x < end.x ? 1 : -1;
+        int sy = start.y < end.y ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            // Make a 3x3 tunnel so fat ships can fit through
+            for (int tx = -1; tx <= 1; tx++)
+            {
+                for (int ty = -1; ty <= 1; ty++)
+                {
+                    if (IsValid(x + tx, y + ty))
+                    {
+                        grid[x + tx, y + ty] = 0;
+                    }
+                }
+            }
+
+            if (x == end.x && y == end.y) break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x += sx; }
+            if (e2 < dx) { err += dx; y += sy; }
+        }
+    }
     List<Vector2Int> GetIsland(int startX, int startY, int[,] mapFlags)
     {
         List<Vector2Int> tiles = new List<Vector2Int>();
@@ -163,17 +212,17 @@ public class GridManager : MonoBehaviour
 
         queue.Enqueue(new Vector2Int(startX, startY));
         mapFlags[startX, startY] = 1;
+        Vector2Int[] neighbors = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
         while (queue.Count > 0)
         {
             Vector2Int tile = queue.Dequeue();
             tiles.Add(tile);
 
-            Vector2Int[] neighbors = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
             foreach (Vector2Int dir in neighbors)
             {
                 Vector2Int n = tile + dir;
-                if (n.x >= 0 && n.x < width && n.y >= 0 && n.y < height)
+                if (IsValid(n.x, n.y))
                 {
                     if (grid[n.x, n.y] == 0 && mapFlags[n.x, n.y] == 0)
                     {
@@ -211,6 +260,10 @@ public class GridManager : MonoBehaviour
         return newGrid;
     }
 
+    bool IsValid(int x, int y)
+    {
+        return (x >= 0 && x < width && y >= 0 && y < height) ? true : false;
+    }
     int GetSurroundingWallCount(int[,] checkGrid, int gridX, int gridY)
     {
         int wallCount = 0;
@@ -245,7 +298,7 @@ public class GridManager : MonoBehaviour
         int gridX = Mathf.RoundToInt(worldPosition.x) - worldOrigin.x;
         int gridY = Mathf.RoundToInt(worldPosition.y) - worldOrigin.y;
 
-        if (gridX >= 0 && gridX < width && gridY >= 0 && gridY < height)
+        if (IsValid(gridX, gridY))
         {
             grid[gridX, gridY] = newTileType;
             nativeGrid[gridX + gridY * width] = newTileType;

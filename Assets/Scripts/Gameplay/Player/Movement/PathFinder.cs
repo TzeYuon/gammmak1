@@ -48,11 +48,10 @@ public class Pathfinder : MonoBehaviour
         FastPriorityQueue<Node> pq = new FastPriorityQueue<Node>();
         pq.Enqueue(currNode);
 
-        // 1. ADDED DIAGONALS (8-Way Movement)
         var adj = new List<(int, int)>
         {
-            (0, 1), (1, 0), (-1, 0), (0, -1),   // Up, Right, Left, Down
-            (1, 1), (1, -1), (-1, 1), (-1, -1)  // Top-Right, Bot-Right, Top-Left, Bot-Left
+            (0, 1), (1, 0), (-1, 0), (0, -1),   
+            (1, 1), (1, -1), (-1, 1), (-1, -1)  
         };
 
         var resPath = new List<Vector2Int>();
@@ -136,7 +135,7 @@ public class Pathfinder : MonoBehaviour
     }
 }
 
-// HELPER CLASS/FUNCTIONS
+// Helper class/functions
 public class Node : IComparable<Node>
 {
     public int x;
@@ -159,7 +158,7 @@ public class Node : IComparable<Node>
     public int CompareTo(Node other)
     {
         int compare = fCost.CompareTo(other.fCost);
-        if (compare == 0) compare = hCost.CompareTo(other.hCost); // Tiebreaker
+        if (compare == 0) compare = hCost.CompareTo(other.hCost);
         return compare;
     }
 }

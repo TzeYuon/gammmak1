@@ -586,7 +586,7 @@ Transform:
   m_GameObject: {fileID: 1416371172}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1000, y: 1000, z: -10}
+  m_LocalPosition: {x: 1100, y: 1100, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -846,11 +846,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3043c5b1d82d2a147b281fa71717a317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
-  width: 400
-  height: 400
-  safezoneRadius: 40
+  width: 200
+  height: 200
+  safezoneRadius: 20
   worldOrigin: {x: 1000, y: 1000}
-  scale: 0.04
+  scale: 0.1
   randomOffset: 0
   wallPrefab: {fileID: 1667765430307784710, guid: 7c9764d7cd155e44db4566d150eaf598, type: 3}
   mudPrefab: {fileID: 5912557210755108530, guid: 03260ede275a4c347a8038f8ca29cc19, type: 3}
