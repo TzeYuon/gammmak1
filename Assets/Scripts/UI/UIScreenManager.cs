@@ -11,6 +11,7 @@ using UnityEngine.UIElements;
 public class UIScreenManager : MonoBehaviour
 {
     [SerializeField] SceneManager sceneManager;
+    [SerializeField] PlayerSaveData playerSaveData;
 
     public VisualElement Root { get; private set; }
     public IUIScreen MenuScreen { get; private set; }
@@ -29,8 +30,10 @@ public class UIScreenManager : MonoBehaviour
         MenuScreen = new MenuScreen(this, Root.Q<VisualElement>("MenuScreen"), sceneManager);
         SettingsScreen = new SettingsScreen(this, Root.Q<VisualElement>("SettingsScreen"));
         PauseScreen = new PauseScreen(this, Root.Q<VisualElement>("PauseScreen"));
-        GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"));
-        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"));
+        GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"), playerSaveData);
+        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData);
+
+        if (playerSaveData == null) Debug.LogWarning("UIManager no save data assigned");
 
         Screens = new List<IUIScreen>
         {

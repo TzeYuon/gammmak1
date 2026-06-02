@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 
 public class GameplayScreen : UIScreen
 {
+    private PlayerSaveData playerSaveData;
+
     private EntityManager entityManager;
     private EntityQuery inputQuery;
 
@@ -27,8 +29,10 @@ public class GameplayScreen : UIScreen
     private Button defeatContinueButton;
     private EntityQuery gameStateQuery;
 
-    public GameplayScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
+    public GameplayScreen(UIScreenManager manager, VisualElement root, PlayerSaveData playerSaveData) : base(manager, root)
     {
+        this.playerSaveData = playerSaveData;
+
         InitInput();
 
         selectionBox = root.Q<VisualElement>("SelectionBox");
@@ -58,12 +62,22 @@ public class GameplayScreen : UIScreen
         void InitReinforcementPopup()
         {
             isReinforcementPopupOpen = false;
-            reinforcementPopup.Add(CreateButton("Frigate (10)", 0));
-            reinforcementPopup.Add(CreateButton("Destroyer (30)", 1));
-            reinforcementPopup.Add(CreateButton("Cruiser (50)", 2));
+            if (playerSaveData != null)
+            {
+                var activeRoster = playerSaveData.ActiveRoster;
+                if (activeRoster == null) return;
+
+                int count = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (activeRoster[i] == null) continue;
+                    var cur = activeRoster[i];
+                    reinforcementPopup.Add(CreateButton(cur.ShipName + "(" + cur.CostToSpawn + ")", count++));
+                }
+            }
         }
 
-        Button CreateButton(string text, int shipType)
+        Button CreateButton(string text, int slotIndex)
         {
             var btn = new Button { text = text };
             btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
@@ -78,7 +92,7 @@ public class GameplayScreen : UIScreen
                 var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
                 queue.Enqueue(new SpawnRequest
                 {
-                    ShipType = shipType,
+                    SlotIndex = slotIndex,
                     Position = GetSpawnPosition()
                 });
 
@@ -171,6 +185,14 @@ public class GameplayScreen : UIScreen
 
         void UpdateReinforcementPopup()
         {
+            if (gameStateQuery.IsEmptyIgnoreFilter) return;
+            gameStateQuery.CompleteDependency();
+            var gameState = gameStateQuery.GetSingleton<GameStateSingleton>();
+            if (gameState.CurrentState != GameState.Gameplay)
+            {
+                return;
+            }
+
             spawnPosition = inputData.MouseWorldPosition;
             if (inputData.WasPressed(PlayerAction.ToggleReinforcementPopup))
             {
@@ -223,10 +245,12 @@ public class GameplayScreen : UIScreen
     {
         if (gameState == GameState.Victory)
         {
+            CloseReinforcementPopup();
             TriggerVictory();
         }
         else if (gameState == GameState.Defeat)
         {
+            CloseReinforcementPopup();
             TriggerLoss();
         }
     }

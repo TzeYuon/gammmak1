@@ -1,16 +1,16 @@
 using Unity.Burst;
 using Unity.Entities;
 
+[BurstCompile]
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial struct GameWinLossSystem : ISystem
+public partial class LevelWinLossSystem : SystemBase
 {
     private EntityQuery livingHivesQuery;
     private EntityQuery livingMothershipQuery;
 
     private bool isInitialized;
 
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
+    protected override void OnCreate()
     {
         isInitialized = false;
 
@@ -24,7 +24,7 @@ public partial struct GameWinLossSystem : ISystem
             .WithDisabled<DeadTag>()
             .Build();
 
-        //GameStateSystem.OnStateChanged += HandleStateChange;
+        GameStateSystem.OnStateChanged += HandleStateChange;
     }
 
     void HandleStateChange(GameState prev, GameState curState)
@@ -33,7 +33,7 @@ public partial struct GameWinLossSystem : ISystem
     }
 
     [BurstCompile]
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
         var gameState = SystemAPI.GetSingletonRW<GameStateSingleton>();
         if (gameState.ValueRO.CurrentState != GameState.Gameplay) return;
