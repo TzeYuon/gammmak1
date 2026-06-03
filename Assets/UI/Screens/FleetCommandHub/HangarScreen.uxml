@@ -1,0 +1,81 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/scrollviewStyles.uss?fileID=7433441132597879392&amp;guid=1c9e88b492e50ef4aa09e28f52ec1cc8&amp;type=3#scrollviewStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <ui:VisualElement name="HangarContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row;">
+        <ui:VisualElement name="ShipListContainer" style="flex-grow: 0; width: 25%; border-right-width: 2px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3);">
+            <ui:Label text="HULL BLUEPRINTS" name="Header" class="text" style="font-size: 24px; letter-spacing: 5px; margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 20px; padding-left: 0; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;"/>
+            <ui:ScrollView name="ShipsScrollView" style="flex-grow: 1;">
+                <ui:Button text="" name="ShipItemBtn" style="background-color: rgba(188, 188, 188, 0); flex-direction: row; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 1px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 6px; margin-right: 5px; margin-bottom: 6px; margin-left: 8px; height: 90px;">
+                    <ui:VisualElement name="ShipItemVisualContainer" style="flex-grow: 0; aspect-ratio: 1; align-items: center; align-self: center; justify-content: center; width: auto; height: 100%;">
+                        <ui:VisualElement name="ShipItemVisual" style="flex-grow: 0;"/>
+                    </ui:VisualElement>
+                    <ui:Label text="Label" name="ShipItemLabel" class="text" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 5px; -unity-text-align: middle-left;"/>
+                </ui:Button>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="DetailsContainer" style="flex-grow: 0; width: 50%; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-right-width: 2px;">
+            <ui:Label text="SHIP NAME" name="ShipTitle" class="text" style="font-size: 40px; letter-spacing: 5px; margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 20px; padding-left: 0; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;"/>
+            <ui:VisualElement name="Container" style="flex-grow: 1; flex-direction: row;">
+                <ui:VisualElement name="LeftContainer" style="flex-grow: 0; width: 50%;">
+                    <ui:VisualElement name="ShipVisualContainer" style="flex-grow: 0; width: auto; height: 40%; align-items: center; align-content: auto; justify-content: center;">
+                        <ui:VisualElement name="ShipVisual" style="flex-grow: 0; width: auto; height: auto;"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ShipDescriptionContainer" style="flex-grow: 1; padding-left: 5px; padding-top: 0; padding-right: 5px;">
+                        <ui:ScrollView name="ShipDescriptionScrollView">
+                            <ui:Label text="DESCRIPTION:" name="ShipDescription" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-left; font-size: 16px;"/>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="RightContainer" style="flex-grow: 1; flex-direction: column; border-left-width: 2px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3);">
+                    <ui:VisualElement name="ShipSystemsContainer" style="flex-grow: 0; width: 100%; height: 50%; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;">
+                        <ui:Label text="SYSTEMS:" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 0; padding-bottom: 5px; padding-left: 5px; font-size: 20px;"/>
+                        <ui:ScrollView name="SystemsScrollView"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="WeaponMountsContainer" style="flex-grow: 1; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-left-width: 2px;">
+                        <ui:Label text="WEAPON MOUNTS:" class="text" style="padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 20px;"/>
+                        <ui:ScrollView name="WeaponMountsScrollView"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button text="ADD TO ROSTER" name="AddToRosterBtn" class="text" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-top-width: 2px; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; font-size: 20px; width: 100%; height: 50px; transition-property: all; transition-duration: 0s; transition-timing-function: ease; transition-delay: 0s;"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="HangarContextMenu" style="flex-grow: 1; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-left-width: 0;">
+            <ui:VisualElement name="ContextWeapons" style="flex-grow: 1; position: absolute; width: 100%; height: 100%;">
+                <ui:Label text="WEAPONS" name="Header" class="text" style="font-size: 24px; letter-spacing: 5px; margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 20px; padding-left: 0; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;"/>
+                <ui:VisualElement name="CurrentWeaponContainer" style="flex-grow: 0; height: 370px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; padding-bottom: 0; margin-bottom: 10px;">
+                    <ui:Label text="WEAPON NAME" name="WeaponName" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; white-space: pre-wrap; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; font-size: 20px;"/>
+                    <ui:VisualElement name="TopContainer" style="flex-grow: 1; flex-direction: row;">
+                        <ui:VisualElement name="LeftContainer" style="flex-grow: 0; width: 45%;">
+                            <ui:VisualElement name="WeaponVisualContainer" style="flex-grow: 0; height: 100px; align-items: center; justify-content: center;">
+                                <ui:VisualElement name="WeaponVisual" style="flex-grow: 0; width: auto; height: auto;"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="WeaponDescriptionContainer" style="flex-grow: 1; padding-left: 5px; padding-top: 0; padding-right: 5px;">
+                                <ui:ScrollView name="ShipDescriptionScrollView">
+                                    <ui:Label text="DESCRIPTION:" name="WeaponDescription" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: upper-left; font-size: 14px;"/>
+                                </ui:ScrollView>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="RightContainer" style="flex-grow: 1; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-left-width: 2px;">
+                            <ui:VisualElement name="WeaponUpgradeContainer" style="flex-grow: 1; flex-direction: column-reverse; margin-bottom: 5px;">
+                                <ui:VisualElement name="WeaponUpgradeSlot" style="flex-grow: 0; height: 40px; width: 100%; flex-direction: row; align-content: auto; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0);">
+                                    <ui:Label text="upgrade effect" name="UpgradeEffectLabel" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 3px; padding-right: 5px; padding-bottom: 3px; padding-left: 5px; -unity-text-align: middle-center; width: auto; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; border-top-width: 2px; white-space: pre-wrap;"/>
+                                    <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.39); display: none;"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="WeaponUpgradeSlot" style="flex-grow: 0; height: 40px; width: 100%; flex-direction: row; align-content: auto; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0);">
+                                    <ui:Label text="upgrade effect" name="UpgradeEffectLabel" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 3px; padding-right: 5px; padding-bottom: 3px; padding-left: 5px; -unity-text-align: middle-center; width: auto; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; border-top-width: 2px; white-space: pre-wrap;"/>
+                                    <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.39);"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="WeaponUpgradeSlot" style="flex-grow: 0; height: 40px; width: 100%; flex-direction: row; align-content: auto; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0);">
+                                    <ui:Label text="upgrade effect" name="UpgradeEffectLabel" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 3px; padding-right: 5px; padding-bottom: 3px; padding-left: 5px; -unity-text-align: middle-center; width: auto; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; border-top-width: 2px; white-space: pre-wrap;"/>
+                                    <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.39);"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:Button text="UPGRADE WEAPON" name="UpgradeWeaponBtn" class="text" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-top-width: 2px; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; font-size: 16px; width: 100%; height: 50px; transition-property: all; transition-duration: 0s; transition-timing-function: ease; transition-delay: 0s; letter-spacing: 5px;"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:ScrollView name="WeaponsScrollView"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

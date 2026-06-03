@@ -1,0 +1,8 @@
+:root {
+}
+
+.text {
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    color: rgb(224, 255, 255);
+    letter-spacing: 5px;
+}

@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <ui:VisualElement name="StarmapContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; display: none;">
+        <ui:Label text="Star&#10;" style="font-size: 50px; color: rgb(255, 0, 0);"/>
+    </ui:VisualElement>
+</ui:UXML>

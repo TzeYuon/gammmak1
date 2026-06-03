@@ -1,0 +1,35 @@
+.unity-scroller__low-button {
+    display: none;
+}
+.unity-scroller__high-button {
+    display: none;
+}
+
+.unity-base-slider__tracker {
+    background-color: transparent;
+    border-width: 0px;
+    border-right-width: 1px;
+    border-right-color: rgba(0, 255, 255, 0.1); 
+    width: 2px; 
+    margin-left: 10px; 
+}
+
+.unity-base-slider__dragger {
+    background-color: #00FFFF; 
+    border-width: 0px;
+    border-radius: 0px; 
+    width: 6px; 
+    left: 8px; 
+}
+
+.unity-base-slider__dragger:hover {
+    background-color: #FFFFFF; 
+}
+.unity-base-slider__dragger:active {
+    background-color: #FF003C;
+}
+
+.unity-scroller {
+    background-color: transparent;
+    width: 15px;
+}
