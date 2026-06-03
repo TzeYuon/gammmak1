@@ -3,6 +3,7 @@ using Unity.Entities;
 
 public enum GameState : byte
 {
+    None = 0,
     MainMenu,
     FleetCommandHub, // In the menus (Shop, Upgrades, Level select)
     Gameplay, // Main gameplay screen (RTS)

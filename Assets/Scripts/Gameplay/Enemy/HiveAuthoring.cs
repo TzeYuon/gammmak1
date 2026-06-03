@@ -24,6 +24,7 @@ class HiveAuthoring : MonoBehaviour
 
             var prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic);
 
+            AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new HiveComponent
             {
                 Prefab = prefab,

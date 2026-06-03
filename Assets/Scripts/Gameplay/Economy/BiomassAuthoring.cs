@@ -9,6 +9,7 @@ public class BiomassAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
+            AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new BiomassLoot());
         }
     }

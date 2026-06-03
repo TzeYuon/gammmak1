@@ -14,6 +14,7 @@ class MothershipAuthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
             // Identity components
+            AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new PlayerTag());
             AddComponent(entity, new MothershipTag());
 
