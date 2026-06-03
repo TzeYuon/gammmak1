@@ -18,6 +18,8 @@ class ProjectileAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
+            AddComponent<LevelEntityTag>(entity);
+
             // Universal stats
             AddComponent<ProjectileMovementStats>(entity);
             AddComponent<ProjectileTriggerState>(entity);

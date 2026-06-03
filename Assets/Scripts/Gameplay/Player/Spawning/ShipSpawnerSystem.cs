@@ -23,7 +23,7 @@ public partial class ShipSpawnerSystem : SystemBase
     protected override void OnUpdate()
     {
         if (spawnQueue.IsEmpty()) return;
-        if (!SystemAPI.TryGetSingleton<PlayerFleetConfig>(out var prefabs)) return;
+        if (!SystemAPI.TryGetSingletonBuffer<ActiveRosterSlot>(out var roster)) return;
         if (!SystemAPI.TryGetSingletonRW<PlayerEconomy>(out var economy)) return;
 
         var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
@@ -31,26 +31,9 @@ public partial class ShipSpawnerSystem : SystemBase
 
         while (spawnQueue.TryDequeue(out SpawnRequest request))
         {
-            Entity prefabToSpawn = Entity.Null;
-            float cost = math.INFINITY;
-
-            switch (request.ShipType)
-            {
-                case 0:
-                    prefabToSpawn = prefabs.FrigatePrefab;
-                    cost = prefabs.FrigateCost;
-                    break;
-                case 1:
-                    prefabToSpawn = prefabs.DestroyerPrefab;
-                    cost = prefabs.DestroyerCost;
-                    break;
-                case 2:
-                    prefabToSpawn = prefabs.CruiserPrefab;
-                    cost = prefabs.CruiserCost;
-                    break;
-                default:
-                    break;
-            }
+            var ship = roster[request.SlotIndex];
+            Entity prefabToSpawn = ship.PrefabEntity;
+            float cost = ship.BiomassCost;
 
             if (economy.ValueRO.TotalBiomass < cost) return;
             else economy.ValueRW.TotalBiomass -= cost;
@@ -66,7 +49,7 @@ public partial class ShipSpawnerSystem : SystemBase
 
 public struct SpawnRequest
 {
-    public int ShipType;
+    public int SlotIndex;
     public float2 Position;
 }
 

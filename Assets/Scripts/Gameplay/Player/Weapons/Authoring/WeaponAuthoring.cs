@@ -14,7 +14,18 @@ class WeaponAuthoring : MonoBehaviour
 
     // Targeting
     public TargetingType Targeting = TargetingType.Heatmap;
-    public float AngleBias = 2.0f;
+    /// <summary>
+    /// Higher number prefers higher density
+    /// </summary>
+    public float DensityBias = 1.0f;
+    /// <summary>
+    /// Higher number prefers less rotation
+    /// </summary>
+    public float AngleBias = 2.0f; 
+    /// <summary>
+    /// Higher number prefers closer targets, larger negative prefers far targets
+    /// </summary>
+    public float DistanceBias = 2.0f;
 
     // Rotation
     public bool HasTurret = true;
@@ -42,10 +53,17 @@ class WeaponAuthoring : MonoBehaviour
             AddComponent(entity, new WeaponState { FireRate = authoring.FireRate });
 
             // Targeting
+            AddComponent(entity, new WeaponTargetingStats { 
+                Range = authoring.Range,
+                RangeSq = authoring.Range * authoring.Range,
+                DensityBias = authoring.DensityBias,
+                AngleBias = authoring.AngleBias,
+                DistanceBias = authoring.DistanceBias,
+            });
             if (authoring.Targeting == TargetingType.Heatmap)
-                AddComponent(entity, new HeatmapTargetingComponent { Range = authoring.Range, AngleBias = authoring.AngleBias });
-            else
-                AddComponent(entity, new PrecisionTargetingComponent { Range = authoring.Range, AngleBias = authoring.AngleBias });
+                AddComponent(entity, new HeatmapTargetingComponent());
+            else if (authoring.Targeting == TargetingType.Precision)
+                AddComponent(entity, new PrecisionTargetingComponent());
 
             // Rotation
             if (authoring.HasTurret)
@@ -91,7 +109,7 @@ public class WeaponAuthoringEditor : Editor
 {
     // Properties
     SerializedProperty p_Damage, p_FireRate, p_Range;
-    SerializedProperty p_Targeting, p_AngleBias;
+    SerializedProperty p_Targeting, p_DensityBias, p_AngleBias, p_DistanceBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
     SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_Spread, p_TriggerTime;
 
@@ -102,7 +120,9 @@ public class WeaponAuthoringEditor : Editor
         p_Range = serializedObject.FindProperty("Range");
 
         p_Targeting = serializedObject.FindProperty("Targeting");
+        p_DensityBias = serializedObject.FindProperty("DensityBias");
         p_AngleBias = serializedObject.FindProperty("AngleBias");
+        p_DistanceBias = serializedObject.FindProperty("DistanceBias");
 
         p_HasTurret = serializedObject.FindProperty("HasTurret");
         p_TurnSpeed = serializedObject.FindProperty("TurnSpeed");
@@ -136,7 +156,9 @@ public class WeaponAuthoringEditor : Editor
         EditorGUILayout.LabelField("TARGETING");
         EditorGUILayout.BeginVertical("helpbox");
         EditorGUILayout.PropertyField(p_Targeting);
+        EditorGUILayout.PropertyField(p_DensityBias, new GUIContent("Density Bias"));
         EditorGUILayout.PropertyField(p_AngleBias, new GUIContent("Angle Bias (Laziness)"));
+        EditorGUILayout.PropertyField(p_DistanceBias, new GUIContent("Distance Bias"));
         EditorGUILayout.EndVertical();
 
         // Rotation

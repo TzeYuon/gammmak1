@@ -1,20 +1,18 @@
 using Unity.Burst;
 using Unity.Entities;
 
+[BurstCompile]
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial struct GameWinLossSystem : ISystem
+public partial class LevelWinLossSystem : SystemBase
 {
     private EntityQuery livingHivesQuery;
     private EntityQuery livingMothershipQuery;
 
-    [BurstCompile]
-    public void OnCreate(ref SystemState state)
+    private bool isInitialized;
+
+    protected override void OnCreate()
     {
-        state.EntityManager.CreateSingleton(new LevelStateComponent
-        {
-            Result = LevelState.Playing,
-            IsInitialized = false
-        });
+        isInitialized = false;
 
         livingHivesQuery = SystemAPI.QueryBuilder()
             .WithAll<HiveComponent>()
@@ -25,33 +23,40 @@ public partial struct GameWinLossSystem : ISystem
             .WithAll<MothershipTag>()
             .WithDisabled<DeadTag>()
             .Build();
+
+        GameStateSystem.OnStateChanged += HandleStateChange;
+    }
+
+    void HandleStateChange(GameState prev, GameState curState)
+    {
+        if (curState == GameState.Gameplay) isInitialized = false;
     }
 
     [BurstCompile]
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
-        var levelState = SystemAPI.GetSingletonRW<LevelStateComponent>();
-        if (levelState.ValueRO.Result != LevelState.Playing) return;
+        var gameState = SystemAPI.GetSingletonRW<GameStateSingleton>();
+        if (gameState.ValueRO.CurrentState != GameState.Gameplay) return;
 
         int mothershipCount = livingMothershipQuery.CalculateEntityCount();
         int hiveCount = livingHivesQuery.CalculateEntityCount();
 
-        if (!levelState.ValueRO.IsInitialized)
+        if (!isInitialized)
         {
             if (mothershipCount > 0 && hiveCount > 0)
             {
-                levelState.ValueRW.IsInitialized = true;
+                isInitialized = true;
             }
             return;
         }
 
         if (mothershipCount == 0)
         {
-            levelState.ValueRW.Result = LevelState.Defeat;
+            gameState.ValueRW.CurrentState = GameState.Defeat;
         }
         else if (hiveCount == 0)
         {
-            levelState.ValueRW.Result = LevelState.Victory;
+            gameState.ValueRW.CurrentState = GameState.Victory;
         }
     }
 }

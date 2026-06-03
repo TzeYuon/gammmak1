@@ -37,6 +37,7 @@ class PlayerShipAuthoring : MonoBehaviour
             });
 
             // Identity components
+            AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new PlayerTag());
 
             // Health

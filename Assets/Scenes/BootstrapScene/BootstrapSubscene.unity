@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64b170c213bacac49ab58a9e25885417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EconomyAuthoring
-  StartingBiomass: 0
+  StartingBiomass: 200
 --- !u!4 &218440434
 Transform:
   m_ObjectHideFlags: 0
@@ -158,7 +158,55 @@ Transform:
   m_GameObject: {fileID: 218440432}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 999.8455, y: 1002.946, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &523752876
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 523752878}
+  - component: {fileID: 523752877}
+  m_Layer: 0
+  m_Name: Heatmap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &523752877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523752876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70cc7c79a2fa11e449afc1118d0130df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeatmapAuthoring
+  MapWidth: 2000
+  MapHeight: 2000
+  CoarseCellSize: 10
+  FineCellSizeMultiplier: 5
+--- !u!4 &523752878
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523752876}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -222,12 +270,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b474cc1cc56733843831c8ae5b5a3b05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPrefabAuthoring
-  PlayerFrigate: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
-  PlayerDestroyer: {fileID: 6753536424006035904, guid: b79ebb98dc298b240bd035f1525e0050, type: 3}
-  PlayerCruiser: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
+  AllGameShips:
+  - {fileID: 11400000, guid: 345d1f1ddb88d7c4da008af6d827aee5, type: 2}
+  - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
+  - {fileID: 11400000, guid: 60fc3a112153fa740b8b01a9f03f8615, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 218440434}
   - {fileID: 2130700922}
+  - {fileID: 523752878}
