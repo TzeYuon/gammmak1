@@ -10,4 +10,36 @@ public class PlayerSaveData : ScriptableObject
     public List<WeaponData> AvailableWeapons;
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
+
+    public bool IsShipInRoster(ShipBlueprintData data)
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] == data) return true;
+        }
+        return false;
+    }
+
+    public void RemoveFromRoster(ShipBlueprintData data)
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] == data)
+            {
+                ActiveRoster[i] = null;
+            }
+        }
+    }
+
+    public void AddToRoster(ShipBlueprintData data)
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] == null)
+            {
+                ActiveRoster[i] = data;
+                return;
+            }
+        }
+    }
 }

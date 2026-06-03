@@ -12,6 +12,7 @@ public class UIScreenManager : MonoBehaviour
 {
     [SerializeField] SceneManager sceneManager;
     [SerializeField] PlayerSaveData playerSaveData;
+    [SerializeField] UIAssetsDatabase uiAssetsDatabase;
 
     public VisualElement Root { get; private set; }
     public IUIScreen MenuScreen { get; private set; }
@@ -31,7 +32,7 @@ public class UIScreenManager : MonoBehaviour
         SettingsScreen = new SettingsScreen(this, Root.Q<VisualElement>("SettingsScreen"));
         PauseScreen = new PauseScreen(this, Root.Q<VisualElement>("PauseScreen"));
         GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"), playerSaveData);
-        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData);
+        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData, uiAssetsDatabase);
 
         if (playerSaveData == null) Debug.LogWarning("UIManager no save data assigned");
 

@@ -12,6 +12,16 @@ public enum ShipID : byte
     Cruiser
 }
 
+public enum ShipClass : byte
+{
+    None = 0,
+    Frigate = 1,
+    Destroyer = 2,
+    Cruiser = 3,
+    Battleship = 4,
+    Dreadnought = 5,
+}
+
 /// <summary>
 /// Upgradable systems that the ships can carry.
 /// </summary>
@@ -44,6 +54,7 @@ public class ShipSystem
 public class ShipBlueprintData : ScriptableObject
 {
     public string ShipName;
+    public ShipClass ShipClass;
     public ShipID ShipID;
     public GameObject ShipPrefab;
     public int MaxSpawnsPerLevel = 10;
