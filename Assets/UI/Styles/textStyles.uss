@@ -6,3 +6,10 @@
     color: rgb(224, 255, 255);
     letter-spacing: 5px;
 }
+
+.subtext {
+    font-size: 12px;
+    color: rgb(136, 165, 178);
+    margin-top: 2px;
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-SemiBold.ttf?fileID=12800000&guid=4c9a87210e735d84da6edcf8efb4be35&type=3#RobotoMono-SemiBold");
+}

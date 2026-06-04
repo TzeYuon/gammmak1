@@ -37,7 +37,6 @@ public enum ShipSystemID : byte
 public class WeaponMount
 {
     public Vector2 Position;
-    public WeaponSize MaxWeaponSize;
     public WeaponData EquippedWeapon;
 }
 

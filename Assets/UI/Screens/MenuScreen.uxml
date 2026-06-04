@@ -1,8 +1,9 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles" />
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
     <engine:VisualElement name="Container" style="flex-grow: 1; flex-direction: column-reverse; align-self: center; justify-content: flex-start; margin-bottom: 40px; align-items: center;">
-        <engine:Button text="Exit" name="ExitButton" class="button" />
-        <engine:Button text="Settings" name="SettingsButton" class="button" style="width: auto; height: 75px;" />
-        <engine:Button text="Start" name="StartButton" class="button" style="width: auto; height: 75px;" />
+        <engine:Button text="EXIT" name="ExitButton" class="button text" style="border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px;"/>
+        <engine:Button text="SETTINGS" name="SettingsButton" class="button text" style="width: auto; height: auto; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px; margin-top: 20px; margin-bottom: 20px;"/>
+        <engine:Button text="START" name="StartButton" class="button text" style="width: auto; height: auto; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px;"/>
     </engine:VisualElement>
 </engine:UXML>

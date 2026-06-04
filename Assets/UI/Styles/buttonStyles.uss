@@ -1,9 +1,124 @@
+.button:hover {
+    color: rgb(0, 255, 255);
+}
+
+.button:active {
+    border-color: rgb(255, 0, 60);
+    color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+}
+
 .button {
-    width: auto;
-    height: 75px;
-    font-size: 30px;
-    padding-top: 32px;
-    padding-right: 32px;
-    padding-bottom: 32px;
-    padding-left: 32px;
+    background-color: rgb(26, 26, 26);
+    border-width: 1px;
+    border-color: rgb(0, 255, 255);
+    border-radius: 0;
+    padding: 8px 15px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+}
+
+.victory-continue-button {
+    color: rgb(0, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(0, 255, 255);
+    border-right-color: rgb(0, 255, 255);
+    border-top-color: rgb(0, 255, 255);
+    border-bottom-color: rgb(0, 255, 255);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
+    margin-top: 45px;
+}
+
+.victory-continue-button:hover {
+    color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(0, 255, 255);
+    border-right-color: rgb(0, 255, 255);
+    border-top-color: rgb(0, 255, 255);
+    border-bottom-color: rgb(0, 255, 255);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
+}
+
+.victory-continue-button:active {
+    color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(255, 0, 0);
+    border-right-color: rgb(255, 0, 0);
+    border-top-color: rgb(255, 0, 0);
+    border-bottom-color: rgb(255, 0, 0);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
+}
+
+
+
+.defeat-continue-button {
+    color: rgb(255, 0, 0);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(255, 0, 0);
+    border-right-color: rgb(255, 0, 0);
+    border-top-color: rgb(255, 0, 0);
+    border-bottom-color: rgb(255, 0, 0);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
+    margin-top: 45px;
+}
+
+.defeat-continue-button:hover {
+    color: rgb(255, 255, 255);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(255, 0, 0);
+    border-right-color: rgb(255, 0, 0);
+    border-top-color: rgb(255, 0, 0);
+    border-bottom-color: rgb(255, 0, 0);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
+}
+
+.defeat-continue-button:active {
+    color: rgb(255, 0, 0);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(255, 0, 0);
+    border-right-color: rgb(255, 0, 0);
+    border-top-color: rgb(255, 0, 0);
+    border-bottom-color: rgb(255, 0, 0);
+    background-color: rgb(26, 26, 26);
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    font-size: 20px;
+    letter-spacing: 3px;
 }

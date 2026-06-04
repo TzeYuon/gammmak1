@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElementsSchema.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/SystemItemStyles.uss?fileID=7433441132597879392&amp;guid=4afa9fad7b8666247837b7b35602f7bc&amp;type=3#SystemItemStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <ui:VisualElement name="SystemItem" class="system-item" style="border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; background-color: rgba(26, 26, 26, 0);">
+        <ui:VisualElement style="width: 45%; flex-grow: 0;">
+            <ui:Label name="SystemName" text="SYSTEM NAME" class="text"/>
+            <ui:Label name="SystemStats" text="UPGRADE EFFECT" class="subtext"/>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; margin-top: 8px;">
+            <ui:VisualElement name="PipContainer" class="pip-container">
+                <ui:VisualElement class="pip pip--inactive"/>
+                <ui:VisualElement class="pip pip--inactive"/>
+                <ui:VisualElement class="pip pip--inactive"/>
+                <ui:VisualElement class="pip pip--inactive"/>
+                <ui:VisualElement class="pip pip--inactive"/>
+            </ui:VisualElement>
+            <ui:Button name="Btn_Upgrade" text="UPGRADE [COST]" class="text button" style="margin-top: 14px; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; background-color: rgb(26, 26, 26); font-size: 14px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

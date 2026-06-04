@@ -13,9 +13,16 @@ MonoBehaviour:
   m_Name: Frigate
   m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
   ShipName: Frigate
+  ShipClass: 1
   ShipID: 1
   ShipPrefab: {fileID: 6753536424006035904, guid: 5327e4ca5048724448d678a0c477895c, type: 3}
   MaxSpawnsPerLevel: 10
   CostToSpawn: 2
-  ShipSystems: []
-  Mounts: []
+  ShipSystems:
+  - SystemID: 1
+    UpgradeLevel: 0
+    MaxUpgradeLevel: 0
+    BaseUpgradeCost: 0
+  Mounts:
+  - Position: {x: 0, y: 0}
+    EquippedWeapon: {fileID: 0}

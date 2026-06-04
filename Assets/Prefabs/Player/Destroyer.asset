@@ -13,9 +13,22 @@ MonoBehaviour:
   m_Name: Destroyer
   m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
   ShipName: Destroyer
+  ShipClass: 2
   ShipID: 2
   ShipPrefab: {fileID: 6753536424006035904, guid: b79ebb98dc298b240bd035f1525e0050, type: 3}
   MaxSpawnsPerLevel: 10
   CostToSpawn: 4
-  ShipSystems: []
-  Mounts: []
+  ShipSystems:
+  - SystemID: 1
+    UpgradeLevel: 0
+    MaxUpgradeLevel: 0
+    BaseUpgradeCost: 0
+  - SystemID: 2
+    UpgradeLevel: 0
+    MaxUpgradeLevel: 0
+    BaseUpgradeCost: 0
+  Mounts:
+  - Position: {x: 0, y: 0}
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0, y: 0}
+    EquippedWeapon: {fileID: 0}
