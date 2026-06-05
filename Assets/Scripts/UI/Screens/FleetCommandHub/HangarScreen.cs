@@ -296,6 +296,7 @@ public class WeaponMountContextMenu
 
             Button weaponListItem = hangarScreen.UIAssetsDatabase.WeaponListItem.Instantiate().Q<Button>("WeaponsListItem");
 
+            // Update name
             Label weaponName = weaponListItem.Q<Label>("WeaponName");
             weaponName.text = weapon.WeaponName;
 
@@ -306,7 +307,31 @@ public class WeaponMountContextMenu
                 UpdateCurrentWeapon();
             };
 
+            // Update upgrade pips
+            VisualElement pipContainer = weaponListItem.Q<VisualElement>("PipContainer");
+            for (int i = 0; i < weapon.MaxUpgradeLevel; i++)
+            {
+                VisualElement pip = hangarScreen.UIAssetsDatabase.UpgradePip.Instantiate();
+                pipContainer.Add(pip);
+
+                SetPipState(pip, i < weapon.UpgradeLevel);
+            }
+
             weaponsScrollViewContainer.Add(weaponListItem);
+        }
+    }
+
+    private void SetPipState(VisualElement pip, bool isActive)
+    {
+        if (isActive)
+        {
+            pip.AddToClassList("pip--active");
+            pip.RemoveFromClassList("pip--inactive");
+        }
+        else
+        {
+            pip.AddToClassList("pip--inactive");
+            pip.RemoveFromClassList("pip--active");
         }
     }
 }

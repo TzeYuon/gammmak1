@@ -7,12 +7,6 @@
         <ui:VisualElement style="flex-grow: 1; align-self: center;">
             <ui:VisualElement name="WeaponVisual" style="flex-grow: 0; aspect-ratio: 1; width: auto; height: 100%; border-left-color: rgba(0, 255, 255, 0); border-right-color: rgba(0, 255, 255, 0); border-top-color: rgba(0, 255, 255, 0); border-bottom-color: rgba(0, 255, 255, 0); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;"/>
         </ui:VisualElement>
-        <ui:VisualElement name="PipContainer" class="pip-container" style="height: 20px; align-items: center; flex-direction: row; margin-right: 0; justify-content: center;">
-            <ui:VisualElement class="pip pip--inactive"/>
-            <ui:VisualElement class="pip pip--inactive"/>
-            <ui:VisualElement class="pip pip--inactive"/>
-            <ui:VisualElement class="pip pip--inactive"/>
-            <ui:VisualElement class="pip pip--inactive"/>
-        </ui:VisualElement>
+        <ui:VisualElement name="PipContainer" class="pip-container" style="height: 20px; align-items: center; flex-direction: row; margin-right: 0; justify-content: center;"/>
     </ui:Button>
 </ui:UXML>
