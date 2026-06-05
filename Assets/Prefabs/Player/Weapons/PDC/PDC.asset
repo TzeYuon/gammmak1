@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: PDC
   WeaponID: 1
-  Size: 0
+  EnergyCost: 0
   UpgradeLevel: 0
   MaxUpgradeLevel: 5
   BaseUpgradeCost: 100

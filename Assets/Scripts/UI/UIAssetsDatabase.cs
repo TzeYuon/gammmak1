@@ -6,6 +6,8 @@ public class UIAssetsDatabase : ScriptableObject
 {
     public VisualTreeAsset ShipListItem;
     public VisualTreeAsset ShipSystemItem;
+
     public VisualTreeAsset WeaponListItem;
     public VisualTreeAsset WeaponMountItem;
+    public VisualTreeAsset WeaponUpgradeItem;
 }

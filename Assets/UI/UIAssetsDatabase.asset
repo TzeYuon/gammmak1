@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIAssetsDatabase
   ShipListItem: {fileID: 9197481963319205126, guid: a7c3a57407451e84ab00d981bf6cc0c1, type: 3}
   ShipSystemItem: {fileID: 9197481963319205126, guid: c39bc8c8aa4f51f488249861475953dc, type: 3}
-  WeaponListItem: {fileID: 0}
+  WeaponListItem: {fileID: 9197481963319205126, guid: 3468ef6c6ec96164086b472b7f46cd71, type: 3}
   WeaponMountItem: {fileID: 9197481963319205126, guid: 863c68ef9177c3a4aa84194012492f16, type: 3}
+  WeaponUpgradeItem: {fileID: 9197481963319205126, guid: a3b9b1c2c367d944c9d00996156401ff, type: 3}

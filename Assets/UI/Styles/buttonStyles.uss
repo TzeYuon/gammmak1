@@ -72,8 +72,6 @@
     letter-spacing: 3px;
 }
 
-
-
 .defeat-continue-button {
     color: rgb(255, 0, 0);
     border-top-width: 1px;
@@ -121,4 +119,18 @@
     -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
     font-size: 20px;
     letter-spacing: 3px;
+}
+
+.listItem {
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+}
+
+.listItem:hover {
+    border-left-color: rgb(0, 255, 255);
+    border-right-color: rgb(0, 255, 255);
+    border-top-color: rgb(0, 255, 255);
+    border-bottom-color: rgb(0, 255, 255);
 }

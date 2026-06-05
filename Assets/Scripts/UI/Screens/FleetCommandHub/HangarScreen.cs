@@ -182,11 +182,15 @@ public class ShipDetailsElement
             weaponMountsScrollViewContainer.Add(weaponMountItem);
         }
 
-        // update toggle roster button
-        if (hangarScreen.PlayerSaveData.IsShipInRoster(currentShip)) toggleRosterBtn.text = "REMOVE FROM ROSTER";
-        else toggleRosterBtn.text = "ADD TO ROSTER";
+        UpdateToggleRosterBtn();
 
         container.style.display = DisplayStyle.Flex;
+    }
+
+    void UpdateToggleRosterBtn()
+    {
+        if (hangarScreen.PlayerSaveData.IsShipInRoster(currentShip)) toggleRosterBtn.text = "REMOVE FROM ROSTER";
+        else toggleRosterBtn.text = "ADD TO ROSTER";
     }
 
     private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)
@@ -211,14 +215,13 @@ public class ShipDetailsElement
         if (hangarScreen.PlayerSaveData.IsShipInRoster(currentShip)) hangarScreen.PlayerSaveData.RemoveFromRoster(currentShip);
         else hangarScreen.PlayerSaveData.AddToRoster(currentShip);
 
-        UpdateDetails(currentShip);
+        UpdateToggleRosterBtn();
         hangarScreen.UpdateShipButton(currentShip);
     }
 }
 
 public class HangarContextMenu
 {
-    private HangarScreen hangarScreen;
     private VisualElement container;
 
     private WeaponMountContextMenu weaponMountContext;
@@ -227,7 +230,7 @@ public class HangarContextMenu
     {
         container = root;
 
-        weaponMountContext = new(container.Q<VisualElement>("ContextWeaponMount"));
+        weaponMountContext = new(container.Q<VisualElement>("ContextWeaponMount"), hangarScreen);
     }
 
     public void Hide()
@@ -250,21 +253,61 @@ public class HangarContextMenu
 
 public class WeaponMountContextMenu
 {
+    private HangarScreen hangarScreen;
+
     private VisualElement container;
 
     private CurrentEquippedWeaponElement currentEquippedWeaponElement;
 
-    public WeaponMountContextMenu(VisualElement root)
+    private VisualElement weaponsScrollViewContainer;
+
+    private WeaponMount currentWeaponMount;
+
+    public WeaponMountContextMenu(VisualElement root, HangarScreen hangarScreen)
     {
+        this.hangarScreen = hangarScreen;
+
         container = root;
 
         currentEquippedWeaponElement = new(container.Q<VisualElement>("CurrentWeaponContainer"));
+
+        weaponsScrollViewContainer = container.Q<VisualElement>("WeaponsScrollViewContainer");
     }
 
     public void ShowWeaponMount(WeaponMount weaponMount)
     {
-        if (weaponMount.EquippedWeapon != null) currentEquippedWeaponElement.ShowWeapon(weaponMount.EquippedWeapon);
+        currentWeaponMount = weaponMount;
+        UpdateCurrentWeapon();
+        UpdateWeaponsList();
+    }
+
+    void UpdateCurrentWeapon()
+    {
+        if (currentWeaponMount.EquippedWeapon != null) currentEquippedWeaponElement.ShowWeapon(currentWeaponMount.EquippedWeapon);
         else currentEquippedWeaponElement.ShowEmpty();
+    }
+
+    void UpdateWeaponsList()
+    {
+        weaponsScrollViewContainer.Clear();
+        foreach (var weapon in hangarScreen.PlayerSaveData.AvailableWeapons)
+        {
+            if (weapon == null) continue;
+
+            Button weaponListItem = hangarScreen.UIAssetsDatabase.WeaponListItem.Instantiate().Q<Button>("WeaponsListItem");
+
+            Label weaponName = weaponListItem.Q<Label>("WeaponName");
+            weaponName.text = weapon.WeaponName;
+
+            weaponListItem.clicked += () =>
+            {
+                // equip weapon then update current equipped UI
+                currentWeaponMount.EquippedWeapon = weapon;
+                UpdateCurrentWeapon();
+            };
+
+            weaponsScrollViewContainer.Add(weaponListItem);
+        }
     }
 }
 

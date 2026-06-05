@@ -8,6 +8,7 @@ public class FleetCommandHubScreen : UIScreen
     private UIAssetsDatabase uiAssetsDatabase;
 
     private IUIScreen hangarScreen;
+    private IUIScreen weaponsScreen;
     private IUIScreen starmapScreen;
 
     public FleetCommandHubScreen(
@@ -20,10 +21,12 @@ public class FleetCommandHubScreen : UIScreen
         this.uiAssetsDatabase = uiAssetsDatabase;
 
         hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), playerSaveData, uiAssetsDatabase);
+        weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"), playerSaveData, uiAssetsDatabase);
         starmapScreen = new StarmapScreen(manager, root.Q<VisualElement>("StarmapScreen"));
 
         // Register buttons
         root.Q<Button>("HangarBtn").clicked += () => ShowScreen(hangarScreen);
+        root.Q<Button>("WeaponsBtn").clicked += () => ShowScreen(weaponsScreen);
         root.Q<Button>("StarmapBtn").clicked += () => ShowScreen(starmapScreen);
     }
 
@@ -42,6 +45,7 @@ public class FleetCommandHubScreen : UIScreen
     {
         // Hide all screens
         hangarScreen.Hide();
+        weaponsScreen.Hide();
         starmapScreen.Hide();
 
         // Show the requested one

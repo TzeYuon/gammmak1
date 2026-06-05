@@ -1,0 +1,42 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <Style src="project://database/Assets/UI/Styles/scrollviewStyles.uss?fileID=7433441132597879392&amp;guid=1c9e88b492e50ef4aa09e28f52ec1cc8&amp;type=3#scrollviewStyles"/>
+    <Style src="project://database/Assets/UI/Styles/systemItemStyles.uss?fileID=7433441132597879392&amp;guid=4afa9fad7b8666247837b7b35602f7bc&amp;type=3#systemItemStyles"/>
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+        <ui:VisualElement name="WeaponsGrid" style="flex-grow: 0; width: 30%; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-right-width: 2px;">
+            <ui:Label text="WEAPONS INVENTORY" name="Header" class="text" style="font-size: 24px; margin-top: 10px; margin-right: 0; margin-bottom: 10px; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 10px; padding-left: 5px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; -unity-text-align: upper-center;"/>
+            <ui:ScrollView name="WeaponsScrollView" horizontal-scroller-visibility="Hidden" style="flex-wrap: wrap; width: 100%; flex-direction: row;">
+                <ui:VisualElement name="WeaponsScrollViewContainer" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap;"/>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1;">
+            <ui:VisualElement name="CurrentWeaponContainer" style="flex-grow: 1; flex-direction: row; position: absolute; width: 100%; height: 100%; display: flex;">
+                <ui:VisualElement name="CurrentWeaponDetailsContainer" style="flex-grow: 0; flex-direction: column; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-right-width: 2px; width: 70%;">
+                    <ui:Label text="WEAPON NAME" name="WeaponName" class="text" style="margin-top: 20px; margin-right: 0; margin-bottom: 10px; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 10px; padding-left: 0; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; font-size: 24px;"/>
+                    <ui:VisualElement name="WeaponVisual" style="flex-grow: 1;"/>
+                    <ui:VisualElement name="Details" style="flex-grow: 0; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-top-width: 2px; height: 30%; flex-direction: row;">
+                        <ui:VisualElement style="flex-grow: 0; width: 30%; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-right-width: 2px;">
+                            <ui:Label text="DESCRIPTION:" name="Header" class="text" style="margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 10px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;"/>
+                            <ui:ScrollView name="DescriptionScrollView">
+                                <ui:Label text="description" name="DescriptionLabel" class="subtext" style="margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 10px; padding-top: 0; padding-right: 0; padding-bottom: 30px; padding-left: 0; font-size: 16px; white-space: normal;"/>
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-grow: 1;">
+                            <ui:Label text="STATS:" name="Header" class="text" style="margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 10px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;"/>
+                            <ui:ScrollView name="StatsScrollView">
+                                <ui:Label text="stats" name="StatsLabel" class="subtext" style="margin-top: 10px; margin-right: 0; margin-bottom: 0; margin-left: 10px; padding-top: 0; padding-right: 0; padding-bottom: 30px; padding-left: 0; font-size: 16px; white-space: normal;"/>
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="UpgradeContainer" style="flex-grow: 1; flex-direction: column-reverse;">
+                    <ui:Button text="UPGRADE [COST]" name="UpgradeBtn" class="button text" style="font-size: 20px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="NoCurrentWeaponContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.3); display: none;">
+                <ui:Label text="[ NO WEAPON SELECTED ]" class="text" style="color: rgb(255, 0, 0); font-size: 30px;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
