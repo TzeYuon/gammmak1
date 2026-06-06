@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 public class FleetCommandHubScreen : UIScreen
 {
     private PlayerSaveData playerSaveData;
-    private UIAssetsDatabase uiAssetsDatabase;
 
     private IUIScreen hangarScreen;
     private IUIScreen weaponsScreen;
@@ -14,14 +13,12 @@ public class FleetCommandHubScreen : UIScreen
     public FleetCommandHubScreen(
         UIScreenManager manager, 
         VisualElement root, 
-        PlayerSaveData playerSaveData, 
-        UIAssetsDatabase uiAssetsDatabase) : base(manager, root)
+        PlayerSaveData playerSaveData) : base(manager, root)
     {
         this.playerSaveData = playerSaveData;
-        this.uiAssetsDatabase = uiAssetsDatabase;
 
-        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), playerSaveData, uiAssetsDatabase);
-        weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"), playerSaveData, uiAssetsDatabase);
+        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), playerSaveData);
+        weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"), playerSaveData);
         starmapScreen = new StarmapScreen(manager, root.Q<VisualElement>("StarmapScreen"));
 
         // Register buttons

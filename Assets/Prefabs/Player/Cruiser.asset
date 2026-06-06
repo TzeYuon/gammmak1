@@ -20,8 +20,8 @@ MonoBehaviour:
   CostToSpawn: 6
   ShipSystems:
   - SystemID: 1
-    UpgradeLevel: 0
-    MaxUpgradeLevel: 0
+    UpgradeLevel: 1
+    MaxUpgradeLevel: 5
     BaseUpgradeCost: 0
   Mounts:
   - Position: {x: 0, y: 0}

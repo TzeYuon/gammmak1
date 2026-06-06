@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
@@ -10,9 +9,13 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public class UIScreenManager : MonoBehaviour
 {
+    public static UIScreenManager Instance { get; private set; }
+
     [SerializeField] SceneManager sceneManager;
     [SerializeField] PlayerSaveData playerSaveData;
+
     [SerializeField] UIAssetsDatabase uiAssetsDatabase;
+    public static UIAssetsDatabase UIAssetsDatabase { get { return Instance.uiAssetsDatabase; } }
 
     public VisualElement Root { get; private set; }
     public IUIScreen MenuScreen { get; private set; }
@@ -27,12 +30,15 @@ public class UIScreenManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         Root = GetComponent<UIDocument>().rootVisualElement;
         MenuScreen = new MenuScreen(this, Root.Q<VisualElement>("MenuScreen"), sceneManager);
         SettingsScreen = new SettingsScreen(this, Root.Q<VisualElement>("SettingsScreen"));
         PauseScreen = new PauseScreen(this, Root.Q<VisualElement>("PauseScreen"));
         GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"), playerSaveData);
-        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData, uiAssetsDatabase);
+        FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData);
 
         if (playerSaveData == null) Debug.LogWarning("UIManager no save data assigned");
 

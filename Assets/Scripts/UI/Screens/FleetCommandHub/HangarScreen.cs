@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 public class HangarScreen : UIScreen
 {
     public PlayerSaveData PlayerSaveData;
-    public UIAssetsDatabase UIAssetsDatabase;
 
     private ScrollView shipListContainer;
     private Dictionary<ShipBlueprintData, Button> shipButtons = new();
@@ -16,11 +15,9 @@ public class HangarScreen : UIScreen
     public HangarScreen(
         UIScreenManager manager, 
         VisualElement root, 
-        PlayerSaveData playerSaveData, 
-        UIAssetsDatabase uiAssetsDatabase) : base(manager, root)
+        PlayerSaveData playerSaveData) : base(manager, root)
     {
         this.PlayerSaveData = playerSaveData;
-        this.UIAssetsDatabase = uiAssetsDatabase;
 
         shipListContainer = root.Q<ScrollView>("ShipsScrollView");
 
@@ -48,7 +45,7 @@ public class HangarScreen : UIScreen
 
         foreach (var shipBlueprint in PlayerSaveData.AvailableShips)
         {
-            VisualElement shipItemClone = UIAssetsDatabase.ShipListItem.Instantiate();
+            VisualElement shipItemClone = UIScreenManager.UIAssetsDatabase.ShipListItem.Instantiate();
 
             Button btn = shipItemClone.Q<Button>("ShipItemBtn");
             Label nameLabel = shipItemClone.Q<Label>("ShipItemName");
@@ -107,7 +104,7 @@ public class ShipDetailsElement
     private Button toggleRosterBtn;
 
     private VisualElement weaponMountsScrollViewContainer;
-    private List<VisualElement> weaponMountButtons = new();
+    private Dictionary<WeaponMount, Button> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
 
@@ -156,10 +153,16 @@ public class ShipDetailsElement
         systemsScrollView.Clear();
         foreach (var system in currentShip.ShipSystems)
         {
-            VisualElement systemItem = hangarScreen.UIAssetsDatabase.ShipSystemItem.Instantiate();
+            VisualElement systemItem = UIScreenManager.UIAssetsDatabase.ShipSystemItem.Instantiate();
 
+            // update system name
             Label systemName = systemItem.Q<Label>("SystemName");
             systemName.text = system.SystemID.ToString().ToUpper();
+
+            // update upgrade pips
+            PipContainerVisualElement pipContainer = systemItem.Q<PipContainerVisualElement>("PipContainer");
+            pipContainer.MaxPips = system.MaxUpgradeLevel;
+            pipContainer.Value = system.UpgradeLevel;
 
             // add btn action
 
@@ -171,14 +174,13 @@ public class ShipDetailsElement
         weaponMountsScrollViewContainer.Clear();
         foreach (var mount in currentShip.Mounts)
         {
-            Button weaponMountItem = hangarScreen.UIAssetsDatabase.WeaponMountItem.Instantiate().Q<Button>("WeaponMountItem");
-
+            Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount, UIScreenManager.UIAssetsDatabase);
             weaponMountItem.clicked += () =>
             {
                 OnWeaponMountItemClicked(mount, weaponMountItem);
             };
 
-            weaponMountButtons.Add(weaponMountItem);
+            weaponMountButtons.Add(mount, weaponMountItem);
             weaponMountsScrollViewContainer.Add(weaponMountItem);
         }
 
@@ -196,7 +198,7 @@ public class ShipDetailsElement
     private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)
     {
         // Clear style for other buttons
-        foreach (var btn in weaponMountButtons)
+        foreach (var btn in weaponMountButtons.Values)
         {
             btn.style.backgroundColor = Color.clear;
         }
@@ -205,6 +207,11 @@ public class ShipDetailsElement
         clickedButton.style.backgroundColor = new Color(0, 1, 1, 0.1f);
 
         hangarScreen.HangarContextMenu.ShowWeaponMount(mount);
+    }
+
+    public void UpdateWeaponMountItem(WeaponMount mount)
+    {
+        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount, UIScreenManager.UIAssetsDatabase);
     }
 
     public void OnToggleRosterBtnClicked()
@@ -257,7 +264,10 @@ public class WeaponMountContextMenu
 
     private VisualElement container;
 
-    private CurrentEquippedWeaponElement currentEquippedWeaponElement;
+    private VisualElement currentWeaponContainer;
+    private Label weaponName;
+    private VisualElement weaponDetailsContainer;
+    private Button unequipBtn;
 
     private VisualElement weaponsScrollViewContainer;
 
@@ -269,7 +279,22 @@ public class WeaponMountContextMenu
 
         container = root;
 
-        currentEquippedWeaponElement = new(container.Q<VisualElement>("CurrentWeaponContainer"));
+        currentWeaponContainer = container.Q<VisualElement>("CurrentWeaponContainer");
+        weaponName = currentWeaponContainer.Q<Label>("WeaponName");
+        weaponDetailsContainer = currentWeaponContainer.Q<VisualElement>("WeaponDetailsContainer");
+
+        unequipBtn = currentWeaponContainer.Q<Button>("UnequipBtn");
+        unequipBtn.clicked += () =>
+        {
+            // unequip weapon
+            currentWeaponMount.EquippedWeapon = null;
+            
+            // update weapon mount item
+            hangarScreen.ShipDetailsElement.UpdateWeaponMountItem(currentWeaponMount);
+            
+            // update current weapon ui
+            UpdateCurrentWeapon();
+        };
 
         weaponsScrollViewContainer = container.Q<VisualElement>("WeaponsScrollViewContainer");
     }
@@ -283,8 +308,8 @@ public class WeaponMountContextMenu
 
     void UpdateCurrentWeapon()
     {
-        if (currentWeaponMount.EquippedWeapon != null) currentEquippedWeaponElement.ShowWeapon(currentWeaponMount.EquippedWeapon);
-        else currentEquippedWeaponElement.ShowEmpty();
+        if (currentWeaponMount.EquippedWeapon != null) ShowCurrentWeapon(currentWeaponMount.EquippedWeapon);
+        else ShowCurrentEmpty();
     }
 
     void UpdateWeaponsList()
@@ -294,78 +319,41 @@ public class WeaponMountContextMenu
         {
             if (weapon == null) continue;
 
-            Button weaponListItem = hangarScreen.UIAssetsDatabase.WeaponListItem.Instantiate().Q<Button>("WeaponsListItem");
-
-            // Update name
-            Label weaponName = weaponListItem.Q<Label>("WeaponName");
-            weaponName.text = weapon.WeaponName;
-
-            weaponListItem.clicked += () =>
+            VisualElement weaponListItem = UIFactory.BuildWeaponListItem(weapon, UIScreenManager.UIAssetsDatabase);
+            
+            weaponListItem.RegisterCallback<ClickEvent>(evt =>
             {
                 // equip weapon then update current equipped UI
                 currentWeaponMount.EquippedWeapon = weapon;
                 UpdateCurrentWeapon();
-            };
-
-            // Update upgrade pips
-            VisualElement pipContainer = weaponListItem.Q<VisualElement>("PipContainer");
-            for (int i = 0; i < weapon.MaxUpgradeLevel; i++)
-            {
-                VisualElement pip = hangarScreen.UIAssetsDatabase.UpgradePip.Instantiate();
-                pipContainer.Add(pip);
-
-                SetPipState(pip, i < weapon.UpgradeLevel);
-            }
+                hangarScreen.ShipDetailsElement.UpdateWeaponMountItem(currentWeaponMount);
+            });
 
             weaponsScrollViewContainer.Add(weaponListItem);
         }
     }
 
-    private void SetPipState(VisualElement pip, bool isActive)
-    {
-        if (isActive)
-        {
-            pip.AddToClassList("pip--active");
-            pip.RemoveFromClassList("pip--inactive");
-        }
-        else
-        {
-            pip.AddToClassList("pip--inactive");
-            pip.RemoveFromClassList("pip--active");
-        }
-    }
-}
-
-public class CurrentEquippedWeaponElement
-{
-    private VisualElement currentWeaponContainer;
-
-    private Label weaponName;
-    private VisualElement weaponDetailsContainer;
-
-    public CurrentEquippedWeaponElement(VisualElement root)
-    {
-        currentWeaponContainer = root;
-
-        weaponName = currentWeaponContainer.Q<Label>("WeaponName");
-        weaponDetailsContainer = currentWeaponContainer.Q<VisualElement>("WeaponDetailsContainer");
-    }
-
-    public void ShowWeapon(WeaponData weapon)
+    public void ShowCurrentWeapon(WeaponData weapon)
     {
         currentWeaponContainer.style.display = DisplayStyle.Flex;
         weaponName.text = weapon.WeaponName.ToUpper();
         weaponName.style.color = Color.lightCyan;
 
+        // show unequip btn
+        unequipBtn.style.visibility = Visibility.Visible;
+
         // show equipped weapons details
         weaponDetailsContainer.style.display = DisplayStyle.Flex;
     }
 
-    public void ShowEmpty()
+    public void ShowCurrentEmpty()
     {
         currentWeaponContainer.style.display = DisplayStyle.Flex;
         weaponName.text = "[ NONE ]";
         weaponName.style.color = Color.red;
+
+        // hide unequip btn
+        unequipBtn.style.visibility = Visibility.Hidden;
 
         // hide weapon details
         weaponDetailsContainer.style.display = DisplayStyle.None;
