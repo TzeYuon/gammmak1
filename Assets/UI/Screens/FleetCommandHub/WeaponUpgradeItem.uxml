@@ -2,10 +2,10 @@
     <Style src="project://database/Assets/UI/Styles/weaponUpgradeItemStyles.uss?fileID=7433441132597879392&amp;guid=855352986e26b074b8a40e254c68caaf&amp;type=3#weaponUpgradeItemStyles"/>
     <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
     <ui:VisualElement name="UpgradeItemRow" class="upgrade-item" style="border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-left-width: 1px; margin-left: 5px; margin-bottom: 5px;">
-        <ui:VisualElement name="StatusIndicator" class="upgrade-indicator upgrade-indicator--active"/>
+        <ui:VisualElement name="StatusIndicator" class="upgrade-indicator"/>
         <ui:VisualElement class="upgrade-item-text-container">
-            <ui:Label name="UpgradeLevelLabel" text="LEVEL 05 [EVOLUTION]" class="upgrade-item-title text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 14px; -unity-font-style: normal;"/>
-            <ui:Label name="UpgradeEffectLabel" text="BULLETS PIERCE THROUGH 1 ADDITIONAL TARGET" class="upgrade-item-effect subtext" style="margin-top: 4px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
+            <ui:Label name="UpgradeLevelLabel" text="Tier" class="upgrade-item-title text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 14px; -unity-font-style: normal;"/>
+            <ui:Label name="UpgradeEffectLabel" text="Effect" class="upgrade-item-effect subtext" style="margin-top: 4px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

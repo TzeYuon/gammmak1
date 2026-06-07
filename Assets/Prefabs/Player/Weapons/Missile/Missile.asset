@@ -13,10 +13,7 @@ MonoBehaviour:
   m_Name: Missile
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Missile
-  WeaponID: 1
+  WeaponID: 3
   EnergyCost: 0
-  UpgradeLevel: 2
-  MaxUpgradeLevel: 4
-  BaseUpgradeCost: 100
-  BaseDamage: 0
-  BaseFireRate: 0
+  UpgradeLevel: 0
+  UpgradeCosts: 64000000fa00000058020000dc050000

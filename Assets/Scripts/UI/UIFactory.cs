@@ -7,16 +7,21 @@ public static class UIFactory
     {
         VisualElement weaponListItem = db.WeaponListItem.Instantiate().Q<VisualElement>("WeaponsListItem");
 
+        UpdateWeaponListItem(weaponListItem, weapon);
+
+        return weaponListItem;
+    }
+
+    public static void UpdateWeaponListItem(VisualElement container, WeaponData weapon)
+    {
         // Update name
-        Label weaponName = weaponListItem.Q<Label>("WeaponName");
+        Label weaponName = container.Q<Label>("WeaponName");
         weaponName.text = weapon.WeaponName;
 
         // Update upgrade pips
-        PipContainerVisualElement pipContainer = weaponListItem.Q<PipContainerVisualElement>("PipContainer");
+        PipContainerVisualElement pipContainer = container.Q<PipContainerVisualElement>("PipContainer");
         pipContainer.MaxPips = weapon.MaxUpgradeLevel;
         pipContainer.Value = weapon.UpgradeLevel;
-
-        return weaponListItem;
     }
 
     public static Button BuildWeaponMountItem(WeaponMount mount, UIAssetsDatabase db)
@@ -49,6 +54,24 @@ public static class UIFactory
             weaponListItem.RemoveFromClassList("list-item");
             weaponListItem.AddToClassList("inactive-list-item");
             weaponListItemContainer.Add(weaponListItem);
+        }
+    }
+
+    public static void BuildWeaponUpgradeContainer(VisualElement container, WeaponData weapon, UIAssetsDatabase db)
+    {
+        container.Clear();
+        for (int i = 0; i < weapon.MaxUpgradeLevel; i++)
+        {
+            var upgradeItem = db.WeaponUpgradeItem.Instantiate();
+
+            if (i >= weapon.UpgradeLevel) upgradeItem.AddToClassList("upgrade-item--locked");
+
+            Label upgradeLevelLabel = upgradeItem.Q<Label>("UpgradeLevelLabel");
+            upgradeLevelLabel.text = i.ToString();
+
+            // update effect text
+
+            container.Add(upgradeItem);
         }
     }
 }

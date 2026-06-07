@@ -15,8 +15,5 @@ MonoBehaviour:
   WeaponName: PDC
   WeaponID: 1
   EnergyCost: 0
-  UpgradeLevel: 1
-  MaxUpgradeLevel: 2
-  BaseUpgradeCost: 100
-  BaseDamage: 0
-  BaseFireRate: 0
+  UpgradeLevel: 0
+  UpgradeCosts: 6400000090010000

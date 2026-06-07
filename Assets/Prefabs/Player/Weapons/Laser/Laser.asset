@@ -13,10 +13,7 @@ MonoBehaviour:
   m_Name: Laser
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Laser
-  WeaponID: 1
+  WeaponID: 2
   EnergyCost: 0
   UpgradeLevel: 3
-  MaxUpgradeLevel: 3
-  BaseUpgradeCost: 100
-  BaseDamage: 0
-  BaseFireRate: 0
+  UpgradeCosts: 64000000fa00000020030000

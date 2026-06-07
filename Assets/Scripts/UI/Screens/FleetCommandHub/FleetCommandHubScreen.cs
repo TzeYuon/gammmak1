@@ -17,8 +17,8 @@ public class FleetCommandHubScreen : UIScreen
     {
         this.playerSaveData = playerSaveData;
 
-        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), playerSaveData);
-        weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"), playerSaveData);
+        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"));
+        weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"));
         starmapScreen = new StarmapScreen(manager, root.Q<VisualElement>("StarmapScreen"));
 
         // Register buttons

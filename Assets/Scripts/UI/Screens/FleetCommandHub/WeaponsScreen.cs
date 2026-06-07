@@ -3,14 +3,11 @@ using UnityEngine.UIElements;
 
 public class WeaponsScreen : UIScreen
 {
-    private PlayerSaveData playerSaveData;
-
     public WeaponsScreen(
         UIScreenManager manager, 
-        VisualElement root,
-        PlayerSaveData playerSaveData) : base(manager, root)
+        VisualElement root) : base(manager, root)
     {
-        this.playerSaveData = playerSaveData;
+
     }
 
     protected override void OnHide()
