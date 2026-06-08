@@ -103,6 +103,7 @@ public class ShipDetailsElement
     private Dictionary<WeaponMount, Button> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
+    private List<(ShipSystem system, VisualElement element)> systemItems = new();
 
     private ShipBlueprintData currentShip;
 
@@ -138,7 +139,7 @@ public class ShipDetailsElement
         }
         hangarScreen.HangarContextMenu.Hide();
         currentShip = data;
-        
+
         // update ship name
         shipTitle.text = currentShip.ShipName.ToUpper();
 
@@ -147,22 +148,20 @@ public class ShipDetailsElement
 
         // update systems scrollview
         systemsScrollView.Clear();
+        systemItems.Clear();
         foreach (var system in currentShip.ShipSystems)
         {
-            VisualElement systemItem = UIScreenManager.UIAssetsDatabase.ShipSystemItem.Instantiate();
-
-            // update system name
-            Label systemName = systemItem.Q<Label>("SystemName");
-            systemName.text = system.SystemID.ToString().ToUpper();
-
-            // update upgrade pips
-            PipContainerVisualElement pipContainer = systemItem.Q<PipContainerVisualElement>("PipContainer");
-            pipContainer.MaxPips = system.MaxUpgradeLevel;
-            pipContainer.Value = system.UpgradeLevel;
+            VisualElement systemItem = UIFactory.BuildSystemItem(system);
 
             // add btn action
+            Button upgradeBtn = systemItem.Q<Button>("UpgradeBtn");
+            upgradeBtn.clicked += () => { OnSytemItemUpgradeClicked(system, systemItem); };
+
+            Button refundBtn = systemItem.Q<Button>("RefundBtn");
+            refundBtn.clicked += () => { OnSytemItemRefundClicked(system, systemItem); };
 
             systemsScrollView.Add(systemItem);
+            systemItems.Add((system, systemItem));
         }
 
         // update weapon mounts
@@ -170,7 +169,7 @@ public class ShipDetailsElement
         weaponMountsScrollViewContainer.Clear();
         foreach (var mount in currentShip.Mounts)
         {
-            Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount, UIScreenManager.UIAssetsDatabase);
+            Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount);
             weaponMountItem.clicked += () =>
             {
                 OnWeaponMountItemClicked(mount, weaponMountItem);
@@ -183,6 +182,55 @@ public class ShipDetailsElement
         UpdateToggleRosterBtn();
 
         container.style.display = DisplayStyle.Flex;
+    }
+
+    void OnSytemItemUpgradeClicked(ShipSystem system, VisualElement systemItem)
+    {
+        if (system == null) return;
+        if (!system.CanBeUpgraded()) return;
+
+        // check affordable
+        var saveData = PlayerSaveManager.PlayerSaveData;
+        int cost = system.GetUpgradeCost();
+        if (saveData.DataCoresRemaining < cost) return;
+
+        // subtract cost
+        saveData.DataCoresRemaining -= cost;
+
+        // update data
+        system.UpgradeLevel++;
+
+        OnPlayerCurrencyChanged();
+    }
+
+    void OnSytemItemRefundClicked(ShipSystem system, VisualElement systemItem)
+    {
+        if (system == null) return;
+        if (!system.CanBeRefunded()) return;
+
+        // refund cost
+        var saveData = PlayerSaveManager.PlayerSaveData;
+        saveData.DataCoresRemaining += system.GetRefundValue();
+        
+        // update data
+        system.UpgradeLevel--;
+
+        // update ui
+        OnPlayerCurrencyChanged();
+    }
+
+    public void UpdateAllSystemItems()
+    {
+        foreach (var system in systemItems)
+        {
+            UIFactory.UpdateSystemItem(system.system, system.element);
+        }
+    }
+
+    void OnPlayerCurrencyChanged()
+    {
+        hangarScreen.HangarContextMenu.WeaponMountContext.UpdateUpgradeBtn();
+        UpdateAllSystemItems();
     }
 
     void UpdateToggleRosterBtn()
@@ -207,7 +255,7 @@ public class ShipDetailsElement
 
     public void UpdateWeaponMountItem(WeaponMount mount)
     {
-        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount, UIScreenManager.UIAssetsDatabase);
+        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount);
     }
 
     public void UpdateAllWeaponMountItems()
@@ -235,13 +283,13 @@ public class HangarContextMenu
 {
     private VisualElement container;
 
-    private WeaponMountContextMenu weaponMountContext;
+    public WeaponMountContextMenu WeaponMountContext;
 
     public HangarContextMenu(VisualElement root, HangarScreen hangarScreen)
     {
         container = root;
 
-        weaponMountContext = new(container.Q<VisualElement>("ContextWeaponMount"), hangarScreen);
+        WeaponMountContext = new(container.Q<VisualElement>("ContextWeaponMount"), hangarScreen);
     }
 
     public void Hide()
@@ -258,7 +306,7 @@ public class HangarContextMenu
         }
 
         container.style.display = DisplayStyle.Flex;
-        weaponMountContext.ShowWeaponMount(mount);
+        WeaponMountContext.ShowWeaponMount(mount);
     }
 }
 
@@ -338,6 +386,7 @@ public class WeaponMountContextMenu
     {
         currentWeaponMount = weaponMount;
         UpdateEquippedWeapon();
+        UpdateViewingWeapon();
         UpdateWeaponList();
     }
 
@@ -374,7 +423,7 @@ public class WeaponMountContextMenu
             {
                 if (weapon == null) continue;
 
-                VisualElement weaponListItem = UIFactory.BuildWeaponListItem(weapon, UIScreenManager.UIAssetsDatabase);
+                VisualElement weaponListItem = UIFactory.BuildWeaponListItem(weapon);
 
                 weaponListItem.RegisterCallback<ClickEvent>(evt =>
                 {
@@ -399,10 +448,10 @@ public class WeaponMountContextMenu
     {
         if (currentViewingWeapon == null) return;
 
-        UIFactory.BuildWeaponUpgradeContainer(weaponUpgradeContainer, currentViewingWeapon, UIScreenManager.UIAssetsDatabase);
+        UIFactory.BuildWeaponUpgradeContainer(weaponUpgradeContainer, currentViewingWeapon);
     }
 
-    void UpdateUpgradeBtn()
+    public void UpdateUpgradeBtn()
     {
         if (
             currentViewingWeapon == null // no current weapon
@@ -417,7 +466,16 @@ public class WeaponMountContextMenu
         // btn visible
         upgradeBtn.style.visibility = Visibility.Visible;
 
-        // update cost of upgrade on label
+        // update cost of upgrade on label, update colour if not affordable
+        int cost = currentViewingWeapon.GetUpgradeCost();
+        if (PlayerSaveManager.PlayerSaveData.DataCoresRemaining >= cost)
+        {
+            upgradeBtn.text = $"UPGRADE [<color=#CCFF00>+{cost}</color>]";
+        }
+        else
+        {
+            upgradeBtn.text = $"UPGRADE [<color=#FF003C>+{cost}</color>]";
+        }
     }
 
     void OnUpgradeBtnClicked()
@@ -431,6 +489,7 @@ public class WeaponMountContextMenu
 
         // subtract cost
         saveData.DataCoresRemaining -= currentViewingWeapon.GetUpgradeCost();
+        OnPlayerCurrencyChanged();
 
         // update data
         currentViewingWeapon.UpgradeLevel++;
@@ -441,10 +500,9 @@ public class WeaponMountContextMenu
 
     void UpdateRefundBtn()
     {
-        WeaponData currentWeapon = currentWeaponMount.EquippedWeapon;
         if (
-            currentWeapon == null // no current weapon
-            || currentWeapon.UpgradeLevel == 0 // min upgrade reached
+            currentViewingWeapon == null // no current weapon
+            || currentViewingWeapon.UpgradeLevel == 0 // min upgrade reached
             )
         {
             // hide btn
@@ -456,6 +514,7 @@ public class WeaponMountContextMenu
         refundWeaponBtn.style.visibility = Visibility.Visible;
 
         // update refund value on label
+        refundWeaponBtn.text = $"REFUND [<color=#CCFF00>+{currentViewingWeapon.GetRefundValue()}</color>]";
     }
 
     void OnRefundBtnClicked()
@@ -466,6 +525,7 @@ public class WeaponMountContextMenu
         // refund cost
         var saveData = PlayerSaveManager.PlayerSaveData;
         saveData.DataCoresRemaining += currentViewingWeapon.GetRefundValue();
+        OnPlayerCurrencyChanged();
 
         // update data
         currentViewingWeapon.UpgradeLevel--;
@@ -483,6 +543,16 @@ public class WeaponMountContextMenu
         hangarScreen.ShipDetailsElement.UpdateAllWeaponMountItems(); // to update upgrade pips on weapon mounts
     }
 
+    void OnPlayerCurrencyChanged()
+    {
+        hangarScreen.ShipDetailsElement.UpdateAllSystemItems();
+    }
+
+    public void UpdateViewingWeapon()
+    {
+        UpdateViewingWeapon(currentViewingWeapon);
+    }
+
     public void UpdateViewingWeapon(WeaponData weapon)
     {
         currentViewingWeapon = weapon;
@@ -494,12 +564,15 @@ public class WeaponMountContextMenu
 
         if (currentViewingWeapon == null)
         {
+            viewingWeaponName.text = "<color=#FF0000>[ NONE ]</color>";
+            equipBtn.style.visibility = Visibility.Hidden;
             weaponDetailsContainer.style.display = DisplayStyle.None;
         }
         else 
         {
             viewingWeaponName.text = currentViewingWeapon.WeaponName;
-            weaponDetailsContainer.style.display = DisplayStyle.Flex; 
+            equipBtn.style.visibility = Visibility.Visible;
+            weaponDetailsContainer.style.display = DisplayStyle.Flex;
         }
     }
 
@@ -513,7 +586,6 @@ public class WeaponMountContextMenu
 
         // show equipped weapons details
         if (currentViewingWeapon == null) UpdateViewingWeapon(weapon);
-        
     }
 
     public void ShowEquippedEmpty()
