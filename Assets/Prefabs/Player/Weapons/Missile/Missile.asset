@@ -16,4 +16,31 @@ MonoBehaviour:
   WeaponID: 3
   EnergyCost: 0
   UpgradeLevel: 0
-  UpgradeCosts: 64000000fa00000058020000dc050000
+  Upgrades:
+  - Cost: 100
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05
+  - Cost: 250
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05
+  - Cost: 700
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05

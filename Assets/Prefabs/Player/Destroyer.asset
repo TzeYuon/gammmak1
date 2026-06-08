@@ -20,13 +20,26 @@ MonoBehaviour:
   CostToSpawn: 4
   ShipSystems:
   - SystemID: 1
-    UpgradeLevel: 2
-    MaxUpgradeLevel: 6
-    BaseUpgradeCost: 0
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
   - SystemID: 2
     UpgradeLevel: 0
-    MaxUpgradeLevel: 0
-    BaseUpgradeCost: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
+    - Cost: 400
+      Description: 
+      Effects: []
   Mounts:
   - Position: {x: 0, y: 0}
     EquippedWeapon: {fileID: 0}

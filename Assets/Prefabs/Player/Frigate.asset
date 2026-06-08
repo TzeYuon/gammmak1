@@ -21,8 +21,13 @@ MonoBehaviour:
   ShipSystems:
   - SystemID: 1
     UpgradeLevel: 0
-    MaxUpgradeLevel: 2
-    BaseUpgradeCost: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
   Mounts:
   - Position: {x: 0, y: 0}
     EquippedWeapon: {fileID: 0}

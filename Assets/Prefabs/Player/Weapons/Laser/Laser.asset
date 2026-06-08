@@ -15,5 +15,41 @@ MonoBehaviour:
   WeaponName: Laser
   WeaponID: 2
   EnergyCost: 0
-  UpgradeLevel: 3
-  UpgradeCosts: 64000000fa00000020030000
+  UpgradeLevel: 0
+  Upgrades:
+  - Cost: 100
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05
+  - Cost: 250
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05
+  - Cost: 550
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05
+  - Cost: 900
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.05

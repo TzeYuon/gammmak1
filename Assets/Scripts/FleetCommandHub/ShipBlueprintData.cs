@@ -40,13 +40,60 @@ public class WeaponMount
     public WeaponData EquippedWeapon;
 }
 
+public enum ShipStat
+{
+    MaxHealth,
+    Speed,
+    TurnSpeed,
+    MagnetRadius
+}
+
+[System.Serializable]
+public class ShipSystemUpgradeEffect
+{
+    public ShipStat StatType;
+    public ModifierType ModifierType;
+    public float Value;
+}
+
+[System.Serializable]
+public class ShipSystemUpgrade
+{
+    public int Cost;
+    public string Description;
+
+    public List<ShipSystemUpgradeEffect> Effects = new();
+}
+
 [System.Serializable]
 public class ShipSystem
 {
     public ShipSystemID SystemID;
     public int UpgradeLevel;
-    public int MaxUpgradeLevel = 5;
-    public int BaseUpgradeCost = 100;
+    public int MaxUpgradeLevel { get { return Upgrades.Count; } }
+    public List<ShipSystemUpgrade> Upgrades = new();
+
+    public bool CanBeUpgraded()
+    {
+        return UpgradeLevel < MaxUpgradeLevel;
+    }
+
+    public bool CanBeRefunded()
+    {
+        return UpgradeLevel > 0;
+    }
+
+    public int GetUpgradeCost()
+    {
+        if (UpgradeLevel >= MaxUpgradeLevel) return 0;
+        return Upgrades[UpgradeLevel].Cost;
+    }
+
+    public int GetRefundValue()
+    {
+        if (UpgradeLevel <= 0) return 0;
+        return Upgrades[UpgradeLevel - 1].Cost;
+    }
 }
 
 [CreateAssetMenu(fileName = "NewShipBlueprint", menuName = "FleetCommand/Ship Blueprint")]

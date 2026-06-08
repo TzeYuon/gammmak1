@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum WeaponID : byte
@@ -8,6 +9,39 @@ public enum WeaponID : byte
     Missile = 3,
 }
 
+public enum WeaponStat
+{
+    Damage,
+    FireRate,
+    Range,
+    SpreadRadians,
+    PierceCount,
+    ExplosionRadius
+}
+
+public enum ModifierType : byte
+{
+    FlatAdd,
+    PercentAdd
+}
+
+[System.Serializable]
+public class WeaponUpgradeEffect
+{
+    public WeaponStat StatType;
+    public ModifierType ModifierType;
+    public float Value;
+}
+
+[System.Serializable]
+public class WeaponUpgrade
+{
+    public int Cost;
+    public string Description;
+
+    public List<WeaponUpgradeEffect> Effects = new();
+}
+
 [CreateAssetMenu(fileName = "NewWeapon", menuName = "FleetCommand/Weapon")]
 public class WeaponData : ScriptableObject
 {
@@ -15,18 +49,18 @@ public class WeaponData : ScriptableObject
     public WeaponID WeaponID;
     public int EnergyCost;
     public int UpgradeLevel;
-    public int MaxUpgradeLevel { get { return UpgradeCosts.Length; } }
-    public int[] UpgradeCosts;
+    public int MaxUpgradeLevel { get { return Upgrades.Count; } }
+    public List<WeaponUpgrade> Upgrades = new();
 
     public int GetUpgradeCost()
     {
         if (UpgradeLevel >= MaxUpgradeLevel) return 0;
-        return UpgradeCosts[UpgradeLevel];
+        return Upgrades[UpgradeLevel].Cost;
     }
 
     public int GetRefundValue()
     {
         if (UpgradeLevel <= 0) return 0;
-        return UpgradeCosts[UpgradeLevel - 1];
+        return Upgrades[UpgradeLevel - 1].Cost;
     }
 }
