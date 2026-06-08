@@ -103,7 +103,6 @@ public class ShipBlueprintData : ScriptableObject
     public ShipClass ShipClass;
     public ShipID ShipID;
     public GameObject ShipPrefab;
-    public int MaxSpawnsPerLevel = 10;
     public int CostToSpawn = 50;
 
     public List<ShipSystem> ShipSystems = new();

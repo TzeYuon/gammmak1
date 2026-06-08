@@ -6,6 +6,7 @@ public enum GameState : byte
     None = 0,
     MainMenu,
     FleetCommandHub, // In the menus (Shop, Upgrades, Level select)
+    Generating, // Generating next level
     Gameplay, // Main gameplay screen (RTS)
     Paused,
     Victory,

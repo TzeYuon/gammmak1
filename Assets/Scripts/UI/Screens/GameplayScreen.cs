@@ -6,8 +6,6 @@ using UnityEngine.UIElements;
 
 public class GameplayScreen : UIScreen
 {
-    private PlayerSaveData playerSaveData;
-
     private EntityManager entityManager;
     private EntityQuery inputQuery;
 
@@ -31,8 +29,6 @@ public class GameplayScreen : UIScreen
 
     public GameplayScreen(UIScreenManager manager, VisualElement root, PlayerSaveData playerSaveData) : base(manager, root)
     {
-        this.playerSaveData = playerSaveData;
-
         InitInput();
 
         selectionBox = root.Q<VisualElement>("SelectionBox");
@@ -238,7 +234,7 @@ public class GameplayScreen : UIScreen
     {
         victoryScreen.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.None;
-        Time.timeScale = 1f; // I dont know if this is the best way to do this
+        Time.timeScale = 1f;
     }
 
     private void HandleStateChange(GameState prevState, GameState gameState)

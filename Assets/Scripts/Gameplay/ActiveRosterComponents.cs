@@ -7,7 +7,6 @@ public struct ActiveRosterSlot : IBufferElementData
     public ShipID ShipID;
     public Entity PrefabEntity;
     public int BiomassCost;
-    public int MaxSpawns;
 }
 
 [InternalBufferCapacity(20)]

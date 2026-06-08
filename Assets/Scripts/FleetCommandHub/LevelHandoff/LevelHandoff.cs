@@ -12,7 +12,7 @@ public class LevelHandoff : MonoBehaviour
 
     private void OnStateChanged(GameState prev, GameState cur)
     {
-        if (cur == GameState.Gameplay) ConvertSaveToComponents();
+        if (cur == GameState.Generating) ConvertSaveToComponents();
     }
 
     public void ConvertSaveToComponents()
@@ -27,7 +27,7 @@ public class LevelHandoff : MonoBehaviour
         }
 
         Entity databaseEntity = query.GetSingletonEntity();
-
+        
         // Prepare roster for next level
         var rosterBuffer = entityManager.GetBuffer<ActiveRosterSlot>(databaseEntity);
         rosterBuffer.Clear();
@@ -60,9 +60,16 @@ public class LevelHandoff : MonoBehaviour
                     ShipID = blueprint.ShipID,
                     PrefabEntity = matchedPrefab,
                     BiomassCost = blueprint.CostToSpawn,
-                    MaxSpawns = blueprint.MaxSpawnsPerLevel
                 });
             }
         }
+
+        Entity generatingStatus = entityManager.CreateEntity();
+        entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
+        {
+            PlayerFleetSpawned = false,
+            TerrainGenerated = false,
+            HivesGenerated = false
+        });
     }
 }
