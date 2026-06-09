@@ -47,6 +47,7 @@ public class WeaponData : ScriptableObject
 {
     public string WeaponName;
     public WeaponID WeaponID;
+    public GameObject WeaponPrefab;
     public int EnergyCost;
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }

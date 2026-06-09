@@ -100,8 +100,6 @@ public class GameplayScreen : UIScreen
 
         void InitVictoryLoss()
         {
-            GameStateSystem.OnStateChanged += HandleStateChange;
-
             victoryScreen = root.Q<VisualElement>("VictoryScreen");
             defeatScreen = root.Q<VisualElement>("DefeatScreen");
 
@@ -133,6 +131,8 @@ public class GameplayScreen : UIScreen
     {
         HideVictoryLoss();
         CloseReinforcementPopup();
+
+        GameStateSystem.OnStateChanged -= HandleStateChange;
     }
 
     protected override void OnShow()
@@ -140,6 +140,8 @@ public class GameplayScreen : UIScreen
         HideVictoryLoss();
         CloseReinforcementPopup();
         biomassCounter.style.display = DisplayStyle.Flex;
+
+        GameStateSystem.OnStateChanged += HandleStateChange;
     }
 
     public override void DoUpdate()

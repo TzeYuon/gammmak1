@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -10,6 +11,11 @@ public class LevelHandoff : MonoBehaviour
         GameStateSystem.OnStateChanged += OnStateChanged;
     }
 
+    private void OnDestroy()
+    {
+        GameStateSystem.OnStateChanged -= OnStateChanged;
+    }
+
     private void OnStateChanged(GameState prev, GameState cur)
     {
         if (cur == GameState.Generating) ConvertSaveToComponents();
@@ -19,7 +25,7 @@ public class LevelHandoff : MonoBehaviour
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        var query = entityManager.CreateEntityQuery(typeof(BakedShipData), typeof(ActiveRosterSlot));
+        var query = entityManager.CreateEntityQuery(typeof(BakedShipData), typeof(BakedWeaponData));
         if (query.IsEmptyIgnoreFilter)
         {
             Debug.LogError("Could not find the Ship Database in the ECS World");
@@ -27,13 +33,10 @@ public class LevelHandoff : MonoBehaviour
         }
 
         Entity databaseEntity = query.GetSingletonEntity();
-        
-        // Prepare roster for next level
-        var rosterBuffer = entityManager.GetBuffer<ActiveRosterSlot>(databaseEntity);
-        rosterBuffer.Clear();
 
         // Get database
-        var databaseBuffer = entityManager.GetBuffer<BakedShipData>(databaseEntity);
+        var shipDB = entityManager.GetBuffer<BakedShipData>(databaseEntity).ToNativeArray(Allocator.Temp);
+        var weaponDB = entityManager.GetBuffer<BakedWeaponData>(databaseEntity).ToNativeArray(Allocator.Temp);
 
         // fill up roster based on database
         int count = 0;
@@ -42,27 +45,52 @@ public class LevelHandoff : MonoBehaviour
             ShipBlueprintData blueprint = playerSaveData.ActiveRoster[i];
             if (blueprint == null) continue;
 
-            Entity matchedPrefab = Entity.Null;
-            foreach (var bakedShip in databaseBuffer)
-            {
-                if (bakedShip.ShipID == blueprint.ShipID)
-                {
-                    matchedPrefab = bakedShip.PrefabEntity;
-                    break;
-                }
-            }
+            Entity matchedPrefab = GetPrefabFromDatabase(shipDB, blueprint.ShipID);
+            if (matchedPrefab == Entity.Null) continue;
 
-            if (matchedPrefab != Entity.Null)
+            Entity recipeEntity = entityManager.CreateEntity();
+
+            // Calculate final ship stats
+            float finalHealth = 10;
+            float finalSpeed = 10;
+
+            // add blueprint to spawn in the ship
+            entityManager.AddComponentData(recipeEntity, new RosterShipBlueprint
             {
-                rosterBuffer.Add(new ActiveRosterSlot
+                SlotIndex = count++,
+                ShipPrefab = matchedPrefab,
+                BiomassCost = blueprint.CostToSpawn,
+                MaxHealth = finalHealth,
+                MaxSpeed = finalSpeed
+            });
+
+            // Create weapon blueprints for each weapon mount on the ship
+            var weaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(recipeEntity);
+            for (int m = 0; m < blueprint.Mounts.Count; m++)
+            {
+                var mount = blueprint.Mounts[m];
+                WeaponData weapon = mount.EquippedWeapon;
+                if (weapon == null) continue;
+
+                Entity weaponPrefab = GetPrefabFromDatabase(weaponDB, weapon.WeaponID);
+
+                // Calculate final weapon stats
+                float finalDamage = 10;
+                float finalFireRate = 10;
+
+                // add blueprint to spawn weapon
+                weaponBuffer.Add(new RosterWeaponBlueprint
                 {
-                    SlotIndex = count++,
-                    ShipID = blueprint.ShipID,
-                    PrefabEntity = matchedPrefab,
-                    BiomassCost = blueprint.CostToSpawn,
+                    WeaponPrefab = weaponPrefab,
+                    Position = mount.Position,
+                    Damage = finalDamage,
+                    FireRate = finalFireRate
                 });
             }
         }
+
+        shipDB.Dispose();
+        weaponDB.Dispose();
 
         Entity generatingStatus = entityManager.CreateEntity();
         entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
@@ -71,5 +99,31 @@ public class LevelHandoff : MonoBehaviour
             TerrainGenerated = false,
             HivesGenerated = false
         });
+    }
+
+    Entity GetPrefabFromDatabase(NativeArray<BakedShipData> db, ShipID id)
+    {
+        for (int i = 0; i < db.Length; i++)
+        {
+            if (db[i].ShipID == id)
+            {
+                return db[i].PrefabEntity;
+            }
+        }
+
+        return Entity.Null;
+    }
+
+    Entity GetPrefabFromDatabase(NativeArray<BakedWeaponData> db, WeaponID id)
+    {
+        for (int i = 0; i < db.Length; i++)
+        {
+            if (db[i].WeaponID == id)
+            {
+                return db[i].PrefabEntity;
+            }
+        }
+
+        return Entity.Null;
     }
 }

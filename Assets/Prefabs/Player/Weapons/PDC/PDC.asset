@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: PDC
   WeaponID: 1
+  WeaponPrefab: {fileID: 90229467165131139, guid: 0d329c13581d0534d87d3b68894b1b88, type: 3}
   EnergyCost: 0
   UpgradeLevel: 0
   Upgrades:

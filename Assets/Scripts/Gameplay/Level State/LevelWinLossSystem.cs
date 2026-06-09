@@ -27,6 +27,11 @@ public partial class LevelWinLossSystem : SystemBase
         GameStateSystem.OnStateChanged += HandleStateChange;
     }
 
+    protected override void OnDestroy()
+    {
+        GameStateSystem.OnStateChanged -= HandleStateChange;
+    }
+
     void HandleStateChange(GameState prev, GameState curState)
     {
         if (curState == GameState.Gameplay) isInitialized = false;
