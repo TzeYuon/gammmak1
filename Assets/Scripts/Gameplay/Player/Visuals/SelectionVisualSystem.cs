@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-[UpdateInGroup(typeof(PresentationSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 partial struct SelectionVisualSystem : ISystem
 {
     private ComponentLookup<SelectedTag> selectedLookup;

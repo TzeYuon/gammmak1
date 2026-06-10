@@ -7,6 +7,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 partial struct FlowFieldSystem : ISystem
 {
     private float _timer;

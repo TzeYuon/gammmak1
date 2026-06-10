@@ -223,6 +223,7 @@ GameObject:
   - component: {fileID: 2130700922}
   - component: {fileID: 2130700921}
   - component: {fileID: 2130700923}
+  - component: {fileID: 2130700924}
   m_Layer: 0
   m_Name: PrefabReferences
   m_TagString: Untagged
@@ -278,6 +279,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   - {fileID: 11400000, guid: 5a59caa2d1fda104a9cca917bef2fd33, type: 2}
+--- !u!114 &2130700924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2130700919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb675d48e5acdf843a36e0c760439c18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDatabaseAuthoring
+  StandardPrefab: {fileID: 8958559792771996627, guid: 45f282945948bad40a005a786f0a0f8f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

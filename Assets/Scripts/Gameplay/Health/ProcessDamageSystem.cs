@@ -1,14 +1,14 @@
 using Unity.Burst;
 using Unity.Entities;
 
-[UpdateInGroup(typeof(ProcessDamageSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct ProcessDamageSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
-            .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
+                           .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         state.CompleteDependency();
 

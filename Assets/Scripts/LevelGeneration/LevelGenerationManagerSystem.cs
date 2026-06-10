@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct LevelGenerationManagerSystem : ISystem
 {
     [BurstCompile]

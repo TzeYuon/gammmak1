@@ -7,14 +7,19 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [BurstCompile]
-[UpdateInGroup(typeof(CombatSystemGroup))]
+[UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct WeaponFiringSystem : ISystem
 {
+    EntityQuery queueQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
+        state.RequireForUpdate<GlobalVFXQueue>();
     }
 
     [BurstCompile]
@@ -30,7 +35,8 @@ public partial struct WeaponFiringSystem : ISystem
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
         NativeParallelMultiHashMap<int, Entity> map = fineEntityMap.Map;
 
-        var vfxWriter = SystemAPI.GetSingleton<GlobalVFXQueue>().Queue.AsParallelWriter();
+        queueQuery.CompleteDependency();
+        var vfxWriter = SystemAPI.GetSingletonRW<GlobalVFXQueue>().ValueRW.Queue.AsParallelWriter();
 
         ComponentLookup<TurretComponent> turretLookup = SystemAPI.GetComponentLookup<TurretComponent>(true);
 

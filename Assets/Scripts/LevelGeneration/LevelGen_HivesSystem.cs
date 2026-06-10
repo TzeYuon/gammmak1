@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct LevelGen_HivesSystem : ISystem
 {
     [BurstCompile]
@@ -19,7 +20,7 @@ partial struct LevelGen_HivesSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.HivesGenerated) return; // hives already generated
 
-        // TODO: GENERATE TERRAIN
+        // TODO: GENERATE HIVES
 
 
         // mark as complete

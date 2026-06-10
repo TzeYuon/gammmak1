@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(ActionAndMovementGroup))]
 partial struct EnemySwarmMovementSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
@@ -58,7 +59,12 @@ public partial struct FlowFieldMovementJob : IJobEntity
     public int HeatmapGridWidth;
     public int HeatmapGridHeight;
 
-    public void Execute(Entity entity, ref LocalTransform transform, ref VelocityComponent velocity, ref SwarmComponent agentData)
+    public void Execute(
+        Entity entity, 
+        ref LocalTransform transform, 
+        ref SwarmVelocityComponent velocity, 
+        in SwarmMovementStatsComponent agentData
+        )
     {
         float3 curPos = transform.Position;
         float2 curVel = velocity.Value;

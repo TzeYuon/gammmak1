@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(CommandAndSpawnGroup))]
 partial struct HiveSystem : ISystem
 {
     private EntityQuery swarmQuery;
@@ -13,6 +14,7 @@ partial struct HiveSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<HiveComponent>();
+        state.RequireForUpdate<EnemyPrefabDatabase>();
         swarmQuery = SystemAPI.QueryBuilder()
             .WithAll<SwarmTag>()
             .Build();
@@ -25,6 +27,9 @@ partial struct HiveSystem : ISystem
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
         int currentEnemyCount = swarmQuery.CalculateEntityCount();
+
+        EnemyPrefabDatabase enemyPrefabDatabase = SystemAPI.GetSingleton<EnemyPrefabDatabase>();
+        Entity standardEnemy = enemyPrefabDatabase.GetPrefab(EnemyType.Standard); // TEMPORARY: before adding new enemy types and spawning logic
 
         foreach (var (hive, transform) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>())
         {
@@ -46,21 +51,20 @@ partial struct HiveSystem : ISystem
             currentEnemyCount += hive.ValueRO.SpawnAmount;
 
             // Spawn enemies
-            Entity prefab = hive.ValueRO.Prefab;
             var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
             float spawnRadius = hive.ValueRO.Width * 1.0f;
             for (int i = 0; i < hive.ValueRO.SpawnAmount; i++)
             {
-                Entity enemy = ecb.Instantiate(prefab);
+                Entity enemy = ecb.Instantiate(standardEnemy);
                 float angle = rng.NextFloat(0, math.PI * 2);
                 float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
                 float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
 
                 float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
-                ecb.SetComponent(enemy, new VelocityComponent { Value = float2.zero });
+                ecb.SetComponent(enemy, new SwarmVelocityComponent { Value = float2.zero });
                 ecb.SetComponent(enemy, LocalTransform.FromPosition(spawnPos));
-                ecb.SetComponent(enemy, new SwarmComponent
+                ecb.SetComponent(enemy, new SwarmMovementStatsComponent
                 {
                     BaseSpeed = hive.ValueRO.EnemySpeed,
                     WiggleOffset = i

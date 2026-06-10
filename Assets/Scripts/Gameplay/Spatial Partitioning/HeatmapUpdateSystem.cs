@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(SpatialGridSystemGroup))]
+[UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 partial struct HeatmapUpdateSystem : ISystem
 {
     [BurstCompile]

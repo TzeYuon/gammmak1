@@ -2,7 +2,7 @@ using Unity.Burst;
 using Unity.Entities;
 
 [BurstCompile]
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial class LevelWinLossSystem : SystemBase
 {
     private EntityQuery livingHivesQuery;

@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 
 public class GameplayScreen : UIScreen
 {
+    private PlayerSaveData playerSaveData;
+
     private EntityManager entityManager;
     private EntityQuery inputQuery;
 
@@ -17,6 +19,7 @@ public class GameplayScreen : UIScreen
     private EntityQuery economyQuery;
 
     private VisualElement reinforcementPopup;
+    private VisualElement reinforcementPopupContainer;
     private bool isReinforcementPopupOpen;
     private float2 spawnPosition;
     private EntityQuery queueQuery;
@@ -35,8 +38,9 @@ public class GameplayScreen : UIScreen
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
+        this.playerSaveData = playerSaveData;
         reinforcementPopup = root.Q<VisualElement>("ReinforcementPopup");
-        InitReinforcementPopup();
+        reinforcementPopupContainer = root.Q<VisualElement>("ReinforcementPopupContainer");
 
         InitVictoryLoss();
 
@@ -53,49 +57,6 @@ public class GameplayScreen : UIScreen
                 queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
                 gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
             }
-        }
-
-        void InitReinforcementPopup()
-        {
-            isReinforcementPopupOpen = false;
-            if (playerSaveData != null)
-            {
-                var activeRoster = playerSaveData.ActiveRoster;
-                if (activeRoster == null) return;
-
-                int count = 0;
-                for (int i = 0; i < 4; i++)
-                {
-                    if (activeRoster[i] == null) continue;
-                    var cur = activeRoster[i];
-                    reinforcementPopup.Add(CreateButton(cur.ShipName + "(" + cur.CostToSpawn + ")", count++));
-                }
-            }
-        }
-
-        Button CreateButton(string text, int slotIndex)
-        {
-            var btn = new Button { text = text };
-            btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
-            btn.style.color = Color.cyan;
-            btn.style.marginTop = 5;
-
-            btn.clicked += () =>
-            {
-                if (queueQuery.IsEmptyIgnoreFilter) return;
-
-                queueQuery.CompleteDependency();
-                var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
-                queue.Enqueue(new SpawnRequest
-                {
-                    SlotIndex = slotIndex,
-                    Position = GetSpawnPosition()
-                });
-
-                CloseReinforcementPopup();
-            };
-
-            return btn;
         }
 
         void InitVictoryLoss()
@@ -138,10 +99,54 @@ public class GameplayScreen : UIScreen
     protected override void OnShow()
     {
         HideVictoryLoss();
+        RebuildReinforcementPopup();
         CloseReinforcementPopup();
         biomassCounter.style.display = DisplayStyle.Flex;
 
         GameStateSystem.OnStateChanged += HandleStateChange;
+
+        void RebuildReinforcementPopup()
+        {
+            reinforcementPopupContainer.Clear();
+            if (playerSaveData != null)
+            {
+                var activeRoster = playerSaveData.ActiveRoster;
+                if (activeRoster == null) return;
+
+                int count = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (activeRoster[i] == null) continue;
+                    var cur = activeRoster[i];
+                    reinforcementPopupContainer.Add(CreateButton(cur.ShipName + "(" + cur.CostToSpawn + ")", count++));
+                }
+            }
+
+            Button CreateButton(string text, int slotIndex)
+            {
+                var btn = new Button { text = text };
+                btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
+                btn.style.color = Color.cyan;
+                btn.style.marginTop = 5;
+
+                btn.clicked += () =>
+                {
+                    if (queueQuery.IsEmptyIgnoreFilter) return;
+
+                    queueQuery.CompleteDependency();
+                    var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
+                    queue.Enqueue(new SpawnRequest
+                    {
+                        SlotIndex = slotIndex,
+                        Position = GetSpawnPosition()
+                    });
+
+                    CloseReinforcementPopup();
+                };
+
+                return btn;
+            }
+        }
     }
 
     public override void DoUpdate()
@@ -213,6 +218,7 @@ public class GameplayScreen : UIScreen
 
         void UpdateBiomassCounter()
         {
+            economyQuery.CompleteDependency();
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
         }

@@ -11,8 +11,8 @@ class EnemyAuthoring : MonoBehaviour
 
             AddComponent(entity, new LevelEntityTag());
             AddComponent(entity, new SwarmTag());
-            AddComponent(entity, new VelocityComponent());
-            AddComponent(entity, new SwarmComponent());
+            AddComponent(entity, new SwarmVelocityComponent());
+            AddComponent(entity, new SwarmMovementStatsComponent());
             AddComponent(entity, new HealthComponent
             {
                 MaxValue = 1,

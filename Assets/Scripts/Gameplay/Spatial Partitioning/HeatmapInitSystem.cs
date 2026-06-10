@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct HeatmapInitSystem : ISystem
 {
     private NativeArray<int> coarseEnemyArray;

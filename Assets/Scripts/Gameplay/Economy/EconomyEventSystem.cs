@@ -1,22 +1,23 @@
 using System;
-using Unity.Burst;
 using Unity.Entities;
-using UnityEngine;
 
-[BurstCompile]
-[UpdateInGroup(typeof(PostUpdateSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial class EconomyEventSystem : SystemBase
 {
     public static event Action<float> OnBiomassChanged;
     private float lastBiomassAmount = -1f;
 
+    private EntityQuery economyQuery;
+
     protected override void OnCreate()
     {
         RequireForUpdate<PlayerEconomy>();
+        economyQuery = SystemAPI.QueryBuilder().WithAll<PlayerEconomy>().Build();
     }
 
     protected override void OnUpdate()
     {
+        economyQuery.CompleteDependency();
         if (SystemAPI.TryGetSingleton<PlayerEconomy>(out var economy))
         {
             if (economy.TotalBiomass != lastBiomassAmount)

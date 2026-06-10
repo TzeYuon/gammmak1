@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [BurstCompile]
-[UpdateInGroup(typeof(MovementSystemGroup))]
+[UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct ShipMovementSystem : ISystem
 {
     [BurstCompile]

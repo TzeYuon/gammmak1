@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct LevelGen_TerrainSystem : ISystem
 {
     [BurstCompile]

@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct LevelGen_PlayerFleetSystem : ISystem
 {
     [BurstCompile]
@@ -19,7 +20,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.PlayerFleetSpawned) return; // player fleet already spawned in
 
-        // TODO: GENERATE TERRAIN
+        // TODO: GENERATE PLAYER MOTHERSHIP
 
 
         // mark as complete
