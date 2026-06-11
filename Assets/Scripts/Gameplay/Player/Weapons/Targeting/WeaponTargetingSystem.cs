@@ -32,6 +32,7 @@ partial struct WeaponTargetingSystem : ISystem
 
         PrecisionTargetingJob precisionJob = new()
         {
+            HeatmapWorldOrigin = coarseHeatmap.WorldOrigin,
             CoarseCellSize = coarseHeatmap.CellSize,
             CoarseGridWidth = coarseHeatmap.GridWidth,
             CoarseGridHeight = coarseHeatmap.GridHeight,
@@ -49,6 +50,7 @@ partial struct WeaponTargetingSystem : ISystem
         HeatmapTargetingJob heatmapJob = new()
         {
             FineDensityMap = fineEntityMap.DensityMap,
+            HeatmapWorldOrigin = fineEntityMap.WorldOrigin,
             GridWidth = fineEntityMap.GridWidth,
             GridHeight = fineEntityMap.GridHeight,
             CellSize = fineEntityMap.CellSize,
@@ -76,6 +78,7 @@ partial struct WeaponTargetingSystem : ISystem
 [WithAll(typeof(PrecisionTargetingComponent))]
 public partial struct PrecisionTargetingJob : IJobEntity
 {
+    public int2 HeatmapWorldOrigin;
     public float CoarseCellSize;
     public int CoarseGridWidth;
     public int CoarseGridHeight;
@@ -103,7 +106,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
         float rangeSq = stats.Range * stats.Range;
 
         // Round to cell position
-        int2 cell = GridUtility.WorldPosToCell(transform.Position, CoarseCellSize);
+        int2 cell = GridUtility.WorldPosToCell(transform.Position, HeatmapWorldOrigin, CoarseCellSize);
         int radiusCells = (int)math.ceil(stats.Range / CoarseCellSize);
 
         bool foundTarget = false;
@@ -124,7 +127,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
                 int density = CoarseHeatmap[GridUtility.CellToIndex(curCell, CoarseGridWidth)];
                 if (density <= 0) continue;
 
-                float2 cellCorner = new float2(curCell.x, curCell.y) * CoarseCellSize;
+                float2 cellCorner = GridUtility.CellToWorldPosCorner(curCell, HeatmapWorldOrigin, CoarseCellSize);
 
                 // Check fine map for specific target
                 for (float i = cellCorner.x; i < cellCorner.x + CoarseCellSize; i += FineCellSize)
@@ -132,7 +135,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
                     for (float j = cellCorner.y; j < cellCorner.y + CoarseCellSize; j += FineCellSize)
                     {
                         float2 p = new(i, j);
-                        int key = GridUtility.WorldPosToIndex(p, FineCellSize, FineGridWidth);
+                        int key = GridUtility.WorldPosToIndex(p, HeatmapWorldOrigin, FineCellSize, FineGridWidth);
                         if (!FineEntityMap.ContainsKey(key)) continue; // no enemies
 
                         float distSq = math.distancesq(weaponPos, p);
@@ -179,6 +182,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
 public partial struct HeatmapTargetingJob : IJobEntity
 {
     [ReadOnly] public NativeArray<int> FineDensityMap;
+    public int2 HeatmapWorldOrigin;
     public int GridWidth;
     public int GridHeight;
     public float CellSize;
@@ -208,19 +212,19 @@ public partial struct HeatmapTargetingJob : IJobEntity
 
         float2 weaponPos = weaponWorld.Position.xy;
         int radiusCells = (int)math.ceil(stats.Range / CellSize);
-        int2 centerCell = (int2)math.floor(weaponPos / CellSize);
+        int2 centerCell = GridUtility.WorldPosToCell(weaponPos, HeatmapWorldOrigin, CellSize);
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
             for (int y = -radiusCells; y <= radiusCells; y++)
             {
                 int2 checkCell = centerCell + new int2(x, y);
-                if (checkCell.x < 0 || checkCell.x >= GridWidth || checkCell.y < 0 || checkCell.y >= GridHeight) continue;
+                if (!GridUtility.IsWithinBounds(checkCell, GridWidth, GridHeight)) continue;
 
-                int density = FineDensityMap[checkCell.x + (checkCell.y * GridWidth)];
+                int density = FineDensityMap[GridUtility.CellToIndex(checkCell, GridWidth)];
                 if (density <= 0) continue;
 
-                float2 cellWorldPos = new(checkCell.x * CellSize + CellSize * 0.5f, checkCell.y * CellSize + CellSize * 0.5f);
+                float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, HeatmapWorldOrigin, CellSize);
                 float2 vectorToCell = cellWorldPos - weaponWorld.Position.xy;
                 float distSq = math.lengthsq(vectorToCell);
 

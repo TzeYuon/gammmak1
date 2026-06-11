@@ -49,6 +49,7 @@ partial struct ProjectileSystem : ISystem
         { 
             DeltaTime = deltaTime,
             Map = fineHeatmap.DensityMap,
+            WorldOrigin = fineHeatmap.WorldOrigin,
             GridWidth = fineHeatmap.GridWidth,
             GridHeight = fineHeatmap.GridHeight,
             CellSize = fineHeatmap.CellSize,
@@ -64,6 +65,7 @@ partial struct ProjectileSystem : ISystem
             Map = fineHeatmap.Map,
             TransformLookup = transformLookup,
             RadiusLookup = collisionLookup,
+            WorldOrigin = fineHeatmap.WorldOrigin,
             CellSize = fineHeatmap.CellSize,
             GridWidth = fineHeatmap.GridWidth,
         }.ScheduleParallel(coordHandle);
@@ -125,6 +127,7 @@ public partial struct HomingFlightJob : IJobEntity
 {
     public float DeltaTime;
     [ReadOnly] public NativeArray<int> Map;
+    public int2 WorldOrigin;
     public int GridWidth;
     public int GridHeight;
     public float CellSize;
@@ -139,7 +142,7 @@ public partial struct HomingFlightJob : IJobEntity
         float2 currentHeading = transform.Up().xy;
 
         int radiusCells = (int)math.ceil(stats.HomingRange / CellSize);
-        int2 centerCell = GridUtility.WorldPosToCell(currentPos, CellSize);
+        int2 centerCell = GridUtility.WorldPosToCell(currentPos, WorldOrigin, CellSize);
 
         float bestScore = -1f;
         float2 bestTargetPos = currentPos + currentHeading * stats.Speed;
@@ -156,7 +159,7 @@ public partial struct HomingFlightJob : IJobEntity
                 int density = Map[GridUtility.CellToIndex(checkCell, GridWidth)];
                 if (density <= 0) continue;
 
-                float2 cellWorldPos = GridUtility.CellToWorldPos(checkCell, CellSize);
+                float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, WorldOrigin, CellSize);
                 float2 vectorToCell = cellWorldPos - currentPos;
                 float dist = math.length(vectorToCell);
 
@@ -206,6 +209,7 @@ public partial struct ContactTriggerJob : IJobEntity
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
     [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
+    public int2 WorldOrigin;
     public float CellSize;
     public int GridWidth;
 
@@ -217,7 +221,7 @@ public partial struct ContactTriggerJob : IJobEntity
     {
         if (state.IsTriggered) return;
 
-        int index = GridUtility.WorldPosToIndex(transform.Position.xy, CellSize, GridWidth);
+        int index = GridUtility.WorldPosToIndex(transform.Position.xy, WorldOrigin, CellSize, GridWidth);
         if (Map.TryGetFirstValue(index, out Entity bug, out var it))
         {
             do

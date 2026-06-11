@@ -193,10 +193,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70cc7c79a2fa11e449afc1118d0130df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeatmapAuthoring
-  MapWidth: 2000
-  MapHeight: 2000
-  CoarseCellSize: 10
-  FineCellSizeMultiplier: 5
+  WorldCentre: {x: 1000, y: 1000}
+  MapWidth: 400
+  MapHeight: 400
+  CoarseCellSize: 16
+  FineCellSizeMultiplier: 16
 --- !u!4 &523752878
 Transform:
   m_ObjectHideFlags: 0

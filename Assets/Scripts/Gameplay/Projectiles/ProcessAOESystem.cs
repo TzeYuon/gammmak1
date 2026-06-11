@@ -34,6 +34,7 @@ partial struct ProcessAOESystem : ISystem
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             ECB = ecb,
             VfxQueue = vfxQueue,
+            WorldOrigin = fineHeatmap.WorldOrigin,
             CellSize = fineHeatmap.CellSize,
             GridWidth = fineHeatmap.GridWidth,
         };
@@ -57,6 +58,7 @@ public partial struct ProcessExplosionsJob : IJobEntity
 
     public EntityCommandBuffer.ParallelWriter ECB;
     public NativeQueue<VFXPayload>.ParallelWriter VfxQueue;
+    public int2 WorldOrigin;
     public float CellSize;
     public int GridWidth;
 
@@ -67,7 +69,7 @@ public partial struct ProcessExplosionsJob : IJobEntity
     {
         float3 centerPos = transform.Position;
         int radiusCells = (int)math.ceil(math.sqrt(explosion.RadiusSq) / CellSize);
-        int2 centerCell = GridUtility.WorldPosToCell(centerPos, CellSize);
+        int2 centerCell = GridUtility.WorldPosToCell(centerPos, WorldOrigin, CellSize);
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {

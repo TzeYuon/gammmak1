@@ -32,6 +32,7 @@ partial struct EnemySwarmMovementSystem : ISystem
             WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y),
 
             Heatmap = fineEnemyHeatmap.DensityMap,
+            HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
             HeatmapCellSize = fineEnemyHeatmap.CellSize,
             HeatmapGridWidth = fineEnemyHeatmap.GridWidth,
             HeatmapGridHeight = fineEnemyHeatmap.GridHeight,
@@ -55,6 +56,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
     public int2 WorldOrigin;
 
     [ReadOnly] public NativeArray<int> Heatmap;
+    public int2 HeatmapWorldOrigin;
     public float HeatmapCellSize;
     public int HeatmapGridWidth;
     public int HeatmapGridHeight;
@@ -152,9 +154,9 @@ public partial struct FlowFieldMovementJob : IJobEntity
         // Separation calculation
         // Use heatmap to move entity away from highly dense areas
         float separationWeight = 0.5f;
-        if (GridUtility.IsWithinBounds(curPos.xy, HeatmapCellSize, HeatmapGridWidth, HeatmapGridHeight))
+        if (GridUtility.IsWithinBounds(curPos.xy, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth, HeatmapGridHeight))
         {
-            int heatmapIndex = GridUtility.WorldPosToIndex(curPos, HeatmapCellSize, HeatmapGridWidth);
+            int heatmapIndex = GridUtility.WorldPosToIndex(curPos, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth);
             int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1] : 100;
             int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1] : 100;
             int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth] : 100;
