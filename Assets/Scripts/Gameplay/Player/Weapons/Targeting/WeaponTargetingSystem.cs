@@ -8,27 +8,40 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(CombatTargetingGroup))]
 partial struct WeaponTargetingSystem : ISystem
 {
+    private EntityQuery coarseHeatmapQuery;
+    private EntityQuery fineEntityMapQuery;
+    private EntityQuery terrainGridComponentQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<CoarseEnemyHeatmapComponent>();
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
+        state.RequireForUpdate<TerrainGridComponent>();
+
+        coarseHeatmapQuery = SystemAPI.QueryBuilder().WithAll<CoarseEnemyHeatmapComponent>().Build();
+        fineEntityMapQuery = SystemAPI.QueryBuilder().WithAll<FineEnemyHeatmapComponent>().Build();
+        terrainGridComponentQuery = SystemAPI.QueryBuilder().WithAll<TerrainGridComponent>().Build();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
-        FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>().ValueRW;
+        coarseHeatmapQuery.CompleteDependency();
+        fineEntityMapQuery.CompleteDependency();
+        terrainGridComponentQuery.CompleteDependency();
+
+        CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingleton<CoarseEnemyHeatmapComponent>();
+        FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
+        TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
 
         ComponentLookup<LocalToWorld> worldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
-        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
-        NativeArray<int> obstacleGrid = GridManager.Instance.nativeGrid;
-        int2 obstacleWorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y);
-        int obstacleGridWidth = GridManager.Instance.width;
-        int obstacleGridHeight = GridManager.Instance.height;
+        NativeArray<int> obstacleGrid = terrainGridComponent.Grid;
+        int2 obstacleWorldOrigin = terrainGridComponent.WorldOrigin;
+        int obstacleGridWidth = terrainGridComponent.GridWidth;
+        int obstacleGridHeight = terrainGridComponent.GridHeight;
 
         PrecisionTargetingJob precisionJob = new()
         {

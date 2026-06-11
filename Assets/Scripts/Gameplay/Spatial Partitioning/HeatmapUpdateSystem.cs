@@ -1,5 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -18,7 +19,7 @@ partial struct HeatmapUpdateSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingleton<CoarseEnemyHeatmapComponent>();
+        CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
         RefRW<FineEnemyHeatmapComponent> fineEnemyHeatmap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>();
 
         int livingEnemiesCount = SystemAPI.QueryBuilder().WithAll<SwarmTag>().Build().CalculateEntityCount();
@@ -31,19 +32,8 @@ partial struct HeatmapUpdateSystem : ISystem
 
         state.Dependency.Complete();
         fineEnemyHeatmap.ValueRO.Map.Clear();
-
-        var clearCoarseEnemyJob = new ClearCoarseEnemyJob
-        {
-            Map = coarseEnemyHeatmap.Map,
-        };
-        JobHandle clearCoarseHandle = clearCoarseEnemyJob.Schedule(coarseEnemyHeatmap.Map.Length, 4096, state.Dependency);
-
-        var clearFineEnemyJob = new ClearFineEnemyJob
-        {
-            Map = fineEnemyHeatmap.ValueRO.DensityMap,
-        };
-        JobHandle clearFineHandle = clearFineEnemyJob.Schedule(fineEnemyHeatmap.ValueRO.DensityMap.Length, 4096, state.Dependency);
-        JobHandle clearHandles = JobHandle.CombineDependencies(clearCoarseHandle, clearFineHandle);
+        ClearArray(coarseEnemyHeatmap.Map);
+        ClearArray(fineEnemyHeatmap.ValueRW.DensityMap);
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
         {
@@ -59,7 +49,7 @@ partial struct HeatmapUpdateSystem : ISystem
             FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
             FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
             FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
-        }.ScheduleParallel(clearHandles);
+        }.ScheduleParallel(state.Dependency);
 
         var hiveHeatmapHandle = new HiveHeatmapJob
         {
@@ -78,6 +68,16 @@ partial struct HeatmapUpdateSystem : ISystem
         }.ScheduleParallel(swarmHeatmapHandle);
 
         state.Dependency = hiveHeatmapHandle;
+    }
+
+    public void ClearArray(NativeArray<int> myArray)
+    {
+        unsafe
+        {
+            void* pointer = NativeArrayUnsafeUtility.GetUnsafePtr(myArray);
+            long sizeInBytes = myArray.Length * sizeof(int);
+            UnsafeUtility.MemClear(pointer, sizeInBytes);
+        }
     }
 
     [BurstCompile]

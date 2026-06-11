@@ -18,19 +18,22 @@ partial struct FlowFieldSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<PlayerTag>();
+        state.RequireForUpdate<TerrainGridComponent>();
+        state.RequireForUpdate<EnemyFlowFieldComponent>();
     }
 
     public void OnUpdate(ref SystemState state)
     {
-        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
-
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
         _timer = 0.45f;
 
-        int gridWidth = GridManager.Instance.width;
-        int gridHeight = GridManager.Instance.height;
+        var terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        int gridWidth = terrainGridComponent.GridWidth;
+        int gridHeight = terrainGridComponent.GridHeight;
         int totalCells = gridWidth * gridHeight;
+
+        var flowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
 
         if (!_integrationField.IsCreated || _integrationField.Length != totalCells)
         {
@@ -47,7 +50,7 @@ partial struct FlowFieldSystem : ISystem
         var noiseFieldHandle = new GenerateNoiseFieldJob
         {
             CostGrid = _costField,
-            ObstacleGrid = GridManager.Instance.nativeGrid,
+            ObstacleGrid = terrainGridComponent.Grid,
             GridWidth = gridWidth,
             CellSize = 1,
             ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
@@ -58,20 +61,16 @@ partial struct FlowFieldSystem : ISystem
         NativeList<int2> targetPositions = new NativeList<int2>(Allocator.TempJob);
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
         {
-            int2 gridPos = new int2(
-                (int)math.round(transform.ValueRO.Position.x),
-                (int)math.round(transform.ValueRO.Position.y)
-            ) - new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y);
-
+            int2 gridPos = GridUtility.WorldPosToGridManagerPos(transform.ValueRO.Position.xy, terrainGridComponent.WorldOrigin);
             targetPositions.Add(gridPos);
         }
 
         var job = new GenerateFlowFieldJob
         {
-            Grid = GridManager.Instance.nativeGrid,
+            Grid = terrainGridComponent.Grid,
             IntegrationField = _integrationField,
             CostGrid = _costField,
-            FlowField = GridManager.Instance.nativeFlowField,
+            FlowField = flowFieldComponent.ValueRW.FlowField,
             TargetPositions = targetPositions,
             GridWidth = gridWidth,
             GridHeight = gridHeight,

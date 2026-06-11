@@ -25,19 +25,19 @@ public class Pathfinder : MonoBehaviour
             return null;
         }
 
-        Vector2Int origin = GridManager.Instance.worldOrigin;
+        Vector2Int origin = new Vector2Int(GridManager.Instance.WorldOrigin.x, GridManager.Instance.WorldOrigin.y);
         Vector2Int a = worldStart - origin;
         Vector2Int b = worldEnd - origin;
 
-        a.x = Mathf.Clamp(a.x, 0, GridManager.Instance.width - 1);
-        a.y = Mathf.Clamp(a.y, 0, GridManager.Instance.height - 1);
+        a.x = Mathf.Clamp(a.x, 0, GridManager.Instance.Width - 1);
+        a.y = Mathf.Clamp(a.y, 0, GridManager.Instance.Height - 1);
 
-        b.x = Mathf.Clamp(b.x, 0, GridManager.Instance.width - 1);
-        b.y = Mathf.Clamp(b.y, 0, GridManager.Instance.height - 1);
+        b.x = Mathf.Clamp(b.x, 0, GridManager.Instance.Width - 1);
+        b.y = Mathf.Clamp(b.y, 0, GridManager.Instance.Height - 1);
 
         if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
 
-        int maxIterations = GridManager.Instance.width * GridManager.Instance.height;
+        int maxIterations = GridManager.Instance.Width * GridManager.Instance.Height;
         int currentLoop = 0;
 
         Node currNode = new Node(a.x, a.y, true);
@@ -92,7 +92,7 @@ public class Pathfinder : MonoBehaviour
                 int tempY = tup.Item2 + currNode.y;
                 Vector2Int tempPos = new Vector2Int(tempX, tempY);
 
-                if (tempX >= 0 && tempX < GridManager.Instance.width && tempY >= 0 && tempY < GridManager.Instance.height)
+                if (tempX >= 0 && tempX < GridManager.Instance.Width && tempY >= 0 && tempY < GridManager.Instance.Height)
                 {
                     int tileType = GridManager.Instance.grid[tempX, tempY];
 

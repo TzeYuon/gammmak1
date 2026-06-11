@@ -92,6 +92,9 @@ public class LevelHandoff : MonoBehaviour
         shipDB.Dispose();
         weaponDB.Dispose();
 
+        var checklistQuery = entityManager.CreateEntityQuery(typeof(LevelGenerationStatus));
+        if (!checklistQuery.IsEmptyIgnoreFilter) return; // LevelGenerationStatus singleton already exists
+
         Entity generatingStatus = entityManager.CreateEntity();
         entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
         {

@@ -8,15 +8,16 @@ public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
 
-    public int width = 200;
-    public int height = 200;
+    public int Width = 200;
+    public int Height = 200;
     public int safezoneRadius = 20;
 
-    public Vector2Int worldOrigin = new Vector2Int(1000, 1000);
+    [SerializeField] private Vector2Int worldCentre = new Vector2Int(1000, 1000);
+    public int2 WorldOrigin;
 
     // Noise settings
-    public float scale = 0.15f;
-    public float randomOffset = 0f;
+    [SerializeField] private float scale = 0.15f;
+    [SerializeField] private float randomOffset = 0f;
 
     public int[,] grid; // 0 = Walkable, 1 = Wall, 2 = Mud, 3 = Poison
     public NativeArray<int> nativeGrid;
@@ -37,31 +38,34 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {
-        grid = new int[width, height];
-        nativeGrid = new NativeArray<int>(width * height, Allocator.Persistent);
-        nativeFlowField = new NativeArray<float2>(width * height, Allocator.Persistent);
+        grid = new int[Width, Height];
+        nativeGrid = new NativeArray<int>(Width * Height, Allocator.Persistent);
+        nativeFlowField = new NativeArray<float2>(Width * Height, Allocator.Persistent);
         randomOffset = UnityEngine.Random.Range(0f, 9999f);
+
+        WorldOrigin = new int2(worldCentre.x - Width / 2, worldCentre.y - Height / 2);
+
         GenerateTerrain();
     }
 
     bool IsInSafeZone(int x, int y)
     {
         bool corner =
-       (x < safezoneRadius || x >= width - safezoneRadius) &&
-       (y < safezoneRadius || y >= height - safezoneRadius);
+       (x < safezoneRadius || x >= Width - safezoneRadius) &&
+       (y < safezoneRadius || y >= Height - safezoneRadius);
 
         bool center =
-            Mathf.Abs(x - width / 2) <= safezoneRadius &&
-            Mathf.Abs(y - height / 2) <= safezoneRadius;
+            Mathf.Abs(x - Width / 2) <= safezoneRadius &&
+            Mathf.Abs(y - Height / 2) <= safezoneRadius;
 
         return corner || center;
     }
 
     void GenerateTerrain()
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
                 if (IsInSafeZone(x, y))
                 {
@@ -84,9 +88,9 @@ public class GridManager : MonoBehaviour
         ConnectDisconnectedIslands();
 
         // Spawn mud and poison
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
                 int currentTile = grid[x, y];
 
@@ -102,9 +106,9 @@ public class GridManager : MonoBehaviour
                 }
 
                 int finalTile = grid[x, y];
-                nativeGrid[x + y * width] = finalTile;
+                nativeGrid[x + y * Width] = finalTile;
 
-                Vector3 spawnPos = new Vector3(x + worldOrigin.x, y + worldOrigin.y, 0);
+                Vector3 spawnPos = new Vector3(x + WorldOrigin.x, y + WorldOrigin.y, 0);
 
                 if (finalTile == 1 && wallPrefab != null)
                     Instantiate(wallPrefab, spawnPos, Quaternion.identity, this.transform);
@@ -117,14 +121,14 @@ public class GridManager : MonoBehaviour
     }
     void ConnectDisconnectedIslands()
     {
-        int[,] mapFlags = new int[width, height];
+        int[,] mapFlags = new int[Width, Height];
         List<List<Vector2Int>> allIslands = new List<List<Vector2Int>>();
         int biggestIslandIndex = 0;
         int maxTiles = 0;
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
                 if (grid[x, y] == 0 && mapFlags[x, y] == 0)
                 {
@@ -238,11 +242,11 @@ public class GridManager : MonoBehaviour
     // Cellular Automata Smoothing Function
     int[,] SmoothAsteroidCaves(int[,] oldGrid)
     {
-        int[,] newGrid = new int[width, height];
+        int[,] newGrid = new int[Width, Height];
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < Width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < Height; y++)
             {
                 if (IsInSafeZone(x, y))
                 {
@@ -262,7 +266,7 @@ public class GridManager : MonoBehaviour
 
     bool IsValid(int x, int y)
     {
-        return (x >= 0 && x < width && y >= 0 && y < height) ? true : false;
+        return (x >= 0 && x < Width && y >= 0 && y < Height) ? true : false;
     }
     int GetSurroundingWallCount(int[,] checkGrid, int gridX, int gridY)
     {
@@ -271,7 +275,7 @@ public class GridManager : MonoBehaviour
         {
             for (int neighborY = gridY - 1; neighborY <= gridY + 1; neighborY++)
             {
-                if (neighborX >= 0 && neighborX < width && neighborY >= 0 && neighborY < height)
+                if (neighborX >= 0 && neighborX < Width && neighborY >= 0 && neighborY < Height)
                 {
                     if (neighborX != gridX || neighborY != gridY)
                     {
@@ -295,13 +299,13 @@ public class GridManager : MonoBehaviour
 
     public void UpdateGridTile(Vector3 worldPosition, int newTileType)
     {   
-        int gridX = Mathf.RoundToInt(worldPosition.x) - worldOrigin.x;
-        int gridY = Mathf.RoundToInt(worldPosition.y) - worldOrigin.y;
+        int gridX = Mathf.RoundToInt(worldPosition.x) - WorldOrigin.x;
+        int gridY = Mathf.RoundToInt(worldPosition.y) - WorldOrigin.y;
 
         if (IsValid(gridX, gridY))
         {
             grid[gridX, gridY] = newTileType;
-            nativeGrid[gridX + gridY * width] = newTileType;
+            nativeGrid[gridX + gridY * Width] = newTileType;
         }
     }
 }

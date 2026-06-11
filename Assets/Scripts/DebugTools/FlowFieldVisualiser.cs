@@ -20,7 +20,7 @@ public class FlowFieldVisualiser : MonoBehaviour
             Gizmos.color = Color.cyan;
             for (int i = 0; i < flowField.Length; i++)
             {
-                Vector3 start = GridManager.Instance.worldOrigin + IndexToWorldPos(i, GridManager.Instance.width);
+                Vector3 start = new Vector2(GridManager.Instance.WorldOrigin.x, GridManager.Instance.WorldOrigin.y) + IndexToWorldPos(i, GridManager.Instance.Width);
                 Vector3 end = start + new Vector3(flowField[i].x, flowField[i].y, 0) * 0.5f;
 
                 float r = (flowField[i].x + 1.0f) * 0.5f;

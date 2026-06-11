@@ -7,11 +7,13 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(CollisionAndDamageGroup))]
 partial struct ProcessAOESystem : ISystem
 {
+    EntityQuery fineHeatmapQuery;
     EntityQuery queueQuery;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        fineHeatmapQuery = SystemAPI.QueryBuilder().WithAll<FineEnemyHeatmapComponent>().Build();
         queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
 
         state.RequireForUpdate<GlobalVFXQueue>();
@@ -21,12 +23,14 @@ partial struct ProcessAOESystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        fineHeatmapQuery.CompleteDependency();
         var fineHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
-        var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
-                           .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         queueQuery.CompleteDependency();
         var vfxQueue = SystemAPI.GetSingletonRW<GlobalVFXQueue>().ValueRW.Queue.AsParallelWriter();
+
+        var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+                           .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         var job = new ProcessExplosionsJob
         {

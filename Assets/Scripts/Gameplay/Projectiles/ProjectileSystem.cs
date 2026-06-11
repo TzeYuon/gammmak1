@@ -20,6 +20,7 @@ partial struct ProjectileSystem : ISystem
         collisionLookup = state.GetComponentLookup<CollisionRadius>(true);
         healthLookup = state.GetComponentLookup<HealthComponent>(false);
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
+        state.RequireForUpdate<TerrainGridComponent>();
     }
 
     //[BurstCompile]
@@ -36,11 +37,11 @@ partial struct ProjectileSystem : ISystem
         float deltaTime = SystemAPI.Time.DeltaTime;
         double elapsedTime = SystemAPI.Time.ElapsedTime;
 
-        if (GridManager.Instance == null || !GridManager.Instance.nativeGrid.IsCreated) return;
-        NativeArray<int> obstacleGrid = GridManager.Instance.nativeGrid;
-        int2 obstacleWorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y);
-        int obstacleGridWidth = GridManager.Instance.width;
-        int obstacleGridHeight = GridManager.Instance.height;
+        var terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        NativeArray<int> obstacleGrid = terrainGridComponent.Grid;
+        int2 obstacleWorldOrigin = terrainGridComponent.WorldOrigin;
+        int obstacleGridWidth = terrainGridComponent.GridWidth;
+        int obstacleGridHeight = terrainGridComponent.GridHeight;
 
         // Movement
         var linearHandle = new LinearFlightJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);

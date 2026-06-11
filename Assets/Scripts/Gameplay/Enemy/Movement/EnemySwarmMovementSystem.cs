@@ -11,25 +11,26 @@ partial struct EnemySwarmMovementSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
+        state.RequireForUpdate<TerrainGridComponent>();
+        state.RequireForUpdate<EnemyFlowFieldComponent>();
     }
 
     public void OnUpdate(ref SystemState state)
     {
-        if (GridManager.Instance == null) return;
-        if (!GridManager.Instance.nativeGrid.IsCreated || !GridManager.Instance.nativeFlowField.IsCreated) return;
-
         FineEnemyHeatmapComponent fineEnemyHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
+        TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        EnemyFlowFieldComponent enemyFlowFieldComponent = SystemAPI.GetSingleton<EnemyFlowFieldComponent>();
 
         var moveJob = new FlowFieldMovementJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
             ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
 
-            FlowField = GridManager.Instance.nativeFlowField,
-            Grid = GridManager.Instance.nativeGrid,
-            GridWidth = GridManager.Instance.width,
-            GridHeight = GridManager.Instance.height,
-            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y),
+            FlowField = enemyFlowFieldComponent.FlowField,
+            Grid = terrainGridComponent.Grid,
+            GridWidth = terrainGridComponent.GridWidth,
+            GridHeight = terrainGridComponent.GridHeight,
+            WorldOrigin = terrainGridComponent.WorldOrigin,
 
             Heatmap = fineEnemyHeatmap.DensityMap,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,

@@ -10,11 +10,14 @@ using UnityEngine;
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct ShipMovementSystem : ISystem
 {
+    public void OnCreate(ref SystemState state)
+    {
+        state.RequireForUpdate<TerrainGridComponent>();
+    }
+
     //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (GridManager.Instance == null || GridManager.Instance.grid == null) return;
-
         foreach (var (transform, command, buffer) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<MoveCommand>, DynamicBuffer<ShipWaypoint>>().WithAll<MoveCommand>())
         {
             if (command.ValueRO.Recalculate)
@@ -47,13 +50,14 @@ public partial struct ShipMovementSystem : ISystem
             }
         }
 
+        TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
         MoveShipJob job = new()
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
-            Grid = GridManager.Instance.nativeGrid,
-            GridWidth = GridManager.Instance.width,
-            GridHeight = GridManager.Instance.height,
-            WorldOrigin = new int2(GridManager.Instance.worldOrigin.x, GridManager.Instance.worldOrigin.y)
+            Grid = terrainGridComponent.Grid,
+            GridWidth = terrainGridComponent.GridWidth,
+            GridHeight = terrainGridComponent.GridHeight,
+            WorldOrigin = terrainGridComponent.WorldOrigin
         };
 
         job.ScheduleParallel();
