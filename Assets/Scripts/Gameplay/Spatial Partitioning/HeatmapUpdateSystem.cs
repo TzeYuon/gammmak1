@@ -9,16 +9,24 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 partial struct HeatmapUpdateSystem : ISystem
 {
+    EntityQuery coarseHeatmapQuery;
+    EntityQuery fineHeatmapQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<CoarseEnemyHeatmapComponent>();
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
+
+        coarseHeatmapQuery = SystemAPI.QueryBuilder().WithAll<CoarseEnemyHeatmapComponent>().Build();
+        fineHeatmapQuery = SystemAPI.QueryBuilder().WithAll<FineEnemyHeatmapComponent>().Build();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        coarseHeatmapQuery.CompleteDependency();
+        fineHeatmapQuery.CompleteDependency();
         CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
         RefRW<FineEnemyHeatmapComponent> fineEnemyHeatmap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>();
 
@@ -30,7 +38,6 @@ partial struct HeatmapUpdateSystem : ISystem
             fineEnemyHeatmap.ValueRW.Map = new NativeParallelMultiHashMap<int, Entity>(newCapacity, Allocator.Persistent);
         }
 
-        state.Dependency.Complete();
         fineEnemyHeatmap.ValueRO.Map.Clear();
         ClearArray(coarseEnemyHeatmap.Map);
         ClearArray(fineEnemyHeatmap.ValueRW.DensityMap);

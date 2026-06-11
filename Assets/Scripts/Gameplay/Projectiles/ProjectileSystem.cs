@@ -90,20 +90,19 @@ partial struct ProjectileSystem : ISystem
         var explosiveHandle = new ExplosivePayloadJob
         {
             ECB = ecb
-        }.ScheduleParallel(triggerhandle);
-        var combinedPayloadHandle = JobHandle.CombineDependencies(kineticHandle, explosiveHandle);
+        }.ScheduleParallel(kineticHandle);
 
-        combinedPayloadHandle = new PiercingPayloadJob
+        var piercingHandle = new PiercingPayloadJob
         {
             ECB = ecb,
-        }.ScheduleParallel(combinedPayloadHandle);
+        }.ScheduleParallel(explosiveHandle);
 
         // Lifespan
         var lifespanHandle = new ProjectileLifespanJob
         {
             ElapsedTime = elapsedTime,
             ECB = ecb,
-        }.ScheduleParallel(combinedPayloadHandle);
+        }.ScheduleParallel(piercingHandle);
 
         state.Dependency = lifespanHandle;
     }

@@ -10,13 +10,9 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct WeaponFiringSystem : ISystem
 {
-    EntityQuery queueQuery;
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
-
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
         state.RequireForUpdate<GlobalVFXQueue>();
@@ -25,7 +21,6 @@ public partial struct WeaponFiringSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        state.CompleteDependency();
         float deltaTime = SystemAPI.Time.DeltaTime;
         double elapsedTime = SystemAPI.Time.ElapsedTime;
 
@@ -35,7 +30,6 @@ public partial struct WeaponFiringSystem : ISystem
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
         NativeParallelMultiHashMap<int, Entity> map = fineEntityMap.Map;
 
-        queueQuery.CompleteDependency();
         var vfxWriter = SystemAPI.GetSingletonRW<GlobalVFXQueue>().ValueRW.Queue.AsParallelWriter();
 
         ComponentLookup<TurretComponent> turretLookup = SystemAPI.GetComponentLookup<TurretComponent>(true);
@@ -65,7 +59,6 @@ public partial struct WeaponFiringSystem : ISystem
         }.ScheduleParallel(hitscan);
 
         state.Dependency = projectile;
-        state.CompleteDependency();
     }
 }
 

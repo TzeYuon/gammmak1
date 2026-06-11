@@ -7,19 +7,15 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(LateGameplayGroup))]
 partial struct EmitTrailSystem : ISystem
 {
-    EntityQuery queueQuery;
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
         state.RequireForUpdate<GlobalVFXQueue>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        queueQuery.CompleteDependency();
         RefRW<GlobalVFXQueue> globalVFXQueue = SystemAPI.GetSingletonRW<GlobalVFXQueue>();
         state.Dependency = new EmitTrailJob
         {

@@ -23,7 +23,7 @@ partial struct VFXSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        //queueQuery.CompleteDependency();
+        queueQuery.CompleteDependency();
         queue.Clear();
     }
 }

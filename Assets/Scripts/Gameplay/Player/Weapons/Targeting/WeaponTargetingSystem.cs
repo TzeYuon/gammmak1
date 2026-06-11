@@ -19,19 +19,11 @@ partial struct WeaponTargetingSystem : ISystem
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
         state.RequireForUpdate<TerrainGridComponent>();
-
-        coarseHeatmapQuery = SystemAPI.QueryBuilder().WithAll<CoarseEnemyHeatmapComponent>().Build();
-        fineEntityMapQuery = SystemAPI.QueryBuilder().WithAll<FineEnemyHeatmapComponent>().Build();
-        terrainGridComponentQuery = SystemAPI.QueryBuilder().WithAll<TerrainGridComponent>().Build();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        coarseHeatmapQuery.CompleteDependency();
-        fineEntityMapQuery.CompleteDependency();
-        terrainGridComponentQuery.CompleteDependency();
-
         CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingleton<CoarseEnemyHeatmapComponent>();
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
         TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
