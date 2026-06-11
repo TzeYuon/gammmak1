@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bdeb26f38132c046bc175ecb1d3c017, type: 3}
+  m_Name: UIAssetsDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::UIAssetsDatabase
+  ShipListItem: {fileID: 9197481963319205126, guid: a7c3a57407451e84ab00d981bf6cc0c1, type: 3}
+  ShipSystemItem: {fileID: 9197481963319205126, guid: c39bc8c8aa4f51f488249861475953dc, type: 3}
+  WeaponListItem: {fileID: 9197481963319205126, guid: 3468ef6c6ec96164086b472b7f46cd71, type: 3}
+  WeaponMountItem: {fileID: 9197481963319205126, guid: 863c68ef9177c3a4aa84194012492f16, type: 3}
+  WeaponUpgradeItem: {fileID: 9197481963319205126, guid: a3b9b1c2c367d944c9d00996156401ff, type: 3}
+  UpgradePip: {fileID: 9197481963319205126, guid: cfa6b3e92bcd4094f9b89fb8ed26bbfa, type: 3}

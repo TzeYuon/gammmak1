@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(PreCombatSystemGroup))]
+[UpdateInGroup(typeof(CombatTargetingGroup))]
 partial struct WeaponTargetingSystem : ISystem
 {
     [BurstCompile]

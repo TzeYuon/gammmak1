@@ -4,25 +4,27 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(PostMovementSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 partial struct EmitTrailSystem : ISystem
 {
+    EntityQuery queueQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
         state.RequireForUpdate<GlobalVFXQueue>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        GlobalVFXQueue globalVFXQueue = SystemAPI.GetSingleton<GlobalVFXQueue>();
+        queueQuery.CompleteDependency();
+        RefRW<GlobalVFXQueue> globalVFXQueue = SystemAPI.GetSingletonRW<GlobalVFXQueue>();
         state.Dependency = new EmitTrailJob
         {
-            VfxQueue = globalVFXQueue.Queue.AsParallelWriter()
+            VfxQueue = globalVFXQueue.ValueRW.Queue.AsParallelWriter()
         }.ScheduleParallel(state.Dependency);
-
-        state.Dependency.Complete();
     }
 }
 

@@ -13,9 +13,52 @@ MonoBehaviour:
   m_Name: Cruiser
   m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
   ShipName: Cruiser
+  ShipClass: 3
   ShipID: 3
   ShipPrefab: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
-  MaxSpawnsPerLevel: 10
   CostToSpawn: 6
-  ShipSystems: []
-  Mounts: []
+  ShipSystems:
+  - SystemID: 1
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
+  - SystemID: 2
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
+    - Cost: 400
+      Description: 
+      Effects: []
+  - SystemID: 3
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
+    - Cost: 400
+      Description: 
+      Effects: []
+  Mounts:
+  - Position: {x: 0, y: 2}
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 2, y: 2}
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: -2, y: 2}
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 3, y: 0}
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: -3, y: 0}
+    EquippedWeapon: {fileID: 0}

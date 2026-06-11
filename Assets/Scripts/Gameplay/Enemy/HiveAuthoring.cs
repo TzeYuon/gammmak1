@@ -3,7 +3,6 @@ using UnityEngine;
 
 class HiveAuthoring : MonoBehaviour
 {
-    public GameObject Prefab;
     public int SpawnAmount;
 
     public float EnemySpeed;
@@ -22,12 +21,9 @@ class HiveAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Renderable);
 
-            var prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic);
-
             AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new HiveComponent
             {
-                Prefab = prefab,
                 SpawnAmount = authoring.SpawnAmount,
 
                 EnemySpeed = authoring.EnemySpeed,

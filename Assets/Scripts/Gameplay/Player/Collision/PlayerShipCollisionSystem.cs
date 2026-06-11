@@ -5,7 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(PostMovementSystemGroup))]
+[UpdateInGroup(typeof(CollisionAndDamageGroup))]
 partial struct PlayerShipCollisionSystem : ISystem
 {
     [BurstCompile]

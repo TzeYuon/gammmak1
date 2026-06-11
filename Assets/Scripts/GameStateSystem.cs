@@ -6,6 +6,7 @@ public enum GameState : byte
     None = 0,
     MainMenu,
     FleetCommandHub, // In the menus (Shop, Upgrades, Level select)
+    Generating, // Generating next level
     Gameplay, // Main gameplay screen (RTS)
     Paused,
     Victory,
@@ -17,7 +18,7 @@ public struct GameStateSingleton : IComponentData
     public GameState CurrentState;
 }
 
-[UpdateInGroup(typeof(PostUpdateSystemGroup))]
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial class GameStateSystem : SystemBase
 {
     private bool hasSubscribedEvents = false;
@@ -67,12 +68,12 @@ public partial class GameStateSystem : SystemBase
             case SceneId.MainMenuScene:
                 stateData.ValueRW.CurrentState = GameState.MainMenu;
                 OnStateChanged?.Invoke(previousState, stateData.ValueRO.CurrentState);
-                previousState = stateData.ValueRO.CurrentState;
+                previousState = GameState.MainMenu;
                 break;
             case SceneId.GameplayScene:
-                stateData.ValueRW.CurrentState = GameState.Gameplay;
+                stateData.ValueRW.CurrentState = GameState.Generating;
                 OnStateChanged?.Invoke(previousState, stateData.ValueRO.CurrentState);
-                previousState = stateData.ValueRO.CurrentState;
+                previousState = GameState.Generating;
                 break;
         }
     }

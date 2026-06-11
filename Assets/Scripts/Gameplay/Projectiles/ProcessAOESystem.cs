@@ -4,12 +4,17 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(PostMovementSystemGroup))]
+[UpdateInGroup(typeof(CollisionAndDamageGroup))]
 partial struct ProcessAOESystem : ISystem
 {
+    EntityQuery queueQuery;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+
+        state.RequireForUpdate<GlobalVFXQueue>();
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
     }
 
@@ -20,7 +25,8 @@ partial struct ProcessAOESystem : ISystem
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        var vfxQueue = SystemAPI.GetSingleton<GlobalVFXQueue>().Queue.AsParallelWriter();
+        queueQuery.CompleteDependency();
+        var vfxQueue = SystemAPI.GetSingletonRW<GlobalVFXQueue>().ValueRW.Queue.AsParallelWriter();
 
         var job = new ProcessExplosionsJob
         {

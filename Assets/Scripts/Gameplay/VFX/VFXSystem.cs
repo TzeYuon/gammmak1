@@ -2,13 +2,16 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct VFXSystem : ISystem
 {
+    EntityQuery queueQuery;
     NativeQueue<VFXPayload> queue;
 
     public void OnCreate(ref SystemState state)
     {
         queue = new NativeQueue<VFXPayload>(Allocator.Persistent);
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
         state.EntityManager.CreateSingleton(new GlobalVFXQueue { Queue = queue });
     }
 
@@ -20,7 +23,8 @@ partial struct VFXSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        SystemAPI.GetSingleton<GlobalVFXQueue>().Queue.Clear();
+        //queueQuery.CompleteDependency();
+        queue.Clear();
     }
 }
 

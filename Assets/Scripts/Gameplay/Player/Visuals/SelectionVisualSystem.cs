@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-[UpdateInGroup(typeof(PresentationSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 partial struct SelectionVisualSystem : ISystem
 {
     private ComponentLookup<SelectedTag> selectedLookup;
@@ -51,7 +51,7 @@ public partial struct UpdateSelectionVisualsJob : IJobEntity
     public float DeltaTime;
 
     private void Execute(
-        ref LocalTransform transform, 
+        ref LocalToWorld localToWorld, 
         in SelectionVisualComponent visual, 
         in ShipReference shipReference
         )
@@ -60,17 +60,17 @@ public partial struct UpdateSelectionVisualsJob : IJobEntity
 
         if (!SelectedLookup.HasComponent(shipReference.Value)) // ship does not have selected component
         {
-            transform.Scale = 0f;
+            localToWorld.Value = float4x4.TRS(localToWorld.Value.Translation(), quaternion.identity, 0);
             return;
         }
 
         if (SelectedLookup.IsComponentEnabled(shipReference.Value)) // ship selected
         {
-            transform.Scale = visual.Scale;
+            localToWorld.Value = float4x4.TRS(localToWorld.Value.Translation(), quaternion.identity, visual.Scale);
         }
         else // ship not selected
         {
-            transform.Scale = 0f;
+            localToWorld.Value = float4x4.TRS(localToWorld.Value.Translation(), quaternion.identity, 0);
         }
     }
 }

@@ -4,22 +4,27 @@ using Unity.Transforms;
 using Unity.Mathematics;
 
 [BurstCompile]
-[UpdateInGroup(typeof(PostUpdateSystemGroup))]
-public partial class SwarmDeathEventSystem : SystemBase
+[UpdateInGroup(typeof(LateGameplayGroup))]
+public partial struct SwarmDeathEventSystem : ISystem
 {
-    protected override void OnCreate()
+    EntityQuery queueQuery;
+
+    public void OnCreate(ref SystemState state)
     {
-        RequireForUpdate<BiomassConfig>();
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+        state.RequireForUpdate<BiomassConfig>();
+        state.RequireForUpdate<GlobalVFXQueue>();
     }
 
     [BurstCompile]
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
-        var vfxQueue = vfxSingleton.Queue;
+        queueQuery.CompleteDependency();
+        if (!SystemAPI.TryGetSingletonRW<GlobalVFXQueue>(out var vfxSingleton)) return;
+        var vfxQueue = vfxSingleton.ValueRW.Queue;
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-        var ecb = ecbSingleton.CreateCommandBuffer(World.Unmanaged);
+        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
         BiomassConfig prefabSingleton = SystemAPI.GetSingleton<BiomassConfig>();
         Entity biomassPrefab = prefabSingleton.BiomassPrefab;
@@ -56,14 +61,23 @@ public partial class SwarmDeathEventSystem : SystemBase
 }
 
 [BurstCompile]
-[UpdateInGroup(typeof(PostUpdateSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct PlayerDeathEventSystem : ISystem
 {
+    EntityQuery queueQuery;
+
+    public void OnCreate(ref SystemState state)
+    {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+        state.RequireForUpdate<GlobalVFXQueue>();
+    }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
-        var vfxQueue = vfxSingleton.Queue;
+        queueQuery.CompleteDependency();
+        if (!SystemAPI.TryGetSingletonRW<GlobalVFXQueue>(out var vfxSingleton)) return;
+        var vfxQueue = vfxSingleton.ValueRW.Queue;
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, PlayerTag>().WithAbsent<MothershipTag>())
         {
             vfxQueue.Enqueue(new VFXPayload
@@ -77,17 +91,25 @@ public partial struct PlayerDeathEventSystem : ISystem
 }
 
 [BurstCompile]
-[UpdateInGroup(typeof(PostUpdateSystemGroup))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct MothershipDeathEventSystem : ISystem
 {
+    EntityQuery queueQuery;
+
+    public void OnCreate(ref SystemState state)
+    {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+        state.RequireForUpdate<GlobalVFXQueue>();
+    }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<GlobalVFXQueue>(out var vfxSingleton)) return;
-        var vfxQueue = vfxSingleton.Queue;
+        queueQuery.CompleteDependency();
+        if (!SystemAPI.TryGetSingletonRW<GlobalVFXQueue>(out var vfxSingleton)) return;
+        var vfxQueue = vfxSingleton.ValueRW.Queue;
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, MothershipTag>())
         {
-            // 1. Spawn the biggest explosion in the game
             vfxQueue.Enqueue(new VFXPayload
             {
                 Position = transform.ValueRO.Position,

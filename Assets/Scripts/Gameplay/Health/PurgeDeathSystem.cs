@@ -1,7 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 
-[UpdateInGroup(typeof(PurgeSystemGroup))]
+[UpdateInGroup(typeof(PurgeGroup))]
 partial struct PurgeDeathSystem : ISystem
 {
     [BurstCompile]

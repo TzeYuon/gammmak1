@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(SpatialGridSystemGroup))] 
+[UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 public partial struct ShipReferencesInitSystem : ISystem
 {
     [BurstCompile]

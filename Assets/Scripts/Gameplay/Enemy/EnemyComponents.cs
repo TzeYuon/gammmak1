@@ -3,7 +3,6 @@ using Unity.Mathematics;
 
 public struct HiveComponent : IComponentData
 {
-    public Entity Prefab;
     public int SpawnAmount;
     
     public float EnemySpeed;
@@ -17,13 +16,13 @@ public struct HiveComponent : IComponentData
     public float Size;
 }
 
-public struct SwarmComponent : IComponentData
+public struct SwarmMovementStatsComponent : IComponentData
 {
     public float BaseSpeed;   
     public float WiggleOffset;
 }   
 
-public struct VelocityComponent : IComponentData
+public struct SwarmVelocityComponent : IComponentData
 {
     public float2 Value;
 }

@@ -14,7 +14,7 @@ public class EconomyAuthoring : MonoBehaviour
 
             AddComponent(entity, new PlayerEconomy
             {
-                TotalBiomass = authoring.StartingBiomass
+                TotalBiomass = authoring.StartingBiomass,
             });
         }
     }

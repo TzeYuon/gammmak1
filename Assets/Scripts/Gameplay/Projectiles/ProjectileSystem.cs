@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [BurstCompile]
-[UpdateInGroup(typeof(MovementSystemGroup))]
+[UpdateInGroup(typeof(ActionAndMovementGroup))]
 partial struct ProjectileSystem : ISystem
 {
     private ComponentLookup<LocalTransform> transformLookup;
@@ -316,7 +316,7 @@ public partial struct PiercingPayloadJob : IJobEntity
         Entity entity, 
         [ChunkIndexInQuery] int chunkIndex, 
         ref ProjectileTriggerState trigger, 
-        ref ProjectilePayloadStats stats
+        in ProjectilePayloadStats stats
         )
     {
         if (!trigger.IsTriggered) return;

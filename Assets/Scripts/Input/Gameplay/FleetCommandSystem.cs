@@ -6,7 +6,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 [BurstCompile]
-[UpdateInGroup(typeof(PlayerInputSystemGroup))]
+[UpdateInGroup(typeof(CommandAndSpawnGroup))]
 partial struct FleetCommandSystem : ISystem
 {
     [BurstCompile]
