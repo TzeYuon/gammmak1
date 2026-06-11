@@ -30,6 +30,7 @@ partial struct PlayerShipCollisionSystem : ISystem
             TransformLookup = transformLookup,
             HealthLookup = healthLookup,
             ECB = ecb,
+            WorldOrigin = fineMap.WorldOrigin,
             CellSize = fineMap.CellSize,
             GridWidth = fineMap.GridWidth,
             GridHeight = fineMap.GridHeight,
@@ -57,6 +58,7 @@ public partial struct ContactDamageJob : IJobEntity
 
     public EntityCommandBuffer.ParallelWriter ECB;
 
+    public int2 WorldOrigin;
     public float CellSize;
     public int GridWidth;
     public int GridHeight;
@@ -70,7 +72,7 @@ public partial struct ContactDamageJob : IJobEntity
         )
     {
         float2 pos = transform.Position.xy;
-        int2 cell = GridUtility.WorldPosToCell(transform.Position, CellSize);
+        int2 cell = GridUtility.WorldPosToCell(pos, WorldOrigin, CellSize);
         float maxRadiusSq = combinedRadius.MaxBoundingRadiusSq;
         int radiusCells = (int)math.ceil(math.sqrt(maxRadiusSq) / CellSize);
 

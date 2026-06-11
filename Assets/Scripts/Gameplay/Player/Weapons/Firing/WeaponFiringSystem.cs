@@ -48,6 +48,7 @@ public partial struct WeaponFiringSystem : ISystem
             ECB = ecb,
             VFXWriter = vfxWriter,
             FineHeatmap = map,
+            WorldOrigin = fineEntityMap.WorldOrigin,
             CellSize = fineEntityMap.CellSize,
             GridWidth = fineEntityMap.GridWidth,
             TurretLookup = turretLookup,
@@ -75,6 +76,7 @@ public partial struct HitscanFiringJob : IJobEntity
     public EntityCommandBuffer.ParallelWriter ECB;
 
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> FineHeatmap;
+    public int2 WorldOrigin;
     public float CellSize;
     public int GridWidth;
 
@@ -99,7 +101,7 @@ public partial struct HitscanFiringJob : IJobEntity
 
         if (TurretLookup.HasComponent(entity) && math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
 
-        int index = GridUtility.WorldPosToIndex(state.TargetPos, CellSize, GridWidth);
+        int index = GridUtility.WorldPosToIndex(state.TargetPos, WorldOrigin, CellSize, GridWidth);
         if (FineHeatmap.TryGetFirstValue(index, out Entity enemy, out var it))
         {
             do

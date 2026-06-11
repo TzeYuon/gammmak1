@@ -6,28 +6,29 @@ using UnityEngine;
 public static class GridUtility
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 WorldPosToCell(float2 worldPos, float cellSize)
+    public static int2 WorldPosToCell(float2 worldPos, int2 worldOrigin, float cellSize)
     {
-        return (int2)math.floor(worldPos / cellSize);
+        int gridX = (int)math.floor((worldPos.x - worldOrigin.x) / cellSize);
+        int gridY = (int)math.floor((worldPos.y - worldOrigin.y) / cellSize);
+        return new int2(gridX, gridY);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 WorldPosToCell(float3 worldPos, float cellSize)
+    public static int2 WorldPosToCell(float3 worldPos, int2 worldOrigin, float cellSize)
     {
-        return (int2)math.floor(worldPos.xy / cellSize);
+        return WorldPosToCell(worldPos.xy, worldOrigin, cellSize);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int WorldPosToIndex(float3 worldPos, float cellSize, int gridWidth)
+    public static int WorldPosToIndex(float3 worldPos, int2 worldOrigin, float cellSize, int gridWidth)
     {
-        int2 cell = (int2)math.floor(worldPos.xy / cellSize);
-        return cell.x + (cell.y * gridWidth);
+        return WorldPosToIndex(worldPos.xy, worldOrigin, cellSize, gridWidth);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int WorldPosToIndex(float2 worldPos, float cellSize, int gridWidth)
+    public static int WorldPosToIndex(float2 worldPos, int2 worldOrigin, float cellSize, int gridWidth)
     {
-        int2 cell = (int2)math.floor(worldPos / cellSize);
+        int2 cell = WorldPosToCell(worldPos, worldOrigin, cellSize);
         return cell.x + (cell.y * gridWidth);
     }
 
@@ -44,9 +45,15 @@ public static class GridUtility
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float2 CellToWorldPos(int2 cell, float cellSize)
+    public static float2 CellToWorldPosCenter(int2 cell, int2 worldOrigin, float cellSize)
     {
-        return (new float2(cell.x, cell.y) * cellSize) + (cellSize * 0.5f);
+        return (new float2(cell.x, cell.y) * cellSize) + (cellSize * 0.5f) + worldOrigin;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float2 CellToWorldPosCorner(int2 cell, int2 worldOrigin, float cellSize)
+    {
+        return (new float2(cell.x, cell.y) * cellSize) + worldOrigin;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,9 +78,13 @@ public static class GridUtility
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsWithinBounds(float2 checkWorldPos, float cellSize, int gridWidth, int gridHeight)
+    public static bool IsWithinBounds(float2 checkWorldPos, int2 worldOrigin, float cellSize, int gridWidth, int gridHeight)
     {
-        return IsWithinBounds(WorldPosToCell(checkWorldPos, cellSize), gridWidth, gridHeight);
+        return IsWithinBounds(
+            WorldPosToCell(checkWorldPos, worldOrigin, cellSize), 
+            gridWidth, 
+            gridHeight
+        );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

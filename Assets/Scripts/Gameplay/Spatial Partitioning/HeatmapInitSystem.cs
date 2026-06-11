@@ -27,6 +27,7 @@ partial struct HeatmapInitSystem : ISystem
         state.EntityManager.AddComponentData(e, new CoarseEnemyHeatmapComponent
         {
             Map = coarseEnemyArray,
+            WorldOrigin = settings.WorldOrigin,
             CellSize = settings.CoarseCellSize,
             GridWidth = settings.CoarseWidth,
             GridHeight = settings.CoarseHeight
@@ -39,6 +40,7 @@ partial struct HeatmapInitSystem : ISystem
         {
             Map = fineEnemyHashmap,
             DensityMap = fineEnemyArray,
+            WorldOrigin = settings.WorldOrigin,
             CellSize = settings.FineCellSize,
             GridWidth = settings.FineWidth,
             GridHeight = settings.FineHeight

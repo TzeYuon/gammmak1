@@ -47,6 +47,8 @@ partial struct HeatmapUpdateSystem : ISystem
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
         {
+            WorldOrigin = coarseEnemyHeatmap.WorldOrigin,
+
             CoarseMap = coarseEnemyHeatmap.Map,
             CoarseCellSize = coarseEnemyHeatmap.CellSize,
             CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
@@ -61,6 +63,8 @@ partial struct HeatmapUpdateSystem : ISystem
 
         var hiveHeatmapHandle = new HiveHeatmapJob
         {
+            WorldOrigin = coarseEnemyHeatmap.WorldOrigin,
+
             CoarseMap = coarseEnemyHeatmap.Map,
             CoarseCellSize = coarseEnemyHeatmap.CellSize,
             CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
@@ -110,6 +114,8 @@ public struct ClearFineEnemyJob : IJobParallelFor
 [WithDisabled(typeof(DeadTag))]
 public partial struct SwarmHeatmapJob : IJobEntity
 {
+    public int2 WorldOrigin;
+
     [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
     public float CoarseCellSize;
     public int CoarseGridWidth;
@@ -127,14 +133,14 @@ public partial struct SwarmHeatmapJob : IJobEntity
         )
     {
         float2 pos = transform.Position.xy;
-        int2 coarseCell = GridUtility.WorldPosToCell(pos, CoarseCellSize);
+        int2 coarseCell = GridUtility.WorldPosToCell(pos, WorldOrigin, CoarseCellSize);
         if (GridUtility.IsWithinBounds(coarseCell, CoarseGridWidth, CoarseGridHeight)) 
         {
             int coarseIndex = GridUtility.CellToIndex(coarseCell, CoarseGridWidth);
             CoarseMap.InterlockedAdd(coarseIndex, 1);
         }
 
-        int2 fineCell = GridUtility.WorldPosToCell(pos, FineCellSize);
+        int2 fineCell = GridUtility.WorldPosToCell(pos, WorldOrigin, FineCellSize);
         if (GridUtility.IsWithinBounds(fineCell, FineGridWidth, FineGridHeight))
         {
             int fineCellIndex = GridUtility.CellToIndex(fineCell, FineGridWidth);
@@ -148,6 +154,8 @@ public partial struct SwarmHeatmapJob : IJobEntity
 [WithDisabled(typeof(DeadTag))]
 public partial struct HiveHeatmapJob : IJobEntity
 {
+    public int2 WorldOrigin;
+
     [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
     public float CoarseCellSize;
     public int CoarseGridWidth;
@@ -167,14 +175,14 @@ public partial struct HiveHeatmapJob : IJobEntity
     {
         // Update coarse heatmap
         int coarseRadiusCells = (int)math.ceil(hive.Size / CoarseCellSize);
-        int2 coarseCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, CoarseCellSize);
+        int2 coarseCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, WorldOrigin, CoarseCellSize);
         float radiusSq = hive.Size * hive.Size;
         for (int x = -coarseRadiusCells; x <= coarseRadiusCells; x++)
         {
             for (int y = -coarseRadiusCells; y <= coarseRadiusCells; y++)
             {
                 int2 checkCell = coarseCenterCell + new int2(x, y);
-                float2 cellWorldPos = GridUtility.CellToWorldPos(checkCell, CoarseCellSize);
+                float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, WorldOrigin, CoarseCellSize);
 
                 if (math.distancesq(transform.Position.xy, cellWorldPos) <= radiusSq)
                 {
@@ -189,13 +197,13 @@ public partial struct HiveHeatmapJob : IJobEntity
 
         // Update fine heatmap
         int fineRadiusCells = (int)math.ceil(hive.Size / FineCellSize);
-        int2 fineCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, FineCellSize);
+        int2 fineCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, WorldOrigin, FineCellSize);
         for (int x = -fineRadiusCells; x <= fineRadiusCells; x++)
         {
             for (int y = -fineRadiusCells; y <= fineRadiusCells; y++)
             {
                 int2 checkCell = fineCenterCell + new int2(x, y);
-                float2 cellWorldPos = GridUtility.CellToWorldPos(checkCell, FineCellSize);
+                float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, WorldOrigin, FineCellSize);
 
                 if (math.distancesq(transform.Position.xy, cellWorldPos) <= radiusSq)
                 {
