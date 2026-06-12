@@ -39,7 +39,7 @@ public class HangarScreen : UIScreen
         shipListContainer.Clear();
         shipButtons.Clear();
 
-        foreach (var shipBlueprint in PlayerSaveManager.PlayerSaveData.AvailableShips)
+        foreach (var shipBlueprint in RunManager.SaveData.AvailableShips)
         {
             VisualElement shipItemClone = UIScreenManager.UIAssetsDatabase.ShipListItem.Instantiate();
 
@@ -52,7 +52,7 @@ public class HangarScreen : UIScreen
             classLabel.text = shipBlueprint.ShipClass.ToString().ToUpper();
 
             // Show status label if already in roster
-            if (PlayerSaveManager.PlayerSaveData.IsShipInRoster(shipBlueprint)) statusLabel.style.display = DisplayStyle.Flex;
+            if (RunManager.SaveData.IsShipInRoster(shipBlueprint)) statusLabel.style.display = DisplayStyle.Flex;
             else statusLabel.style.display = DisplayStyle.None;
 
             btn.clicked += () =>
@@ -84,7 +84,7 @@ public class HangarScreen : UIScreen
     public void UpdateShipButton(ShipBlueprintData ship)
     {
         var statusLabel = shipButtons[ship].Q<Label>("ShipItemStatus");
-        if (PlayerSaveManager.PlayerSaveData.IsShipInRoster(ship)) statusLabel.style.display = DisplayStyle.Flex;
+        if (RunManager.SaveData.IsShipInRoster(ship)) statusLabel.style.display = DisplayStyle.Flex;
         else statusLabel.style.display = DisplayStyle.None;
     }
 }
@@ -190,12 +190,12 @@ public class ShipDetailsElement
         if (!system.CanBeUpgraded()) return;
 
         // check affordable
-        var saveData = PlayerSaveManager.PlayerSaveData;
+        var saveData = RunManager.SaveData;
         int cost = system.GetUpgradeCost();
-        if (saveData.DataCoresRemaining < cost) return;
+        if (saveData.UpgradeCoresRemaining < cost) return;
 
         // subtract cost
-        saveData.DataCoresRemaining -= cost;
+        saveData.UpgradeCoresRemaining -= cost;
 
         // update data
         system.UpgradeLevel++;
@@ -209,8 +209,8 @@ public class ShipDetailsElement
         if (!system.CanBeRefunded()) return;
 
         // refund cost
-        var saveData = PlayerSaveManager.PlayerSaveData;
-        saveData.DataCoresRemaining += system.GetRefundValue();
+        var saveData = RunManager.SaveData;
+        saveData.UpgradeCoresRemaining += system.GetRefundValue();
         
         // update data
         system.UpgradeLevel--;
@@ -235,7 +235,7 @@ public class ShipDetailsElement
 
     void UpdateToggleRosterBtn()
     {
-        if (PlayerSaveManager.PlayerSaveData.IsShipInRoster(currentShip)) toggleRosterBtn.text = "REMOVE FROM ROSTER";
+        if (RunManager.SaveData.IsShipInRoster(currentShip)) toggleRosterBtn.text = "REMOVE FROM ROSTER";
         else toggleRosterBtn.text = "ADD TO ROSTER";
     }
 
@@ -271,8 +271,8 @@ public class ShipDetailsElement
         if (currentShip == null) return;
 
         // Add or remove from roster
-        if (PlayerSaveManager.PlayerSaveData.IsShipInRoster(currentShip)) PlayerSaveManager.PlayerSaveData.RemoveFromRoster(currentShip);
-        else PlayerSaveManager.PlayerSaveData.AddToRoster(currentShip);
+        if (RunManager.SaveData.IsShipInRoster(currentShip)) RunManager.SaveData.RemoveFromRoster(currentShip);
+        else RunManager.SaveData.AddToRoster(currentShip);
 
         UpdateToggleRosterBtn();
         hangarScreen.UpdateShipButton(currentShip);
@@ -398,7 +398,7 @@ public class WeaponMountContextMenu
 
     void UpdateWeaponList()
     {
-        List<WeaponData> weapons = PlayerSaveManager.PlayerSaveData.AvailableWeapons;
+        List<WeaponData> weapons = RunManager.SaveData.AvailableWeapons;
         if (weapons.Count != weaponsListItems.Count)
         {
             RebuildWeaponList();
@@ -419,7 +419,7 @@ public class WeaponMountContextMenu
             weaponsScrollViewContainer.Clear();
             weaponsListItems.Clear();
             weaponsListed.Clear();
-            foreach (var weapon in PlayerSaveManager.PlayerSaveData.AvailableWeapons)
+            foreach (var weapon in RunManager.SaveData.AvailableWeapons)
             {
                 if (weapon == null) continue;
 
@@ -468,7 +468,7 @@ public class WeaponMountContextMenu
 
         // update cost of upgrade on label, update colour if not affordable
         int cost = currentViewingWeapon.GetUpgradeCost();
-        if (PlayerSaveManager.PlayerSaveData.DataCoresRemaining >= cost)
+        if (RunManager.SaveData.UpgradeCoresRemaining >= cost)
         {
             upgradeBtn.text = $"UPGRADE [<color=#CCFF00>+{cost}</color>]";
         }
@@ -484,11 +484,11 @@ public class WeaponMountContextMenu
         if (currentViewingWeapon.UpgradeLevel == currentViewingWeapon.MaxUpgradeLevel) return;
 
         // check affordable
-        var saveData = PlayerSaveManager.PlayerSaveData;
-        if (saveData.DataCoresRemaining < currentViewingWeapon.GetUpgradeCost()) return;
+        var saveData = RunManager.SaveData;
+        if (saveData.UpgradeCoresRemaining < currentViewingWeapon.GetUpgradeCost()) return;
 
         // subtract cost
-        saveData.DataCoresRemaining -= currentViewingWeapon.GetUpgradeCost();
+        saveData.UpgradeCoresRemaining -= currentViewingWeapon.GetUpgradeCost();
         OnPlayerCurrencyChanged();
 
         // update data
@@ -523,8 +523,8 @@ public class WeaponMountContextMenu
         if (currentViewingWeapon.UpgradeLevel == 0) return;
 
         // refund cost
-        var saveData = PlayerSaveManager.PlayerSaveData;
-        saveData.DataCoresRemaining += currentViewingWeapon.GetRefundValue();
+        var saveData = RunManager.SaveData;
+        saveData.UpgradeCoresRemaining += currentViewingWeapon.GetRefundValue();
         OnPlayerCurrencyChanged();
 
         // update data

@@ -1,15 +1,24 @@
+using Map;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerSave", menuName = "FleetCommand/Player Save Data")]
 public class PlayerSaveData : ScriptableObject
 {
-    public int DataCoresRemaining;
+    public CurrentRunData ActiveRun;
+    public int UpgradeCoresRemaining;
 
     public List<ShipBlueprintData> AvailableShips;
     public List<WeaponData> AvailableWeapons;
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
+
+    public void OnStartNewRun()
+    {
+        ActiveRun?.Clear();
+        ActiveRun ??= new();
+        UpgradeCoresRemaining = 0;
+    }
 
     public bool IsShipInRoster(ShipBlueprintData data)
     {
@@ -41,5 +50,18 @@ public class PlayerSaveData : ScriptableObject
                 return;
             }
         }
+    }
+}
+
+public class CurrentRunData
+{
+    public int CurrentNodeIndex = 0; // Current node player is at
+
+    public List<LevelNode> SectorMap = new(); // level nodes present in the current sector
+
+    public void Clear()
+    {
+        CurrentNodeIndex = 0;
+        SectorMap.Clear();
     }
 }

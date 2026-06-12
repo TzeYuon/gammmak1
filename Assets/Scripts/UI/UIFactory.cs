@@ -105,7 +105,7 @@ public static class UIFactory
             upgradeBtn.style.visibility = Visibility.Visible;
 
             int cost = system.GetUpgradeCost();
-            if (PlayerSaveManager.PlayerSaveData.DataCoresRemaining >= cost)
+            if (RunManager.SaveData.UpgradeCoresRemaining >= cost)
             {
                 upgradeBtn.text = $"UPGRADE [<color=#CCFF00>+{cost}</color>]";
             }
