@@ -41,6 +41,7 @@ class WeaponAuthoring : MonoBehaviour
     public float ExplosionRadius;
     public int PierceCount;
     public float ProjectileSpeed;
+    public float ProjectileTurnSpeed;
     public float Spread;
     public float TriggerTime;
 
@@ -92,6 +93,7 @@ class WeaponAuthoring : MonoBehaviour
                     ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
                     PierceCount = authoring.PierceCount,
                     ProjectileSpeed = authoring.ProjectileSpeed,
+                    ProjectileTurnSpeed = authoring.ProjectileTurnSpeed,
                     Spread = authoring.Spread,
                     TriggerTime = authoring.TriggerTime,
                 });
@@ -111,7 +113,7 @@ public class WeaponAuthoringEditor : Editor
     SerializedProperty p_Damage, p_FireRate, p_Range;
     SerializedProperty p_Targeting, p_DensityBias, p_AngleBias, p_DistanceBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
-    SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_Spread, p_TriggerTime;
+    SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_ProjectileTurnSpeed, p_Spread, p_TriggerTime;
 
     private void OnEnable()
     {
@@ -136,6 +138,7 @@ public class WeaponAuthoringEditor : Editor
         p_ExplosionRadius = serializedObject.FindProperty("ExplosionRadius");
         p_PierceCount = serializedObject.FindProperty("PierceCount");
         p_ProjectileSpeed = serializedObject.FindProperty("ProjectileSpeed");
+        p_ProjectileTurnSpeed = serializedObject.FindProperty("ProjectileTurnSpeed");
         p_Spread = serializedObject.FindProperty("Spread");
         p_TriggerTime = serializedObject.FindProperty("TriggerTime");
     }
@@ -193,6 +196,7 @@ public class WeaponAuthoringEditor : Editor
             EditorGUILayout.PropertyField(p_ExplosionRadius);
             EditorGUILayout.PropertyField(p_PierceCount);
             EditorGUILayout.PropertyField(p_ProjectileSpeed);
+            EditorGUILayout.PropertyField(p_ProjectileTurnSpeed);
             EditorGUILayout.PropertyField(p_Spread);
             EditorGUILayout.PropertyField(p_TriggerTime);
             EditorGUI.indentLevel--;

@@ -6,6 +6,7 @@ public struct ProjectileMovementStats : IComponentData
 {
     public float Speed;    
     public float HomingRange;
+    public float TurnSpeed;
 }
 
 /// <summary>
@@ -18,7 +19,6 @@ public struct LinearFlight : IComponentData { }
 /// </summary>
 public struct HomingFlight : IComponentData 
 {
-    public float TurnSpeed;
     public float DistanceBias;
     public float AngleBias;
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 class ShipDatabaseAuthoring : MonoBehaviour
 {
+    public GameObject MothershipPrefab;
     public List<ShipBlueprintData> AllGameShips;
     public List<WeaponData> AllGameWeapons;
 
@@ -12,6 +13,9 @@ class ShipDatabaseAuthoring : MonoBehaviour
         public override void Bake(ShipDatabaseAuthoring authoring)
         {
             var entity = GetEntity(TransformUsageFlags.None);
+
+            var mothershipEntity = GetEntity(authoring.MothershipPrefab, TransformUsageFlags.Dynamic);
+            AddComponent(entity, new MothershipPrefabDatabase { MothershipPrefab = mothershipEntity });
 
             // Create the database buffer
             var shipDBBuffer = AddBuffer<BakedShipData>(entity);
@@ -43,4 +47,9 @@ class ShipDatabaseAuthoring : MonoBehaviour
             }
         }
     }
+}
+
+public partial struct MothershipPrefabDatabase : IComponentData
+{
+    public Entity MothershipPrefab;
 }

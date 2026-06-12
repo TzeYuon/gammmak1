@@ -55,6 +55,7 @@ public struct ProjectileWeapon : IComponentData
     public float ExplosionRadiusSq;
     public int PierceCount;
     public float ProjectileSpeed;
+    public float ProjectileTurnSpeed;
     public float Spread;
     public float TriggerTime;
 }

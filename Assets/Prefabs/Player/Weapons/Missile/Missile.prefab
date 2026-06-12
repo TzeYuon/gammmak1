@@ -50,7 +50,9 @@ MonoBehaviour:
   FireRate: 1
   Range: 60
   Targeting: 0
+  DensityBias: 1
   AngleBias: 0
+  DistanceBias: 2
   HasTurret: 0
   TurnSpeed: 5
   BaseDirection: {x: 0, y: 1, z: 0}
@@ -62,6 +64,7 @@ MonoBehaviour:
   ExplosionRadius: 5
   PierceCount: 0
   ProjectileSpeed: 50
+  ProjectileTurnSpeed: 2
   Spread: 0
   TriggerTime: 0
 --- !u!1 &954237318640528480

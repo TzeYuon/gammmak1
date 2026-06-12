@@ -1,5 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 partial struct LevelGen_PlayerFleetSystem : ISystem
@@ -20,10 +22,16 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.PlayerFleetSpawned) return; // player fleet already spawned in
 
-        // TODO: GENERATE PLAYER MOTHERSHIP
-
+        if (!SystemAPI.TryGetSingleton<MothershipPrefabDatabase>(out var prefabDatabase)) return;
 
         // mark as complete
         status.ValueRW.PlayerFleetSpawned = true;
+
+        var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+                           .CreateCommandBuffer(state.WorldUnmanaged);
+
+        // Generate mothership
+        Entity mothershipEntity = ecb.Instantiate(prefabDatabase.MothershipPrefab);
+        ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(new float3(1000, 1000, 0)));
     }
 }

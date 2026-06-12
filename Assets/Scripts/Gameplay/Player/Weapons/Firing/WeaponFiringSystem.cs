@@ -180,6 +180,7 @@ public partial struct ProjectileFiringJob : IJobEntity
         ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
         {
             Speed = projectileWeapon.ProjectileSpeed,
+            TurnSpeed = projectileWeapon.ProjectileTurnSpeed,
             HomingRange = 60f
         });
 

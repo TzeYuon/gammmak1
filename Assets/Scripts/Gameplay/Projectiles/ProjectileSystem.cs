@@ -1,8 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -23,7 +21,7 @@ partial struct ProjectileSystem : ISystem
         state.RequireForUpdate<TerrainGridComponent>();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         transformLookup.Update(ref state);
@@ -191,7 +189,7 @@ public partial struct HomingFlightJob : IJobEntity
         float angleDiff = targetAngle - currentAngle;
         while (angleDiff > math.PI) angleDiff -= math.PI * 2f;
         while (angleDiff < -math.PI) angleDiff += math.PI * 2f;
-        float maxTurnThisFrame = homing.TurnSpeed * DeltaTime;
+        float maxTurnThisFrame = stats.TurnSpeed * DeltaTime;
         float actualTurn = math.clamp(angleDiff, -maxTurnThisFrame, maxTurnThisFrame);
         float finalAngle = currentAngle + actualTurn;
         float2 newDir = new float2(math.cos(finalAngle), math.sin(finalAngle));

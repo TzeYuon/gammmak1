@@ -34,7 +34,6 @@ class ProjectileAuthoring : MonoBehaviour
             {
                 AddComponent(entity, new HomingFlight
                 {
-                    TurnSpeed = 1,
                     DistanceBias = 0,
                     AngleBias = 0,
                 });
