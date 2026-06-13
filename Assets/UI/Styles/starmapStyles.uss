@@ -1,0 +1,58 @@
+:root {
+}
+
+.map-node {
+    width: 100px;
+    height: 100px;
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.map-node-default {
+    width: 100px;
+    height: 100px;
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    background-color: rgb(255, 0, 0);
+}
+
+.map-node-activeselected {
+    width: 100px;
+    height: 100px;
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    background-color: rgb(0, 255, 0);
+}
+
+.map-node-selectable {
+    width: 100px;
+    height: 100px;
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    background-color: rgb(0, 0, 255);
+}

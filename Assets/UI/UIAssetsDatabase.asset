@@ -17,4 +17,4 @@ MonoBehaviour:
   WeaponListItem: {fileID: 9197481963319205126, guid: 3468ef6c6ec96164086b472b7f46cd71, type: 3}
   WeaponMountItem: {fileID: 9197481963319205126, guid: 863c68ef9177c3a4aa84194012492f16, type: 3}
   WeaponUpgradeItem: {fileID: 9197481963319205126, guid: a3b9b1c2c367d944c9d00996156401ff, type: 3}
-  UpgradePip: {fileID: 9197481963319205126, guid: cfa6b3e92bcd4094f9b89fb8ed26bbfa, type: 3}
+  MapNode: {fileID: 9197481963319205126, guid: 158798af0f857954c87bb07adcfe004b, type: 3}

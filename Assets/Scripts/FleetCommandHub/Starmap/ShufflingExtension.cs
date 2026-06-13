@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Map
+namespace Starmap
 {
     public static class ShufflingExtension
     {

@@ -1,5 +1,5 @@
 using UnityEngine;
-using Map;
+using Starmap;
 
 public class RunManager : MonoBehaviour
 {
@@ -23,11 +23,6 @@ public class RunManager : MonoBehaviour
         var generatedMap = MapGenerator.GetMap(Sector1Config);
 
         // Clear previous run data
-        SaveData.OnStartNewRun();
-
-        foreach (var generatedNode in generatedMap.AllNodes)
-        {
-            SaveData.ActiveRun.SectorMap.Add(generatedNode);
-        }
+        SaveData.OnStartNewRun(generatedMap);
     }
 }

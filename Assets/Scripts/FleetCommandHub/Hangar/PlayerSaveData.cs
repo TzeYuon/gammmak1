@@ -1,4 +1,3 @@
-using Map;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,10 +12,10 @@ public class PlayerSaveData : ScriptableObject
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
 
-    public void OnStartNewRun()
+    public void OnStartNewRun(Starmap.Map map)
     {
         ActiveRun?.Clear();
-        ActiveRun ??= new();
+        ActiveRun ??= new(map);
         UpgradeCoresRemaining = 0;
     }
 
@@ -56,12 +55,16 @@ public class PlayerSaveData : ScriptableObject
 public class CurrentRunData
 {
     public int CurrentNodeIndex = 0; // Current node player is at
+    
+    public Starmap.Map SectorMap; // level nodes present in the current sector
 
-    public List<LevelNode> SectorMap = new(); // level nodes present in the current sector
+    public CurrentRunData(Starmap.Map map)
+    {
+        SectorMap = map;
+    }
 
     public void Clear()
     {
         CurrentNodeIndex = 0;
-        SectorMap.Clear();
     }
 }

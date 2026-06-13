@@ -3,17 +3,19 @@ using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     public class Map
     {
         public List<LevelNode> AllNodes;
+        public List<LevelNode> StartNodes;
         public List<LevelNode> PathTaken;
 
-        public Map(List<LevelNode> nodes, List<LevelNode> path)
+        public Map(List<LevelNode> nodes, List<LevelNode> startNodes)
         {
-            this.AllNodes = nodes;
-            this.PathTaken = path;
+            AllNodes = nodes;
+            StartNodes = startNodes;
+            PathTaken = new();
         }
     }
 }

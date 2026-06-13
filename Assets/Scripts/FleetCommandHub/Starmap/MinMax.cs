@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     [System.Serializable]
     public class FloatMinMax
@@ -15,7 +15,7 @@ namespace Map
     }
 }
 
-namespace Map
+namespace Starmap
 {
     [System.Serializable]
     public class IntMinMax

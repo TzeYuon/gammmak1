@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     [CreateAssetMenu]
     public class MapConfig : ScriptableObject

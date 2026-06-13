@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     public static class MapGenerator
     {
@@ -33,8 +33,9 @@ namespace Map
 
             // select all the nodes with connections:
             List<LevelNode> nodesList = nodes.SelectMany(n => n).Where(n => n.Incoming.Count > 0 || n.Outgoing.Count > 0).ToList();
+            List<LevelNode> startNodes = nodesList.Where(n => n.Incoming.Count == 0).ToList();
 
-            return new Map(nodesList, new());
+            return new Map(nodesList, startNodes);
         }
 
         private static void PlaceLayer(int layerIndex)

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     [System.Serializable]
     public class MapLayer

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
 
-namespace Map
+namespace Starmap
 {
     public enum NodeType
     {
@@ -16,16 +16,15 @@ namespace Map
 
     public class LevelNode
     {
-        public readonly Vector2Int Point;
+        public readonly Vector2Int Position;
         public readonly List<LevelNode> Incoming = new();
         public readonly List<LevelNode> Outgoing = new();
-        [JsonConverter(typeof(StringEnumConverter))]
         public readonly NodeType NodeType;
 
         public LevelNode(NodeType nodeType, Vector2Int point)
         {
-            this.NodeType = nodeType;
-            this.Point = point;
+            NodeType = nodeType;
+            Position = point;
         }
 
         public void AddIncoming(LevelNode p)

@@ -10,4 +10,6 @@ public class UIAssetsDatabase : ScriptableObject
     public VisualTreeAsset WeaponListItem;
     public VisualTreeAsset WeaponMountItem;
     public VisualTreeAsset WeaponUpgradeItem;
+
+    public VisualTreeAsset MapNode;
 }
