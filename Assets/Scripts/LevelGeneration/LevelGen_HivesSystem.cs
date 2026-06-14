@@ -34,9 +34,9 @@ partial struct LevelGen_HivesSystem : ISystem
         // Generate hives TEMPORARY: spawns one in each corner
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
         Entity hiveEntity1 = ecb.Instantiate(hivePrefab);
-        //Entity hiveEntity2 = ecb.Instantiate(hivePrefab);
-        //Entity hiveEntity3 = ecb.Instantiate(hivePrefab);
-        //Entity hiveEntity4 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity2 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity3 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity4 = ecb.Instantiate(hivePrefab);
 
         ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(1000, 1010, 0)));
         //ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(910, 910, 0)));
