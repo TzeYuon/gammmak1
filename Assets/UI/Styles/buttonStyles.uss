@@ -11,6 +11,13 @@
     border-left-width: 1px;
 }
 
+.button:disabled {
+    background-color: rgb(20, 20, 20); 
+    border-color: rgb(75, 85, 95);    
+    color: rgb(100, 110, 120);       
+    opacity: 0.6;                      
+}
+
 .button {
     background-color: rgb(26, 26, 26);
     border-width: 1px;

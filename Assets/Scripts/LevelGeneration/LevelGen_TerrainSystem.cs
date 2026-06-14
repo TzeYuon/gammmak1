@@ -45,16 +45,21 @@ partial struct LevelGen_TerrainSystem : ISystem
         RefRW<EnemyFlowFieldComponent> enemyFlowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
 
         // Copy new sizes of the new level to the singleton
+        int2 worldOrigin = GridManager.Instance.WorldOrigin;
+        int width = GridManager.Instance.Width;
+        int height = GridManager.Instance.Height;
         terrainGridComponent.ValueRW.Grid = GridManager.Instance.nativeGrid;
-        terrainGridComponent.ValueRW.WorldOrigin = GridManager.Instance.WorldOrigin;
-        terrainGridComponent.ValueRW.GridWidth = GridManager.Instance.Width;
-        terrainGridComponent.ValueRW.GridHeight = GridManager.Instance.Height;
+        terrainGridComponent.ValueRW.WorldOrigin = worldOrigin;
+        terrainGridComponent.ValueRW.GridWidth = width;
+        terrainGridComponent.ValueRW.GridHeight = height;
         terrainGridComponent.ValueRW.CellSize = 1; // Hardcoded cell size of 1
 
-        enemyFlowFieldComponent.ValueRW.FlowField = GridManager.Instance.nativeFlowField;
-        enemyFlowFieldComponent.ValueRW.WorldOrigin = GridManager.Instance.WorldOrigin;
-        enemyFlowFieldComponent.ValueRW.GridWidth = GridManager.Instance.Width;
-        enemyFlowFieldComponent.ValueRW.GridHeight = GridManager.Instance.Height;
+        if (flowField.IsCreated) flowField.Dispose();
+        flowField = new NativeArray<float2>(width * height, Allocator.Persistent);
+        enemyFlowFieldComponent.ValueRW.FlowField = flowField;
+        enemyFlowFieldComponent.ValueRW.WorldOrigin = worldOrigin;
+        enemyFlowFieldComponent.ValueRW.GridWidth = width;
+        enemyFlowFieldComponent.ValueRW.GridHeight = height;
         enemyFlowFieldComponent.ValueRW.CellSize = 1; // Hardcoded cell size of 1
 
         // mark as complete

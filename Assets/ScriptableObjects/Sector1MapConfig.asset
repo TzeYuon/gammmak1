@@ -20,8 +20,36 @@ MonoBehaviour:
   NumOfStartingNodes:
     min: 2
     max: 3
-  ExtraPaths: 2
+  ExtraPaths: 4
   Layers:
+  - nodeType: 0
+    distanceFromPreviousLayer:
+      min: 0
+      max: 0
+    nodesApartDistance: 0
+    randomizePosition: 0
+    randomizeNodes: 0
+  - nodeType: 0
+    distanceFromPreviousLayer:
+      min: 0
+      max: 0
+    nodesApartDistance: 0
+    randomizePosition: 0
+    randomizeNodes: 0
+  - nodeType: 0
+    distanceFromPreviousLayer:
+      min: 0
+      max: 0
+    nodesApartDistance: 0
+    randomizePosition: 0
+    randomizeNodes: 0
+  - nodeType: 0
+    distanceFromPreviousLayer:
+      min: 0
+      max: 0
+    nodesApartDistance: 0
+    randomizePosition: 0
+    randomizeNodes: 0
   - nodeType: 0
     distanceFromPreviousLayer:
       min: 0

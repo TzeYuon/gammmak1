@@ -32,7 +32,7 @@ namespace Starmap
             RemoveCrossConnections();
 
             // select all the nodes with connections:
-            List<LevelNode> nodesList = nodes.SelectMany(n => n).Where(n => n.Incoming.Count > 0 || n.Outgoing.Count > 0).ToList();
+            List<LevelNode> nodesList = nodes.SelectMany(n => n).Where(n => !n.HasNoConnections()).ToList();
             List<LevelNode> startNodes = nodesList.Where(n => n.Incoming.Count == 0).ToList();
 
             return new Map(nodesList, startNodes);
@@ -65,8 +65,8 @@ namespace Starmap
                 {
                     LevelNode node = GetNode(path[i]);
                     LevelNode nextNode = GetNode(path[i + 1]);
-                    node.AddOutgoing(nextNode);
-                    nextNode.AddIncoming(node);
+                    node.Outgoing.Add(nextNode);
+                    nextNode.Incoming.Add(node);
                 }
             }
         }
@@ -93,34 +93,34 @@ namespace Starmap
 
                     // we managed to find a cross node:
                     // 1) add direct connections:
-                    node.AddOutgoing(top);
-                    top.AddIncoming(node);
+                    node.Outgoing.Add(top);
+                    top.Incoming.Add(node);
 
-                    right.AddOutgoing(topRight);
-                    topRight.AddIncoming(right);
+                    right.Outgoing.Add(topRight);
+                    topRight.Incoming.Add(right);
 
                     float rnd = Random.Range(0f, 1f);
                     if (rnd < 0.2f)
                     {
                         // remove both cross connections:
                         // a) 
-                        node.RemoveOutgoing(topRight);
-                        topRight.RemoveIncoming(node);
+                        node.Outgoing.Remove(topRight);
+                        topRight.Incoming.Remove(node);
                         // b) 
-                        right.RemoveOutgoing(top);
-                        top.RemoveIncoming(right);
+                        right.Outgoing.Remove(top);
+                        top.Incoming.Remove(right);
                     }
                     else if (rnd < 0.6f)
                     {
                         // a) 
-                        node.RemoveOutgoing(topRight);
-                        topRight.RemoveIncoming(node);
+                        node.Outgoing.Remove(topRight);
+                        topRight.Incoming.Remove(node);
                     }
                     else
                     {
                         // b) 
-                        right.RemoveOutgoing(top);
-                        top.RemoveIncoming(right);
+                        right.Outgoing.Remove(top);
+                        top.Incoming.Remove(right);
                     }
                 }
         }
