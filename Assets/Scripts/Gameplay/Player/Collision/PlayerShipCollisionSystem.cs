@@ -54,7 +54,7 @@ public partial struct ContactDamageJob : IJobEntity
 {
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
-    [NativeDisableContainerSafetyRestriction] [ReadOnly] public ComponentLookup<HealthComponent> HealthLookup;
+    [ReadOnly] public ComponentLookup<HealthComponent> HealthLookup;
 
     public EntityCommandBuffer.ParallelWriter ECB;
 

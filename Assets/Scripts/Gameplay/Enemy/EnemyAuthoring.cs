@@ -4,6 +4,8 @@ using UnityEngine;
 
 class EnemyAuthoring : MonoBehaviour
 {
+    [SerializeField] float hitboxRadius;
+
     class EnemyAuthoringBaker : Baker<EnemyAuthoring>
     {
         public override void Bake(EnemyAuthoring authoring)
@@ -23,7 +25,7 @@ class EnemyAuthoring : MonoBehaviour
 
             AddComponent(entity, new CollisionRadius
             {
-                Value = 1,
+                Value = authoring.hitboxRadius,
             });
 
             AddComponent(entity, new DeadTag());
