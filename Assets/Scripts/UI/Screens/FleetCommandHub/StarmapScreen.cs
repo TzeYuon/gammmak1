@@ -1,12 +1,12 @@
-using Starmap;
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class StarmapScreen : UIScreen
 {
-    private Map map;
+    private Starmap map;
 
     private VisualElement mapContainer;
     private Dictionary<LevelNode, MapNodeVisualElement> mapNodes = new();
@@ -43,7 +43,7 @@ public class StarmapScreen : UIScreen
             map = RunManager.SaveData.ActiveRun.SectorMap;
 
             // add invisible active node to connect to start nodes
-            currentNode = new(NodeType.Encounter, new Vector2Int(-1, -1));
+            currentNode = new(-1, -1);
             foreach (var startNode in map.StartNodes)
             {
                 currentNode.Outgoing.Add(startNode);
@@ -52,13 +52,9 @@ public class StarmapScreen : UIScreen
             // add node visual elements to map
             foreach (LevelNode node in map.AllNodes)
             {
-                var pos = node.Position;
                 MapNodeVisualElement nodeElement = UIScreenManager.UIAssetsDatabase.MapNode.Instantiate().Q<MapNodeVisualElement>();
 
                 nodeElement.style.position = Position.Absolute;
-                nodeElement.style.top = pos.y * 105 + 50;
-                nodeElement.style.left = pos.x * 105 + 50;
-
                 nodeElement.RegisterCallback<ClickEvent>(evt => OnMapNodeClicked(node));
 
                 mapContainer.Add(nodeElement);
@@ -66,32 +62,96 @@ public class StarmapScreen : UIScreen
             }
             UpdateMapNodeStates();
 
-            // Draw paths between nodes
-            DrawLines();
+            mapContainer.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
         }
     }
 
-    private void DrawLines()
+    public void OnGeometryChanged(GeometryChangedEvent evt)
     {
-        List<PathConnection> pathsToDraw = new();
-        foreach (LevelNode node in map.AllNodes)
-        {
-            MapNodeVisualElement nodeElement = mapNodes[node];
-            Vector2 start = new(nodeElement.style.left.value.value, nodeElement.style.top.value.value);
-            foreach (var outgoingNode in node.Outgoing)
-            {
-                MapNodeVisualElement outgoingElement = mapNodes[outgoingNode];
-                Vector2 end = new(outgoingElement.style.left.value.value, outgoingElement.style.top.value.value);
+        LayoutMap();
+    }
 
-                pathsToDraw.Add(new PathConnection
-                {
-                    Start = start,
-                    End = end,
-                    IsActivePath = nodeElement.NodeState == MapNodeState.Current,
-                });
+    private void LayoutMap()
+    {
+        float containerWidth = mapContainer.resolvedStyle.width;
+        float containerHeight = mapContainer.resolvedStyle.height;
+
+        // boundaries of map
+        float minX = float.MaxValue; 
+        float maxX = float.MinValue;
+        float minY = float.MaxValue; 
+        float maxY = float.MinValue;
+
+        foreach (var node in map.AllNodes)
+        {
+            if (node.Layer < minX) minX = node.Layer;
+            if (node.Layer > maxX) maxX = node.Layer;
+            if (node.Lane < minY) minY = node.Lane;
+            if (node.Lane > maxY) maxY = node.Lane;
+        }
+
+        float mapWidth = math.max(1f, maxX - minX);
+        float mapHeight = math.max(1f, maxY - minY);
+
+        // Calculate Scale and Offset
+        float paddingMultiplierX = 0.85f;
+        float paddingMultiplierY = 0.4f;
+        float scaleX = (containerWidth * paddingMultiplierX) / mapWidth;
+        float scaleY = (containerHeight * paddingMultiplierY) / mapHeight;
+
+        float offsetX = containerWidth * (1f - paddingMultiplierX) * 0.5f;
+        float offsetY = containerHeight * (1f - paddingMultiplierY) * 0.5f;
+
+        float randomOffsetX = 0.2f * scaleX;
+        float randomOffsetY = 0.15f * scaleY;
+        var originalRandomState = UnityEngine.Random.state;
+
+        // Position nodes in the middle of mapContainer
+        foreach (var nodeData in map.AllNodes)
+        {
+            if (mapNodes.TryGetValue(nodeData, out MapNodeVisualElement nodeVisual))
+            {
+                float localX = nodeData.Layer - minX;
+                float localY = nodeData.Lane - minY;
+                float uiLocalY = mapHeight - localY;
+
+                UnityEngine.Random.InitState(nodeData.GetHashCode());
+                float rand_x = UnityEngine.Random.Range(-randomOffsetX, randomOffsetX);
+                float rand_y = UnityEngine.Random.Range(-randomOffsetY, randomOffsetY);
+
+                float finalUI_X = (localX * scaleX) + offsetX + rand_x;
+                float finalUI_Y = (uiLocalY * scaleY) + offsetY + rand_y;
+
+                nodeVisual.style.left = finalUI_X;
+                nodeVisual.style.top = finalUI_Y;
             }
         }
-        pathCanvas.SetPaths(pathsToDraw);
+        UnityEngine.Random.state = originalRandomState;
+
+        DrawLines();
+
+        void DrawLines()
+        {
+            List<PathConnection> pathsToDraw = new();
+            foreach (LevelNode node in map.AllNodes)
+            {
+                MapNodeVisualElement nodeElement = mapNodes[node];
+                Vector2 start = new(nodeElement.style.left.value.value, nodeElement.style.top.value.value);
+                foreach (var outgoingNode in node.Outgoing)
+                {
+                    MapNodeVisualElement outgoingElement = mapNodes[outgoingNode];
+                    Vector2 end = new(outgoingElement.style.left.value.value, outgoingElement.style.top.value.value);
+
+                    pathsToDraw.Add(new PathConnection
+                    {
+                        Start = start,
+                        End = end,
+                        IsActivePath = nodeElement.NodeState == MapNodeState.Current,
+                    });
+                }
+            }
+            pathCanvas.SetPaths(pathsToDraw);
+        }
     }
 
     protected override void OnHide()
@@ -103,7 +163,6 @@ public class StarmapScreen : UIScreen
     {
         UpdateMapNodeStates();
         UpdateDeployBtn();
-        DrawLines();
     }
 
     void UpdateMapNodeStates()

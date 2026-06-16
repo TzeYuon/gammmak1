@@ -381,7 +381,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveManager
   playerSaveData: {fileID: 11400000, guid: f3b095d919907a84198ee7e196198de6, type: 2}
-  Sector1Config: {fileID: 11400000, guid: 50650ec14840e68449af8e743d9e6c62, type: 2}
+  Sector1Config: {fileID: 11400000, guid: 7c1d5098cdde9d74ba246d456cd2b94e, type: 2}
 --- !u!4 &878546418
 Transform:
   m_ObjectHideFlags: 0

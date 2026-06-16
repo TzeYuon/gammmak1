@@ -1,5 +1,4 @@
 using UnityEngine;
-using Starmap;
 
 public class RunManager : MonoBehaviour
 {
@@ -8,7 +7,7 @@ public class RunManager : MonoBehaviour
     [SerializeField] private PlayerSaveData playerSaveData;
     public static PlayerSaveData SaveData { get { return Instance.playerSaveData; } }
 
-    public MapConfig Sector1Config;
+    public MapGenerationConfig Sector1Config;
 
     private void Awake()
     {
@@ -20,7 +19,7 @@ public class RunManager : MonoBehaviour
 
     public void StartNewRun()
     {
-        var generatedMap = MapGenerator.GetMap(Sector1Config);
+        var generatedMap = MapGenerator.GenerateMap(Sector1Config);
 
         // Clear previous run data
         SaveData.OnStartNewRun(generatedMap);

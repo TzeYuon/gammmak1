@@ -12,7 +12,7 @@ public class PlayerSaveData : ScriptableObject
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
 
-    public void OnStartNewRun(Starmap.Map map)
+    public void OnStartNewRun(Starmap map)
     {
         ActiveRun?.Clear();
         ActiveRun ??= new(map);
@@ -56,9 +56,9 @@ public class CurrentRunData
 {
     public int CurrentNodeIndex = 0; // Current node player is at
     
-    public Starmap.Map SectorMap; // level nodes present in the current sector
+    public Starmap SectorMap; // level nodes present in the current sector
 
-    public CurrentRunData(Starmap.Map map)
+    public CurrentRunData(Starmap map)
     {
         SectorMap = map;
     }

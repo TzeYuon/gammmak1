@@ -12,10 +12,10 @@
 }
 
 .button:disabled {
-    background-color: rgb(20, 20, 20); 
-    border-color: rgb(75, 85, 95);    
-    color: rgb(100, 110, 120);       
-    opacity: 0.6;                      
+    background-color: rgb(20, 20, 20);
+    border-color: rgb(75, 85, 95);
+    color: rgb(100, 110, 120);
+    opacity: 0.6;
 }
 
 .button {
@@ -142,8 +142,6 @@
     border-bottom-color: rgb(0, 255, 255);
 }
 
-
-
 .inactive-list-item {
     border-left-color: rgba(0, 255, 255, 0);
     border-right-color: rgba(0, 255, 255, 0);
@@ -158,3 +156,5 @@
     padding-bottom: 0;
     padding-left: 0;
 }
+
+
