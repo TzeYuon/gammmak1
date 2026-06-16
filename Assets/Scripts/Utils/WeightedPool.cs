@@ -13,7 +13,7 @@ public class WeightedPool<T>
 {
     private bool isInit = false;
     private int totalWeight;
-    private List<WeightedItem<T>> pool = new List<WeightedItem<T>>();
+    public List<WeightedItem<T>> Pool = new List<WeightedItem<T>>();
 
     public T GetRandom()
     {
@@ -23,25 +23,25 @@ public class WeightedPool<T>
             CalculateTotalWeight();
         }
 
-        if (pool.Count == 0) return default;
+        if (Pool.Count == 0) return default;
 
         int randomRoll = Random.Range(0, totalWeight);
         int currentWeight = 0;
 
-        foreach (var item in pool)
+        foreach (var item in Pool)
         {
             currentWeight += item.Weight;
             if (randomRoll < currentWeight)
                 return item.Item;
         }
 
-        return pool[0].Item;
+        return Pool[0].Item;
     }
 
     void CalculateTotalWeight()
     {
         totalWeight = 0;
-        foreach (var item in pool)
+        foreach (var item in Pool)
         {
             totalWeight += item.Weight;
         }
@@ -55,12 +55,12 @@ public class WeightedPool<T>
     public void Add(WeightedItem<T> weightedItem)
     {
         totalWeight += weightedItem.Weight;
-        pool.Add(weightedItem);
+        Pool.Add(weightedItem);
     }
 
     public void Remove(WeightedItem<T> weightedItem)
     {
         totalWeight -= weightedItem.Weight;
-        pool.Remove(weightedItem);
+        Pool.Remove(weightedItem);
     }
 }

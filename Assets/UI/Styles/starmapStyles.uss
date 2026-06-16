@@ -43,7 +43,43 @@
 }
 
 .map-node-onpath {
-    background-color: rgba(0, 255, 255, 0.25); 
+    background-color: rgba(0, 255, 255, 0.25);
     border-color: rgba(0, 255, 255, 0.4);
-    scale: 0.8;  
+    scale: 0.8;
+}
+
+.details-panel {
+    width: 60%;
+    height: 0;
+    padding: 0 20px;
+    transition-property: height, opacity, padding;
+    transition-duration: 0.1s, 0.1s, 0.1s;
+    transition-timing-function: linear, linear, linear;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.details-panel--open {
+    height: 50%;
+    opacity: 1;
+    padding: 20px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    width: 60%;
+    border-left-color: rgba(0, 255, 255, 0.3);
+    border-right-color: rgba(0, 255, 255, 0.3);
+    border-top-color: rgba(0, 255, 255, 0.3);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    opacity: 1;
+    overflow: hidden;
 }

@@ -18,31 +18,135 @@ MonoBehaviour:
     NumNodes:
       min: 1
       max: 1
-    BaseUpgradeCoreReward: 0
+    NodePool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    ThreatPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    TerrainPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    ObjectivePool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    EnemyPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    StandardRewardPool:
+      Pool:
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    BaseUpgradeCoreReward: 200
+    EliteRewardPool:
+      Pool:
+      - Item: 0
+        Weight: 0
     EliteUpgradeCoreReward: 0
     StandardAnomalyChance: 0
     EliteAnomalyChance: 0
-  - NumLayers: 4
+    AnomalyPool:
+      Pool: []
+  - NumLayers: 3
     NumNodes:
       min: 2
       max: 3
-    BaseUpgradeCoreReward: 0
+    NodePool:
+      Pool:
+      - Item: 0
+        Weight: 3
+      - Item: 2
+        Weight: 1
+    ThreatPool:
+      Pool:
+      - Item: 0
+        Weight: 2
+      - Item: 1
+        Weight: 1
+    TerrainPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
+    ObjectivePool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 1
+    EnemyPool:
+      Pool:
+      - Item: 0
+        Weight: 2
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    StandardRewardPool:
+      Pool:
+      - Item: 0
+        Weight: 3
+      - Item: 1
+        Weight: 3
+      - Item: 2
+        Weight: 3
+      - Item: 3
+        Weight: 1
+    BaseUpgradeCoreReward: 300
+    EliteRewardPool:
+      Pool: []
     EliteUpgradeCoreReward: 0
-    StandardAnomalyChance: 0
+    StandardAnomalyChance: 0.1
     EliteAnomalyChance: 0
-  - NumLayers: 4
-    NumNodes:
-      min: 3
-      max: 5
-    BaseUpgradeCoreReward: 0
-    EliteUpgradeCoreReward: 0
-    StandardAnomalyChance: 0
-    EliteAnomalyChance: 0
+    AnomalyPool:
+      Pool:
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
   - NumLayers: 1
     NumNodes:
       min: 1
       max: 1
+    NodePool:
+      Pool:
+      - Item: 3
+        Weight: 0
+    ThreatPool:
+      Pool: []
+    TerrainPool:
+      Pool: []
+    ObjectivePool:
+      Pool: []
+    EnemyPool:
+      Pool: []
+    StandardRewardPool:
+      Pool: []
     BaseUpgradeCoreReward: 0
-    EliteUpgradeCoreReward: 0
+    EliteRewardPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    EliteUpgradeCoreReward: 1000
     StandardAnomalyChance: 0
     EliteAnomalyChance: 0
+    AnomalyPool:
+      Pool: []

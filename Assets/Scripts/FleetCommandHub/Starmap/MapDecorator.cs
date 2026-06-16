@@ -3,9 +3,9 @@ using UnityEngine;
 
 public static class MapDecorator
 {
-    public static List<LevelNode> DecorateSector(List<LevelNode> nodes, MapGenerationConfig config)
+    public static void DecorateSector(List<LevelNode> nodes, MapGenerationConfig config)
     {
-        if (nodes == null || nodes.Count == 0 || config == null) return nodes;
+        if (nodes == null || nodes.Count == 0 || config == null) return;
 
         // Map each layer to a config
         Dictionary<int, LayerRangeConfig> layerConfigs = new();
@@ -74,7 +74,5 @@ public static class MapDecorator
                 node.UpgradeCoreReward = layerConfig.BaseUpgradeCoreReward;
             }
         }
-
-        return nodes;
     }
 }

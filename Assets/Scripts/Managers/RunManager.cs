@@ -19,7 +19,8 @@ public class RunManager : MonoBehaviour
 
     public void StartNewRun()
     {
-        var generatedMap = MapGenerator.GenerateMap(Sector1Config);
+        Starmap generatedMap = MapGenerator.GenerateMap(Sector1Config);
+        MapDecorator.DecorateSector(generatedMap.AllNodes, Sector1Config);
 
         // Clear previous run data
         SaveData.OnStartNewRun(generatedMap);

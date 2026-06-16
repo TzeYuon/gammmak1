@@ -10,8 +10,13 @@ public class StarmapScreen : UIScreen
 
     private VisualElement mapContainer;
     private Dictionary<LevelNode, MapNodeVisualElement> mapNodes = new();
-
     MapPathCanvas pathCanvas;
+
+    private VisualElement mapDetailsContainer;
+    private string mapDetailsOpenClass = "details-panel--open";
+    private LevelNode pendingTargetNode = null;
+    private bool isMapDetailsContainerOpen { get { return mapDetailsContainer.ClassListContains(mapDetailsOpenClass); } }
+    private Label nodeTypeLbl, threatLevelLbl, objectiveLbl, enemyProfileLbl, terrainTypeLbl, rewardTypeLbl, anomalyLbl;
 
     private Button deployBtn;
     private EntityQuery gameStateQuery;
@@ -22,6 +27,7 @@ public class StarmapScreen : UIScreen
     public StarmapScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
         mapContainer = root.Q<VisualElement>("MapContainer");
+        mapDetailsContainer = root.Q<VisualElement>("MapDetailsContainer");
         pathCanvas = root.Q<MapPathCanvas>("MapPathCanvas");
 
         deployBtn = root.Q<Button>("DeployBtn");
@@ -35,6 +41,8 @@ public class StarmapScreen : UIScreen
         }
 
         InitMap();
+
+        InitMapDetailsContainer();
 
         UpdateDeployBtn();
 
@@ -61,14 +69,36 @@ public class StarmapScreen : UIScreen
                 mapNodes.Add(node, nodeElement);
             }
             UpdateMapNodeStates();
+        }
 
-            mapContainer.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        void InitMapDetailsContainer()
+        {
+            nodeTypeLbl = mapDetailsContainer.Q<Label>("NodeTypeLbl");
+            threatLevelLbl = mapDetailsContainer.Q<Label>("ThreatLevelLbl");
+            objectiveLbl = mapDetailsContainer.Q<Label>("ObjectiveLbl");
+            enemyProfileLbl = mapDetailsContainer.Q<Label>("EnemyProfileLbl");
+            terrainTypeLbl = mapDetailsContainer.Q<Label>("TerrainTypeLbl");
+            rewardTypeLbl = mapDetailsContainer.Q<Label>("RewardTypeLbl");
+            anomalyLbl = mapDetailsContainer.Q<Label>("AnomalyLbl");
         }
     }
 
     public void OnGeometryChanged(GeometryChangedEvent evt)
     {
         LayoutMap();
+    }
+
+    private void OnTransitionFinished(TransitionEndEvent evt)
+    {
+        if (evt.stylePropertyNames.Contains("height") && !isMapDetailsContainerOpen)
+        {
+            if (pendingTargetNode != null)
+            {
+                UpdateMapDetailsContainer(pendingTargetNode);
+                pendingTargetNode = null;
+                ToggleMapDetailsContainer(true);
+            }
+        }
     }
 
     private void LayoutMap()
@@ -156,13 +186,21 @@ public class StarmapScreen : UIScreen
 
     protected override void OnHide()
     {
+        mapContainer.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        mapDetailsContainer.UnregisterCallback<TransitionEndEvent>(OnTransitionFinished);
 
+        ToggleMapDetailsContainer(selectedNode != null);
     }
 
     protected override void OnShow()
     {
+        mapContainer.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        mapDetailsContainer.RegisterCallback<TransitionEndEvent>(OnTransitionFinished);
+
         UpdateMapNodeStates();
         UpdateDeployBtn();
+
+        ToggleMapDetailsContainer(selectedNode != null);
     }
 
     void UpdateMapNodeStates()
@@ -209,6 +247,47 @@ public class StarmapScreen : UIScreen
         selectedNode = node;
         UpdateMapNodeStates();
         UpdateDeployBtn();
+
+        if (isMapDetailsContainerOpen)
+        {
+            pendingTargetNode = node;
+            ToggleMapDetailsContainer(false);
+        }
+        else
+        {
+            UpdateMapDetailsContainer(node);
+            ToggleMapDetailsContainer(true);
+        }
+    }
+
+    void ToggleMapDetailsContainer(bool open)
+    {
+        if (open) mapDetailsContainer.AddToClassList(mapDetailsOpenClass);
+        else mapDetailsContainer.RemoveFromClassList(mapDetailsOpenClass);
+    }
+
+    void UpdateMapDetailsContainer(LevelNode node)
+    {
+        // populate node details
+        if (node == null)
+        {
+            nodeTypeLbl.text = "NODE TYPE : [ NONE ]";
+            threatLevelLbl.text = "THREAT LEVEL : [ NONE ]";
+            objectiveLbl.text = "OBJECTIVE : [ NONE ]";
+            enemyProfileLbl.text = "ENEMY PROFILE : [ NONE ]";
+            terrainTypeLbl.text = "TERRAIN : [ NONE ]";
+            rewardTypeLbl.text = "REWARD : [ NONE ]";
+            anomalyLbl.text = "ANOMALY : [ NONE ]";
+            return;
+        }
+
+        nodeTypeLbl.text = $"NODE TYPE : [ {node.NodeType.ToString().ToUpper()} ]";
+        threatLevelLbl.text = $"THREAT LEVEL : [ {node.ThreatLevel.ToString().ToUpper()} ]";
+        objectiveLbl.text = $"OBJECTIVE : [ {node.ObjectiveType.ToString().ToUpper()} ]";
+        enemyProfileLbl.text = $"ENEMY PROFILE : [ {node.EnemyProfile.ToString().ToUpper()} ]";
+        terrainTypeLbl.text = $"TERRAIN : [ {node.TerrainType.ToString().ToUpper()} ]";
+        rewardTypeLbl.text = $"REWARD : [ {node.RewardType.ToString().ToUpper()} ]";
+        anomalyLbl.text = $"ANOMALY : [ {node.AnomalyType.ToString().ToUpper()} ]";
     }
 
     void UpdateDeployBtn()
