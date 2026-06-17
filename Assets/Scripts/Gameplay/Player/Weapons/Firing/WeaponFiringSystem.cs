@@ -1,6 +1,5 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -81,13 +80,14 @@ public partial struct HitscanFiringJob : IJobEntity
         Entity entity,
         [ChunkIndexInQuery] int chunkIndex,
         ref WeaponState state,
-        in HitscanWeapon hitscanWeapon,
+        in HitscanWeapon weapon,
+        in WeaponCombatStats stats,
         in LocalToWorld localToWorld
         )
     {
         state.FireTimer -= DeltaTime;
-        if (state.FireTimer > 0 || !state.HasTarget || state.FireRate == 0) return;
-        state.FireTimer = 1 / state.FireRate;
+        if (state.FireTimer > 0 || !state.HasTarget || stats.FireRate == 0) return;
+        state.FireTimer = 1 / stats.FireRate;
 
         float3 barrelForward = localToWorld.Up;
         float3 dirToTarget = math.normalize(new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position);
@@ -99,7 +99,7 @@ public partial struct HitscanFiringJob : IJobEntity
         {
             do
             {
-                ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = hitscanWeapon.Damage });
+                ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = stats.Damage });
             } while (FineHeatmap.TryGetNextValue(out enemy, ref it));
         }
 
@@ -111,8 +111,9 @@ public partial struct HitscanFiringJob : IJobEntity
         float angleRadians = math.atan2(dir.y, dir.x);
         float angleDegrees = math.degrees(angleRadians);
         quaternion rotation = quaternion.RotateZ(angleRadians - (math.PI / 2f));
-        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(hitscanWeapon.WeaponStartPosition, 0));
+        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(weapon.WeaponStartOffset, 0));
 
+        // TEMPORARY: All weapons have the same vfx
         VFXWriter.Enqueue(new VFXPayload
         {
             Position = midpoint,
@@ -149,12 +150,13 @@ public partial struct ProjectileFiringJob : IJobEntity
         [ChunkIndexInQuery] int chunkIndex,
         ref WeaponState state,
         in ProjectileWeapon projectileWeapon,
+        in WeaponCombatStats stats,
         in LocalToWorld localToWorld
         )
     {
         state.FireTimer -= DeltaTime;
-        if (state.FireTimer > 0 || !state.HasTarget || state.FireRate == 0) return;
-        state.FireTimer = 1 / state.FireRate;
+        if (state.FireTimer > 0 || !state.HasTarget || stats.FireRate == 0) return;
+        state.FireTimer = 1 / stats.FireRate;
 
         float3 weaponForward = localToWorld.Up;
         float2 targetPos = state.TargetPos;
@@ -166,11 +168,11 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         // Add spread
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
-        float randomAngleOffset = math.radians(rng.NextFloat(-projectileWeapon.Spread, projectileWeapon.Spread));
+        float randomAngleOffset = math.radians(rng.NextFloat(-stats.Spread, stats.Spread));
         float baseAngle = math.atan2(weaponForward.y, weaponForward.x); 
         float finalAngle = baseAngle + randomAngleOffset;
         quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
-        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(projectileWeapon.ProjectileSpawnPoint, 0));
+        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(projectileWeapon.WeaponStartOffset, 0));
 
         ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
             spawnPoint,
@@ -179,8 +181,8 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
         {
-            Speed = projectileWeapon.ProjectileSpeed,
-            TurnSpeed = projectileWeapon.ProjectileTurnSpeed,
+            Speed = stats.ProjectileSpeed,
+            TurnSpeed = stats.ProjectileTurnSpeed,
             HomingRange = 60f
         });
 
@@ -188,20 +190,20 @@ public partial struct ProjectileFiringJob : IJobEntity
         {
             IsTriggered = false,
             EntityHit = Entity.Null,
-            RemainingHits = projectileWeapon.PierceCount
+            RemainingHits = stats.PierceCount
         });
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerStats
         {
             TargetPos = targetPos,
-            HitRadius = projectileWeapon.HitRadius,
-            TriggerTime = projectileWeapon.TriggerTime,
+            HitRadius = stats.HitRadius,
+            TriggerTime = stats.TriggerTime,
         });
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectilePayloadStats
         {
-            Damage = projectileWeapon.Damage,
-            ExplosionRadiusSq = projectileWeapon.ExplosionRadiusSq
+            Damage = stats.Damage,
+            ExplosionRadiusSq = stats.ExplosionRadiusSq
         });
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
@@ -209,6 +211,7 @@ public partial struct ProjectileFiringJob : IJobEntity
             ExpirationTime = ElapsedTime + 5.0
         });
 
+        // TEMPORARY: All weapons have the same vfx
         VFXWriter.Enqueue(new VFXPayload
         {
             Position = spawnPoint,

@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -51,7 +52,7 @@ class WeaponAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            AddComponent(entity, new WeaponState { FireRate = authoring.FireRate });
+            AddComponent(entity, new WeaponState());
 
             // Targeting
             AddComponent(entity, new WeaponTargetingStats { 
@@ -76,26 +77,31 @@ class WeaponAuthoring : MonoBehaviour
             });
 
             // Firing
+            AddComponent(entity, new WeaponCombatStats
+            {
+                Damage = authoring.Damage,
+                FireRate = authoring.FireRate,
+                Spread = authoring.Spread,
+
+                ProjectileSpeed = authoring.ProjectileSpeed,
+                ProjectileTurnSpeed = authoring.ProjectileTurnSpeed,
+                HitRadius = authoring.HitRadius,
+                ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
+                PierceCount = authoring.PierceCount,
+                TriggerTime = authoring.TriggerTime,
+            });
             if (authoring.Firing == FiringType.Hitscan)
             {
-                AddComponent(entity, new HitscanWeapon { 
-                    WeaponStartPosition = (Vector2)authoring.WeaponStartPoint.localPosition,
-                    Damage = authoring.Damage 
+                AddComponent(entity, new HitscanWeapon()
+                {
+                    WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
                 });
             }
             else
             {
-                AddComponent(entity, new ProjectileWeapon { 
-                    Damage = authoring.Damage,
+                AddComponent(entity, new ProjectileWeapon {
                     ProjectilePrefab = GetEntity(authoring.ProjectilePrefab, TransformUsageFlags.Dynamic),
-                    ProjectileSpawnPoint = (Vector2)authoring.WeaponStartPoint.localPosition,
-                    HitRadius = authoring.HitRadius,
-                    ExplosionRadiusSq = authoring.ExplosionRadius * authoring.ExplosionRadius,
-                    PierceCount = authoring.PierceCount,
-                    ProjectileSpeed = authoring.ProjectileSpeed,
-                    ProjectileTurnSpeed = authoring.ProjectileTurnSpeed,
-                    Spread = authoring.Spread,
-                    TriggerTime = authoring.TriggerTime,
+                    WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
                 });
             }
 

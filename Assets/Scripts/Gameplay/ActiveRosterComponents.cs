@@ -30,6 +30,6 @@ public struct RosterWeaponBlueprint : IBufferElementData
     public float2 Position;
 
     // Weapon stats after upgrades
-    public float Damage;
-    public float FireRate;
+    public WeaponTargetingStats WeaponTargetingStats;
+    public WeaponCombatStats WeaponCombatStats;
 }

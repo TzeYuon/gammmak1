@@ -74,17 +74,33 @@ public class LevelHandoff : MonoBehaviour
 
                 Entity weaponPrefab = GetPrefabFromDatabase(weaponDB, weapon.WeaponID);
 
-                // Calculate final weapon stats
-                float finalDamage = 10;
-                float finalFireRate = 10;
-
                 // add blueprint to spawn weapon
                 weaponBuffer.Add(new RosterWeaponBlueprint
                 {
                     WeaponPrefab = weaponPrefab,
                     Position = mount.Position,
-                    Damage = finalDamage,
-                    FireRate = finalFireRate
+                    
+                    WeaponTargetingStats = new WeaponTargetingStats
+                    {
+                        Range = weapon.GetStatAtLevel(WeaponStat.Range),
+                        RangeSq = weapon.GetStatAtLevel(WeaponStat.Range) * weapon.GetStatAtLevel(WeaponStat.Range),
+                        DensityBias =weapon.DensityBias,
+                        AngleBias = weapon.AngleBias,
+                        DistanceBias = weapon.DistanceBias,
+                    },
+
+                    WeaponCombatStats = new WeaponCombatStats
+                    {
+                        Damage = weapon.GetStatAtLevel(WeaponStat.Damage),
+                        FireRate = weapon.GetStatAtLevel(WeaponStat.FireRate),
+                        Spread = weapon.GetStatAtLevel(WeaponStat.Spread),
+                        ProjectileSpeed = weapon.GetStatAtLevel(WeaponStat.ProjectileSpeed),
+                        ProjectileTurnSpeed = weapon.GetStatAtLevel(WeaponStat.ProjectileTurnSpeed),
+                        HitRadius = weapon.GetStatAtLevel(WeaponStat.HitRadius),
+                        ExplosionRadiusSq = weapon.GetStatAtLevel(WeaponStat.ExplosionRadius) * weapon.GetStatAtLevel(WeaponStat.ExplosionRadius),
+                        PierceCount = Mathf.RoundToInt(weapon.GetStatAtLevel(WeaponStat.PierceCount)),
+                        TriggerTime = weapon.GetStatAtLevel(WeaponStat.TriggerTime),
+                    }
                 });
             }
         }

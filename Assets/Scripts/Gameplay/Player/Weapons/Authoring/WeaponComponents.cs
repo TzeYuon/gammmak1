@@ -40,30 +40,34 @@ public struct TurretComponent : IComponentData
     public float TurnSpeed;
 }
 
+public struct WeaponCombatStats : IComponentData
+{
+    public float Damage;
+    public float FireRate;
+    public float Spread;
+
+    public float ProjectileSpeed;
+    public float ProjectileTurnSpeed;
+    public float HitRadius;
+    public float ExplosionRadiusSq;
+    public int PierceCount;
+    public float TriggerTime;
+}
+
 public struct HitscanWeapon : IComponentData
 {
-    public float2 WeaponStartPosition;
-    public float Damage;
+    public float2 WeaponStartOffset;
 }
 
 public struct ProjectileWeapon : IComponentData
 {
     public Entity ProjectilePrefab;
-    public float2 ProjectileSpawnPoint;
-    public float Damage;
-    public float HitRadius;
-    public float ExplosionRadiusSq;
-    public int PierceCount;
-    public float ProjectileSpeed;
-    public float ProjectileTurnSpeed;
-    public float Spread;
-    public float TriggerTime;
+    public float2 WeaponStartOffset;
 }
 
 public struct WeaponState : IComponentData
 {
     public float FireTimer;
-    public float FireRate;
     public float2 TargetPos;
     public bool HasTarget;
 }

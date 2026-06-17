@@ -54,3 +54,16 @@ MonoBehaviour:
     - StatType: 1
       ModifierType: 1
       Value: 0.05
+  BaseRange: 60
+  DensityBias: 1
+  AngleBias: 0
+  DistanceBias: 0
+  BaseDamage: 10
+  BaseFireRate: 1
+  BaseSpreadDegrees: 0
+  BaseProjectileSpeed: 0
+  BaseProjectileTurnSpeed: 0
+  BaseHitRadius: 0
+  BaseExplosionRadius: 0
+  BasePierceCount: 0
+  BaseTriggerTime: 0
