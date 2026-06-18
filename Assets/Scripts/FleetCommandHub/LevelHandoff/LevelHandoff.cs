@@ -18,13 +18,40 @@ public class LevelHandoff : MonoBehaviour
 
     private void OnStateChanged(GameState prev, GameState cur)
     {
-        if (cur == GameState.Generating) ConvertSaveToComponents();
+        if (cur == GameState.Generating)
+        {
+            StartGeneratingLevel();
+        }
     }
 
-    public void ConvertSaveToComponents()
+    void StartGeneratingLevel()
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
+        // Converts all ship and weapon stats to proper prefabs to be spawned in
+        ConvertRosterToComponents(entityManager);
+
+        var checklistQuery = entityManager.CreateEntityQuery(typeof(LevelGenerationStatus));
+        if (!checklistQuery.IsEmptyIgnoreFilter) return; // LevelGenerationStatus singleton already exists
+
+        // Create an entity to track the generation of levels
+        Entity generatingStatus = entityManager.CreateEntity();
+
+        // Convert the level data to usable components
+        LevelBlueprint levelBlueprint = ConvertLevelToComponent(entityManager);
+        entityManager.AddComponentData(generatingStatus, levelBlueprint);
+        
+        // init all to incomplete
+        entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
+        {
+            PlayerFleetSpawned = false,
+            TerrainGenerated = false,
+            HivesGenerated = false
+        });
+    }
+
+    void ConvertRosterToComponents(EntityManager entityManager)
+    {
         var query = entityManager.CreateEntityQuery(typeof(BakedShipData), typeof(BakedWeaponData));
         if (query.IsEmptyIgnoreFilter)
         {
@@ -107,17 +134,27 @@ public class LevelHandoff : MonoBehaviour
 
         shipDB.Dispose();
         weaponDB.Dispose();
+    }
 
-        var checklistQuery = entityManager.CreateEntityQuery(typeof(LevelGenerationStatus));
-        if (!checklistQuery.IsEmptyIgnoreFilter) return; // LevelGenerationStatus singleton already exists
+    LevelBlueprint ConvertLevelToComponent(EntityManager entityManager)
+    {
+        LevelNode levelToGenerate = playerSaveData.ActiveSector.SectorMap.CurrentLevel;
 
-        Entity generatingStatus = entityManager.CreateEntity();
-        entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
+        // Copy relevant level generation details over to component
+        return new LevelBlueprint
         {
-            PlayerFleetSpawned = false,
-            TerrainGenerated = false,
-            HivesGenerated = false
-        });
+            NodeType = levelToGenerate.NodeType,
+            RewardType = levelToGenerate.RewardType,
+            ThreatLevel = levelToGenerate.ThreatLevel,
+            ObjectiveType = levelToGenerate.ObjectiveType,
+            TerrainType = levelToGenerate.TerrainType,
+            EnemyProfile = levelToGenerate.EnemyProfile,
+            AnomalyType = levelToGenerate.AnomalyType,
+            UpgradeCoreReward = levelToGenerate.UpgradeCoreReward,
+
+            // Generate random seed
+            Seed = (uint)System.DateTime.Now.Ticks
+        };
     }
 
     Entity GetPrefabFromDatabase(NativeArray<BakedShipData> db, ShipID id)

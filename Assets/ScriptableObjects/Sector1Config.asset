@@ -118,6 +118,82 @@ MonoBehaviour:
         Weight: 1
       - Item: 3
         Weight: 1
+  - NumLayers: 3
+    NumNodes:
+      min: 3
+      max: 6
+    NodePool:
+      Pool:
+      - Item: 0
+        Weight: 3
+      - Item: 2
+        Weight: 1
+      - Item: 1
+        Weight: 1
+    ThreatPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 3
+      - Item: 2
+        Weight: 2
+    TerrainPool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
+    ObjectivePool:
+      Pool:
+      - Item: 0
+        Weight: 1
+      - Item: 1
+        Weight: 1
+    EnemyPool:
+      Pool:
+      - Item: 0
+        Weight: 2
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    StandardRewardPool:
+      Pool:
+      - Item: 0
+        Weight: 3
+      - Item: 1
+        Weight: 3
+      - Item: 2
+        Weight: 3
+      - Item: 3
+        Weight: 1
+    BaseUpgradeCoreReward: 400
+    EliteRewardPool:
+      Pool:
+      - Item: 0
+        Weight: 3
+      - Item: 1
+        Weight: 3
+      - Item: 2
+        Weight: 3
+      - Item: 3
+        Weight: 1
+    EliteUpgradeCoreReward: 700
+    StandardAnomalyChance: 0.1
+    EliteAnomalyChance: 0
+    AnomalyPool:
+      Pool:
+      - Item: 1
+        Weight: 1
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
   - NumLayers: 1
     NumNodes:
       min: 1

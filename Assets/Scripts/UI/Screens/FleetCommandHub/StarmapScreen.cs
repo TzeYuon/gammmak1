@@ -48,7 +48,7 @@ public class StarmapScreen : UIScreen
 
         void InitMap()
         {
-            map = RunManager.SaveData.ActiveRun.SectorMap;
+            map = RunManager.SaveData.ActiveSector.SectorMap;
 
             // add invisible active node to connect to start nodes
             currentNode = new(-1, -1);
@@ -304,6 +304,8 @@ public class StarmapScreen : UIScreen
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
         gameState.ValueRW.CurrentState = GameState.Generating;
+
+        map.CurrentLevel = selectedNode;
 
         map.PathTaken.Add(currentNode);
 

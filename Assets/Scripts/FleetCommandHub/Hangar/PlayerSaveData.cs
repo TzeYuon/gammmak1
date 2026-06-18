@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerSave", menuName = "FleetCommand/Player Save Data")]
 public class PlayerSaveData : ScriptableObject
 {
-    public CurrentRunData ActiveRun;
+    public CurrentSectorData ActiveSector;
     public int UpgradeCoresRemaining;
 
     public List<ShipBlueprintData> AvailableShips;
@@ -14,9 +14,13 @@ public class PlayerSaveData : ScriptableObject
 
     public void OnStartNewRun(Starmap map)
     {
-        ActiveRun?.Clear();
-        ActiveRun ??= new(map);
+        EnterNewSector(map);
         UpgradeCoresRemaining = 0;
+    }
+
+    public void EnterNewSector(Starmap map)
+    {
+        ActiveSector = new(map);
     }
 
     public bool IsShipInRoster(ShipBlueprintData data)
@@ -52,19 +56,12 @@ public class PlayerSaveData : ScriptableObject
     }
 }
 
-public class CurrentRunData
+public class CurrentSectorData
 {
-    public int CurrentNodeIndex = 0; // Current node player is at
-    
     public Starmap SectorMap; // level nodes present in the current sector
 
-    public CurrentRunData(Starmap map)
+    public CurrentSectorData(Starmap map)
     {
         SectorMap = map;
-    }
-
-    public void Clear()
-    {
-        CurrentNodeIndex = 0;
     }
 }

@@ -23,6 +23,8 @@ partial struct LevelGen_HivesSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.HivesGenerated) return; // hives already generated
 
+        if (!SystemAPI.TryGetSingletonRW<LevelBlueprint>(out var levelBlueprint)) return;
+
         if (!SystemAPI.TryGetSingleton<HivePrefabDatabase>(out var prefabDatabase)) return;
 
         // mark as complete
@@ -31,7 +33,8 @@ partial struct LevelGen_HivesSystem : ISystem
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
-        // Generate hives TEMPORARY: spawns one in each corner
+        // Generate hives
+        // TEMPORARY: spawns one in each corner
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
         Entity hiveEntity1 = ecb.Instantiate(hivePrefab);
         Entity hiveEntity2 = ecb.Instantiate(hivePrefab);

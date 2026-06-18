@@ -2,6 +2,7 @@
 
 public class Starmap
 {
+    public LevelNode CurrentLevel;
     public List<LevelNode> AllNodes;
     public List<LevelNode> StartNodes;
     public List<LevelNode> PathTaken;
