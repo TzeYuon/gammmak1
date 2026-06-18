@@ -20,8 +20,9 @@ public struct RosterShipBlueprint : IComponentData
     public int BiomassCost; // Cost after upgrades
 
     // Ship stats after upgrades
-    public float MaxHealth;
-    public float MaxSpeed;
+    public HealthComponent ShipHealthComponent;
+    public ShipMovementStatsComponent ShipMovementStats;
+    public ShipCollectionRadiusComponent ShipCollectionRadiusStat;
 }
 
 public struct RosterWeaponBlueprint : IBufferElementData

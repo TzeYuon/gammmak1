@@ -481,7 +481,7 @@ public class WeaponMountContextMenu
     void OnUpgradeBtnClicked()
     {
         if (currentViewingWeapon == null) return;
-        if (currentViewingWeapon.UpgradeLevel == currentViewingWeapon.MaxUpgradeLevel) return;
+        if (!currentViewingWeapon.CanBeUpgraded()) return;
 
         // check affordable
         var saveData = RunManager.SaveData;
@@ -520,7 +520,7 @@ public class WeaponMountContextMenu
     void OnRefundBtnClicked()
     {
         if (currentViewingWeapon == null) return;
-        if (currentViewingWeapon.UpgradeLevel == 0) return;
+        if (!currentViewingWeapon.CanBeRefunded()) return;
 
         // refund cost
         var saveData = RunManager.SaveData;

@@ -97,8 +97,9 @@ public partial struct ShipSpawnerSystem : ISystem
             ecb.SetComponent(newShip, LocalTransform.FromPosition(new float3(request.Position, 0)));
 
             // Set ship stats
-            //ecb.SetComponent(newShip, new HealthComponent { Value = shipBlueprint.MaxHealth });
-            //ecb.SetComponent(newShip, new ShipMovementStatsComponent { MaxSpeed = shipBlueprint.MaxSpeed });
+            ecb.SetComponent(newShip, shipBlueprint.ShipHealthComponent);
+            ecb.SetComponent(newShip, shipBlueprint.ShipMovementStats);
+            ecb.SetComponent(newShip, shipBlueprint.ShipCollectionRadiusStat);
 
             // spawn weapons
             if (!weaponBufferLookup.HasBuffer(shipBlueprintEntity)) continue;

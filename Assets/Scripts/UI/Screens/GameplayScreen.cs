@@ -118,7 +118,7 @@ public class GameplayScreen : UIScreen
                 {
                     if (activeRoster[i] == null) continue;
                     var cur = activeRoster[i];
-                    reinforcementPopupContainer.Add(CreateButton(cur.ShipName + "(" + cur.CostToSpawn + ")", count++));
+                    reinforcementPopupContainer.Add(CreateButton(cur.ShipName + "(" + cur.GetStat(ShipStat.Cost) + ")", count++));
                 }
             }
 

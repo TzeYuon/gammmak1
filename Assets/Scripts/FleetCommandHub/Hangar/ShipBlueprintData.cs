@@ -42,10 +42,12 @@ public class WeaponMount
 
 public enum ShipStat
 {
+    Cost,
     MaxHealth,
     Speed,
+    Acceleration,
     TurnSpeed,
-    MagnetRadius
+    CollectionRadius,
 }
 
 [System.Serializable]
@@ -69,9 +71,12 @@ public class ShipSystemUpgrade
 public class ShipSystem
 {
     public ShipSystemID SystemID;
+
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }
     public List<ShipSystemUpgrade> Upgrades = new();
+
+
 
     public bool CanBeUpgraded()
     {
@@ -103,8 +108,55 @@ public class ShipBlueprintData : ScriptableObject
     public ShipClass ShipClass;
     public ShipID ShipID;
     public GameObject ShipPrefab;
-    public int CostToSpawn = 50;
 
     public List<ShipSystem> ShipSystems = new();
     public List<WeaponMount> Mounts = new();
+
+    [Header("Base Stats")]
+    public float BaseCost = 5f;
+    public float BaseMaxHealth = 10f;
+    public float BaseSpeed = 15f;
+    public float BaseAcceleration = 15f;
+    public float BaseTurnSpeed = 15f;
+    public float BaseCollectionRadius = 5f;
+
+    public float GetStat(ShipStat statType)
+    {
+        // Set base values
+        float baseValue = 0f;
+        switch (statType)
+        {
+            case ShipStat.Cost: baseValue = BaseCost; break;
+            case ShipStat.MaxHealth: baseValue = BaseMaxHealth; break;
+            case ShipStat.Speed: baseValue = BaseSpeed; break;
+            case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
+            case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
+            case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
+        }
+
+        float flatBonus = 0f;
+        float percentBonus = 0f;
+
+        // add all bonuses from all ship systems
+        foreach (ShipSystem system in ShipSystems)
+        {
+            for (int i = 0; i < system.UpgradeLevel; i++)
+            {
+                if (i >= system.Upgrades.Count) break; // Safety check
+
+                foreach (var effect in system.Upgrades[i].Effects)
+                {
+                    if (effect.StatType == statType)
+                    {
+                        if (effect.ModifierType == ModifierType.FlatAdd)
+                            flatBonus += effect.Value;
+                        else if (effect.ModifierType == ModifierType.PercentAdd)
+                            percentBonus += effect.Value;
+                    }
+                }
+            }
+        }
+        float finalValue = (baseValue + flatBonus) * (1.0f + percentBonus);
+        return finalValue;
+    }
 }

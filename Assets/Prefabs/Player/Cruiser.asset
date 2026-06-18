@@ -16,7 +16,6 @@ MonoBehaviour:
   ShipClass: 3
   ShipID: 3
   ShipPrefab: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
-  CostToSpawn: 6
   ShipSystems:
   - SystemID: 1
     UpgradeLevel: 0
@@ -62,3 +61,9 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   - Position: {x: -3, y: 0}
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+  BaseCost: 5
+  BaseMaxHealth: 20
+  BaseSpeed: 10
+  BaseAcceleration: 4
+  BaseTurnSpeed: 9
+  BaseCollectionRadius: 5

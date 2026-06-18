@@ -78,17 +78,41 @@ public class LevelHandoff : MonoBehaviour
             Entity recipeEntity = entityManager.CreateEntity();
 
             // Calculate final ship stats
-            float finalHealth = 10;
-            float finalSpeed = 10;
+            float health = blueprint.GetStat(ShipStat.MaxHealth);
+            float collectionRadius = blueprint.GetStat(ShipStat.CollectionRadius);
+
+            // Calculate braking distance
+            float speed = blueprint.GetStat(ShipStat.Speed);
+            float acceleration = blueprint.GetStat(ShipStat.Acceleration);
+            float stoppingDistance = (speed * speed) / (2.0f * acceleration);
+            float finalBrakingRadius = stoppingDistance * 1.25f;
+            finalBrakingRadius = Mathf.Max(finalBrakingRadius, 1.0f);
 
             // add blueprint to spawn in the ship
             entityManager.AddComponentData(recipeEntity, new RosterShipBlueprint
             {
                 SlotIndex = count++,
                 ShipPrefab = matchedPrefab,
-                BiomassCost = blueprint.CostToSpawn,
-                MaxHealth = finalHealth,
-                MaxSpeed = finalSpeed
+                BiomassCost = Mathf.RoundToInt(blueprint.GetStat(ShipStat.Cost)),
+                
+                ShipHealthComponent = new HealthComponent
+                {
+                    MaxValue = health,
+                    Value = health
+                },
+
+                ShipMovementStats = new ShipMovementStatsComponent
+                {
+                    MaxSpeed = speed,
+                    Acceleration = acceleration,
+                    TurnSpeed = blueprint.GetStat(ShipStat.TurnSpeed),
+                    BrakingDistance = finalBrakingRadius
+                },
+
+                ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
+                {
+                    RadiusSq = collectionRadius * collectionRadius
+                }
             });
 
             // Create weapon blueprints for each weapon mount on the ship
@@ -101,6 +125,9 @@ public class LevelHandoff : MonoBehaviour
 
                 Entity weaponPrefab = GetPrefabFromDatabase(weaponDB, weapon.WeaponID);
 
+                float range = weapon.GetStat(WeaponStat.Range);
+                float explosionRadius = weapon.GetStat(WeaponStat.ExplosionRadius);
+
                 // add blueprint to spawn weapon
                 weaponBuffer.Add(new RosterWeaponBlueprint
                 {
@@ -109,24 +136,24 @@ public class LevelHandoff : MonoBehaviour
                     
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
-                        Range = weapon.GetStatAtLevel(WeaponStat.Range),
-                        RangeSq = weapon.GetStatAtLevel(WeaponStat.Range) * weapon.GetStatAtLevel(WeaponStat.Range),
-                        DensityBias =weapon.DensityBias,
+                        Range = weapon.GetStat(WeaponStat.Range),
+                        RangeSq = range * range,
+                        DensityBias = weapon.DensityBias,
                         AngleBias = weapon.AngleBias,
                         DistanceBias = weapon.DistanceBias,
                     },
 
                     WeaponCombatStats = new WeaponCombatStats
                     {
-                        Damage = weapon.GetStatAtLevel(WeaponStat.Damage),
-                        FireRate = weapon.GetStatAtLevel(WeaponStat.FireRate),
-                        Spread = weapon.GetStatAtLevel(WeaponStat.Spread),
-                        ProjectileSpeed = weapon.GetStatAtLevel(WeaponStat.ProjectileSpeed),
-                        ProjectileTurnSpeed = weapon.GetStatAtLevel(WeaponStat.ProjectileTurnSpeed),
-                        HitRadius = weapon.GetStatAtLevel(WeaponStat.HitRadius),
-                        ExplosionRadiusSq = weapon.GetStatAtLevel(WeaponStat.ExplosionRadius) * weapon.GetStatAtLevel(WeaponStat.ExplosionRadius),
-                        PierceCount = Mathf.RoundToInt(weapon.GetStatAtLevel(WeaponStat.PierceCount)),
-                        TriggerTime = weapon.GetStatAtLevel(WeaponStat.TriggerTime),
+                        Damage = weapon.GetStat(WeaponStat.Damage),
+                        FireRate = weapon.GetStat(WeaponStat.FireRate),
+                        Spread = weapon.GetStat(WeaponStat.Spread),
+                        ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
+                        ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
+                        HitRadius = weapon.GetStat(WeaponStat.HitRadius),
+                        ExplosionRadiusSq = explosionRadius * explosionRadius,
+                        PierceCount = Mathf.RoundToInt(weapon.GetStat(WeaponStat.PierceCount)),
+                        TriggerTime = weapon.GetStat(WeaponStat.TriggerTime),
                     }
                 });
             }

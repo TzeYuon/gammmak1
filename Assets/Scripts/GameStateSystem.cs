@@ -71,9 +71,9 @@ public partial class GameStateSystem : SystemBase
                 previousState = GameState.MainMenu;
                 break;
             case SceneId.GameplayScene:
-                stateData.ValueRW.CurrentState = GameState.Generating;
+                stateData.ValueRW.CurrentState = GameState.FleetCommandHub;
                 OnStateChanged?.Invoke(previousState, stateData.ValueRO.CurrentState);
-                previousState = GameState.Generating;
+                previousState = GameState.FleetCommandHub;
                 break;
         }
     }

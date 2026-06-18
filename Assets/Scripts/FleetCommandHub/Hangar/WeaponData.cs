@@ -86,6 +86,16 @@ public class WeaponData : ScriptableObject
     public int BasePierceCount = 0;
     public float BaseTriggerTime = 0;
 
+    public bool CanBeUpgraded()
+    {
+        return UpgradeLevel < MaxUpgradeLevel;
+    }
+
+    public bool CanBeRefunded()
+    {
+        return UpgradeLevel > 0;
+    }
+
     public int GetUpgradeCost()
     {
         if (UpgradeLevel >= MaxUpgradeLevel) return 0;
@@ -98,7 +108,7 @@ public class WeaponData : ScriptableObject
         return Upgrades[UpgradeLevel - 1].Cost;
     }
 
-    public float GetStatAtLevel(WeaponStat statType)
+    public float GetStat(WeaponStat statType)
     {
         // Set base values
         float baseValue = 0f;
