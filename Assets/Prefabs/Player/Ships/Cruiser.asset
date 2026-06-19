@@ -62,7 +62,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   - Position: {x: -3, y: 0}
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  BaseCost: 5
+  BaseCost: 15
   BaseMaxHealth: 20
   BaseSpeed: 10
   BaseAcceleration: 4

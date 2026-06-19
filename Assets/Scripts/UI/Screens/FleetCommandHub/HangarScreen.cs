@@ -5,6 +5,8 @@ using UnityEngine.UIElements;
 
 public class HangarScreen : UIScreen
 {
+    public FleetCommandHubScreen FleetCommandHubScreen;
+
     private ScrollView shipListContainer;
     private Dictionary<ShipBlueprintData, Button> shipButtons = new();
 
@@ -13,8 +15,11 @@ public class HangarScreen : UIScreen
 
     public HangarScreen(
         UIScreenManager manager, 
-        VisualElement root) : base(manager, root)
+        VisualElement root,
+        FleetCommandHubScreen fleetCommandHubScreen) : base(manager, root)
     {
+        FleetCommandHubScreen = fleetCommandHubScreen;
+
         shipListContainer = root.Q<ScrollView>("ShipsScrollView");
 
         ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this);
@@ -201,6 +206,7 @@ public class ShipDetailsElement
 
         // subtract cost
         saveData.UpgradeCoresRemaining -= cost;
+        hangarScreen.FleetCommandHubScreen.UpdateUpgradeCoreCounter();
 
         // update data
         system.UpgradeLevel++;
@@ -216,7 +222,8 @@ public class ShipDetailsElement
         // refund cost
         var saveData = RunManager.SaveData;
         saveData.UpgradeCoresRemaining += system.GetRefundValue();
-        
+        hangarScreen.FleetCommandHubScreen.UpdateUpgradeCoreCounter();
+
         // update data
         system.UpgradeLevel--;
 
@@ -574,6 +581,7 @@ public class WeaponMountContextMenu
     void OnPlayerCurrencyChanged()
     {
         hangarScreen.ShipDetailsElement.UpdateAllSystemItems();
+        hangarScreen.FleetCommandHubScreen.UpdateUpgradeCoreCounter();
     }
 
     public void UpdateViewingWeapon()
