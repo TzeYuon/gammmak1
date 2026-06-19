@@ -99,13 +99,14 @@ public class ShipDetailsElement
     private Label ShipDescription;
     private Button toggleRosterBtn;
 
+    private PipContainerVisualElement weaponCapacityElement;
     private VisualElement weaponMountsScrollViewContainer;
     private Dictionary<WeaponMount, Button> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
     private List<(ShipSystem system, VisualElement element)> systemItems = new();
 
-    private ShipBlueprintData currentShip;
+    public ShipBlueprintData CurrentShip;
 
     public ShipDetailsElement(VisualElement root, HangarScreen hangarScreen)
     {
@@ -114,6 +115,7 @@ public class ShipDetailsElement
         shipTitle = root.Q<Label>("ShipTitle");
         shipClass = root.Q<Label>("ShipClass");
 
+        weaponCapacityElement = root.Q<PipContainerVisualElement>("WeaponCapacityContainer");
         weaponMountsScrollViewContainer = root.Q<VisualElement>("WeaponMountScrollViewContainer");
 
         systemsScrollView = root.Q<ScrollView>("SystemsScrollView");
@@ -138,18 +140,18 @@ public class ShipDetailsElement
             return;
         }
         hangarScreen.HangarContextMenu.Hide();
-        currentShip = data;
+        CurrentShip = data;
 
         // update ship name
-        shipTitle.text = currentShip.ShipName.ToUpper();
+        shipTitle.text = CurrentShip.ShipName.ToUpper();
 
         // update ship class
-        shipClass.text = currentShip.ShipClass.ToString().ToUpper();
+        shipClass.text = CurrentShip.ShipClass.ToString().ToUpper();
 
         // update systems scrollview
         systemsScrollView.Clear();
         systemItems.Clear();
-        foreach (var system in currentShip.ShipSystems)
+        foreach (var system in CurrentShip.ShipSystems)
         {
             VisualElement systemItem = UIFactory.BuildSystemItem(system);
 
@@ -164,10 +166,13 @@ public class ShipDetailsElement
             systemItems.Add((system, systemItem));
         }
 
+        // Update weapon capacity pips
+        UpdateWeaponCapacity();
+
         // update weapon mounts
         weaponMountButtons.Clear();
         weaponMountsScrollViewContainer.Clear();
-        foreach (var mount in currentShip.Mounts)
+        foreach (var mount in CurrentShip.Mounts)
         {
             Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount);
             weaponMountItem.clicked += () =>
@@ -235,7 +240,7 @@ public class ShipDetailsElement
 
     void UpdateToggleRosterBtn()
     {
-        if (RunManager.SaveData.IsShipInRoster(currentShip))
+        if (RunManager.SaveData.IsShipInRoster(CurrentShip))
         {
             toggleRosterBtn.text = "REMOVE FROM ROSTER";
             toggleRosterBtn.SetEnabled(true);
@@ -247,6 +252,12 @@ public class ShipDetailsElement
             if (RunManager.SaveData.IsRosterFull()) toggleRosterBtn.SetEnabled(false);
             else toggleRosterBtn.SetEnabled(true);
         }
+    }
+
+    void UpdateWeaponCapacity()
+    {
+        weaponCapacityElement.MaxPips = CurrentShip.WeaponCapacity;
+        weaponCapacityElement.Value = CurrentShip.UsedWeaponCapacity;
     }
 
     private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)
@@ -266,6 +277,7 @@ public class ShipDetailsElement
     public void UpdateWeaponMountItem(WeaponMount mount)
     {
         UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount);
+        UpdateWeaponCapacity();
     }
 
     public void UpdateAllWeaponMountItems()
@@ -278,14 +290,14 @@ public class ShipDetailsElement
 
     public void OnToggleRosterBtnClicked()
     {
-        if (currentShip == null) return;
+        if (CurrentShip == null) return;
 
         // Add or remove from roster
-        if (RunManager.SaveData.IsShipInRoster(currentShip)) RunManager.SaveData.RemoveFromRoster(currentShip);
-        else RunManager.SaveData.AddToRoster(currentShip);
+        if (RunManager.SaveData.IsShipInRoster(CurrentShip)) RunManager.SaveData.RemoveFromRoster(CurrentShip);
+        else RunManager.SaveData.AddToRoster(CurrentShip);
 
         UpdateToggleRosterBtn();
-        hangarScreen.UpdateShipButton(currentShip);
+        hangarScreen.UpdateShipButton(CurrentShip);
     }
 }
 
@@ -571,18 +583,32 @@ public class WeaponMountContextMenu
         UpdateUpgradeContainer();
         UpdateUpgradeBtn();
         UpdateRefundBtn();
+        UpdateEquipBtn();
 
         if (currentViewingWeapon == null)
         {
             viewingWeaponName.text = "<color=#FF0000>[ NONE ]</color>";
-            equipBtn.style.visibility = Visibility.Hidden;
             weaponDetailsContainer.style.display = DisplayStyle.None;
         }
         else 
         {
             viewingWeaponName.text = currentViewingWeapon.WeaponName.ToUpper();
-            equipBtn.style.visibility = Visibility.Visible;
             weaponDetailsContainer.style.display = DisplayStyle.Flex;
+        }
+    }
+
+    void UpdateEquipBtn()
+    {
+        if (currentViewingWeapon == null)
+        {
+            equipBtn.style.visibility = Visibility.Hidden;
+        }
+        else
+        {
+            if (hangarScreen.ShipDetailsElement.CurrentShip.CanEquipWeaponInMount(currentViewingWeapon, currentWeaponMount)) equipBtn.SetEnabled(true);
+            else equipBtn.SetEnabled(false);
+
+            equipBtn.style.visibility = Visibility.Visible;
         }
     }
 

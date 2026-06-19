@@ -22,15 +22,34 @@ MonoBehaviour:
     Upgrades:
     - Cost: 100
       Description: 
-      Effects: []
+      Effects:
+      - StatType: 2
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 3
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 4
+        ModifierType: 1
+        Value: 0.2
     - Cost: 200
       Description: 
-      Effects: []
+      Effects:
+      - StatType: 2
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 3
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 4
+        ModifierType: 1
+        Value: 0.2
+  BaseWeaponCapacity: 2
   Mounts:
   - Position: {x: 2, y: 0}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    EquippedWeapon: {fileID: 0}
   - Position: {x: -2, y: 0}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    EquippedWeapon: {fileID: 0}
   BaseCost: 5
   BaseMaxHealth: 10
   BaseSpeed: 15

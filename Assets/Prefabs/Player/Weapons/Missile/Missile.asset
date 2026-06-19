@@ -15,7 +15,7 @@ MonoBehaviour:
   WeaponName: Missile
   WeaponID: 3
   WeaponPrefab: {fileID: 90229467165131139, guid: d39fd2feb189ed544bc5822e80127972, type: 3}
-  EnergyCost: 0
+  BaseEquipCost: 2
   UpgradeLevel: 0
   Upgrades:
   - Cost: 100

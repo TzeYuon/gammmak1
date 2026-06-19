@@ -21,14 +21,13 @@ public enum WeaponStat
     ProjectileTurnSpeed,
     PierceCount,
     TriggerTime,
-    EquipCost,
 }
 
 public enum ModifierType : byte
 {
     FlatAdd,
     PercentAdd,
-    
+    Unlock    
 }
 
 [System.Serializable]
@@ -69,7 +68,6 @@ public class WeaponUpgradeEffect
             WeaponStat.ProjectileSpeed => "Projectile Speed",
             WeaponStat.ProjectileTurnSpeed => "Projectile Turn Speed",
             WeaponStat.PierceCount => "Piercing",
-            WeaponStat.EquipCost => "Equip Cost",
             _ => stat.ToString(),
         };
     }
@@ -90,7 +88,8 @@ public class WeaponData : ScriptableObject
     public string WeaponName;
     public WeaponID WeaponID;
     public GameObject WeaponPrefab;
-    public int EnergyCost;
+    public int BaseEquipCost;
+    public int EquipCost { get { return BaseEquipCost + UpgradeLevel; } }
 
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }

@@ -48,6 +48,7 @@ public enum ShipStat
     Acceleration,
     TurnSpeed,
     CollectionRadius,
+    WeaponCapacity,
 }
 
 [System.Serializable]
@@ -86,6 +87,8 @@ public class ShipSystemUpgradeEffect
                 return "Turn Speed";
             case ShipStat.CollectionRadius:
                 return "Collection Radius";
+            case ShipStat.WeaponCapacity:
+                return "Weapon Capacity";
             default:
                 return stat.ToString();
         }
@@ -142,6 +145,21 @@ public class ShipBlueprintData : ScriptableObject
     public GameObject ShipPrefab;
 
     public List<ShipSystem> ShipSystems = new();
+
+    public int BaseWeaponCapacity;
+    public int WeaponCapacity { get { return Mathf.RoundToInt(GetStat(ShipStat.WeaponCapacity)); } }
+    public int UsedWeaponCapacity { 
+        get {
+            int capUsed = 0;
+            foreach (WeaponMount mount in Mounts)
+            {
+                if (mount.EquippedWeapon == null) continue;
+                capUsed += mount.EquippedWeapon.EquipCost;
+            }
+            return capUsed;
+        } 
+    }
+    public int RemainingWeaponCapacity { get { return WeaponCapacity - UsedWeaponCapacity; } }
     public List<WeaponMount> Mounts = new();
 
     [Header("Base Stats")]
@@ -151,6 +169,13 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
     public float BaseCollectionRadius = 5f;
+
+    public bool CanEquipWeaponInMount(WeaponData data, WeaponMount mount)
+    {
+        int remainingCap = RemainingWeaponCapacity;
+        if (mount.EquippedWeapon != null) return remainingCap + mount.EquippedWeapon.EquipCost >= data.EquipCost;
+        else return remainingCap >= data.EquipCost;
+    }
 
     public float GetStat(ShipStat statType)
     {
@@ -164,6 +189,7 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
             case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
+            case ShipStat.WeaponCapacity: baseValue = BaseWeaponCapacity; break;
         }
 
         float flatBonus = 0f;

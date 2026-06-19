@@ -20,8 +20,8 @@ public static class UIFactory
 
         // Update upgrade pips
         PipContainerVisualElement pipContainer = container.Q<PipContainerVisualElement>("PipContainer");
-        pipContainer.MaxPips = weapon.MaxUpgradeLevel;
-        pipContainer.Value = weapon.UpgradeLevel;
+        pipContainer.MaxPips = weapon.BaseEquipCost + weapon.MaxUpgradeLevel;
+        pipContainer.Value = weapon.EquipCost;
     }
 
     public static Button BuildWeaponMountItem(WeaponMount mount)
