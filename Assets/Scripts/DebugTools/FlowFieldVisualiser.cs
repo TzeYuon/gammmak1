@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class FlowFieldVisualiser : MonoBehaviour
@@ -12,15 +13,25 @@ public class FlowFieldVisualiser : MonoBehaviour
 
         var entityManager = world.EntityManager;
 
+        var terrainQuery = entityManager.CreateEntityQuery(typeof(TerrainGridComponent));
+        var flowQuery = entityManager.CreateEntityQuery(typeof(EnemyFlowFieldComponent));
 
-        var flowField = GridManager.Instance.nativeFlowField;
+        if (!terrainQuery.HasSingleton<TerrainGridComponent>()) return;
+        if (!flowQuery.HasSingleton<EnemyFlowFieldComponent>()) return;
+
+        var terrainGrid = terrainQuery.GetSingleton<TerrainGridComponent>();
+        var flowFieldComp = flowQuery.GetSingleton<EnemyFlowFieldComponent>();
+
+        var flowField = flowFieldComp.FlowField;
 
         if (flowField.IsCreated)
         {
             Gizmos.color = Color.cyan;
             for (int i = 0; i < flowField.Length; i++)
             {
-                Vector3 start = new Vector2(GridManager.Instance.WorldOrigin.x, GridManager.Instance.WorldOrigin.y) + IndexToWorldPos(i, GridManager.Instance.Width);
+                if (math.lengthsq(flowField[i]) < 0.01f) continue;
+
+                Vector3 start = new Vector2(terrainGrid.WorldOrigin.x, terrainGrid.WorldOrigin.y) + IndexToWorldPos(i, terrainGrid.GridWidth);
                 Vector3 end = start + new Vector3(flowField[i].x, flowField[i].y, 0) * 0.5f;
 
                 float r = (flowField[i].x + 1.0f) * 0.5f;

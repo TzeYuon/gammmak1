@@ -1,4 +1,3 @@
-using System.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -17,20 +16,21 @@ partial struct EnemySwarmMovementSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
-        FineEnemyHeatmapComponent fineEnemyHeatmap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
-        TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
-        EnemyFlowFieldComponent enemyFlowFieldComponent = SystemAPI.GetSingleton<EnemyFlowFieldComponent>();
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGrid)) return;
+        if (!SystemAPI.TryGetSingleton<EnemyFlowFieldComponent>(out var flowFieldComp)) return;
+        if (!SystemAPI.TryGetSingleton<FineEnemyHeatmapComponent>(out var fineEnemyHeatmap)) return;
+        if (!terrainGrid.Grid.IsCreated || !flowFieldComp.FlowField.IsCreated) return;
 
         var moveJob = new FlowFieldMovementJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
             ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
 
-            FlowField = enemyFlowFieldComponent.FlowField,
-            Grid = terrainGridComponent.Grid,
-            GridWidth = terrainGridComponent.GridWidth,
-            GridHeight = terrainGridComponent.GridHeight,
-            WorldOrigin = terrainGridComponent.WorldOrigin,
+            FlowField = flowFieldComp.FlowField,
+            Grid = terrainGrid.Grid,
+            GridWidth = terrainGrid.GridWidth,
+            GridHeight = terrainGrid.GridHeight,
+            WorldOrigin = terrainGrid.WorldOrigin,
 
             Heatmap = fineEnemyHeatmap.DensityMap,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
@@ -186,8 +186,8 @@ public partial struct FlowFieldMovementJob : IJobEntity
             currentTileType = Grid[gridX + gridY * GridWidth];
         }
 
-        if (currentTileType == 2) baseSpeed *= 0.5f; // Mud
-        if (currentTileType == 3) baseSpeed *= 0.2f; // Poison
+        if (currentTileType == (int)TerrainTileType.Mud) baseSpeed *= 0.5f;
+        if (currentTileType == (int)TerrainTileType.Poison) baseSpeed *= 0.2f; 
 
         if (math.lengthsq(targetDir) > 0.01f)
         {

@@ -20,24 +20,33 @@ public class Pathfinder : MonoBehaviour
 
     public static List<Vector2Int> Astar(Vector2Int worldStart, Vector2Int worldEnd, bool forcePath = false)
     {
-        if (GridManager.Instance == null || GridManager.Instance.grid == null)
-        {
-            return null;
-        }
+        if (Unity.Entities.World.DefaultGameObjectInjectionWorld == null) return null;
 
-        Vector2Int origin = new Vector2Int(GridManager.Instance.WorldOrigin.x, GridManager.Instance.WorldOrigin.y);
+        var entityManager = Unity.Entities.World.DefaultGameObjectInjectionWorld.EntityManager;
+        var query = entityManager.CreateEntityQuery(typeof(TerrainGridComponent));
+
+        if (!query.HasSingleton<TerrainGridComponent>()) return null;
+
+        var terrainComp = query.GetSingleton<TerrainGridComponent>();
+        if (!terrainComp.Grid.IsCreated) return null;
+
+        int gridWidth = terrainComp.GridWidth;
+        int gridHeight = terrainComp.GridHeight;
+        var grid = terrainComp.Grid;
+
+        Vector2Int origin = new Vector2Int(terrainComp.WorldOrigin.x, terrainComp.WorldOrigin.y);
         Vector2Int a = worldStart - origin;
         Vector2Int b = worldEnd - origin;
 
-        a.x = Mathf.Clamp(a.x, 0, GridManager.Instance.Width - 1);
-        a.y = Mathf.Clamp(a.y, 0, GridManager.Instance.Height - 1);
+        a.x = Mathf.Clamp(a.x, 0, gridWidth - 1);
+        a.y = Mathf.Clamp(a.y, 0, gridHeight - 1);
 
-        b.x = Mathf.Clamp(b.x, 0, GridManager.Instance.Width - 1);
-        b.y = Mathf.Clamp(b.y, 0, GridManager.Instance.Height - 1);
+        b.x = Mathf.Clamp(b.x, 0, gridWidth - 1);
+        b.y = Mathf.Clamp(b.y, 0, gridHeight - 1);
 
-        if (GridManager.Instance.grid[b.x, b.y] == 1) return null;
+        if (grid[b.x + b.y * gridWidth] == 1) return null;
 
-        int maxIterations = GridManager.Instance.Width * GridManager.Instance.Height;
+        int maxIterations = gridWidth * gridHeight;
         int currentLoop = 0;
 
         Node currNode = new Node(a.x, a.y, true);
@@ -45,7 +54,7 @@ public class Pathfinder : MonoBehaviour
 
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
-        FastPriorityQueue<Node> pq = new FastPriorityQueue<Node>();
+        PriorityQueue<Node> pq = new PriorityQueue<Node>();
         pq.Enqueue(currNode);
 
         var adj = new List<(int, int)>
@@ -92,17 +101,17 @@ public class Pathfinder : MonoBehaviour
                 int tempY = tup.Item2 + currNode.y;
                 Vector2Int tempPos = new Vector2Int(tempX, tempY);
 
-                if (tempX >= 0 && tempX < GridManager.Instance.Width && tempY >= 0 && tempY < GridManager.Instance.Height)
+                if (tempX >= 0 && tempX < gridWidth && tempY >= 0 && tempY < gridHeight)
                 {
-                    int tileType = GridManager.Instance.grid[tempX, tempY];
+                    int tileType = grid[tempX + tempY * gridWidth];
 
                     if (tileType == 1) continue;
                     if (visited.Contains(tempPos)) continue;
 
                     if (tup.Item1 != 0 && tup.Item2 != 0)
                     {
-                        if (GridManager.Instance.grid[currNode.x + tup.Item1, currNode.y] == 1 ||
-                            GridManager.Instance.grid[currNode.x, currNode.y + tup.Item2] == 1)
+                        if (grid[currNode.x + tup.Item1 + currNode.y * gridWidth] == 1 ||
+                            grid[currNode.x + (currNode.y + tup.Item2) * gridWidth] == 1)
                         {
                             continue; 
                         }
@@ -112,8 +121,8 @@ public class Pathfinder : MonoBehaviour
 
                     if (!forcePath)
                     {
-                        if (tileType == 2) moveCost += 5;  // Mud
-                        if (tileType == 3) moveCost += 15; // Poison
+                        if (tileType == (int)TerrainTileType.Mud) moveCost += 5;
+                        if (tileType == (int)TerrainTileType.Poison) moveCost += 15;
                     }
 
                     Node tempNode = new Node(tempX, tempY, true);
@@ -163,7 +172,7 @@ public class Node : IComparable<Node>
     }
 }
 
-public class FastPriorityQueue<TElement> where TElement : IComparable<TElement>
+public class PriorityQueue<TElement> where TElement : IComparable<TElement>
 {
     private List<TElement> elements = new List<TElement>();
 

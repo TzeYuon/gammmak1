@@ -24,13 +24,17 @@ partial struct FlowFieldSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGrid)) return;
+        if (!SystemAPI.TryGetSingleton<EnemyFlowFieldComponent>(out var flowFieldComp)) return;
+
+        if (!terrainGrid.Grid.IsCreated || !flowFieldComp.FlowField.IsCreated) return;
+
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
         _timer = 0.45f;
 
-        var terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
-        int gridWidth = terrainGridComponent.GridWidth;
-        int gridHeight = terrainGridComponent.GridHeight;
+        int gridWidth = terrainGrid.GridWidth;
+        int gridHeight = terrainGrid.GridHeight;
         int totalCells = gridWidth * gridHeight;
 
         var flowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
@@ -50,7 +54,7 @@ partial struct FlowFieldSystem : ISystem
         var noiseFieldHandle = new GenerateNoiseFieldJob
         {
             CostGrid = _costField,
-            ObstacleGrid = terrainGridComponent.Grid,
+            ObstacleGrid = terrainGrid.Grid,
             GridWidth = gridWidth,
             CellSize = 1,
             ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
@@ -61,16 +65,20 @@ partial struct FlowFieldSystem : ISystem
         NativeList<int2> targetPositions = new NativeList<int2>(Allocator.TempJob);
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
         {
-            int2 gridPos = GridUtility.WorldPosToGridManagerPos(transform.ValueRO.Position.xy, terrainGridComponent.WorldOrigin);
+            int2 gridPos = new int2(
+                (int)math.round(transform.ValueRO.Position.x),
+                (int)math.round(transform.ValueRO.Position.y)
+            ) - terrainGrid.WorldOrigin;
+
             targetPositions.Add(gridPos);
         }
 
         var job = new GenerateFlowFieldJob
         {
-            Grid = terrainGridComponent.Grid,
+            Grid = terrainGrid.Grid,
             IntegrationField = _integrationField,
             CostGrid = _costField,
-            FlowField = flowFieldComponent.ValueRW.FlowField,
+            FlowField = flowFieldComp.FlowField,
             TargetPositions = targetPositions,
             GridWidth = gridWidth,
             GridHeight = gridHeight,
