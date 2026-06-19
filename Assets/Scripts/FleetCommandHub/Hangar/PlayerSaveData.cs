@@ -23,6 +23,19 @@ public class PlayerSaveData : ScriptableObject
         ActiveSector = new(map);
     }
 
+    public bool IsRosterFull()
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public bool IsShipInRoster(ShipBlueprintData data)
     {
         for (int i = 0; i < ActiveRoster.Length; i++)

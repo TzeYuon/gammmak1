@@ -48,6 +48,7 @@ public enum ShipStat
     Acceleration,
     TurnSpeed,
     CollectionRadius,
+    WeaponCapacity,
 }
 
 [System.Serializable]
@@ -56,6 +57,42 @@ public class ShipSystemUpgradeEffect
     public ShipStat StatType;
     public ModifierType ModifierType;
     public float Value;
+
+    public string GetDescription()
+    {
+        float displayValue = Value;
+        string statName = GetStatName(StatType);
+
+        string sign = displayValue > 0 ? "+" : "";
+
+        if (ModifierType == ModifierType.PercentAdd)
+            return $"{sign}{Mathf.RoundToInt(displayValue * 100f)}% {statName}";
+        else
+            return $"{sign}{displayValue} {statName}";
+    }
+
+    private string GetStatName(ShipStat stat)
+    {
+        switch (stat)
+        {
+            case ShipStat.Cost:
+                return "Cost";
+            case ShipStat.MaxHealth:
+                return "Hull";
+            case ShipStat.Speed:
+                return "Max Speed";
+            case ShipStat.Acceleration:
+                return "Acceleration";
+            case ShipStat.TurnSpeed:
+                return "Turn Speed";
+            case ShipStat.CollectionRadius:
+                return "Collection Radius";
+            case ShipStat.WeaponCapacity:
+                return "Weapon Capacity";
+            default:
+                return stat.ToString();
+        }
+    }
 }
 
 [System.Serializable]
@@ -75,8 +112,6 @@ public class ShipSystem
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }
     public List<ShipSystemUpgrade> Upgrades = new();
-
-
 
     public bool CanBeUpgraded()
     {
@@ -110,6 +145,21 @@ public class ShipBlueprintData : ScriptableObject
     public GameObject ShipPrefab;
 
     public List<ShipSystem> ShipSystems = new();
+
+    public int BaseWeaponCapacity;
+    public int WeaponCapacity { get { return Mathf.RoundToInt(GetStat(ShipStat.WeaponCapacity)); } }
+    public int UsedWeaponCapacity { 
+        get {
+            int capUsed = 0;
+            foreach (WeaponMount mount in Mounts)
+            {
+                if (mount.EquippedWeapon == null) continue;
+                capUsed += mount.EquippedWeapon.EquipCost;
+            }
+            return capUsed;
+        } 
+    }
+    public int RemainingWeaponCapacity { get { return WeaponCapacity - UsedWeaponCapacity; } }
     public List<WeaponMount> Mounts = new();
 
     [Header("Base Stats")]
@@ -119,6 +169,13 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
     public float BaseCollectionRadius = 5f;
+
+    public bool CanEquipWeaponInMount(WeaponData data, WeaponMount mount)
+    {
+        int remainingCap = RemainingWeaponCapacity;
+        if (mount.EquippedWeapon != null) return remainingCap + mount.EquippedWeapon.EquipCost >= data.EquipCost;
+        else return remainingCap >= data.EquipCost;
+    }
 
     public float GetStat(ShipStat statType)
     {
@@ -132,6 +189,7 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
             case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
+            case ShipStat.WeaponCapacity: baseValue = BaseWeaponCapacity; break;
         }
 
         float flatBonus = 0f;

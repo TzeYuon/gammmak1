@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f0f76c6a054bc48bd7402d7ffe0151, type: 3}
   m_Name: CurrentSave
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveData
-  DataCoresRemaining: 1650
+  UpgradeCoresRemaining: 500
   AvailableShips:
   - {fileID: 11400000, guid: 345d1f1ddb88d7c4da008af6d827aee5, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}

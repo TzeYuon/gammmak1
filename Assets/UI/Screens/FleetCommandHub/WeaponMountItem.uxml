@@ -1,7 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
     <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
-    <ui:Button text="" name="WeaponMountItem" class="list-item" style="height: auto; aspect-ratio: 1; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(26, 26, 26, 0); width: 100px;">
+    <ui:Button text="" name="WeaponMountItem" class="list-item" style="height: auto; aspect-ratio: 1; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(26, 26, 26, 0); width: 125px;">
         <ui:Label text="[ EMPTY ]" name="EmptyLabel" enabled="true" class="text" style="color: rgb(255, 0, 0); width: 100%; height: 100%; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; position: absolute; display: none;"/>
         <ui:VisualElement name="WeaponListItemContainer" style="flex-grow: 1; justify-content: center; align-content: center; align-self: center;"/>
     </ui:Button>

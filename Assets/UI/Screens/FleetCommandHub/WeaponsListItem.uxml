@@ -2,11 +2,12 @@
     <Style src="project://database/Assets/UI/Styles/systemItemStyles.uss?fileID=7433441132597879392&amp;guid=4afa9fad7b8666247837b7b35602f7bc&amp;type=3#systemItemStyles"/>
     <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
     <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
-    <ui:VisualElement text="" name="WeaponsListItem" class="list-item" style="width: 100px; aspect-ratio: 1; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(188, 188, 188, 0); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;">
-        <ui:Label text="NAME" name="WeaponName" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: middle-center;"/>
+    <ui:VisualElement text="" name="WeaponsListItem" class="list-item" style="width: 125px; aspect-ratio: 1; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(188, 188, 188, 0); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; align-items: stretch;">
+        <PipContainer name="EquipCost" colour="Orange" max-pips="8" group-size="5" style="flex-grow: 0; margin-top: 3px;"/>
+        <ui:Label text="NAME" name="WeaponName" enable-rich-text="true" class="text" style="margin-top: 3px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: middle-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-top-width: 0; border-bottom-width: 0; border-right-width: 0; border-left-width: 0;"/>
         <ui:VisualElement style="flex-grow: 0; align-self: center; height: 50px;">
             <ui:VisualElement name="WeaponVisual" style="flex-grow: 0; aspect-ratio: 1; width: auto; height: 100%; border-left-color: rgba(0, 255, 255, 0); border-right-color: rgba(0, 255, 255, 0); border-top-color: rgba(0, 255, 255, 0); border-bottom-color: rgba(0, 255, 255, 0); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;"/>
         </ui:VisualElement>
-        <PipContainer max-pips="0" value="0" name="PipContainer"/>
+        <PipContainer max-pips="4" value="0" name="PipContainer" style="align-items: flex-end; margin-bottom: 3px;"/>
     </ui:VisualElement>
 </ui:UXML>

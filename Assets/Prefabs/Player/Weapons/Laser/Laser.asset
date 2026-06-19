@@ -15,7 +15,7 @@ MonoBehaviour:
   WeaponName: Laser
   WeaponID: 2
   WeaponPrefab: {fileID: 90229467165131139, guid: e2177913980be5242b015600eb02fc31, type: 3}
-  EnergyCost: 0
+  EquipCost: 1
   UpgradeLevel: 0
   Upgrades:
   - Cost: 100

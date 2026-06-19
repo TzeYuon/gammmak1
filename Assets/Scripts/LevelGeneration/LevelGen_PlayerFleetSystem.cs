@@ -11,6 +11,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
     {
         state.RequireForUpdate<GameStateSingleton>();
         state.RequireForUpdate<LevelGenerationStatus>();
+        state.RequireForUpdate<PlayerEconomy>();
     }
 
     [BurstCompile]
@@ -22,10 +23,14 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.PlayerFleetSpawned) return; // player fleet already spawned in
 
+        if (!SystemAPI.TryGetSingletonRW<PlayerEconomy>(out var playerEconomy)) return;
+
         if (!SystemAPI.TryGetSingleton<MothershipPrefabDatabase>(out var prefabDatabase)) return;
 
         // mark as complete
         status.ValueRW.PlayerFleetSpawned = true;
+
+        playerEconomy.ValueRW.TotalBiomass = 15;
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);

@@ -18,6 +18,11 @@ public static class UIFactory
         Label weaponName = container.Q<Label>("WeaponName");
         weaponName.text = weapon.WeaponName.ToUpper();
 
+        // Update equip cost pips
+        PipContainerVisualElement equipCost = container.Q<PipContainerVisualElement>("EquipCost");
+        equipCost.MaxPips = weapon.EquipCost;
+        equipCost.Value = weapon.EquipCost;
+
         // Update upgrade pips
         PipContainerVisualElement pipContainer = container.Q<PipContainerVisualElement>("PipContainer");
         pipContainer.MaxPips = weapon.MaxUpgradeLevel;
@@ -50,7 +55,7 @@ public static class UIFactory
             weaponListItemContainer.style.display = DisplayStyle.Flex;
             var weaponListItem = BuildWeaponListItem(mount.EquippedWeapon);
             weaponListItem.pickingMode = PickingMode.Ignore;
-            weaponListItem.style.width = 100;
+            weaponListItem.style.width = 125;
             weaponListItem.RemoveFromClassList("list-item");
             weaponListItem.AddToClassList("inactive-list-item");
             weaponListItemContainer.Add(weaponListItem);
@@ -70,6 +75,13 @@ public static class UIFactory
             upgradeLevelLabel.text = (i + 1).ToString();
 
             // update effect text
+            Label upgradeEffectLabel = upgradeItem.Q<Label>("UpgradeEffectLabel");
+            string allEffectsText = "";
+            foreach (var effect in weapon.Upgrades[i].Effects)
+            {
+                allEffectsText += effect.GetDescription() + "\n";
+            }
+            upgradeEffectLabel.text = allEffectsText.TrimEnd();
 
             container.Add(upgradeItem);
         }
@@ -96,7 +108,20 @@ public static class UIFactory
         pipContainer.Value = system.UpgradeLevel;
 
         // update upgrade effect ui
-        // Update the label below
+        Label upgradeEffectLabel = systemItem.Q<Label>("SystemStats");
+        if (system.CanBeUpgraded())
+        {
+            string allEffectsText = "";
+            foreach (var effect in system.Upgrades[system.UpgradeLevel].Effects)
+            {
+                allEffectsText += effect.GetDescription() + "\n";
+            }
+            upgradeEffectLabel.text = allEffectsText.TrimEnd();
+        }
+        else
+        {
+            upgradeEffectLabel.text = "";
+        }
 
         // update upgrade btn
         Button upgradeBtn = systemItem.Q<Button>("UpgradeBtn");

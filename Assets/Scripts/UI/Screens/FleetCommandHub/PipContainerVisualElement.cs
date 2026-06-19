@@ -1,11 +1,19 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+public enum PipColour
+{
+    Cyan,
+    Orange,
+}
+
 [UxmlElement("PipContainer")] 
 public partial class PipContainerVisualElement : VisualElement
 {
     private int m_Value;
     private int m_MaxPips;
+    private int m_GroupSize = 5;
+    private PipColour m_Colour = PipColour.Cyan;
 
     [UxmlAttribute]
     public int Value
@@ -27,6 +35,28 @@ public partial class PipContainerVisualElement : VisualElement
         }
     }
 
+    [UxmlAttribute]
+    public int GroupSize
+    {
+        get => m_GroupSize;
+        set
+        {
+            m_GroupSize = Mathf.Max(1, value);
+            Rebuild();
+        }
+    }
+
+    [UxmlAttribute]
+    public PipColour Colour
+    {
+        get => m_Colour;
+        set
+        {
+            m_Colour = value;
+            Rebuild();
+        }
+    }
+
     public PipContainerVisualElement()
     {
         AddToClassList("pip-container");
@@ -37,8 +67,31 @@ public partial class PipContainerVisualElement : VisualElement
     {
         Clear(); // Remove old pips
 
+        RemoveFromClassList("colour-cyan");
+        RemoveFromClassList("colour-orange");
+
+        switch (m_Colour)
+        {
+            case PipColour.Cyan: AddToClassList("colour-cyan"); break;
+            case PipColour.Orange: AddToClassList("colour-orange"); break;
+        }
+
+        VisualElement currentGroup = null;
         for (int i = 0; i < m_MaxPips; i++)
         {
+            if (i % m_GroupSize == 0)
+            {
+                currentGroup = new VisualElement();
+                currentGroup.style.flexDirection = FlexDirection.Row;
+
+                currentGroup.style.marginRight = 4f;
+                currentGroup.style.marginLeft = 4f;
+
+                //currentGroup.style.marginBottom = 6f;
+
+                Add(currentGroup);
+            }
+
             var pip = new VisualElement();
             pip.AddToClassList("pip");
 
@@ -51,7 +104,7 @@ public partial class PipContainerVisualElement : VisualElement
                 pip.AddToClassList("pip--inactive");
             }
 
-            Add(pip);
+            currentGroup.Add(pip);
         }
     }
 }

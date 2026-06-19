@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c7c9f7cf10519c248b38583a980873b0, type: 3}
-  m_Name: Destroyer
+  m_Name: Cruiser
   m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
-  ShipName: Destroyer
-  ShipClass: 2
-  ShipID: 2
-  ShipPrefab: {fileID: 6753536424006035904, guid: b79ebb98dc298b240bd035f1525e0050, type: 3}
+  ShipName: Cruiser
+  ShipClass: 3
+  ShipID: 3
+  ShipPrefab: {fileID: 6753536424006035904, guid: bc8d6e96bbb78a44fae21e5b125f55a3, type: 3}
   ShipSystems:
   - SystemID: 1
     UpgradeLevel: 0
@@ -38,16 +38,33 @@ MonoBehaviour:
     - Cost: 400
       Description: 
       Effects: []
+  - SystemID: 3
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 100
+      Description: 
+      Effects: []
+    - Cost: 200
+      Description: 
+      Effects: []
+    - Cost: 400
+      Description: 
+      Effects: []
+  BaseWeaponCapacity: 7
   Mounts:
+  - Position: {x: 0, y: 3}
+    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - Position: {x: 2, y: 2}
     EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - Position: {x: -2, y: 2}
     EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
-  - Position: {x: 0, y: -2}
+  - Position: {x: 3, y: 0}
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  BaseCost: 5
-  BaseMaxHealth: 15
-  BaseSpeed: 12
-  BaseAcceleration: 5
-  BaseTurnSpeed: 10
+  - Position: {x: -3, y: 0}
+    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+  BaseCost: 15
+  BaseMaxHealth: 20
+  BaseSpeed: 10
+  BaseAcceleration: 4
+  BaseTurnSpeed: 9
   BaseCollectionRadius: 5
