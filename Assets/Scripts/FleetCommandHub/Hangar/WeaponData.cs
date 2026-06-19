@@ -88,8 +88,7 @@ public class WeaponData : ScriptableObject
     public string WeaponName;
     public WeaponID WeaponID;
     public GameObject WeaponPrefab;
-    public int BaseEquipCost;
-    public int EquipCost { get { return BaseEquipCost + UpgradeLevel; } }
+    public int EquipCost;
 
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }

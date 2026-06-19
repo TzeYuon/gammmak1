@@ -9,12 +9,27 @@
 }
 
 .pip-container {
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     flex-direction: row;
     flex-wrap: wrap;
-    align-content: center;
     flex-grow: 1;
+    align-content: flex-end;
+}
+
+.colour-cyan .pip--active {
+}
+
+.colour-cyan .pip--inactive {
+}
+
+.colour-orange .pip--active {
+    background-color: rgb(255, 165, 0);
+}
+
+.colour-orange .pip--inactive {
+    background-color: rgba(255, 165, 0, 0.1);
+    border-color: rgba(255, 165, 0, 0.2);
 }
 
 .pip {
@@ -22,10 +37,10 @@
     height: 6px;
     margin: 0 2px;
     border-radius: 0;
-    margin-top: 2px;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    margin-left: 2px;
+    margin-top: 1px;
+    margin-right: 1px;
+    margin-bottom: 1px;
+    margin-left: 1px;
 }
 
 .pip--inactive {

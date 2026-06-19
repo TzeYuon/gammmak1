@@ -18,10 +18,15 @@ public static class UIFactory
         Label weaponName = container.Q<Label>("WeaponName");
         weaponName.text = weapon.WeaponName.ToUpper();
 
+        // Update equip cost pips
+        PipContainerVisualElement equipCost = container.Q<PipContainerVisualElement>("EquipCost");
+        equipCost.MaxPips = weapon.EquipCost;
+        equipCost.Value = weapon.EquipCost;
+
         // Update upgrade pips
         PipContainerVisualElement pipContainer = container.Q<PipContainerVisualElement>("PipContainer");
-        pipContainer.MaxPips = weapon.BaseEquipCost + weapon.MaxUpgradeLevel;
-        pipContainer.Value = weapon.EquipCost;
+        pipContainer.MaxPips = weapon.MaxUpgradeLevel;
+        pipContainer.Value = weapon.UpgradeLevel;
     }
 
     public static Button BuildWeaponMountItem(WeaponMount mount)
@@ -50,7 +55,7 @@ public static class UIFactory
             weaponListItemContainer.style.display = DisplayStyle.Flex;
             var weaponListItem = BuildWeaponListItem(mount.EquippedWeapon);
             weaponListItem.pickingMode = PickingMode.Ignore;
-            weaponListItem.style.width = 100;
+            weaponListItem.style.width = 125;
             weaponListItem.RemoveFromClassList("list-item");
             weaponListItem.AddToClassList("inactive-list-item");
             weaponListItemContainer.Add(weaponListItem);
