@@ -235,8 +235,18 @@ public class ShipDetailsElement
 
     void UpdateToggleRosterBtn()
     {
-        if (RunManager.SaveData.IsShipInRoster(currentShip)) toggleRosterBtn.text = "REMOVE FROM ROSTER";
-        else toggleRosterBtn.text = "ADD TO ROSTER";
+        if (RunManager.SaveData.IsShipInRoster(currentShip))
+        {
+            toggleRosterBtn.text = "REMOVE FROM ROSTER";
+            toggleRosterBtn.SetEnabled(true);
+        }
+        else
+        {
+            toggleRosterBtn.text = "ADD TO ROSTER";
+
+            if (RunManager.SaveData.IsRosterFull()) toggleRosterBtn.SetEnabled(false);
+            else toggleRosterBtn.SetEnabled(true);
+        }
     }
 
     private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)

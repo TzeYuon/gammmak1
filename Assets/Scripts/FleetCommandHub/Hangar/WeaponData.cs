@@ -20,13 +20,15 @@ public enum WeaponStat
     ProjectileSpeed,
     ProjectileTurnSpeed,
     PierceCount,
-    TriggerTime
+    TriggerTime,
+    EquipCost,
 }
 
 public enum ModifierType : byte
 {
     FlatAdd,
-    PercentAdd
+    PercentAdd,
+    
 }
 
 [System.Serializable]
@@ -35,6 +37,42 @@ public class WeaponUpgradeEffect
     public WeaponStat StatType;
     public ModifierType ModifierType;
     public float Value;
+
+    public string GetDescription()
+    {
+        float displayValue = Value;
+        string statName = GetStatName(StatType);
+
+        if (StatType == WeaponStat.Spread)
+        {
+            displayValue = -Value;
+        }
+
+        string sign = displayValue > 0 ? "+" : "";
+
+        if (ModifierType == ModifierType.PercentAdd)
+            return $"{sign}{Mathf.RoundToInt(displayValue * 100f)}% {statName}";
+        else
+            return $"{sign}{displayValue} {statName}";
+    }
+
+    private string GetStatName(WeaponStat stat)
+    {
+        return stat switch
+        {
+            WeaponStat.Damage => "Damage",
+            WeaponStat.FireRate => "Fire Rate",
+            WeaponStat.Range => "Range",
+            WeaponStat.Spread => "Accuracy",
+            WeaponStat.HitRadius => "Projectile Size",
+            WeaponStat.ExplosionRadius => "Blast Radius",
+            WeaponStat.ProjectileSpeed => "Projectile Speed",
+            WeaponStat.ProjectileTurnSpeed => "Projectile Turn Speed",
+            WeaponStat.PierceCount => "Piercing",
+            WeaponStat.EquipCost => "Equip Cost",
+            _ => stat.ToString(),
+        };
+    }
 }
 
 [System.Serializable]

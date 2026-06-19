@@ -70,6 +70,13 @@ public static class UIFactory
             upgradeLevelLabel.text = (i + 1).ToString();
 
             // update effect text
+            Label upgradeEffectLabel = upgradeItem.Q<Label>("UpgradeEffectLabel");
+            string allEffectsText = "";
+            foreach (var effect in weapon.Upgrades[i].Effects)
+            {
+                allEffectsText += effect.GetDescription() + "\n";
+            }
+            upgradeEffectLabel.text = allEffectsText.TrimEnd();
 
             container.Add(upgradeItem);
         }
@@ -96,7 +103,20 @@ public static class UIFactory
         pipContainer.Value = system.UpgradeLevel;
 
         // update upgrade effect ui
-        // Update the label below
+        Label upgradeEffectLabel = systemItem.Q<Label>("SystemStats");
+        if (system.CanBeUpgraded())
+        {
+            string allEffectsText = "";
+            foreach (var effect in system.Upgrades[system.UpgradeLevel].Effects)
+            {
+                allEffectsText += effect.GetDescription() + "\n";
+            }
+            upgradeEffectLabel.text = allEffectsText.TrimEnd();
+        }
+        else
+        {
+            upgradeEffectLabel.text = "";
+        }
 
         // update upgrade btn
         Button upgradeBtn = systemItem.Q<Button>("UpgradeBtn");

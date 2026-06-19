@@ -56,6 +56,40 @@ public class ShipSystemUpgradeEffect
     public ShipStat StatType;
     public ModifierType ModifierType;
     public float Value;
+
+    public string GetDescription()
+    {
+        float displayValue = Value;
+        string statName = GetStatName(StatType);
+
+        string sign = displayValue > 0 ? "+" : "";
+
+        if (ModifierType == ModifierType.PercentAdd)
+            return $"{sign}{Mathf.RoundToInt(displayValue * 100f)}% {statName}";
+        else
+            return $"{sign}{displayValue} {statName}";
+    }
+
+    private string GetStatName(ShipStat stat)
+    {
+        switch (stat)
+        {
+            case ShipStat.Cost:
+                return "Cost";
+            case ShipStat.MaxHealth:
+                return "Hull";
+            case ShipStat.Speed:
+                return "Max Speed";
+            case ShipStat.Acceleration:
+                return "Acceleration";
+            case ShipStat.TurnSpeed:
+                return "Turn Speed";
+            case ShipStat.CollectionRadius:
+                return "Collection Radius";
+            default:
+                return stat.ToString();
+        }
+    }
 }
 
 [System.Serializable]
@@ -75,8 +109,6 @@ public class ShipSystem
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }
     public List<ShipSystemUpgrade> Upgrades = new();
-
-
 
     public bool CanBeUpgraded()
     {
