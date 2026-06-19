@@ -247,10 +247,16 @@ public class ShipDetailsElement
         }
         else
         {
-            toggleRosterBtn.text = "ADD TO ROSTER";
-
-            if (RunManager.SaveData.IsRosterFull()) toggleRosterBtn.SetEnabled(false);
-            else toggleRosterBtn.SetEnabled(true);
+            if (RunManager.SaveData.IsRosterFull())
+            {
+                toggleRosterBtn.text = "ROSTER FULL";
+                toggleRosterBtn.SetEnabled(false);
+            }
+            else 
+            {
+                toggleRosterBtn.text = "ADD TO ROSTER";
+                toggleRosterBtn.SetEnabled(true); 
+            }
         }
     }
 

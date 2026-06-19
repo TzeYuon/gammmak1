@@ -113,7 +113,7 @@ public static class MapGenerator
                         closestA = nodeA;
                     }
                 }
-                nodeB.Outgoing.Add(closestA);
+                closestA.Outgoing.Add(nodeB);
 
                 // Add any other nodes that are close enough
                 foreach (LevelNode nodeA in layerA)
