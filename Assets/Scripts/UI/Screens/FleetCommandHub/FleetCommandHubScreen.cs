@@ -41,6 +41,7 @@ public class FleetCommandHubScreen : UIScreen
     {
         // Show default screen
         ShowScreen(hangarScreen);
+        UpdateUpgradeCoreCounter();
     }
 
     private void ShowScreen(IUIScreen screenToShow)

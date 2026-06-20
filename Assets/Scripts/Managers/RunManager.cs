@@ -7,6 +7,9 @@ public class RunManager : MonoBehaviour
     [SerializeField] private PlayerSaveData playerSaveData;
     public static PlayerSaveData SaveData { get { return Instance.playerSaveData; } }
 
+    [SerializeField] private LootDatabase lootDB;
+    public static LootDatabase LootDB { get { return Instance.lootDB; } }
+
     public MapGenerationConfig Sector1Config;
 
     private void Awake()
@@ -24,5 +27,6 @@ public class RunManager : MonoBehaviour
 
         // Clear previous run data
         SaveData.OnStartNewRun(generatedMap);
+        lootDB.Init(SaveData);
     }
 }

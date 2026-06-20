@@ -311,6 +311,8 @@ public class StarmapScreen : UIScreen
 
         currentNode = selectedNode;
         selectedNode = null;
+
+        RunManager.SaveData.MoveToNode(currentNode);
     }
 }
 

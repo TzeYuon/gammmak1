@@ -23,6 +23,11 @@ public class PlayerSaveData : ScriptableObject
         ActiveSector = new(map);
     }
 
+    public void MoveToNode(LevelNode node)
+    {
+        ActiveSector.CurrentNode = node;
+    }
+
     public bool IsRosterFull()
     {
         for (int i = 0; i < ActiveRoster.Length; i++)
@@ -72,6 +77,7 @@ public class PlayerSaveData : ScriptableObject
 public class CurrentSectorData
 {
     public Starmap SectorMap; // level nodes present in the current sector
+    public LevelNode CurrentNode;
 
     public CurrentSectorData(Starmap map)
     {

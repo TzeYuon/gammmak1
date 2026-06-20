@@ -229,6 +229,9 @@ public class GameplayScreen : UIScreen
         victoryScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
         Time.timeScale = 0.2f;
+
+        // Display rewards earned
+
     }
 
     private void TriggerLoss()
