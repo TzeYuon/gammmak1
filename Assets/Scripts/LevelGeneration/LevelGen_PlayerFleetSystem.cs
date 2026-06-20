@@ -30,7 +30,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         // mark as complete
         status.ValueRW.PlayerFleetSpawned = true;
 
-        playerEconomy.ValueRW.TotalBiomass = 15;
+        playerEconomy.ValueRW.TotalBiomass = 200;
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);

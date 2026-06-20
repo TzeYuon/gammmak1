@@ -24,17 +24,13 @@ partial struct FlowFieldSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGrid)) return;
-        if (!SystemAPI.TryGetSingleton<EnemyFlowFieldComponent>(out var flowFieldComp)) return;
-
-        if (!terrainGrid.Grid.IsCreated || !flowFieldComp.FlowField.IsCreated) return;
-
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
         _timer = 0.45f;
 
-        int gridWidth = terrainGrid.GridWidth;
-        int gridHeight = terrainGrid.GridHeight;
+        var terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        int gridWidth = terrainGridComponent.GridWidth;
+        int gridHeight = terrainGridComponent.GridHeight;
         int totalCells = gridWidth * gridHeight;
 
         var flowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
@@ -54,7 +50,7 @@ partial struct FlowFieldSystem : ISystem
         var noiseFieldHandle = new GenerateNoiseFieldJob
         {
             CostGrid = _costField,
-            ObstacleGrid = terrainGrid.Grid,
+            ObstacleGrid = terrainGridComponent.Grid,
             GridWidth = gridWidth,
             CellSize = 1,
             ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
@@ -66,19 +62,18 @@ partial struct FlowFieldSystem : ISystem
         foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
         {
             int2 gridPos = new int2(
-                (int)math.round(transform.ValueRO.Position.x),
-                (int)math.round(transform.ValueRO.Position.y)
-            ) - terrainGrid.WorldOrigin;
-
+                (int)math.round(transform.ValueRO.Position.x) - terrainGridComponent.WorldOrigin.x,
+                (int)math.round(transform.ValueRO.Position.y) - terrainGridComponent.WorldOrigin.y
+            );
             targetPositions.Add(gridPos);
         }
 
         var job = new GenerateFlowFieldJob
         {
-            Grid = terrainGrid.Grid,
+            Grid = terrainGridComponent.Grid,
             IntegrationField = _integrationField,
             CostGrid = _costField,
-            FlowField = flowFieldComp.FlowField,
+            FlowField = flowFieldComponent.ValueRW.FlowField,
             TargetPositions = targetPositions,
             GridWidth = gridWidth,
             GridHeight = gridHeight,
@@ -101,13 +96,9 @@ partial struct FlowFieldSystem : ISystem
 public struct GenerateNoiseFieldJob : IJobParallelFor
 {
     [WriteOnly] public NativeArray<byte> CostGrid;
-
     [ReadOnly] public NativeArray<int> ObstacleGrid;
-
     public int GridWidth;
     public float CellSize;
-
-    // Tuning Variables
     public float ElapsedTime;
     public float NoiseFrequency;
     public byte MaxNoiseCost;
@@ -122,15 +113,12 @@ public struct GenerateNoiseFieldJob : IJobParallelFor
 
         int x = index % GridWidth;
         int y = index / GridWidth;
-
         float noiseX = x * CellSize * NoiseFrequency;
         float noiseY = y * CellSize * NoiseFrequency;
-
         float noiseZ = ElapsedTime * 0.2f;
         float rawNoise = noise.snoise(new float3(noiseX, noiseY, noiseZ));
         float normalizedNoise = (rawNoise + 1.0f) * 0.5f;
         byte finalCost = (byte)math.clamp(math.lerp(1, MaxNoiseCost, normalizedNoise), 1, 254);
-        
         CostGrid[index] = finalCost;
     }
 }
@@ -149,31 +137,18 @@ public struct GenerateFlowFieldJob : IJob
 
     public float ElapsedTime;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int GetSafeIntegrationValue(int checkX, int checkY)
-    {
-        // If the neighbor is off-map, return a massive distance value.
-        // This acts as an invisible, steep wall keeping the swarm inside!
-        if (checkX < 0 || checkX >= GridWidth || checkY < 0 || checkY >= GridHeight)
-        {
-            return 999999;
-        }
-
-        return IntegrationField[checkX + (checkY * GridWidth)];
-    }
+    private const int MAX_COST = 9999999;
 
     public void Execute()
     {
-        // Reset Arrays
         for (int i = 0; i < IntegrationField.Length; i++)
         {
-            IntegrationField[i] = 99999;
+            IntegrationField[i] = MAX_COST;
             FlowField[i] = float2.zero;
         }
 
         NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.Temp);
 
-        // multi-target start
         for (int i = 0; i < TargetPositions.Length; i++)
         {
             int2 pos = TargetPositions[i];
@@ -187,31 +162,34 @@ public struct GenerateFlowFieldJob : IJob
             }
         }
 
-        // Dijkstra Flood Fill
-        NativeArray<int2> neighbors = new NativeArray<int2>(4, Allocator.Temp);
+        NativeArray<int2> neighbors = new NativeArray<int2>(8, Allocator.Temp);
         neighbors[0] = new int2(0, 1);
         neighbors[1] = new int2(0, -1);
         neighbors[2] = new int2(-1, 0);
         neighbors[3] = new int2(1, 0);
+        neighbors[4] = new int2(-1, 1);
+        neighbors[5] = new int2(1, 1);
+        neighbors[6] = new int2(-1, -1);
+        neighbors[7] = new int2(1, -1);
 
         while (cellsToCheck.TryDequeue(out int2 current))
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 8; i++)
             {
                 int2 neighbor = current + neighbors[i];
 
                 if (neighbor.x >= 0 && neighbor.x < GridWidth && neighbor.y >= 0 && neighbor.y < GridHeight)
                 {
                     int tileType = Grid[neighbor.x + neighbor.y * GridWidth];
-                    if (tileType == 1) continue; // Wall
+                    if (tileType == 1) continue;
 
-                    int cost = (tileType == 2) ? 5 : (tileType == 3) ? 25 : 1;
+                    int baseCost = (tileType == 2) ? 250 : (tileType == 3) ? 1000 : 10;
+                    int cost = (i < 4) ? baseCost : (int)(baseCost * 1.414f);
+
                     int current1D = current.x + current.y * GridWidth;
                     int neighbor1D = neighbor.x + neighbor.y * GridWidth;
 
-                    int newCost = IntegrationField[current1D] + cost;
-
-                    newCost += CostGrid[neighbor1D];
+                    int newCost = IntegrationField[current1D] + cost + CostGrid[neighbor1D];
 
                     if (newCost < IntegrationField[neighbor1D])
                     {
@@ -222,33 +200,68 @@ public struct GenerateFlowFieldJob : IJob
             }
         }
 
-        // Generate Flow Field Vectors
         for (int x = 0; x < GridWidth; x++)
         {
             for (int y = 0; y < GridHeight; y++)
             {
                 int idx = x + y * GridWidth;
-                if (Grid[idx] == 1) continue; // wall
 
-                int valTL = GetSafeIntegrationValue(x - 1, y + 1); // Top-Left
-                int valT = GetSafeIntegrationValue(x, y + 1); // Top
-                int valTR = GetSafeIntegrationValue(x + 1, y + 1); // Top-Right
-
-                int valL = GetSafeIntegrationValue(x - 1, y); // Left
-                int valR = GetSafeIntegrationValue(x + 1, y); // Right
-
-                int valBL = GetSafeIntegrationValue(x - 1, y - 1); // Bottom-Left
-                int valB = GetSafeIntegrationValue(x, y - 1); // Bottom
-                int valBR = GetSafeIntegrationValue(x + 1, y - 1); // Bottom-Right
-
-                float dirX = (valTL + (2 * valL) + valBL) - (valTR + (2 * valR) + valBR);
-                float dirY = (valBL + (2 * valB) + valBR) - (valTL + (2 * valT) + valTR);
-
-                float2 flowDir = new(dirX, dirY);
-
-                if (math.lengthsq(flowDir) > 0.001f)
+                if (Grid[idx] == 1)
                 {
-                    FlowField[idx] = math.normalize(flowDir);
+                    int minWallCost = MAX_COST;
+                    float2 escapeDir = float2.zero;
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        int nx = x + neighbors[i].x;
+                        int ny = y + neighbors[i].y;
+                        if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
+                        {
+                            if (Grid[nx + ny * GridWidth] != 1)
+                            {
+                                int nCost = IntegrationField[nx + ny * GridWidth];
+                                if (nCost < minWallCost)
+                                {
+                                    minWallCost = nCost;
+                                    escapeDir = new float2(neighbors[i].x, neighbors[i].y);
+                                }
+                            }
+                        }
+                    }
+
+                    if (math.lengthsq(escapeDir) > 0.01f) FlowField[idx] = math.normalize(escapeDir);
+                    else FlowField[idx] = float2.zero;
+
+                    continue;
+                }
+
+                int currentCost = IntegrationField[idx];
+                int minCost = currentCost;
+                float2 bestDir = float2.zero;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    int nx = x + neighbors[i].x;
+                    int ny = y + neighbors[i].y;
+
+                    if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
+                    {
+                        if (Grid[nx + ny * GridWidth] != 1) // Ignore walls
+                        {
+                            int neighborCost = IntegrationField[nx + ny * GridWidth];
+
+                            if (neighborCost < minCost)
+                            {
+                                minCost = neighborCost;
+                                bestDir = new float2(neighbors[i].x, neighbors[i].y);
+                            }
+                        }
+                    }
+                }
+
+                if (math.lengthsq(bestDir) > 0.01f)
+                {
+                    FlowField[idx] = math.normalize(bestDir);
                 }
                 else
                 {

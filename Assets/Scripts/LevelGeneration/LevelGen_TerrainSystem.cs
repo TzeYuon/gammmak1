@@ -21,18 +21,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         state.EntityManager.CreateSingleton(new TerrainGridComponent());
         state.EntityManager.CreateSingleton(new EnemyFlowFieldComponent());
 
-        // TEMPORARY: Inject a default level blueprint until the UI is built
-        state.EntityManager.CreateSingleton(new LevelBlueprintComponent
-        {
-            GridWidth = 200,
-            GridHeight = 200,
-            Shape = MapShape.Standard,
-            NoiseScale = 0.15f,
-            WallThreshold = 0.60f,
-            PoisonThreshold = 0.75f,
-            MudThreshold = 0.25f,
-            Seed = 12345
-        });
     }
 
     public void OnDestroy(ref SystemState state)
@@ -49,16 +37,31 @@ partial struct LevelGen_TerrainSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.TerrainGenerated) return;
 
-        var blueprint = SystemAPI.GetSingleton<LevelBlueprintComponent>();
+        status.ValueRW.TerrainGenerated = true;
+        var oldTerrainQuery = state.EntityManager.CreateEntityQuery(typeof(ProceduralTerrainTag));
+        state.EntityManager.DestroyEntity(oldTerrainQuery);
+        
+        LevelBlueprintComponent blueprint;
+        if (!SystemAPI.TryGetSingleton<LevelBlueprintComponent>(out blueprint))
+        {
+            blueprint = new LevelBlueprintComponent
+            {
+                GridWidth = 200,
+                GridHeight = 200,
+                Shape = MapShape.Standard,
+                NoiseScale = 0.15f,
+                WallThreshold = 0.75f,
+                PoisonThreshold = 0.80f,
+                MudThreshold = 0.10f,
+                Seed = (uint)UnityEngine.Random.Range(1, 99999)
+            };
+        }
         var prefabs = SystemAPI.GetSingleton<TerrainPrefabsComponent>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        RefRW<TerrainGridComponent> terrainGridComponent = SystemAPI.GetSingletonRW<TerrainGridComponent>();
-        RefRW<EnemyFlowFieldComponent> enemyFlowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
-
         int width = blueprint.GridWidth;
         int height = blueprint.GridHeight;
-        int safezoneRadius = 20;
+        int safezoneRadius = 30;
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
 
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
@@ -113,7 +116,6 @@ partial struct LevelGen_TerrainSystem : ISystem
                 obstacleGrid[x + y * width] = finalTile;
                 flowField[x + y * width] = float2.zero; // Reset flow field
 
-                // Instantly spawn ECS terrain entities
                 Entity prefabToSpawn = Entity.Null;
                 if (finalTile == 1) prefabToSpawn = prefabs.WallEntity;
                 else if (finalTile == 2) prefabToSpawn = prefabs.MudEntity;
@@ -122,8 +124,15 @@ partial struct LevelGen_TerrainSystem : ISystem
                 if (prefabToSpawn != Entity.Null)
                 {
                     Entity tileEntity = ecb.Instantiate(prefabToSpawn);
+                    ecb.AddComponent<ProceduralTerrainTag>(tileEntity);
                     float3 spawnPos = new float3(x + worldOrigin.x, y + worldOrigin.y, 0);
-                    ecb.SetComponent(tileEntity, LocalTransform.FromPosition(spawnPos));
+                    float myCustomSize = 1.0f;
+                    ecb.SetComponent(tileEntity, new LocalTransform
+                    {
+                        Position = spawnPos,
+                        Rotation = Unity.Mathematics.quaternion.identity,
+                        Scale = myCustomSize
+                    });
                 }
             }
         }
@@ -146,8 +155,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         flowComp.ValueRW.GridWidth = width;
         flowComp.ValueRW.GridHeight = height;
         flowComp.ValueRW.CellSize = 1;
-
-        status.ValueRW.TerrainGenerated = true;
     }
 
     // Helper Functions
@@ -294,4 +301,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         }
         return tiles;
     }
+
+    public struct ProceduralTerrainTag : IComponentData { }
 }
