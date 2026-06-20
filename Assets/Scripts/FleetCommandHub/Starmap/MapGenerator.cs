@@ -9,11 +9,13 @@ public static class MapGenerator
         float connectionRadius = mapConfig.ConnectionRadius;
 
         int totalLayers = 0;
-        int maxLanes = 20;
+        int maxLanes = 0;
         foreach (var layerConfig in mapConfig.LayerConfigs)
         {
             totalLayers += layerConfig.NumLayers;
+            maxLanes = Mathf.Max(maxLanes, layerConfig.NumNodes.max);
         }
+        maxLanes = Mathf.RoundToInt(Mathf.Max(1, maxLanes) * 1.5f); // add some padding for variation
 
         int currentLayer = 0;
         List<List<LevelNode>> grid = new();

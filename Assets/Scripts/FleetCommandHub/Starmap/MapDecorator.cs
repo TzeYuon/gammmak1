@@ -61,7 +61,7 @@ public static class MapDecorator
 
                 node.UpgradeCoreReward = layerConfig.EliteUpgradeCoreReward;
             }
-            else
+            else if (node.NodeType == NodeType.Encounter)
             {
                 node.RewardType = layerConfig.StandardRewardPool.GetRandom();
 
@@ -72,6 +72,12 @@ public static class MapDecorator
                     : AnomalyType.None;
 
                 node.UpgradeCoreReward = layerConfig.BaseUpgradeCoreReward;
+            }
+            else // shop node
+            {
+                node.RewardType = RewardType.None;
+                node.AnomalyType = AnomalyType.None;
+                node.UpgradeCoreReward = 0;
             }
         }
     }

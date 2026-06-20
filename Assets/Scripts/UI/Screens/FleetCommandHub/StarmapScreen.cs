@@ -60,7 +60,7 @@ public class StarmapScreen : UIScreen
             // add node visual elements to map
             foreach (LevelNode node in map.AllNodes)
             {
-                MapNodeVisualElement nodeElement = UIScreenManager.UIAssetsDatabase.MapNode.Instantiate().Q<MapNodeVisualElement>();
+                MapNodeVisualElement nodeElement = UIFactory.BuildMapNode(node);
 
                 nodeElement.style.position = Position.Absolute;
                 nodeElement.RegisterCallback<ClickEvent>(evt => OnMapNodeClicked(node));
@@ -125,7 +125,7 @@ public class StarmapScreen : UIScreen
 
         // Calculate Scale and Offset
         float paddingMultiplierX = 0.85f;
-        float paddingMultiplierY = 0.4f;
+        float paddingMultiplierY = 0.8f;
         float scaleX = (containerWidth * paddingMultiplierX) / mapWidth;
         float scaleY = (containerHeight * paddingMultiplierY) / mapHeight;
 
@@ -327,6 +327,9 @@ public enum MapNodeState
 public partial class MapNodeVisualElement : VisualElement
 {
     private MapNodeState m_NodeState;
+    private NodeType nodeType;
+    private ThreatLevel threatLevel;
+    private RewardType rewardType;
 
     [UxmlAttribute]
     public MapNodeState NodeState
@@ -345,6 +348,81 @@ public partial class MapNodeVisualElement : VisualElement
         Rebuild();
     }
 
+    public void Init(LevelNode node)
+    {
+        nodeType = node.NodeType;
+        threatLevel = node.ThreatLevel;
+        rewardType = node.RewardType;
+
+        VisualElement nodeTypeSymbol = this.Q<VisualElement>("NodeTypeSymbol");
+        VisualElement threatBorder = this.Q<VisualElement>("ThreatBorder");
+        VisualElement rewardSymbol = this.Q<VisualElement>("RewardSymbol");
+
+        nodeTypeSymbol.RemoveFromClassList("node-encounter");
+        nodeTypeSymbol.RemoveFromClassList("node-elite");
+        nodeTypeSymbol.RemoveFromClassList("node-store");
+        nodeTypeSymbol.RemoveFromClassList("node-boss");
+        switch (nodeType)
+        {
+            case NodeType.Encounter:
+                nodeTypeSymbol.AddToClassList("node-encounter");
+                break;
+            case NodeType.EliteEncounter:
+                nodeTypeSymbol.AddToClassList("node-elite");
+                break;
+            case NodeType.Store:
+                nodeTypeSymbol.AddToClassList("node-store");
+                break;
+            case NodeType.Boss:
+                nodeTypeSymbol.AddToClassList("node-boss");
+                break;
+        }
+
+        threatBorder.RemoveFromClassList("threat-low");
+        threatBorder.RemoveFromClassList("threat-medium");
+        threatBorder.RemoveFromClassList("threat-high");
+        threatBorder.RemoveFromClassList("threat-boss");
+        switch (threatLevel)
+        {
+            case ThreatLevel.None:
+                break;
+            case ThreatLevel.Low:
+                threatBorder.AddToClassList("threat-low");
+                break;
+            case ThreatLevel.Medium:
+                threatBorder.AddToClassList("threat-medium");
+                break;
+            case ThreatLevel.High:
+                threatBorder.AddToClassList("threat-high");
+                break;
+            case ThreatLevel.Boss:
+                threatBorder.AddToClassList("threat-boss");
+                break;
+        }
+
+        rewardSymbol.RemoveFromClassList("reward-cores");
+        rewardSymbol.RemoveFromClassList("reward-weapon");
+        rewardSymbol.RemoveFromClassList("reward-ship");
+        rewardSymbol.RemoveFromClassList("reward-repair");
+        switch (rewardType)
+        {
+            case RewardType.None:
+                break;
+            case RewardType.UpgradeCores:
+                rewardSymbol.AddToClassList("reward-cores");
+                break;
+            case RewardType.WeaponBlueprint:
+                rewardSymbol.AddToClassList("reward-weapon");
+                break;
+            case RewardType.ShipBlueprint:
+                rewardSymbol.AddToClassList("reward-ship");
+                break;
+            case RewardType.MothershipRepair:
+                rewardSymbol.AddToClassList("reward-repair");
+                break;
+        }
+    }
+
     private void Rebuild()
     {
         RemoveFromClassList("map-node-default");
@@ -352,7 +430,6 @@ public partial class MapNodeVisualElement : VisualElement
         RemoveFromClassList("map-node-selected");
         RemoveFromClassList("map-node-onpath");
         RemoveFromClassList("map-node-selectable");
-
         switch (m_NodeState)
         {
             case MapNodeState.Default:

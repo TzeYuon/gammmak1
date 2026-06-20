@@ -156,4 +156,11 @@ public static class UIFactory
             refundBtn.style.visibility = Visibility.Hidden;
         }
     }
+
+    public static MapNodeVisualElement BuildMapNode(LevelNode node)
+    {
+        MapNodeVisualElement nodeElement = UIScreenManager.UIAssetsDatabase.MapNode.Instantiate().Q<MapNodeVisualElement>();
+        nodeElement.Init(node);
+        return nodeElement;
+    }
 }
