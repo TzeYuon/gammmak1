@@ -11,6 +11,7 @@ public class PlayerSaveData : ScriptableObject
     public List<WeaponData> AvailableWeapons;
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
+    public ShipBlueprintData Mothership;
 
     public void OnStartNewRun(Starmap map)
     {

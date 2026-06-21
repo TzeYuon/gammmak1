@@ -6,7 +6,8 @@
     <ui:VisualElement name="StarmapContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%;">
         <ui:VisualElement name="" style="flex-grow: 1; flex-direction: row;">
             <ui:ScrollView mode="Horizontal" vertical-scroller-visibility="Hidden" style="flex-direction: column; width: 70%; height: 100%;">
-                <ui:VisualElement name="MapContainer" style="flex-grow: 0; align-items: center; justify-content: center; flex-direction: column; width: 2490px; height: 100%;">
+                <ui:VisualElement name="" style="flex-grow: 0; align-items: center; justify-content: center; flex-direction: column; width: 2490px; height: 100%;">
+                    <ui:VisualElement name="MapContainer" style="flex-grow: 0; align-items: center; justify-content: center; flex-direction: column; width: 100%; height: 100%;"/>
                     <MapPathCanvas name="MapPathCanvas" style="position: absolute; width: 100%; height: 100%;"/>
                 </ui:VisualElement>
             </ui:ScrollView>

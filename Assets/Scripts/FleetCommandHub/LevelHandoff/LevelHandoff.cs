@@ -65,6 +65,9 @@ public class LevelHandoff : MonoBehaviour
         var shipDB = entityManager.GetBuffer<BakedShipData>(databaseEntity).ToNativeArray(Allocator.Temp);
         var weaponDB = entityManager.GetBuffer<BakedWeaponData>(databaseEntity).ToNativeArray(Allocator.Temp);
 
+        // Update mothership stats and weapons
+        entityManager = CreateMothershipBlueprint(entityManager, weaponDB);
+
         // fill up roster based on database
         int count = 0;
         for (int i = 0; i < playerSaveData.ActiveRoster.Length; i++)
@@ -75,7 +78,7 @@ public class LevelHandoff : MonoBehaviour
             Entity matchedPrefab = GetPrefabFromDatabase(shipDB, blueprint.ShipID);
             if (matchedPrefab == Entity.Null) continue;
 
-            Entity recipeEntity = entityManager.CreateEntity();
+            Entity blueprintEntity = entityManager.CreateEntity();
 
             // Calculate final ship stats
             float health = blueprint.GetStat(ShipStat.MaxHealth);
@@ -88,13 +91,15 @@ public class LevelHandoff : MonoBehaviour
             float finalBrakingRadius = stoppingDistance * 1.25f;
             finalBrakingRadius = Mathf.Max(finalBrakingRadius, 1.0f);
 
+            entityManager.AddComponentData(blueprintEntity, new LevelEntityTag());
+
             // add blueprint to spawn in the ship
-            entityManager.AddComponentData(recipeEntity, new RosterShipBlueprint
+            entityManager.AddComponentData(blueprintEntity, new RosterShipBlueprint
             {
                 SlotIndex = count++,
                 ShipPrefab = matchedPrefab,
                 BiomassCost = Mathf.RoundToInt(blueprint.GetStat(ShipStat.Cost)),
-                
+
                 ShipHealthComponent = new HealthComponent
                 {
                     MaxValue = health,
@@ -116,7 +121,7 @@ public class LevelHandoff : MonoBehaviour
             });
 
             // Create weapon blueprints for each weapon mount on the ship
-            var weaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(recipeEntity);
+            var weaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(blueprintEntity);
             for (int m = 0; m < blueprint.Mounts.Count; m++)
             {
                 var mount = blueprint.Mounts[m];
@@ -133,7 +138,7 @@ public class LevelHandoff : MonoBehaviour
                 {
                     WeaponPrefab = weaponPrefab,
                     Position = mount.Position,
-                    
+
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
                         Range = weapon.GetStat(WeaponStat.Range),
@@ -161,6 +166,78 @@ public class LevelHandoff : MonoBehaviour
 
         shipDB.Dispose();
         weaponDB.Dispose();
+
+        EntityManager CreateMothershipBlueprint(EntityManager entityManager, NativeArray<BakedWeaponData> weaponDB)
+        {
+            ShipBlueprintData mBlueprint = playerSaveData.Mothership;
+            Entity mBlueprintEntity = entityManager.CreateEntity();
+
+            // Calculate final ship stats
+            float mHealth = mBlueprint.GetStat(ShipStat.MaxHealth);
+            float mCollectionRadius = mBlueprint.GetStat(ShipStat.CollectionRadius);
+
+            entityManager.AddComponentData(mBlueprintEntity, new LevelEntityTag());
+
+            // add blueprint to spawn in the ship
+            entityManager.AddComponentData(mBlueprintEntity, new MothershipBlueprint
+            {
+                ShipHealthComponent = new HealthComponent
+                {
+                    MaxValue = mHealth,
+                    Value = mHealth
+                },
+
+                ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
+                {
+                    RadiusSq = mCollectionRadius * mCollectionRadius
+                }
+            });
+
+            // Create weapon blueprints for each weapon mount on the ship
+            var mWeaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(mBlueprintEntity);
+            for (int m = 0; m < mBlueprint.Mounts.Count; m++)
+            {
+                var mount = mBlueprint.Mounts[m];
+                WeaponData weapon = mount.EquippedWeapon;
+                if (weapon == null) continue;
+
+                Entity weaponPrefab = GetPrefabFromDatabase(weaponDB, weapon.WeaponID);
+
+                float range = weapon.GetStat(WeaponStat.Range);
+                float explosionRadius = weapon.GetStat(WeaponStat.ExplosionRadius);
+
+                // add blueprint to spawn weapon
+                mWeaponBuffer.Add(new RosterWeaponBlueprint
+                {
+                    WeaponPrefab = weaponPrefab,
+                    Position = mount.Position,
+
+                    WeaponTargetingStats = new WeaponTargetingStats
+                    {
+                        Range = weapon.GetStat(WeaponStat.Range),
+                        RangeSq = range * range,
+                        DensityBias = weapon.DensityBias,
+                        AngleBias = weapon.AngleBias,
+                        DistanceBias = weapon.DistanceBias,
+                    },
+
+                    WeaponCombatStats = new WeaponCombatStats
+                    {
+                        Damage = weapon.GetStat(WeaponStat.Damage),
+                        FireRate = weapon.GetStat(WeaponStat.FireRate),
+                        Spread = weapon.GetStat(WeaponStat.Spread),
+                        ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
+                        ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
+                        HitRadius = weapon.GetStat(WeaponStat.HitRadius),
+                        ExplosionRadiusSq = explosionRadius * explosionRadius,
+                        PierceCount = Mathf.RoundToInt(weapon.GetStat(WeaponStat.PierceCount)),
+                        TriggerTime = weapon.GetStat(WeaponStat.TriggerTime),
+                    }
+                });
+            }
+
+            return entityManager;
+        }
     }
 
     LevelBlueprint ConvertLevelToComponent(EntityManager entityManager)

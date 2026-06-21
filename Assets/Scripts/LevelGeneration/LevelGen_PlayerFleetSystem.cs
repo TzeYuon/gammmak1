@@ -12,6 +12,8 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         state.RequireForUpdate<GameStateSingleton>();
         state.RequireForUpdate<LevelGenerationStatus>();
         state.RequireForUpdate<PlayerEconomy>();
+        state.RequireForUpdate<MothershipPrefabDatabase>();
+        state.RequireForUpdate<MothershipBlueprint>();
     }
 
     [BurstCompile]
@@ -26,17 +28,46 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<PlayerEconomy>(out var playerEconomy)) return;
 
         if (!SystemAPI.TryGetSingleton<MothershipPrefabDatabase>(out var prefabDatabase)) return;
+        if (!SystemAPI.TryGetSingletonEntity<MothershipBlueprint>(out var mothershipBlueprintEntity)) return;
+        if (!SystemAPI.TryGetSingleton<MothershipBlueprint>(out var mothershipBlueprint)) return;
+
+        var weaponBufferLookup = SystemAPI.GetBufferLookup<RosterWeaponBlueprint>(true);
+        if (!weaponBufferLookup.HasBuffer(mothershipBlueprintEntity)) return;
 
         // mark as complete
         status.ValueRW.PlayerFleetSpawned = true;
 
-        playerEconomy.ValueRW.TotalBiomass = 15;
+        playerEconomy.ValueRW.TotalBiomass = 500;
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
         // Generate mothership
         Entity mothershipEntity = ecb.Instantiate(prefabDatabase.MothershipPrefab);
-        ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(new float3(1000, 1000, 0)));
+        ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(new float3(1000, 1000, 0))); // TEMPORARY: Hardcoded spawn point for mothership
+
+        // Set ship stats
+        ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipHealthComponent);
+        ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipCollectionRadiusStat);
+
+        // spawn weapons
+        var weaponBuffer = weaponBufferLookup[mothershipBlueprintEntity];
+        for (int w = 0; w < weaponBuffer.Length; w++)
+        {
+            var weaponBlueprint = weaponBuffer[w];
+
+            Entity weaponPrefab = weaponBlueprint.WeaponPrefab;
+            if (weaponPrefab == Entity.Null) continue;
+
+            Entity weapon = ecb.Instantiate(weaponPrefab);
+            ecb.AddComponent(weapon, new Parent { Value = mothershipEntity });
+            ecb.SetComponent(weapon, LocalTransform.FromPosition(new float3(weaponBlueprint.Position, 0)));
+
+            // Set weapon stats
+            ecb.SetComponent(weapon, weaponBlueprint.WeaponTargetingStats);
+            ecb.SetComponent(weapon, weaponBlueprint.WeaponCombatStats);
+
+            ecb.AppendToBuffer(mothershipEntity, new LinkedEntityGroup { Value = weapon });
+        }
     }
 }

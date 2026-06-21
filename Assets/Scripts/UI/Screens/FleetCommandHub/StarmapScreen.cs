@@ -40,15 +40,38 @@ public class StarmapScreen : UIScreen
             gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
         }
 
-        InitMap();
-
+        RunManager.OnRunStart += OnRunStart;
         InitMapDetailsContainer();
 
-        UpdateDeployBtn();
+        UpdateDeployBtn();        
+
+        void InitMapDetailsContainer()
+        {
+            nodeTypeLbl = mapDetailsContainer.Q<Label>("NodeTypeLbl");
+            threatLevelLbl = mapDetailsContainer.Q<Label>("ThreatLevelLbl");
+            objectiveLbl = mapDetailsContainer.Q<Label>("ObjectiveLbl");
+            enemyProfileLbl = mapDetailsContainer.Q<Label>("EnemyProfileLbl");
+            terrainTypeLbl = mapDetailsContainer.Q<Label>("TerrainTypeLbl");
+            rewardTypeLbl = mapDetailsContainer.Q<Label>("RewardTypeLbl");
+            anomalyLbl = mapDetailsContainer.Q<Label>("AnomalyLbl");
+        }
+    }
+
+    public override void Dispose()
+    {
+        RunManager.OnRunStart -= OnRunStart;
+    }
+
+    void OnRunStart()
+    {
+        InitMap();
 
         void InitMap()
         {
             map = RunManager.SaveData.ActiveSector.SectorMap;
+
+            // clear previous nodes
+            mapContainer.Clear();
 
             // add invisible active node to connect to start nodes
             currentNode = new(-1, -1);
@@ -69,17 +92,6 @@ public class StarmapScreen : UIScreen
                 mapNodes.Add(node, nodeElement);
             }
             UpdateMapNodeStates();
-        }
-
-        void InitMapDetailsContainer()
-        {
-            nodeTypeLbl = mapDetailsContainer.Q<Label>("NodeTypeLbl");
-            threatLevelLbl = mapDetailsContainer.Q<Label>("ThreatLevelLbl");
-            objectiveLbl = mapDetailsContainer.Q<Label>("ObjectiveLbl");
-            enemyProfileLbl = mapDetailsContainer.Q<Label>("EnemyProfileLbl");
-            terrainTypeLbl = mapDetailsContainer.Q<Label>("TerrainTypeLbl");
-            rewardTypeLbl = mapDetailsContainer.Q<Label>("RewardTypeLbl");
-            anomalyLbl = mapDetailsContainer.Q<Label>("AnomalyLbl");
         }
     }
 
