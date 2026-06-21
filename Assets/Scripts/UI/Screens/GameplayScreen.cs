@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEditor;
@@ -18,10 +19,8 @@ public class GameplayScreen : UIScreen
     private Label biomassCounter;
     private EntityQuery economyQuery;
 
-    private VisualElement reinforcementPopup;
-    private VisualElement reinforcementPopupContainer;
-    private bool isReinforcementPopupOpen;
-    private float2 spawnPosition;
+    private VisualElement reinforcementContainer;
+    private List<(int cost, VisualElement btn)> reinforcementBtns = new();
     private EntityQuery queueQuery;
 
     private VisualElement victoryScreen;
@@ -39,8 +38,7 @@ public class GameplayScreen : UIScreen
         biomassCounter = root.Q<Label>("BiomassCounter");
 
         this.playerSaveData = playerSaveData;
-        reinforcementPopup = root.Q<VisualElement>("ReinforcementPopup");
-        reinforcementPopupContainer = root.Q<VisualElement>("ReinforcementPopupContainer");
+        reinforcementContainer = root.Q<VisualElement>("ReinforcementBtnContainer");
 
         InitVictoryLoss();
 
@@ -91,23 +89,27 @@ public class GameplayScreen : UIScreen
     protected override void OnHide()
     {
         HideVictoryLoss();
-        CloseReinforcementPopup();
+        ToggleReinforcementPopup(false);
 
         GameStateSystem.OnStateChanged -= HandleStateChange;
+        EconomyEventSystem.OnBiomassChanged -= UpdateReinforcementBtns;
     }
 
     protected override void OnShow()
     {
         HideVictoryLoss();
+        ToggleReinforcementPopup(true);
         RebuildReinforcementPopup();
-        CloseReinforcementPopup();
+
         biomassCounter.style.display = DisplayStyle.Flex;
 
         GameStateSystem.OnStateChanged += HandleStateChange;
+        EconomyEventSystem.OnBiomassChanged += UpdateReinforcementBtns;
 
         void RebuildReinforcementPopup()
         {
-            reinforcementPopupContainer.Clear();
+            reinforcementBtns.Clear();
+            reinforcementContainer.Clear();
             if (playerSaveData != null)
             {
                 var activeRoster = playerSaveData.ActiveRoster;
@@ -118,18 +120,23 @@ public class GameplayScreen : UIScreen
                 {
                     if (activeRoster[i] == null) continue;
                     var cur = activeRoster[i];
-                    reinforcementPopupContainer.Add(CreateButton(cur.ShipName + "(" + cur.GetStat(ShipStat.Cost) + ")", count++));
+
+                    int cost = cur.GetStatInt(ShipStat.Cost);
+                    VisualElement btn = UIFactory.BuildReinforcementBtn(cur.ShipName, cost);
+                    RegisterBtn(btn, count++);
+
+                    reinforcementBtns.Add((cost, btn));
+                    reinforcementContainer.Add(btn);
                 }
             }
 
-            Button CreateButton(string text, int slotIndex)
-            {
-                var btn = new Button { text = text };
-                btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
-                btn.style.color = Color.cyan;
-                btn.style.marginTop = 5;
+            economyQuery.CompleteDependency();
+            var economy = economyQuery.GetSingleton<PlayerEconomy>();
+            UpdateReinforcementBtns(economy.TotalBiomass);
 
-                btn.clicked += () =>
+            void RegisterBtn(VisualElement btn, int slot)
+            {
+                btn.RegisterCallback<ClickEvent>(evt =>
                 {
                     if (queueQuery.IsEmptyIgnoreFilter) return;
 
@@ -137,15 +144,18 @@ public class GameplayScreen : UIScreen
                     var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
                     queue.Enqueue(new SpawnRequest
                     {
-                        SlotIndex = slotIndex,
-                        Position = GetSpawnPosition()
+                        SlotIndex = slot,
                     });
-
-                    CloseReinforcementPopup();
-                };
-
-                return btn;
+                });
             }
+        }
+    }
+
+    void UpdateReinforcementBtns(float amount)
+    {
+        foreach (var (cost, btn) in reinforcementBtns)
+        {
+            btn.SetEnabled(amount >= cost);
         }
     }
 
@@ -195,25 +205,6 @@ public class GameplayScreen : UIScreen
             {
                 return;
             }
-
-            spawnPosition = inputData.MouseWorldPosition;
-            if (inputData.WasPressed(PlayerAction.ToggleReinforcementPopup))
-            {
-                if (isReinforcementPopupOpen)
-                {
-                    CloseReinforcementPopup();
-                }
-                else
-                {
-                    reinforcementPopup.style.display = DisplayStyle.Flex;
-                    isReinforcementPopupOpen = true;
-
-                    Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
-
-                    reinforcementPopup.style.left = uiCurrent.x;
-                    reinforcementPopup.style.top = uiCurrent.y;
-                }
-            }
         }
 
         void UpdateBiomassCounter()
@@ -252,12 +243,12 @@ public class GameplayScreen : UIScreen
     {
         if (gameState == GameState.Victory)
         {
-            CloseReinforcementPopup();
+            ToggleReinforcementPopup(false);
             TriggerVictory();
         }
         else if (gameState == GameState.Defeat)
         {
-            CloseReinforcementPopup();
+            ToggleReinforcementPopup(false);
             TriggerLoss();
         }
     }
@@ -268,14 +259,8 @@ public class GameplayScreen : UIScreen
         return new Vector2(screenPos.x, Screen.height - screenPos.y);
     }
 
-    private void CloseReinforcementPopup()
+    private void ToggleReinforcementPopup(bool show)
     {
-        reinforcementPopup.style.display = DisplayStyle.None;
-        isReinforcementPopupOpen = false;
-    }
-
-    private float2 GetSpawnPosition()
-    {
-        return spawnPosition;
+        reinforcementContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }
 }

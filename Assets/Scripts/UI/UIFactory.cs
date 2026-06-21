@@ -3,6 +3,15 @@ using UnityEngine.UIElements;
 
 public static class UIFactory
 {
+    public static VisualElement BuildReinforcementBtn(string name, int cost)
+    {
+        VisualElement reinforcementBtn = UIScreenManager.UIAssetsDatabase.ReinforcementBtn.Instantiate().Q<VisualElement>("ReinforcementBtn");
+        reinforcementBtn.Q<Label>("ShipNameLbl").text = name;
+        reinforcementBtn.Q<Label>("CostLbl").text = "" + cost;
+
+        return reinforcementBtn;
+    }
+
     public static VisualElement BuildWeaponListItem(WeaponData weapon)
     {
         VisualElement weaponListItem = UIScreenManager.UIAssetsDatabase.WeaponListItem.Instantiate().Q<VisualElement>("WeaponsListItem");

@@ -97,15 +97,21 @@ MonoBehaviour:
     StandardRewardPool:
       Pool:
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
         Weight: 1
       - Item: 3
         Weight: 1
     BaseUpgradeCoreReward: 300
     EliteRewardPool:
-      Pool: []
-    EliteUpgradeCoreReward: 0
+      Pool:
+      - Item: 1
+        Weight: 5
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
+    EliteUpgradeCoreReward: 500
     StandardAnomalyChance: 0.1
     EliteAnomalyChance: 0
     AnomalyPool:
@@ -160,20 +166,20 @@ MonoBehaviour:
         Weight: 1
     StandardRewardPool:
       Pool:
-      - Item: 3
-        Weight: 1
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
+        Weight: 1
+      - Item: 3
         Weight: 1
     BaseUpgradeCoreReward: 400
     EliteRewardPool:
       Pool:
-      - Item: 3
-        Weight: 1
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
+        Weight: 1
+      - Item: 3
         Weight: 1
     EliteUpgradeCoreReward: 700
     StandardAnomalyChance: 0.1
