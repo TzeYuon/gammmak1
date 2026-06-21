@@ -16,8 +16,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         state.RequireForUpdate<GameStateSingleton>();
         state.RequireForUpdate<LevelGenerationStatus>();
 
-        state.RequireForUpdate<TerrainPrefabsComponent>();
-
         state.EntityManager.CreateSingleton(new TerrainGridComponent());
         state.EntityManager.CreateSingleton(new EnemyFlowFieldComponent());
 
@@ -48,7 +46,7 @@ partial struct LevelGen_TerrainSystem : ISystem
             {
                 GridWidth = 200,
                 GridHeight = 200,
-                Shape = MapShape.Standard,
+                TerrainShape = TerrainType.TwoTunnel,
                 NoiseScale = 0.15f,
                 WallThreshold = 0.75f,
                 PoisonThreshold = 0.80f,
@@ -56,7 +54,6 @@ partial struct LevelGen_TerrainSystem : ISystem
                 Seed = (uint)UnityEngine.Random.Range(1, 99999)
             };
         }
-        var prefabs = SystemAPI.GetSingleton<TerrainPrefabsComponent>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
         int width = blueprint.GridWidth;
@@ -78,13 +75,50 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         int[,] grid = new int[width, height];
 
+        float centerX = width / 2f;
+        float centerY = height / 2f;
+        float maxDistFromCenter = math.sqrt(centerX * centerX + centerY * centerY);
+
         // Perlin noise
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 if (InSafeZone(x, y, width, height, safezoneRadius)) continue;
+
+                // Base noise
                 float elevation = noise.snoise(new float2(x + randomOffset, y + randomOffset) * blueprint.NoiseScale * 0.8f) * 0.5f + 0.5f;
+                
+                // Generate Terrain based on enum
+                switch (blueprint.TerrainShape)
+                {
+                    case TerrainType.Asteroids:
+                        // Just standard scattered asteroids. No modifiers needed!
+                        break;
+
+                    case TerrainType.Cavern:
+                        // Pushes the edges up into solid rock to form an enclosed arena
+                        float distToCenter = math.distance(new float2(x, y), new float2(centerX, centerY));
+                        float normalizedDist = distToCenter / maxDistFromCenter;
+                        elevation += (normalizedDist * 1.5f) - 0.5f;
+                        break;
+
+                    case TerrainType.OneTunnel:
+                        // Carves a single diagonal trench
+                        float distToDiagonal = math.abs(x - y) * 0.7071f;
+                        float tunnelMask = distToDiagonal / (width * 0.3f);
+                        elevation += tunnelMask * 1.5f;
+                        break;
+
+                    case TerrainType.TwoTunnel:
+                        // Carves a giant "X" connecting all 4 corners
+                        float distToDiag1 = math.abs(x - y) * 0.7071f;
+                        float distToDiag2 = math.abs(x - (height - y)) * 0.7071f;
+                        float closestTunnelDist = math.min(distToDiag1, distToDiag2);
+                        float xMask = closestTunnelDist / (width * 0.3f);
+                        elevation += xMask * 1.5f;
+                        break;
+                }
                 grid[x, y] = (elevation > blueprint.WallThreshold) ? 1 : 0;
             }
         }
@@ -114,27 +148,18 @@ partial struct LevelGen_TerrainSystem : ISystem
                 // Copy to ECS Native Array
                 int finalTile = grid[x, y];
                 obstacleGrid[x + y * width] = finalTile;
-                flowField[x + y * width] = float2.zero; // Reset flow field
-
-                Entity prefabToSpawn = Entity.Null;
-                if (finalTile == 1) prefabToSpawn = prefabs.WallEntity;
-                else if (finalTile == 2) prefabToSpawn = prefabs.MudEntity;
-                else if (finalTile == 3) prefabToSpawn = prefabs.PoisonEntity;
-
-                if (prefabToSpawn != Entity.Null)
-                {
-                    Entity tileEntity = ecb.Instantiate(prefabToSpawn);
-                    ecb.AddComponent<ProceduralTerrainTag>(tileEntity);
-                    float3 spawnPos = new float3(x + worldOrigin.x, y + worldOrigin.y, 0);
-                    float myCustomSize = 1.0f;
-                    ecb.SetComponent(tileEntity, new LocalTransform
-                    {
-                        Position = spawnPos,
-                        Rotation = Unity.Mathematics.quaternion.identity,
-                        Scale = myCustomSize
-                    });
-                }
+                flowField[x + y * width] = float2.zero;
             }
+        }
+
+        var meshGen = TerrainMeshGenerator.GetInstance();
+        if (meshGen != null)
+        {
+            meshGen.BuildTerrainMesh(grid, width, height, worldOrigin);
+        }
+        else
+        {
+            Debug.LogError("ERROR: TerrainMeshGenerator was not found in the scene");
         }
 
         ecb.Playback(state.EntityManager);

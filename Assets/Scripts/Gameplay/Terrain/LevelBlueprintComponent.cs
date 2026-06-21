@@ -1,13 +1,4 @@
 using Unity.Entities;
-using Unity.Mathematics;
-
-public enum MapShape
-{
-    Standard = 0,
-    Caldera = 1,
-    Island = 2,
-    Canyon = 3
-}
 
 public enum TerrainTileType
 {
@@ -21,7 +12,7 @@ public struct LevelBlueprintComponent : IComponentData
 {
     public int GridWidth;
     public int GridHeight;
-    public MapShape Shape;
+    public TerrainType TerrainShape;
 
     public float NoiseScale;
 

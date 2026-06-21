@@ -81,6 +81,11 @@ public class SceneManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene loadedScene, LoadSceneMode loadSceneMode)
     {
+        if (loadedScene.name.Contains("Subscene"))
+        {
+            return;
+        }
+
         if (Enum.TryParse(loadedScene.name, out SceneId id))
         {
             OnSceneChanged?.Invoke(this, new() { prevSceneId = _prevId, newSceneId = id });
