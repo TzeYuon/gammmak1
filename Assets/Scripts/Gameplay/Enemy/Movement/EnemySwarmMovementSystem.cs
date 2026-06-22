@@ -187,7 +187,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
         }
 
         if (currentTileType == (int)TerrainTileType.Mud) baseSpeed *= 0.5f;
-        if (currentTileType == (int)TerrainTileType.Poison) baseSpeed *= 0.2f; 
+        if (currentTileType == (int)TerrainTileType.Poison) baseSpeed *= 0.5f; 
 
         if (math.lengthsq(targetDir) > 0.01f)
         {

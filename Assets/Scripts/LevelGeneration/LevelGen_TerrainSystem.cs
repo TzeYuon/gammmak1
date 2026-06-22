@@ -39,18 +39,23 @@ partial struct LevelGen_TerrainSystem : ISystem
         var oldTerrainQuery = state.EntityManager.CreateEntityQuery(typeof(ProceduralTerrainTag));
         state.EntityManager.DestroyEntity(oldTerrainQuery);
         
-        LevelBlueprintComponent blueprint;
-        if (!SystemAPI.TryGetSingleton<LevelBlueprintComponent>(out blueprint))
+        LevelBlueprint blueprint;
+        if (!SystemAPI.TryGetSingleton<LevelBlueprint>(out blueprint))
         {
-            blueprint = new LevelBlueprintComponent
+            blueprint = new LevelBlueprint();
+        }
+
+        if (blueprint.GridWidth <= 0)
+        {
+            blueprint = new LevelBlueprint
             {
                 GridWidth = 200,
                 GridHeight = 200,
-                TerrainShape = TerrainType.TwoTunnel,
+                TerrainType = TerrainType.TwoRing   ,
                 NoiseScale = 0.15f,
                 WallThreshold = 0.75f,
-                PoisonThreshold = 0.80f,
-                MudThreshold = 0.10f,
+                PoisonThreshold = 0.85f,
+                MudThreshold = 0.15f,
                 Seed = (uint)UnityEngine.Random.Range(1, 99999)
             };
         }
@@ -58,7 +63,7 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         int width = blueprint.GridWidth;
         int height = blueprint.GridHeight;
-        int safezoneRadius = 30;
+        int safezoneRadius = 20;
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
 
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
@@ -88,18 +93,18 @@ partial struct LevelGen_TerrainSystem : ISystem
 
                 // Base noise
                 float elevation = noise.snoise(new float2(x + randomOffset, y + randomOffset) * blueprint.NoiseScale * 0.8f) * 0.5f + 0.5f;
-                
+                float distToCenter = math.distance(new float2(x, y), new float2(centerX, centerY));
+                float normalizedDist = distToCenter / maxDistFromCenter;
+
                 // Generate Terrain based on enum
-                switch (blueprint.TerrainShape)
+                switch (blueprint.TerrainType)
                 {
                     case TerrainType.Asteroids:
-                        // Just standard scattered asteroids. No modifiers needed!
+                        // Default
                         break;
 
                     case TerrainType.Cavern:
                         // Pushes the edges up into solid rock to form an enclosed arena
-                        float distToCenter = math.distance(new float2(x, y), new float2(centerX, centerY));
-                        float normalizedDist = distToCenter / maxDistFromCenter;
                         elevation += (normalizedDist * 1.5f) - 0.5f;
                         break;
 
@@ -115,8 +120,56 @@ partial struct LevelGen_TerrainSystem : ISystem
                         float distToDiag1 = math.abs(x - y) * 0.7071f;
                         float distToDiag2 = math.abs(x - (height - y)) * 0.7071f;
                         float closestTunnelDist = math.min(distToDiag1, distToDiag2);
-                        float xMask = closestTunnelDist / (width * 0.3f);
-                        elevation += xMask * 1.5f;
+                        elevation += math.smoothstep(12f, 25f, closestTunnelDist) * 2.0f;
+                        break;
+
+                    case TerrainType.Ring:
+                        // Creates a massive hollow ring of walls between dist 35 and 55
+                        float ringThickness = math.abs(distToCenter - 45f);
+                        if (ringThickness < 10f)
+                        {
+                            // Carves 4 Entrances (N,S,E,W)
+                            bool isDoor = math.abs(x - centerX) < 12f || math.abs(y - centerY) < 12f;
+                            if (!isDoor)
+                            {
+                                elevation += 2.0f;
+                            }
+                        }
+                        break;
+
+                    case TerrainType.TwoRing:
+                        float dx = x - centerX;
+                        float dy = y - centerY;
+                        float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
+                        if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
+
+                        float innerRingRadius = 35f;
+                        float outerRingRadius = 70f;
+                        float radiusThickness = 7f;
+
+                        float distToInner = math.abs(distToCenter - innerRingRadius);
+                        float distToOuter = math.abs(distToCenter - outerRingRadius);
+
+                        // Inner Ring Logic (Entrances at 0, 120, 240)
+                        if (distToInner < radiusThickness)
+                        {
+                            float modInner = angleDeg % 120f;
+                            bool isInnerGap = (modInner < 12f || modInner > 108f);
+
+                            if (isInnerGap) elevation -= 1.0f; 
+                            else elevation += 2.0f;
+                        }
+
+                        // Outer Ring Logic (Entrances at 60, 180, 300)
+                        if (distToOuter < radiusThickness)
+                        {
+                            float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
+                            float modOuter = shiftedAngle % 120f;
+                            bool isOuterGap = (modOuter < 9f || modOuter > 111f);
+
+                            if (isOuterGap) elevation -= 1.0f;
+                            else elevation += 2.0f;
+                        }
                         break;
                 }
                 grid[x, y] = (elevation > blueprint.WallThreshold) ? 1 : 0;

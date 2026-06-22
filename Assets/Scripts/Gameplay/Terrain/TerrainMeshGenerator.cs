@@ -7,10 +7,11 @@ public class TerrainMeshGenerator : MonoBehaviour
 {
     public static TerrainMeshGenerator Instance { get; private set; }
 
-    [Header("Assign Your Materials Here!")]
+    [Header("Assign Your Materials Here")]
     public Material wallMaterial;
     public Material mudMaterial;
     public Material poisonMaterial;
+    public Material outlineMaterial;
 
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
@@ -39,7 +40,7 @@ public class TerrainMeshGenerator : MonoBehaviour
             TerrainMeshGenerator generator = FindAnyObjectByType<TerrainMeshGenerator>();
             if (generator != null)
             {
-                generator.Awake(); // Force setup!
+                generator.Awake();
             }
         }
         return Instance;
@@ -57,8 +58,10 @@ public class TerrainMeshGenerator : MonoBehaviour
         List<int> wallTriangles = new List<int>();
         List<int> mudTriangles = new List<int>();
         List<int> poisonTriangles = new List<int>();
+        List<int> outlineTriangles = new List<int>();
 
         int vertexIndex = 0;
+        float lineThickness = 0.15f;
 
         for (int x = 0; x < width; x++)
         {
@@ -70,49 +73,69 @@ public class TerrainMeshGenerator : MonoBehaviour
                 // Center the quad
                 Vector3 pos = new Vector3(x + worldOrigin.x, y + worldOrigin.y, 0);
 
-                // Add the 4 corners of the tile
-                vertices.Add(pos + new Vector3(-0.5f, -0.5f, 0));
-                vertices.Add(pos + new Vector3(-0.5f, 0.5f, 0));
-                vertices.Add(pos + new Vector3(0.5f, -0.5f, 0));
-                vertices.Add(pos + new Vector3(0.5f, 0.5f, 0));
-
-                // UV Mapping
-                uvs.Add(new Vector2(0, 0));
-                uvs.Add(new Vector2(0, 1));
-                uvs.Add(new Vector2(1, 0));
-                uvs.Add(new Vector2(1, 1));
-
-                // Assign triangles to the correct material list
                 List<int> activeTriangles = wallTriangles;
                 if (tileType == 2) activeTriangles = mudTriangles;
                 if (tileType == 3) activeTriangles = poisonTriangles;
 
-                activeTriangles.Add(vertexIndex + 0);
-                activeTriangles.Add(vertexIndex + 1);
-                activeTriangles.Add(vertexIndex + 2);
-                activeTriangles.Add(vertexIndex + 2);
-                activeTriangles.Add(vertexIndex + 1);
-                activeTriangles.Add(vertexIndex + 3);
+                AddQuad(pos, new Vector2(1f, 1f), activeTriangles, vertices, uvs, ref vertexIndex);
 
-                vertexIndex += 4;
+                if (tileType == 1)
+                {
+                    // Check Top
+                    if (y == height - 1 || grid[x, y + 1] != 1)
+                        AddQuad(pos + new Vector3(0, 0.5f, 0), new Vector2(1f, lineThickness), outlineTriangles, vertices, uvs, ref vertexIndex);
+
+                    // Check Bottom
+                    if (y == 0 || grid[x, y - 1] != 1)
+                        AddQuad(pos + new Vector3(0, -0.5f, 0), new Vector2(1f, lineThickness), outlineTriangles, vertices, uvs, ref vertexIndex);
+
+                    // Check Right
+                    if (x == width - 1 || grid[x + 1, y] != 1)
+                        AddQuad(pos + new Vector3(0.5f, 0, 0), new Vector2(lineThickness, 1f), outlineTriangles, vertices, uvs, ref vertexIndex);
+
+                    // Check Left
+                    if (x == 0 || grid[x - 1, y] != 1)
+                        AddQuad(pos + new Vector3(-0.5f, 0, 0), new Vector2(lineThickness, 1f), outlineTriangles, vertices, uvs, ref vertexIndex);
+                }
             }
         }
+
 
         mesh.vertices = vertices.ToArray();
         mesh.uv = uvs.ToArray();
 
-         //Tell Unity this mesh has 3 materials
-        mesh.subMeshCount = 3;
+        // Tell Unity this mesh has only 4 materials
+        mesh.subMeshCount = 4;
         mesh.SetTriangles(wallTriangles.ToArray(), 0);
         mesh.SetTriangles(mudTriangles.ToArray(), 1);
         mesh.SetTriangles(poisonTriangles.ToArray(), 2);
+        mesh.SetTriangles(outlineTriangles.ToArray(), 3); 
 
         mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
 
         meshFilter.mesh = mesh;
-        meshRenderer.materials = new Material[] { wallMaterial, mudMaterial, poisonMaterial };
+        meshRenderer.materials = new Material[] { wallMaterial, mudMaterial, poisonMaterial, outlineMaterial };
+    }
 
-        Debug.Log($"Mesh built with {vertices.Count} vertices and {wallTriangles.Count / 3} wall triangles!");
+    private void AddQuad(Vector3 center, Vector2 size, List<int> triangles, List<Vector3> verts, List<Vector2> uvs, ref int vIndex)
+    {
+        verts.Add(center + new Vector3(-size.x / 2, -size.y / 2, -0.1f));
+        verts.Add(center + new Vector3(-size.x / 2, size.y / 2, -0.1f));
+        verts.Add(center + new Vector3(size.x / 2, -size.y / 2, -0.1f));
+        verts.Add(center + new Vector3(size.x / 2, size.y / 2, -0.1f));
+
+        uvs.Add(new Vector2(0, 0));
+        uvs.Add(new Vector2(0, 1));
+        uvs.Add(new Vector2(1, 0));
+        uvs.Add(new Vector2(1, 1));
+
+        triangles.Add(vIndex + 0);
+        triangles.Add(vIndex + 1);
+        triangles.Add(vIndex + 2);
+        triangles.Add(vIndex + 2);
+        triangles.Add(vIndex + 1);
+        triangles.Add(vIndex + 3);
+
+        vIndex += 4;
     }
 }

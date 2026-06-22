@@ -1,5 +1,13 @@
 using Unity.Entities;
 
+public enum TerrainTileType
+{
+    Empty = 0,
+    Wall = 1,
+    Mud = 2,
+    Poison = 3
+}
+
 public struct LevelGenerationStatus : IComponentData
 {
     public bool PlayerFleetSpawned;
@@ -17,16 +25,23 @@ public struct LevelGenerationStatus : IComponentData
 /// </summary>
 public struct LevelBlueprint : IComponentData
 {
-    public NodeType NodeType;
+    public uint Seed;
+    public TerrainType TerrainType;
 
+    // Gameplay and Campaign settings
+    public NodeType NodeType;
     public RewardType RewardType;
     public ThreatLevel ThreatLevel;
     public ObjectiveType ObjectiveType;
-    public TerrainType TerrainType;
     public EnemyProfile EnemyProfile;
     public AnomalyType AnomalyType;
-
     public int UpgradeCoreReward;
 
-    public uint Seed;
+    // Terrain Generation setttings
+    public int GridWidth;
+    public int GridHeight;
+    public float NoiseScale;
+    public float WallThreshold; // Anything above this number becomes a wall
+    public float PoisonThreshold; // Anything above this number becomes Poison
+    public float MudThreshold; // Anything below this number becomes Mud
 }
