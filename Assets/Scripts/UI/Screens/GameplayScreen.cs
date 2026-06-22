@@ -19,6 +19,9 @@ public class GameplayScreen : UIScreen
     private Label biomassCounter;
     private EntityQuery economyQuery;
 
+    private Label surgeWarningLbl;
+    private EntityQuery surgeStateQuery;
+
     private VisualElement reinforcementPanel;
     private VisualElement reinforcementContainer;
     private List<(int cost, VisualElement btn)> reinforcementBtns = new();
@@ -42,6 +45,8 @@ public class GameplayScreen : UIScreen
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
+        surgeWarningLbl = root.Q<Label>("SurgeWarningLbl");
+
         this.playerSaveData = playerSaveData;
         reinforcementPanel = root.Q<VisualElement>("ReinforcementPanel");
         reinforcementContainer = root.Q<VisualElement>("ReinforcementBtnContainer");
@@ -60,6 +65,7 @@ public class GameplayScreen : UIScreen
                 economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
                 queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
                 gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
+                surgeStateQuery = world.EntityManager.CreateEntityQuery(typeof(GlobalSurgeState));
             }
         }
 
@@ -209,10 +215,9 @@ public class GameplayScreen : UIScreen
         var inputData = inputQuery.GetSingleton<PlayerInputData>();
 
         UpdateSelectionBox();
-
         UpdateBiomassCounter();
-
         UpdateReinforcementPopup();
+        UpdateSurgeWarning();
 
         void UpdateSelectionBox()
         {
@@ -257,6 +262,25 @@ public class GameplayScreen : UIScreen
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
         }
+        
+        void UpdateSurgeWarning()
+        {
+            if (surgeStateQuery.IsEmptyIgnoreFilter) return;
+            var surgeState = surgeStateQuery.GetSingleton<GlobalSurgeState>();
+
+            if (surgeState.SurgeTimer > 0f && surgeState.SurgeTimer <= 3)
+            {
+                if (surgeWarningLbl.style.display != DisplayStyle.Flex) surgeWarningLbl.style.display = DisplayStyle.Flex;
+
+                float rawSine = math.sin(surgeState.SurgeTimer * 4);
+                float smoothOpacity = (rawSine * 0.5f) + 0.5f;
+                surgeWarningLbl.style.opacity = smoothOpacity;
+            }
+            else
+            {
+                if (surgeWarningLbl.style.display != DisplayStyle.None) surgeWarningLbl.style.display = DisplayStyle.None;
+            }
+        }
     }
 
     private void TriggerVictory()
@@ -264,9 +288,6 @@ public class GameplayScreen : UIScreen
         victoryScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
         Time.timeScale = 0.2f;
-
-        // Display rewards earned
-
     }
 
     private void TriggerLoss()
