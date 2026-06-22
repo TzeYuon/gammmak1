@@ -199,7 +199,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
 
             float2 wobblyTargetDir = math.normalize(targetDir + (2 * noiseValue * sidewaysDir));
 
-            float uniqueSpeedVariation = 1.0f - ((agentData.WiggleOffset % 10) * 0.02f);
+            float uniqueSpeedVariation = 1.0f - ((agentData.SpawnIndex % 10) * 0.02f);
             float finalDesiredSpeed = baseSpeed * uniqueSpeedVariation;
 
             float2 desiredVelocity = wobblyTargetDir * finalDesiredSpeed;

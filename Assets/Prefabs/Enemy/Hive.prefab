@@ -45,15 +45,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6270de34e21c4e428e67668a4af3ae2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HiveAuthoring
-  Prefab: {fileID: 8958559792771996627, guid: 45f282945948bad40a005a786f0a0f8f, type: 3}
-  SpawnAmount: 250
-  EnemySpeed: 7
-  DynamicSpeedMultiplier: 2
-  Density: 0.5
-  Width: 0.5
-  SpawnCooldown: 15
-  SpawnTimer: 2
+  trickleSpawnConfigs:
+  - Type: 0
+    SpawnCount: 10
+    Interval: 1
+  enableSurge: 1
+  surgeEnemyType: 0
+  surgeSpawnCount: 500
   Size: 5
+  maxHealth: 500
 --- !u!212 &693153602026284644
 SpriteRenderer:
   serializedVersion: 2

@@ -4,6 +4,8 @@ using UnityEngine;
 
 class EnemyAuthoring : MonoBehaviour
 {
+    [SerializeField] float maxHealth;
+    [SerializeField] float baseSpeed;
     [SerializeField] float hitboxRadius;
 
     class EnemyAuthoringBaker : Baker<EnemyAuthoring>
@@ -15,11 +17,15 @@ class EnemyAuthoring : MonoBehaviour
             AddComponent(entity, new LevelEntityTag());
             AddComponent(entity, new SwarmTag());
             AddComponent(entity, new SwarmVelocityComponent());
-            AddComponent(entity, new SwarmMovementStatsComponent());
+            AddComponent(entity, new SwarmMovementStatsComponent()
+            {
+                BaseSpeed = authoring.baseSpeed,
+            });
+            
             AddComponent(entity, new HealthComponent
             {
-                MaxValue = 1,
-                Value = 1,
+                MaxValue = authoring.maxHealth,
+                Value = authoring.maxHealth,
             });
             AddBuffer<DamageEvent>(entity);
 

@@ -15,6 +15,7 @@ partial struct HiveSystem : ISystem
     {
         state.RequireForUpdate<HiveComponent>();
         state.RequireForUpdate<EnemyPrefabDatabase>();
+        state.RequireForUpdate<GlobalSurgeState>();
         swarmQuery = SystemAPI.QueryBuilder()
             .WithAll<SwarmTag>()
             .Build();
@@ -23,57 +24,98 @@ partial struct HiveSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        float elapsedTime = (float)SystemAPI.Time.ElapsedTime;
         float deltaTime = SystemAPI.Time.DeltaTime;
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
+                           .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         int currentEnemyCount = swarmQuery.CalculateEntityCount();
 
+        GlobalSurgeState surgeState = SystemAPI.GetSingleton<GlobalSurgeState>();
+        
         EnemyPrefabDatabase enemyPrefabDatabase = SystemAPI.GetSingleton<EnemyPrefabDatabase>();
-        Entity standardEnemy = enemyPrefabDatabase.GetPrefab(EnemyType.Standard); // TEMPORARY: before adding new enemy types and spawning logic
+        var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
 
-        foreach (var (hive, transform) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>())
+        // Exceeded amount
+        if (currentEnemyCount > GlobalSwarmCap)
         {
-            // Manage cooldown
-            hive.ValueRW.SpawnTimer -= deltaTime;
-            if (hive.ValueRO.SpawnTimer > 0) continue;
-            
-            // Exceeded amount
-            if (currentEnemyCount + hive.ValueRO.SpawnAmount > GlobalSwarmCap)
-            {
-                // Skip spawning, and leave the timer at or near 0 so it tries again next frame.
-                continue;
-            }
+            // Skip spawning, and leave the timer at or near 0 so it tries again next frame.
+            return;
+        }
 
-            hive.ValueRW.SpawnTimer += hive.ValueRW.SpawnCooldown;
+        foreach (var (hive, transform, spawnerBuffer, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>, DynamicBuffer<TrickleSpawnerData>>().WithEntityAccess())
+        {
             float3 hivePosition = transform.ValueRO.Position;
+            float spawnRadius = hive.ValueRO.Size;
+            int count = spawnerBuffer.Length;
 
-            // Add to enemy count
-            currentEnemyCount += hive.ValueRO.SpawnAmount;
-
-            // Spawn enemies
-            var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
-            float spawnRadius = hive.ValueRO.Width * 1.0f;
-            for (int i = 0; i < hive.ValueRO.SpawnAmount; i++)
+            for (int i = 0; i < count; i++)
             {
-                Entity enemy = ecb.Instantiate(standardEnemy);
-                float angle = rng.NextFloat(0, math.PI * 2);
-                float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
-                float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
-
-                float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
-
-                ecb.SetComponent(enemy, new SwarmVelocityComponent { Value = float2.zero });
-                ecb.SetComponent(enemy, LocalTransform.FromPosition(spawnPos));
-                ecb.SetComponent(enemy, new SwarmMovementStatsComponent
+                var spawner = spawnerBuffer[i];
+                if (spawner.NextSpawnTime <= elapsedTime)
                 {
-                    BaseSpeed = hive.ValueRO.EnemySpeed,
-                    WiggleOffset = i
-                });
+                    spawner.NextSpawnTime = elapsedTime + spawner.Interval; // Reset timer
+
+                    // spawn trickle amount
+                    Entity prefab = enemyPrefabDatabase.GetPrefab(spawner.Type);
+                    for (int b = 0; b < spawner.SpawnCount; b++)
+                    {
+                        Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
+
+                        float angle = rng.NextFloat(0, math.PI * 2);
+                        float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
+                        float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
+                        float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
+
+                        ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                    }
+
+                    spawnerBuffer.RemoveAt(i);
+                    i--;
+
+                    spawnerBuffer.Add(spawner);
+                }
             }
         }
 
-        ecb.Playback(state.EntityManager);
-        ecb.Dispose();
+        foreach (var (hive, transform, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>().WithEntityAccess())
+        {
+            // queue spawns for surge
+            if (surgeState.TriggerSurgeThisFrame)
+            {
+                hive.ValueRW.SurgePendingSpawns += (int)math.floor(hive.ValueRO.SurgeSpawnCount * surgeState.SpawnCountMultiplier);
+            }
+
+            // spawn over multiple frames
+            float3 hivePosition = transform.ValueRO.Position;
+            float spawnRadius = hive.ValueRO.Size;
+            if (hive.ValueRO.SurgePendingSpawns > 0)
+            {
+                hive.ValueRW.SurgeSpawnAccumulator += hive.ValueRO.SurgeSpawnRate * deltaTime;
+                int spawnCount = (int)math.floor(hive.ValueRO.SurgeSpawnAccumulator);
+
+                if (spawnCount > 0)
+                {
+                    int amountToSpawn = math.min(spawnCount, hive.ValueRO.SurgePendingSpawns);
+                    hive.ValueRW.SurgeSpawnAccumulator -= amountToSpawn;
+
+                    Entity prefab = enemyPrefabDatabase.GetPrefab(hive.ValueRO.SurgeEnemyType);
+                    for (int i = 0; i < amountToSpawn; i++)
+                    {
+                        Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
+
+                        float angle = rng.NextFloat(0, math.PI * 2);
+                        float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
+                        float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
+                        float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
+
+                        ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                    }
+
+                    hive.ValueRW.SurgePendingSpawns -= amountToSpawn;
+                }
+            }
+        }
     }
 
     [BurstCompile]
