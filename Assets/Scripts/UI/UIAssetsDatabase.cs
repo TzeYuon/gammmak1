@@ -14,4 +14,5 @@ public class UIAssetsDatabase : ScriptableObject
     public VisualTreeAsset MapNode;
 
     public VisualTreeAsset ReinforcementBtn;
+    public VisualTreeAsset RewardItem;
 }

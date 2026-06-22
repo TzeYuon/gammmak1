@@ -9,7 +9,7 @@ public partial class RewardManager : SystemBase
     private PlayerSaveData saveData;
     private LootDatabase lootDB;
 
-    public static event System.Action OnRewardGranted;
+    public static event System.Action<List<LevelReward>> OnRewardGranted;
 
     protected override void OnDestroy()
     {
@@ -39,18 +39,34 @@ public partial class RewardManager : SystemBase
     {
         if (!init) return;
 
+        List<LevelReward> rewardList = new List<LevelReward>();
+
         LevelNode currentNode = saveData.ActiveSector.CurrentNode;
         saveData.UpgradeCoresRemaining += currentNode.UpgradeCoreReward;
+        rewardList.Add(new LevelReward { 
+            Type = RewardType.UpgradeCores, 
+            UpgradeCores = currentNode.UpgradeCoreReward 
+        });
+
         switch (currentNode.RewardType)
         {
             case RewardType.UpgradeCores:
                 saveData.UpgradeCoresRemaining += currentNode.UpgradeCoreReward;
+                rewardList.Add(new LevelReward { 
+                    Type = RewardType.UpgradeCores, 
+                    UpgradeCores = currentNode.UpgradeCoreReward 
+                });
                 break;
 
             case RewardType.WeaponBlueprint:
                 if (lootDB.DropableWeapons.Count == 0)
                 {
                     saveData.UpgradeCoresRemaining += currentNode.UpgradeCoreReward;
+                    rewardList.Add(new LevelReward { 
+                        Type = RewardType.UpgradeCores, 
+                        UpgradeCores = currentNode.UpgradeCoreReward,
+                        Details = "Duplicate blueprint recycled"
+                    });
                 }
                 else
                 {
@@ -58,6 +74,11 @@ public partial class RewardManager : SystemBase
                     WeaponData weapon = lootDB.DropableWeapons[wIndex];
                     lootDB.DropableWeapons.RemoveAt(wIndex);
                     saveData.AvailableWeapons.Add(weapon);
+
+                    rewardList.Add(new LevelReward { 
+                        Type = RewardType.WeaponBlueprint, 
+                        WeaponBlueprint = weapon 
+                    });
                 }
                 break;
 
@@ -65,6 +86,11 @@ public partial class RewardManager : SystemBase
                 if (lootDB.DropableShips.Count == 0)
                 {
                     saveData.UpgradeCoresRemaining += currentNode.UpgradeCoreReward;
+                    rewardList.Add(new LevelReward { 
+                        Type = RewardType.UpgradeCores, 
+                        UpgradeCores = currentNode.UpgradeCoreReward,
+                        Details = "Duplicate blueprint recycled"
+                    });
                 }
                 else
                 {
@@ -72,10 +98,24 @@ public partial class RewardManager : SystemBase
                     ShipBlueprintData ship = lootDB.DropableShips[sIndex];
                     lootDB.DropableShips.RemoveAt(sIndex);
                     saveData.AvailableShips.Add(ship);
+
+                    rewardList.Add(new LevelReward { 
+                        Type = RewardType.ShipBlueprint, 
+                        ShipBlueprint = ship 
+                    });
                 }
                 break;
         }
 
-        OnRewardGranted?.Invoke();
+        OnRewardGranted?.Invoke(rewardList);
     }
+}
+
+public class LevelReward
+{
+    public string Details;
+    public RewardType Type;
+    public int UpgradeCores;
+    public WeaponData WeaponBlueprint;
+    public ShipBlueprintData ShipBlueprint;
 }

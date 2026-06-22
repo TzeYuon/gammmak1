@@ -19,6 +19,7 @@ public class GameplayScreen : UIScreen
     private Label biomassCounter;
     private EntityQuery economyQuery;
 
+    private VisualElement reinforcementPanel;
     private VisualElement reinforcementContainer;
     private List<(int cost, VisualElement btn)> reinforcementBtns = new();
     private EntityQuery queueQuery;
@@ -29,6 +30,10 @@ public class GameplayScreen : UIScreen
     private Button defeatContinueButton;
     private EntityQuery gameStateQuery;
 
+    private VisualElement upgradeCoresRewardContainer;
+    private VisualElement weaponsRewardContainer;
+    private VisualElement shipsRewardContainer;
+
     public GameplayScreen(UIScreenManager manager, VisualElement root, PlayerSaveData playerSaveData) : base(manager, root)
     {
         InitInput();
@@ -38,6 +43,7 @@ public class GameplayScreen : UIScreen
         biomassCounter = root.Q<Label>("BiomassCounter");
 
         this.playerSaveData = playerSaveData;
+        reinforcementPanel = root.Q<VisualElement>("ReinforcementPanel");
         reinforcementContainer = root.Q<VisualElement>("ReinforcementBtnContainer");
 
         InitVictoryLoss();
@@ -83,6 +89,11 @@ public class GameplayScreen : UIScreen
                 var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
                 gameState.ValueRW.CurrentState = GameState.MainMenu;
             };
+
+            // init rewards
+            upgradeCoresRewardContainer = victoryScreen.Q<VisualElement>("UpgradeCoresRewardContainer");
+            weaponsRewardContainer = victoryScreen.Q<VisualElement>("WeaponsRewardContainer");
+            shipsRewardContainer = victoryScreen.Q<VisualElement>("ShipsRewardContainer");
         }
     }
 
@@ -93,6 +104,7 @@ public class GameplayScreen : UIScreen
 
         GameStateSystem.OnStateChanged -= HandleStateChange;
         EconomyEventSystem.OnBiomassChanged -= UpdateReinforcementBtns;
+        RewardManager.OnRewardGranted -= OnRewardGranted;
     }
 
     protected override void OnShow()
@@ -105,6 +117,7 @@ public class GameplayScreen : UIScreen
 
         GameStateSystem.OnStateChanged += HandleStateChange;
         EconomyEventSystem.OnBiomassChanged += UpdateReinforcementBtns;
+        RewardManager.OnRewardGranted += OnRewardGranted;
 
         void RebuildReinforcementPopup()
         {
@@ -147,6 +160,37 @@ public class GameplayScreen : UIScreen
                         SlotIndex = slot,
                     });
                 });
+            }
+        }
+    }
+
+    /// <summary>
+    /// This only updates the victory screen to display the rewards granted
+    /// </summary>
+    /// <param name="rewards"></param>
+    private void OnRewardGranted(List<LevelReward> rewards)
+    {
+        // empty previous rewards
+        upgradeCoresRewardContainer.Clear();
+        weaponsRewardContainer.Clear();
+        shipsRewardContainer.Clear();
+
+        // display list of rewards
+        foreach (var reward in rewards)
+        {
+            switch (reward.Type)
+            {
+                case RewardType.UpgradeCores:
+                    upgradeCoresRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
+                
+                case RewardType.WeaponBlueprint:
+                    weaponsRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
+                
+                case RewardType.ShipBlueprint:
+                    shipsRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
             }
         }
     }
@@ -261,6 +305,6 @@ public class GameplayScreen : UIScreen
 
     private void ToggleReinforcementPopup(bool show)
     {
-        reinforcementContainer.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+        reinforcementPanel.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }
 }
