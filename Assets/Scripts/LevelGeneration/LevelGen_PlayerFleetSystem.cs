@@ -35,8 +35,6 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         var weaponBufferLookup = SystemAPI.GetBufferLookup<RosterWeaponBlueprint>(true);
         if (!weaponBufferLookup.HasBuffer(mothershipBlueprintEntity)) return;
 
-        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
-
         // mark as complete
         status.ValueRW.PlayerFleetSpawned = true;
 
@@ -47,7 +45,8 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
 
         // Generate mothership
         Entity mothershipEntity = ecb.Instantiate(prefabDatabase.MothershipPrefab);
-        ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(new float3(1000, 1000, 0))); // TEMPORARY: Hardcoded spawn point for mothership
+        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
+        ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(spawnData.MothershipSpawn));
 
         // Set ship stats
         ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipHealthComponent);

@@ -67,8 +67,6 @@ partial struct LevelGen_HivesSystem : ISystem
         diffState.HivesDestroyed = 0;
         diffState.SpawnRateMult = 1;
         diffState.SpawnCountMult = 1;
-        if (!SystemAPI.TryGetSingleton<HivePrefabDatabase>(out var prefabDatabase)) return;
-        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
 
         // reset surge state
         ref var sState = ref surgeState.ValueRW;
@@ -90,6 +88,7 @@ partial struct LevelGen_HivesSystem : ISystem
         Entity hiveEntity7 = ecb.Instantiate(hivePrefab);
         Entity hiveEntity8 = ecb.Instantiate(hivePrefab);
 
+        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
         ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(spawnData.Hive1Spawn));
         ecb.SetComponent(hiveEntity2, LocalTransform.FromPosition(spawnData.Hive2Spawn));
         ecb.SetComponent(hiveEntity3, LocalTransform.FromPosition(spawnData.Hive3Spawn));

@@ -288,6 +288,7 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         var spawnerEntity = state.EntityManager.CreateEntity();
         state.EntityManager.AddComponentData(spawnerEntity, spawnData);
+        state.EntityManager.AddComponentData(spawnerEntity, new LevelEntityTag());
         ecb.Playback(state.EntityManager);
         ecb.Dispose();
 
