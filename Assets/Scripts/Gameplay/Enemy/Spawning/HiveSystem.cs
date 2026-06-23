@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -15,7 +14,7 @@ partial struct HiveSystem : ISystem
     {
         state.RequireForUpdate<HiveComponent>();
         state.RequireForUpdate<EnemyPrefabDatabase>();
-        state.RequireForUpdate<GlobalSurgeState>();
+        state.RequireForUpdate<DifficultyState>();
         swarmQuery = SystemAPI.QueryBuilder()
             .WithAll<SwarmTag>()
             .Build();
@@ -30,9 +29,9 @@ partial struct HiveSystem : ISystem
                            .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
         int currentEnemyCount = swarmQuery.CalculateEntityCount();
-
-        GlobalSurgeState surgeState = SystemAPI.GetSingleton<GlobalSurgeState>();
         
+        DifficultyState difficultyState = SystemAPI.GetSingleton<DifficultyState>();
+
         EnemyPrefabDatabase enemyPrefabDatabase = SystemAPI.GetSingleton<EnemyPrefabDatabase>();
         var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
 
@@ -43,6 +42,7 @@ partial struct HiveSystem : ISystem
             return;
         }
 
+        // Trickle spawning behaviour
         foreach (var (hive, transform, spawnerBuffer, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>, DynamicBuffer<TrickleSpawnerData>>().WithEntityAccess())
         {
             float3 hivePosition = transform.ValueRO.Position;
@@ -54,11 +54,12 @@ partial struct HiveSystem : ISystem
                 var spawner = spawnerBuffer[i];
                 if (spawner.NextSpawnTime <= elapsedTime)
                 {
-                    spawner.NextSpawnTime = elapsedTime + spawner.Interval; // Reset timer
+                    spawner.NextSpawnTime = elapsedTime + (spawner.Interval / difficultyState.SpawnRateMult); // Reset timer
 
                     // spawn trickle amount
                     Entity prefab = enemyPrefabDatabase.GetPrefab(spawner.Type);
-                    for (int b = 0; b < spawner.SpawnCount; b++)
+                    int spawnCount = (int)math.floor(spawner.SpawnCount * difficultyState.SpawnCountMult);
+                    for (int b = 0; b < spawnCount; b++)
                     {
                         Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
 
@@ -78,12 +79,14 @@ partial struct HiveSystem : ISystem
             }
         }
 
+        // Surge behaviour
+        if (!SystemAPI.TryGetSingleton(out GlobalSurgeState surgeState)) return;
         foreach (var (hive, transform, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>().WithEntityAccess())
         {
             // queue spawns for surge
             if (surgeState.TriggerSurgeThisFrame)
             {
-                hive.ValueRW.SurgePendingSpawns += (int)math.floor(hive.ValueRO.SurgeSpawnCount * surgeState.SpawnCountMultiplier);
+                hive.ValueRW.SurgePendingSpawns += (int)math.floor(hive.ValueRO.SurgeSpawnCount * difficultyState.SpawnCountMult);
             }
 
             // spawn over multiple frames

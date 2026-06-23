@@ -44,9 +44,6 @@ class HiveAuthoring : MonoBehaviour
                     SpawnCount = config.SpawnCount,
                     Interval = config.Interval,
                     NextSpawnTime = config.Interval,
-
-                    BaseInterval = config.Interval,
-                    BaseSpawnCount = config.SpawnCount,
                 });
             }
 

@@ -20,10 +20,6 @@ public struct TrickleSpawnerData : IBufferElementData
     public int SpawnCount;
     public float Interval;
     public float NextSpawnTime;
-
-    // For scaling during levels
-    public float BaseInterval;
-    public float BaseSpawnCount;
 }
 
 public struct SwarmMovementStatsComponent : IComponentData

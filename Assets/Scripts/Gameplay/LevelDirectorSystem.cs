@@ -11,7 +11,9 @@ public partial struct LevelDirectorSystem : ISystem
         state.RequireForUpdate<GameStateSingleton>();
 
         // Create the global surge singleton
-        state.EntityManager.CreateSingleton(new GlobalSurgeState());
+        state.EntityManager.CreateSingleton<GlobalSurgeState>();
+        state.EntityManager.CreateSingleton<DifficultyConfig>();
+        state.EntityManager.CreateSingleton<DifficultyState>();
     }
 
     [BurstCompile]
@@ -22,33 +24,74 @@ public partial struct LevelDirectorSystem : ISystem
 
         float deltaTime = SystemAPI.Time.DeltaTime;
 
-        // Update surge state and stats
-        RefRW<GlobalSurgeState> surgeState = SystemAPI.GetSingletonRW<GlobalSurgeState>();
-        surgeState.ValueRW.LevelTimer += deltaTime;
-        float levelTime = surgeState.ValueRO.LevelTimer;
+        // Update difficulty state
+        DifficultyConfig config = SystemAPI.GetSingleton<DifficultyConfig>();
+        ref var difficultyState = ref SystemAPI.GetSingletonRW<DifficultyState>().ValueRW;
+        difficultyState.LevelTimer += deltaTime;
 
-        surgeState.ValueRW.TriggerSurgeThisFrame = false;
-        surgeState.ValueRW.SurgeTimer -= deltaTime;
-        if (surgeState.ValueRO.SurgeTimer <= 0)
+        float timeFactor = (difficultyState.LevelTimer / 60.0f) * config.DifficultyPerMinute;
+        float enrageFactor = difficultyState.HivesDestroyed * config.DifficultyPerHiveDestroyed;
+
+        float difficultyFactor = 1.0f + enrageFactor + timeFactor;
+
+        difficultyState.SpawnRateMult = math.min(difficultyFactor, config.MaxSpawnRateMult);
+        difficultyState.SpawnCountMult = math.min(difficultyFactor, config.MaxSpawnCountMult);
+
+        // Update surge state and stats
+        ref GlobalSurgeState surgeState = ref SystemAPI.GetSingletonRW<GlobalSurgeState>().ValueRW;
+        surgeState.TriggerSurgeThisFrame = false;
+        surgeState.SurgeTimer -= deltaTime;
+        if (surgeState.SurgeTimer <= 0)
         {
             // Trigger surge
-            surgeState.ValueRW.TriggerSurgeThisFrame = true;
-
-            // TEMPORARY: hardcoded scaling of surge stats
-            float difficultyMultiplier = 1.0f + (levelTime / 60.0f); // +100% difficulty per minute
-            // Interval between surges not affected by level time
-            surgeState.ValueRW.SpawnCountMultiplier = math.min(3f, difficultyMultiplier / 2);
-
-            surgeState.ValueRW.SurgeTimer = surgeState.ValueRO.CurrentInterval;
+            surgeState.TriggerSurgeThisFrame = true;
+            surgeState.SurgeTimer = surgeState.CurrentInterval;
         }
     }
 }
 
+public struct DifficultyConfig : IComponentData
+{
+    public float DifficultyPerMinute;
+    public float DifficultyPerHiveDestroyed;
+    public float MaxSpawnRateMult;
+    public float MaxSpawnCountMult;
+}
+
+public struct DifficultyState : IComponentData
+{
+    /// <summary>
+    /// Duration that the level has been running for
+    /// </summary>
+    public float LevelTimer;
+    public int HivesDestroyed;
+    
+    /// <summary>
+    /// Multipier to interval between trickle spawns
+    /// </summary>
+    public float SpawnRateMult; // larger number means faster
+    
+    /// <summary>
+    /// Multiplier to apply to hives to trickle spawn
+    /// </summary>
+    public float SpawnCountMult;
+    
+    //public float EnemyHealthMult;
+    //public float MaxEnemyHealthMult;
+}
+
 public struct GlobalSurgeState : IComponentData
 {
-    public float LevelTimer;
-    public float SurgeTimer;
+    /// <summary>
+    /// How long until the next surge
+    /// </summary>
+    public float SurgeTimer; 
+    /// <summary>
+    /// The interval between surges that changes across the level
+    /// </summary>
     public float CurrentInterval;
-    public float SpawnCountMultiplier;
+    /// <summary>
+    /// bool to signal to hives to surge for one frame
+    /// </summary>
     public bool TriggerSurgeThisFrame;
 }
