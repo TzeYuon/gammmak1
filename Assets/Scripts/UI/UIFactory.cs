@@ -3,6 +3,50 @@ using UnityEngine.UIElements;
 
 public static class UIFactory
 {
+    public static VisualElement BuildReinforcementBtn(string name, int cost)
+    {
+        VisualElement reinforcementBtn = UIScreenManager.UIAssetsDatabase.ReinforcementBtn.Instantiate().Q<VisualElement>("ReinforcementBtn");
+        reinforcementBtn.Q<Label>("ShipNameLbl").text = name;
+        reinforcementBtn.Q<Label>("CostLbl").text = "" + cost;
+
+        return reinforcementBtn;
+    }
+
+    public static VisualElement BuildRewardItem(LevelReward levelReward)
+    {
+        VisualElement rewardItem = UIScreenManager.UIAssetsDatabase.RewardItem.Instantiate().Q<VisualElement>("RewardItem");
+
+        VisualElement rewardIcon = rewardItem.Q<VisualElement>("RewardIcon");
+        Label rewardLbl = rewardItem.Q<Label>("RewardLbl");
+
+        Label rewardDetailsLbl = rewardItem.Q<Label>("RewardDetailsLbl");
+        rewardDetailsLbl.text = levelReward.Details;
+
+        switch (levelReward.Type)
+        {
+            case RewardType.None:
+                break;
+            case RewardType.UpgradeCores:
+                rewardIcon.AddToClassList("reward-cores");
+                rewardLbl.text = "UPGRADE CORES: +" + levelReward.UpgradeCores;
+                break;
+            case RewardType.WeaponBlueprint:
+                rewardIcon.AddToClassList("reward-weapon");
+                rewardLbl.text = "NEW WEAPON: +" + levelReward.WeaponBlueprint.WeaponName;
+                break;
+            case RewardType.ShipBlueprint:
+                rewardIcon.AddToClassList("reward-ship");
+                rewardLbl.text = "NEW HULL: +" + levelReward.ShipBlueprint.ShipName;
+                break;
+            case RewardType.MothershipRepair: // NOT IMPLEMENTED/UNUSED
+                rewardIcon.AddToClassList("reward-repair");
+                rewardLbl.text = "REPAIR: +";
+                break;
+        }
+
+        return rewardItem;
+    }
+
     public static VisualElement BuildWeaponListItem(WeaponData weapon)
     {
         VisualElement weaponListItem = UIScreenManager.UIAssetsDatabase.WeaponListItem.Instantiate().Q<VisualElement>("WeaponsListItem");
@@ -155,5 +199,12 @@ public static class UIFactory
         {
             refundBtn.style.visibility = Visibility.Hidden;
         }
+    }
+
+    public static MapNodeVisualElement BuildMapNode(LevelNode node)
+    {
+        MapNodeVisualElement nodeElement = UIScreenManager.UIAssetsDatabase.MapNode.Instantiate().Q<MapNodeVisualElement>();
+        nodeElement.Init(node);
+        return nodeElement;
     }
 }

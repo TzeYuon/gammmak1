@@ -2,8 +2,8 @@
 }
 
 .map-node {
-    width: 24px;
-    height: 24px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     border-width: 2px;
     translate: -50% -50%;
@@ -14,38 +14,80 @@
 }
 
 .map-node-default {
-    background-color: rgba(8, 12, 26, 0);
-    border-color: rgba(0, 255, 255, 0.2);
     scale: 0.8;
 }
 
 .map-node-selectable {
-    background-color: rgba(0, 255, 255, 0.15);
-    border-color: rgb(0, 255, 255);
     scale: 1;
 }
 
 .map-node-selectable:hover {
-    background-color: rgba(0, 255, 255, 0.8);
     scale: 1.3;
 }
 
 .map-node-current {
-    background-color: rgb(255, 255, 255);
-    border-color: rgb(0, 255, 255);
     scale: 1.4;
 }
 
 .map-node-selected {
-    background-color: rgb(255, 0, 60);
-    border-color: rgb(255, 255, 255);
     scale: 1.5;
 }
 
 .map-node-onpath {
-    background-color: rgba(0, 255, 255, 0.25);
-    border-color: rgba(0, 255, 255, 0.4);
     scale: 0.8;
+}
+
+.node-encounter {
+    background-image: url("project://database/Assets/UI/Icons/Icon_Encounter.svg?fileID=7388822144124034973&guid=b6464b675cc65c1478aee05b10db630c&type=3#Icon_Encounter");
+    -unity-background-image-tint-color: rgb(255, 0, 0);
+}
+
+.node-elite {
+    background-image: url("project://database/Assets/UI/Icons/Icon_Elite.svg?fileID=7388822144124034973&guid=4fb3c0f197671b24d9f848a0ed54b1c3&type=3#Icon_Elite");
+    -unity-background-image-tint-color: rgb(255, 0, 0);
+}
+
+.node-shop {
+}
+
+.node-boss {
+    background-image: url("project://database/Assets/UI/Icons/Icon_Boss.svg?fileID=7388822144124034973&guid=cd55725ec5cf12a4a8954d9e70455915&type=3#Icon_Boss");
+    -unity-background-image-tint-color: rgb(255, 0, 0);
+}
+
+.reward-weapon {
+    background-image: url("project://database/Assets/UI/Icons/Icon_WeaponBlueprint.svg?fileID=7388822144124034973&guid=ed3cb49705835334ca10ea638a850895&type=3#Icon_WeaponBlueprint");
+    -unity-background-image-tint-color: rgb(204, 255, 0);
+}
+
+.reward-ship {
+    background-image: url("project://database/Assets/UI/Icons/Icon_ShipBlueprint.svg?fileID=7388822144124034973&guid=97ebc228951d7ae4a827e053aa882b21&type=3#Icon_ShipBlueprint");
+    -unity-background-image-tint-color: rgb(204, 255, 0);
+}
+
+.reward-cores {
+    background-image: url("project://database/Assets/UI/Icons/Icon_UpgradeCore.svg?fileID=7388822144124034973&guid=a5cc65f603d08cf4aa5f643bbf1548a2&type=3#Icon_UpgradeCore");
+    -unity-background-image-tint-color: rgb(204, 255, 0);
+}
+
+.reward-repair {
+    -unity-background-image-tint-color: rgb(204, 255, 0);
+}
+
+.threat-low {
+    border-color: rgb(0, 255, 255);
+}
+
+.threat-medium {
+    border-color: rgb(255, 204, 0);
+}
+
+.threat-high {
+    border-color: rgb(255, 0, 60);
+}
+
+.threat-boss {
+    border-color: rgb(255, 0, 255);
 }
 
 .details-panel {

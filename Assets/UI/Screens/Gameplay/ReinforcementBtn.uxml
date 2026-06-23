@@ -1,0 +1,8 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <engine:VisualElement name="ReinforcementBtn" class="list-item" style="flex-grow: 0; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; width: 25%; justify-content: center;">
+        <engine:Label text="Frigate" name="ShipNameLbl" class="text" style="-unity-text-align: upper-center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
+        <engine:Label text="5" name="CostLbl" class="text" style="-unity-text-align: upper-center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;"/>
+    </engine:VisualElement>
+</engine:UXML>

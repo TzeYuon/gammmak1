@@ -11,6 +11,7 @@ public class PlayerSaveData : ScriptableObject
     public List<WeaponData> AvailableWeapons;
 
     public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
+    public ShipBlueprintData Mothership;
 
     public void OnStartNewRun(Starmap map)
     {
@@ -21,6 +22,11 @@ public class PlayerSaveData : ScriptableObject
     public void EnterNewSector(Starmap map)
     {
         ActiveSector = new(map);
+    }
+
+    public void MoveToNode(LevelNode node)
+    {
+        ActiveSector.CurrentNode = node;
     }
 
     public bool IsRosterFull()
@@ -72,6 +78,7 @@ public class PlayerSaveData : ScriptableObject
 public class CurrentSectorData
 {
     public Starmap SectorMap; // level nodes present in the current sector
+    public LevelNode CurrentNode;
 
     public CurrentSectorData(Starmap map)
     {

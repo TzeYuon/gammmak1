@@ -3,23 +3,29 @@ using Unity.Mathematics;
 
 public struct HiveComponent : IComponentData
 {
-    public int SpawnAmount;
-    
-    public float EnemySpeed;
-    public float MaxSpeedMult; // Max speed multiplier for enemies that are behind desired position
-    public float Density;
-    public float Width;
-
-    public float SpawnCooldown;
-    public float SpawnTimer;
-
+    // for targeting and damage
     public float Size;
+
+    public EnemyType SurgeEnemyType;
+    public int SurgeSpawnCount;
+    public int SurgePendingSpawns;
+    public float SurgeSpawnRate;
+    public float SurgeSpawnAccumulator;
+}
+
+[InternalBufferCapacity(4)]
+public struct TrickleSpawnerData : IBufferElementData
+{
+    public EnemyType Type;
+    public int SpawnCount;
+    public float Interval;
+    public float NextSpawnTime;
 }
 
 public struct SwarmMovementStatsComponent : IComponentData
 {
     public float BaseSpeed;   
-    public float WiggleOffset;
+    public float SpawnIndex;
 }   
 
 public struct SwarmVelocityComponent : IComponentData

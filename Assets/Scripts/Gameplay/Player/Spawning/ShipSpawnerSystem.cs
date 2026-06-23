@@ -71,6 +71,9 @@ public partial struct ShipSpawnerSystem : ISystem
         var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
+        if (!SystemAPI.TryGetSingletonEntity<MothershipTag>(out var mothershipEntity)) return;
+        var mothershipPosition = SystemAPI.GetComponentRO<LocalTransform>(mothershipEntity).ValueRO.Position;
+        
         var shipBlueprintLookupReadOnly = SystemAPI.GetComponentLookup<RosterShipBlueprint>(true);
         var weaponBufferLookup = SystemAPI.GetBufferLookup<RosterWeaponBlueprint>(true);
 
@@ -82,19 +85,19 @@ public partial struct ShipSpawnerSystem : ISystem
             // safety check for missing blueprint component
             if (!shipBlueprintLookupReadOnly.HasComponent(shipBlueprintEntity)) continue;
             RosterShipBlueprint shipBlueprint = shipBlueprintLookupReadOnly[shipBlueprintEntity];
-
+            
             // safety check for no prefab
             Entity prefabToSpawn = shipBlueprint.ShipPrefab;
             if (prefabToSpawn == Entity.Null) continue;
-
+            
             // check and subtract cost
             int cost = shipBlueprint.BiomassCost;
             if (economy.ValueRO.TotalBiomass < cost) continue;
             else economy.ValueRW.TotalBiomass -= cost;
-
+            
             // Spawn ship
             Entity newShip = ecb.Instantiate(prefabToSpawn);
-            ecb.SetComponent(newShip, LocalTransform.FromPosition(new float3(request.Position, 0)));
+            ecb.SetComponent(newShip, LocalTransform.FromPosition(mothershipPosition));
 
             // Set ship stats
             ecb.SetComponent(newShip, shipBlueprint.ShipHealthComponent);
@@ -129,7 +132,6 @@ public partial struct ShipSpawnerSystem : ISystem
 public struct SpawnRequest
 {
     public int SlotIndex;
-    public float2 Position;
 }
 
 public struct SpawnQueueSingleton : IComponentData

@@ -62,6 +62,45 @@ public partial struct SwarmDeathEventSystem : ISystem
 
 [BurstCompile]
 [UpdateInGroup(typeof(LateGameplayGroup))]
+public partial struct HiveDeathEventSystem : ISystem
+{
+    EntityQuery queueQuery;
+
+    public void OnCreate(ref SystemState state)
+    {
+        queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
+        state.RequireForUpdate<BiomassConfig>();
+        state.RequireForUpdate<GlobalVFXQueue>();
+        state.RequireForUpdate<DifficultyState>();
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        queueQuery.CompleteDependency();
+        if (!SystemAPI.TryGetSingletonRW<GlobalVFXQueue>(out var vfxSingleton)) return;
+        var vfxQueue = vfxSingleton.ValueRW.Queue;
+
+        RefRW<DifficultyState> difficultyState = SystemAPI.GetSingletonRW<DifficultyState>();
+
+        foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, HiveComponent>().WithEntityAccess())
+        {
+            difficultyState.ValueRW.HivesDestroyed++;
+
+            // TODO: Change death visual for hives
+            // Create death visual
+            vfxQueue.Enqueue(new VFXPayload
+            {
+                Position = transform.ValueRO.Position,
+                Type = (uint)VFXType.DeathExplosion,
+                Colour = new float4(1, 0, 0, 0),
+            });
+        }
+    }
+}
+
+[BurstCompile]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct PlayerDeathEventSystem : ISystem
 {
     EntityQuery queueQuery;

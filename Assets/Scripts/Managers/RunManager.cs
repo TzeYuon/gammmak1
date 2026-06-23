@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class RunManager : MonoBehaviour
@@ -7,14 +8,17 @@ public class RunManager : MonoBehaviour
     [SerializeField] private PlayerSaveData playerSaveData;
     public static PlayerSaveData SaveData { get { return Instance.playerSaveData; } }
 
+    [SerializeField] private LootDatabase lootDB;
+    public static LootDatabase LootDB { get { return Instance.lootDB; } }
+
     public MapGenerationConfig Sector1Config;
+
+    public static Action OnRunStart;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-
-        StartNewRun();
     }
 
     public void StartNewRun()
@@ -24,5 +28,8 @@ public class RunManager : MonoBehaviour
 
         // Clear previous run data
         SaveData.OnStartNewRun(generatedMap);
+        lootDB.Init(SaveData);
+
+        OnRunStart?.Invoke();
     }
 }

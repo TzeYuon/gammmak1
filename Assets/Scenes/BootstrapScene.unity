@@ -381,6 +381,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveManager
   playerSaveData: {fileID: 11400000, guid: f3b095d919907a84198ee7e196198de6, type: 2}
+  lootDB: {fileID: 11400000, guid: 1f895dafdaf00534ea0c01743d10c55c, type: 2}
   Sector1Config: {fileID: 11400000, guid: 7c1d5098cdde9d74ba246d456cd2b94e, type: 2}
 --- !u!4 &878546418
 Transform:

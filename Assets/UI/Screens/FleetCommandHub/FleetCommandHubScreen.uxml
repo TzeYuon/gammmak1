@@ -8,7 +8,10 @@
     <Style src="project://database/Assets/UI/Styles/systemItemStyles.uss?fileID=7433441132597879392&amp;guid=4afa9fad7b8666247837b7b35602f7bc&amp;type=3#systemItemStyles"/>
     <ui:VisualElement style="flex-grow: 1; background-color: rgb(8, 12, 26); flex-direction: row;">
         <ui:VisualElement name="LeftContainer" style="flex-grow: 0; width: 250px; padding-top: 30px; padding-left: 15px; padding-right: 15px; border-right-width: 3px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); padding-bottom: 30px;">
-            <ui:Label text="CORES:" name="UpgradeCoreCounter" class="text"/>
+            <ui:VisualElement style="flex-grow: 0; flex-direction: row;">
+                <ui:VisualElement style="flex-grow: 0; background-image: url(&quot;project://database/Assets/UI/Icons/Icon_UpgradeCore.svg?fileID=7388822144124034973&amp;guid=a5cc65f603d08cf4aa5f643bbf1548a2&amp;type=3#Icon_UpgradeCore&quot;); width: auto; aspect-ratio: 1; padding-right: 0;"/>
+                <ui:Label text="CORES:" name="UpgradeCoreCounter" class="text" style="margin-left: 10px;"/>
+            </ui:VisualElement>
             <ui:VisualElement name="NavigationBar" style="flex-grow: 0; height: 150px; margin-top: 20px;">
                 <ui:Button text="HANGAR" name="HangarBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;"/>
                 <ui:Button text="WEAPONS" name="WeaponsBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; display: none;"/>

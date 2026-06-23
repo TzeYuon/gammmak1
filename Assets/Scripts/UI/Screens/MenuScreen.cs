@@ -35,6 +35,7 @@ public class MenuScreen : UIScreen
 
     void OnStartClicked()
     {
+        RunManager.Instance.StartNewRun();
         sceneManager.LoadScene(SceneId.GameplayScene);
     }
 

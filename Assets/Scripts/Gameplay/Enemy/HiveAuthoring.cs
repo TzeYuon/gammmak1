@@ -1,19 +1,21 @@
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
 class HiveAuthoring : MonoBehaviour
 {
-    public int SpawnAmount;
+    [Header("Trickle Spawner Settings")]
+    [SerializeField] List<SpawnConfig> trickleSpawnConfigs = new();
 
-    public float EnemySpeed;
-    public float DynamicSpeedMultiplier; // Max speed multiplier for enemies that are behind desired position
-    public float Density;
-    public float Width;
+    [Header("Surge Spawning Settings")]
+    [SerializeField] EnemyType surgeEnemyType = EnemyType.Standard;
+    [SerializeField] int surgeSpawnCount = 500;
 
-    public float SpawnCooldown;
-    public float SpawnTimer;
+    [Header("Collision Settings")]
+    [SerializeField] float Size = 5;
 
-    public float Size;
+    [Header("Health Settings")]
+    [SerializeField] float maxHealth = 500;
 
     class HiveAuthoringBaker : Baker<HiveAuthoring>
     {
@@ -24,23 +26,31 @@ class HiveAuthoring : MonoBehaviour
             AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new HiveComponent
             {
-                SpawnAmount = authoring.SpawnAmount,
-
-                EnemySpeed = authoring.EnemySpeed,
-                MaxSpeedMult = authoring.DynamicSpeedMultiplier,
-                Density = authoring.Density,
-                Width = authoring.Width,
-
-                SpawnCooldown = authoring.SpawnCooldown,
-                SpawnTimer = authoring.SpawnTimer,
+                SurgeEnemyType = authoring.surgeEnemyType,
+                SurgeSpawnCount = authoring.surgeSpawnCount,
+                SurgeSpawnRate = 100,
+                SurgeSpawnAccumulator = 0,
+                SurgePendingSpawns = 0,
 
                 Size = authoring.Size
             });
 
+            DynamicBuffer<TrickleSpawnerData> ambientBuffer = AddBuffer<TrickleSpawnerData>(entity);
+            foreach (var config in authoring.trickleSpawnConfigs)
+            {
+                ambientBuffer.Add(new TrickleSpawnerData
+                {
+                    Type = config.Type,
+                    SpawnCount = config.SpawnCount,
+                    Interval = config.Interval,
+                    NextSpawnTime = config.Interval,
+                });
+            }
+
             AddComponent(entity, new HealthComponent
             {
-                MaxValue = 200,
-                Value = 200,
+                MaxValue = authoring.maxHealth,
+                Value = authoring.maxHealth,
             });
             AddBuffer<DamageEvent>(entity);
 
@@ -53,4 +63,12 @@ class HiveAuthoring : MonoBehaviour
             SetComponentEnabled<DeadTag>(entity, false);
         }
     }
+}
+
+[System.Serializable]
+public struct SpawnConfig
+{
+    public EnemyType Type;
+    public int SpawnCount;
+    public float Interval;
 }

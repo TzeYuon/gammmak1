@@ -13,6 +13,23 @@ public struct BakedWeaponData : IBufferElementData
     public Entity PrefabEntity;
 }
 
+public struct MothershipBlueprint : IComponentData
+{
+    // Ship stats after upgrades
+    public HealthComponent ShipHealthComponent;
+    public ShipCollectionRadiusComponent ShipCollectionRadiusStat;
+}
+
+public struct MothershipWeaponBlueprint : IBufferElementData
+{
+    public Entity WeaponPrefab;
+    public float2 Position;
+
+    // Weapon stats after upgrades
+    public WeaponTargetingStats WeaponTargetingStats;
+    public WeaponCombatStats WeaponCombatStats;
+}
+
 public struct RosterShipBlueprint : IComponentData
 {
     public int SlotIndex;

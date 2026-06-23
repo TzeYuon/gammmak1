@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7572224295713369303}
   - component: {fileID: 7902167587106154927}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: StandardEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,6 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fae42492bc90454bb2306baa7e2478f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAuthoring
+  maxHealth: 1
+  baseSpeed: 8
   hitboxRadius: 0.5
 --- !u!23 &-769284683796917348
 MeshRenderer:

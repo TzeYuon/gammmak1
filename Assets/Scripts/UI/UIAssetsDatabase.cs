@@ -12,4 +12,7 @@ public class UIAssetsDatabase : ScriptableObject
     public VisualTreeAsset WeaponUpgradeItem;
 
     public VisualTreeAsset MapNode;
+
+    public VisualTreeAsset ReinforcementBtn;
+    public VisualTreeAsset RewardItem;
 }

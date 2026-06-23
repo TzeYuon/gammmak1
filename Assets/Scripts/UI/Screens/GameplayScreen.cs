@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEditor;
@@ -18,10 +19,12 @@ public class GameplayScreen : UIScreen
     private Label biomassCounter;
     private EntityQuery economyQuery;
 
-    private VisualElement reinforcementPopup;
-    private VisualElement reinforcementPopupContainer;
-    private bool isReinforcementPopupOpen;
-    private float2 spawnPosition;
+    private Label surgeWarningLbl;
+    private EntityQuery surgeStateQuery;
+
+    private VisualElement reinforcementPanel;
+    private VisualElement reinforcementContainer;
+    private List<(int cost, VisualElement btn)> reinforcementBtns = new();
     private EntityQuery queueQuery;
 
     private VisualElement victoryScreen;
@@ -29,6 +32,10 @@ public class GameplayScreen : UIScreen
     private VisualElement defeatScreen;
     private Button defeatContinueButton;
     private EntityQuery gameStateQuery;
+
+    private VisualElement upgradeCoresRewardContainer;
+    private VisualElement weaponsRewardContainer;
+    private VisualElement shipsRewardContainer;
 
     public GameplayScreen(UIScreenManager manager, VisualElement root, PlayerSaveData playerSaveData) : base(manager, root)
     {
@@ -38,9 +45,11 @@ public class GameplayScreen : UIScreen
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
+        surgeWarningLbl = root.Q<Label>("SurgeWarningLbl");
+
         this.playerSaveData = playerSaveData;
-        reinforcementPopup = root.Q<VisualElement>("ReinforcementPopup");
-        reinforcementPopupContainer = root.Q<VisualElement>("ReinforcementPopupContainer");
+        reinforcementPanel = root.Q<VisualElement>("ReinforcementPanel");
+        reinforcementContainer = root.Q<VisualElement>("ReinforcementBtnContainer");
 
         InitVictoryLoss();
 
@@ -56,6 +65,7 @@ public class GameplayScreen : UIScreen
                 economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
                 queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
                 gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
+                surgeStateQuery = world.EntityManager.CreateEntityQuery(typeof(GlobalSurgeState));
             }
         }
 
@@ -85,29 +95,40 @@ public class GameplayScreen : UIScreen
                 var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
                 gameState.ValueRW.CurrentState = GameState.MainMenu;
             };
+
+            // init rewards
+            upgradeCoresRewardContainer = victoryScreen.Q<VisualElement>("UpgradeCoresRewardContainer");
+            weaponsRewardContainer = victoryScreen.Q<VisualElement>("WeaponsRewardContainer");
+            shipsRewardContainer = victoryScreen.Q<VisualElement>("ShipsRewardContainer");
         }
     }
 
     protected override void OnHide()
     {
         HideVictoryLoss();
-        CloseReinforcementPopup();
+        ToggleReinforcementPopup(false);
 
         GameStateSystem.OnStateChanged -= HandleStateChange;
+        EconomyEventSystem.OnBiomassChanged -= UpdateReinforcementBtns;
+        RewardManager.OnRewardGranted -= OnRewardGranted;
     }
 
     protected override void OnShow()
     {
         HideVictoryLoss();
+        ToggleReinforcementPopup(true);
         RebuildReinforcementPopup();
-        CloseReinforcementPopup();
+
         biomassCounter.style.display = DisplayStyle.Flex;
 
         GameStateSystem.OnStateChanged += HandleStateChange;
+        EconomyEventSystem.OnBiomassChanged += UpdateReinforcementBtns;
+        RewardManager.OnRewardGranted += OnRewardGranted;
 
         void RebuildReinforcementPopup()
         {
-            reinforcementPopupContainer.Clear();
+            reinforcementBtns.Clear();
+            reinforcementContainer.Clear();
             if (playerSaveData != null)
             {
                 var activeRoster = playerSaveData.ActiveRoster;
@@ -118,18 +139,23 @@ public class GameplayScreen : UIScreen
                 {
                     if (activeRoster[i] == null) continue;
                     var cur = activeRoster[i];
-                    reinforcementPopupContainer.Add(CreateButton(cur.ShipName + "(" + cur.GetStat(ShipStat.Cost) + ")", count++));
+
+                    int cost = cur.GetStatInt(ShipStat.Cost);
+                    VisualElement btn = UIFactory.BuildReinforcementBtn(cur.ShipName, cost);
+                    RegisterBtn(btn, count++);
+
+                    reinforcementBtns.Add((cost, btn));
+                    reinforcementContainer.Add(btn);
                 }
             }
 
-            Button CreateButton(string text, int slotIndex)
-            {
-                var btn = new Button { text = text };
-                btn.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f);
-                btn.style.color = Color.cyan;
-                btn.style.marginTop = 5;
+            economyQuery.CompleteDependency();
+            var economy = economyQuery.GetSingleton<PlayerEconomy>();
+            UpdateReinforcementBtns(economy.TotalBiomass);
 
-                btn.clicked += () =>
+            void RegisterBtn(VisualElement btn, int slot)
+            {
+                btn.RegisterCallback<ClickEvent>(evt =>
                 {
                     if (queueQuery.IsEmptyIgnoreFilter) return;
 
@@ -137,15 +163,49 @@ public class GameplayScreen : UIScreen
                     var queue = queueQuery.GetSingleton<SpawnQueueSingleton>().Queue;
                     queue.Enqueue(new SpawnRequest
                     {
-                        SlotIndex = slotIndex,
-                        Position = GetSpawnPosition()
+                        SlotIndex = slot,
                     });
-
-                    CloseReinforcementPopup();
-                };
-
-                return btn;
+                });
             }
+        }
+    }
+
+    /// <summary>
+    /// This only updates the victory screen to display the rewards granted
+    /// </summary>
+    /// <param name="rewards"></param>
+    private void OnRewardGranted(List<LevelReward> rewards)
+    {
+        // empty previous rewards
+        upgradeCoresRewardContainer.Clear();
+        weaponsRewardContainer.Clear();
+        shipsRewardContainer.Clear();
+
+        // display list of rewards
+        foreach (var reward in rewards)
+        {
+            switch (reward.Type)
+            {
+                case RewardType.UpgradeCores:
+                    upgradeCoresRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
+                
+                case RewardType.WeaponBlueprint:
+                    weaponsRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
+                
+                case RewardType.ShipBlueprint:
+                    shipsRewardContainer.Add(UIFactory.BuildRewardItem(reward));
+                    break;
+            }
+        }
+    }
+
+    void UpdateReinforcementBtns(float amount)
+    {
+        foreach (var (cost, btn) in reinforcementBtns)
+        {
+            btn.SetEnabled(amount >= cost);
         }
     }
 
@@ -155,10 +215,9 @@ public class GameplayScreen : UIScreen
         var inputData = inputQuery.GetSingleton<PlayerInputData>();
 
         UpdateSelectionBox();
-
         UpdateBiomassCounter();
-
         UpdateReinforcementPopup();
+        UpdateSurgeWarning();
 
         void UpdateSelectionBox()
         {
@@ -195,25 +254,6 @@ public class GameplayScreen : UIScreen
             {
                 return;
             }
-
-            spawnPosition = inputData.MouseWorldPosition;
-            if (inputData.WasPressed(PlayerAction.ToggleReinforcementPopup))
-            {
-                if (isReinforcementPopupOpen)
-                {
-                    CloseReinforcementPopup();
-                }
-                else
-                {
-                    reinforcementPopup.style.display = DisplayStyle.Flex;
-                    isReinforcementPopupOpen = true;
-
-                    Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
-
-                    reinforcementPopup.style.left = uiCurrent.x;
-                    reinforcementPopup.style.top = uiCurrent.y;
-                }
-            }
         }
 
         void UpdateBiomassCounter()
@@ -221,6 +261,25 @@ public class GameplayScreen : UIScreen
             economyQuery.CompleteDependency();
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
+        }
+        
+        void UpdateSurgeWarning()
+        {
+            if (surgeStateQuery.IsEmptyIgnoreFilter) return;
+            var surgeState = surgeStateQuery.GetSingleton<GlobalSurgeState>();
+
+            if (surgeState.SurgeTimer > 0f && surgeState.SurgeTimer <= 3)
+            {
+                if (surgeWarningLbl.style.display != DisplayStyle.Flex) surgeWarningLbl.style.display = DisplayStyle.Flex;
+
+                float rawSine = math.sin(surgeState.SurgeTimer * 4);
+                float smoothOpacity = (rawSine * 0.5f) + 0.5f;
+                surgeWarningLbl.style.opacity = smoothOpacity;
+            }
+            else
+            {
+                if (surgeWarningLbl.style.display != DisplayStyle.None) surgeWarningLbl.style.display = DisplayStyle.None;
+            }
         }
     }
 
@@ -249,12 +308,12 @@ public class GameplayScreen : UIScreen
     {
         if (gameState == GameState.Victory)
         {
-            CloseReinforcementPopup();
+            ToggleReinforcementPopup(false);
             TriggerVictory();
         }
         else if (gameState == GameState.Defeat)
         {
-            CloseReinforcementPopup();
+            ToggleReinforcementPopup(false);
             TriggerLoss();
         }
     }
@@ -265,14 +324,8 @@ public class GameplayScreen : UIScreen
         return new Vector2(screenPos.x, Screen.height - screenPos.y);
     }
 
-    private void CloseReinforcementPopup()
+    private void ToggleReinforcementPopup(bool show)
     {
-        reinforcementPopup.style.display = DisplayStyle.None;
-        isReinforcementPopupOpen = false;
-    }
-
-    private float2 GetSpawnPosition()
-    {
-        return spawnPosition;
+        reinforcementPanel.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
     }
 }

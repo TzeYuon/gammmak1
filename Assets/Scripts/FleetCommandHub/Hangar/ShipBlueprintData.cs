@@ -217,4 +217,9 @@ public class ShipBlueprintData : ScriptableObject
         float finalValue = (baseValue + flatBonus) * (1.0f + percentBonus);
         return finalValue;
     }
+
+    public int GetStatInt(ShipStat statType)
+    {
+        return Mathf.RoundToInt(GetStat(statType));
+    }
 }

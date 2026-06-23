@@ -24,7 +24,7 @@ MonoBehaviour:
         Weight: 1
     ThreatPool:
       Pool:
-      - Item: 0
+      - Item: 1
         Weight: 1
     TerrainPool:
       Pool:
@@ -40,7 +40,7 @@ MonoBehaviour:
         Weight: 1
     StandardRewardPool:
       Pool:
-      - Item: 1
+      - Item: 3
         Weight: 1
       - Item: 2
         Weight: 1
@@ -62,13 +62,13 @@ MonoBehaviour:
       Pool:
       - Item: 0
         Weight: 3
-      - Item: 2
+      - Item: 1
         Weight: 1
     ThreatPool:
       Pool:
-      - Item: 0
-        Weight: 2
       - Item: 1
+        Weight: 2
+      - Item: 2
         Weight: 1
     TerrainPool:
       Pool:
@@ -96,18 +96,22 @@ MonoBehaviour:
         Weight: 1
     StandardRewardPool:
       Pool:
-      - Item: 0
-        Weight: 3
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
-        Weight: 3
+        Weight: 1
       - Item: 3
         Weight: 1
     BaseUpgradeCoreReward: 300
     EliteRewardPool:
-      Pool: []
-    EliteUpgradeCoreReward: 0
+      Pool:
+      - Item: 1
+        Weight: 5
+      - Item: 2
+        Weight: 1
+      - Item: 3
+        Weight: 1
+    EliteUpgradeCoreReward: 500
     StandardAnomalyChance: 0.1
     EliteAnomalyChance: 0
     AnomalyPool:
@@ -126,17 +130,15 @@ MonoBehaviour:
       Pool:
       - Item: 0
         Weight: 3
-      - Item: 2
-        Weight: 1
       - Item: 1
         Weight: 1
     ThreatPool:
       Pool:
-      - Item: 0
-        Weight: 1
       - Item: 1
-        Weight: 3
+        Weight: 1
       - Item: 2
+        Weight: 3
+      - Item: 3
         Weight: 2
     TerrainPool:
       Pool:
@@ -164,23 +166,19 @@ MonoBehaviour:
         Weight: 1
     StandardRewardPool:
       Pool:
-      - Item: 0
-        Weight: 3
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
-        Weight: 3
+        Weight: 1
       - Item: 3
         Weight: 1
     BaseUpgradeCoreReward: 400
     EliteRewardPool:
       Pool:
-      - Item: 0
-        Weight: 3
       - Item: 1
-        Weight: 3
+        Weight: 5
       - Item: 2
-        Weight: 3
+        Weight: 1
       - Item: 3
         Weight: 1
     EliteUpgradeCoreReward: 700
@@ -201,21 +199,29 @@ MonoBehaviour:
     NodePool:
       Pool:
       - Item: 3
-        Weight: 0
+        Weight: 1
     ThreatPool:
-      Pool: []
+      Pool:
+      - Item: 4
+        Weight: 1
     TerrainPool:
-      Pool: []
+      Pool:
+      - Item: 0
+        Weight: 1
     ObjectivePool:
-      Pool: []
+      Pool:
+      - Item: 0
+        Weight: 1
     EnemyPool:
-      Pool: []
+      Pool:
+      - Item: 0
+        Weight: 1
     StandardRewardPool:
       Pool: []
     BaseUpgradeCoreReward: 0
     EliteRewardPool:
       Pool:
-      - Item: 0
+      - Item: 3
         Weight: 1
       - Item: 1
         Weight: 1
