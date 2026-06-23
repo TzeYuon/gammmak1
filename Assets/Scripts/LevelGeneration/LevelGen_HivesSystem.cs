@@ -12,6 +12,7 @@ partial struct LevelGen_HivesSystem : ISystem
         state.RequireForUpdate<GameStateSingleton>();
         state.RequireForUpdate<LevelGenerationStatus>();
         state.RequireForUpdate<HivePrefabDatabase>();
+        state.RequireForUpdate<LevelSpawnData>();
     }
 
     [BurstCompile]
@@ -26,6 +27,7 @@ partial struct LevelGen_HivesSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelBlueprint>(out var levelBlueprint)) return;
 
         if (!SystemAPI.TryGetSingleton<HivePrefabDatabase>(out var prefabDatabase)) return;
+        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
 
         // mark as complete
         status.ValueRW.HivesGenerated = true;
@@ -34,17 +36,23 @@ partial struct LevelGen_HivesSystem : ISystem
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
         // Generate hives
-        // TEMPORARY: spawns one in each corner
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
         Entity hiveEntity1 = ecb.Instantiate(hivePrefab);
         Entity hiveEntity2 = ecb.Instantiate(hivePrefab);
         Entity hiveEntity3 = ecb.Instantiate(hivePrefab);
         Entity hiveEntity4 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity5 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity6 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity7 = ecb.Instantiate(hivePrefab);
+        Entity hiveEntity8 = ecb.Instantiate(hivePrefab);
 
-        //ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(1000, 1010, 0)));
-        ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(910, 910, 0)));
-        ecb.SetComponent(hiveEntity2, LocalTransform.FromPosition(new float3(1090, 1090, 0)));
-        ecb.SetComponent(hiveEntity3, LocalTransform.FromPosition(new float3(1090, 910, 0)));
-        ecb.SetComponent(hiveEntity4, LocalTransform.FromPosition(new float3(910, 1090, 0)));
+        ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(spawnData.Hive1Spawn));
+        ecb.SetComponent(hiveEntity2, LocalTransform.FromPosition(spawnData.Hive2Spawn));
+        ecb.SetComponent(hiveEntity3, LocalTransform.FromPosition(spawnData.Hive3Spawn));
+        ecb.SetComponent(hiveEntity4, LocalTransform.FromPosition(spawnData.Hive4Spawn));
+        ecb.SetComponent(hiveEntity5, LocalTransform.FromPosition(spawnData.Hive5Spawn));
+        ecb.SetComponent(hiveEntity6, LocalTransform.FromPosition(spawnData.Hive6Spawn));
+        ecb.SetComponent(hiveEntity7, LocalTransform.FromPosition(spawnData.Hive7Spawn));
+        ecb.SetComponent(hiveEntity8, LocalTransform.FromPosition(spawnData.Hive8Spawn));
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
@@ -35,6 +36,7 @@ partial struct LevelGen_TerrainSystem : ISystem
         if (!SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)) return;
         if (status.ValueRO.TerrainGenerated) return;
 
+        // mark as complete
         status.ValueRW.TerrainGenerated = true;
         var oldTerrainQuery = state.EntityManager.CreateEntityQuery(typeof(ProceduralTerrainTag));
         state.EntityManager.DestroyEntity(oldTerrainQuery);
@@ -51,10 +53,10 @@ partial struct LevelGen_TerrainSystem : ISystem
             {
                 GridWidth = 200,
                 GridHeight = 200,
-                TerrainType = TerrainType.TwoRing   ,
+                TerrainType = TerrainType.Cavern,
                 NoiseScale = 0.15f,
                 WallThreshold = 0.75f,
-                PoisonThreshold = 0.85f,
+                PoisonThreshold = 0.78f,
                 MudThreshold = 0.15f,
                 Seed = (uint)UnityEngine.Random.Range(1, 99999)
             };
@@ -65,6 +67,7 @@ partial struct LevelGen_TerrainSystem : ISystem
         int height = blueprint.GridHeight;
         int safezoneRadius = 20;
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
+        LevelSpawnData spawnData = new LevelSpawnData();
 
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
         float randomOffset = rng.NextFloat(0f, 9999f);
@@ -89,26 +92,40 @@ partial struct LevelGen_TerrainSystem : ISystem
         {
             for (int y = 0; y < height; y++)
             {
-                if (InSafeZone(x, y, width, height, safezoneRadius)) continue;
-
                 // Base noise
                 float elevation = noise.snoise(new float2(x + randomOffset, y + randomOffset) * blueprint.NoiseScale * 0.8f) * 0.5f + 0.5f;
                 float distToCenter = math.distance(new float2(x, y), new float2(centerX, centerY));
-                float normalizedDist = distToCenter / maxDistFromCenter;
 
                 // Generate Terrain based on enum
                 switch (blueprint.TerrainType)
                 {
                     case TerrainType.Asteroids:
                         // Default
+                        spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive1Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
                         break;
 
                     case TerrainType.Cavern:
-                        // Pushes the edges up into solid rock to form an enclosed arena
+                        // Maybe can spawn new hives periodically while starting with <8?
+                        spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                        spawnData.Hive1Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive2Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive3Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive4Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive5Spawn = new float3(1000, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive6Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000, 0);
+                        spawnData.Hive7Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000, 0);
+                        spawnData.Hive8Spawn = new float3(1000, 1000 - height / 2 + safezoneRadius, 0);
+
+                        // Carves a circular cavern in the center
+                        float normalizedDist = distToCenter / maxDistFromCenter;
                         elevation += (normalizedDist * 1.5f) - 0.5f;
                         break;
 
                     case TerrainType.OneTunnel:
+                        spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive1Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        
                         // Carves a single diagonal trench
                         float distToDiagonal = math.abs(x - y) * 0.7071f;
                         float tunnelMask = distToDiagonal / (width * 0.3f);
@@ -116,6 +133,12 @@ partial struct LevelGen_TerrainSystem : ISystem
                         break;
 
                     case TerrainType.TwoTunnel:
+                        spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                        spawnData.Hive1Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive2Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive3Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive4Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+
                         // Carves a giant "X" connecting all 4 corners
                         float distToDiag1 = math.abs(x - y) * 0.7071f;
                         float distToDiag2 = math.abs(x - (height - y)) * 0.7071f;
@@ -124,6 +147,12 @@ partial struct LevelGen_TerrainSystem : ISystem
                         break;
 
                     case TerrainType.Ring:
+                        spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                        spawnData.Hive1Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive2Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive3Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive4Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+
                         // Creates a massive hollow ring of walls between dist 35 and 55
                         float ringThickness = math.abs(distToCenter - 45f);
                         if (ringThickness < 10f)
@@ -138,6 +167,13 @@ partial struct LevelGen_TerrainSystem : ISystem
                         break;
 
                     case TerrainType.TwoRing:
+                        spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                        spawnData.Hive1Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive2Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 + height / 2 - safezoneRadius, 0);
+                        spawnData.Hive3Spawn = new float3(1000 + width / 2 - safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                        spawnData.Hive4Spawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+
+                        // Logic
                         float dx = x - centerX;
                         float dy = y - centerY;
                         float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
@@ -175,27 +211,62 @@ partial struct LevelGen_TerrainSystem : ISystem
                 grid[x, y] = (elevation > blueprint.WallThreshold) ? 1 : 0;
             }
         }
+        float3[] allSpawns = { spawnData.MothershipSpawn, spawnData.Hive1Spawn, spawnData.Hive2Spawn, spawnData.Hive3Spawn, spawnData.Hive4Spawn, spawnData.Hive5Spawn, spawnData.Hive6Spawn, spawnData.Hive7Spawn, spawnData.Hive8Spawn };
 
         // Cellular automata
-        for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius);
+        for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius, allSpawns);
 
         // Merge disconnected islands
         ConnectDisconnectedIslands(grid, width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                float2 currentPos = new float2(x + 1000 - width / 2, y + 1000 - height / 2);
+
+                foreach (float3 spawn in allSpawns)
+                {
+                    // If the tile is within 15 units of ANY spawn point, completely obliterate it!
+                    if (math.distance(currentPos, spawn.xy) < safezoneRadius)
+                    {
+                        grid[x, y] = 0;
+                    }
+                }
+            }
+        }
 
         // Hazards and ECS spawning
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                int currentTile = grid[x, y];
-
-                if (currentTile == 0 && !InSafeZone(x, y, width, height, safezoneRadius))
+                if (InSafeZone(x, y, width, height, safezoneRadius, allSpawns))
                 {
-                    float poisonNoise = noise.snoise(new float2(x + randomOffset + 5000f, y + randomOffset + 5000f) * blueprint.NoiseScale) * 0.5f + 0.5f;
-                    float mudNoise = noise.snoise(new float2(x + randomOffset + 2000f, y + randomOffset + 2000f) * blueprint.NoiseScale) * 0.5f + 0.5f;
+                    grid[x, y] = 0;
+                }
+                else if (grid[x, y] == 0)
+                {
+                    // Don't spawn hazards near the spawns!
+                    float2 currentPos = new float2(x + 1000 - width / 2, y + 1000 - height / 2);
+                    int wallNeighbors = GetSurroundingWallCount(grid, x, y, width, height);
 
-                    if (poisonNoise > blueprint.PoisonThreshold) grid[x, y] = 3;
-                    else if (mudNoise > 1.0f - blueprint.MudThreshold) grid[x, y] = 2;
+                    // If this tile is squeezed between 3 or 4 walls, fill it with Mud.
+                    if (wallNeighbors >= 3)
+                    {
+                        grid[x, y] = 2; // Mud
+                    }
+
+                    // If this tile is in an open space, it might be a poison lake
+                    else if (wallNeighbors <= 1)
+                    {
+                        float poisonNoise = noise.snoise(new float2(x + randomOffset, y + randomOffset) * 0.02f);
+                        if (poisonNoise > 0.85f)
+                        {
+                            grid[x, y] = 3;
+                        }
+                    }
+                    
                 }
 
                 // Copy to ECS Native Array
@@ -215,6 +286,8 @@ partial struct LevelGen_TerrainSystem : ISystem
             Debug.LogError("ERROR: TerrainMeshGenerator was not found in the scene");
         }
 
+        var spawnerEntity = state.EntityManager.CreateEntity();
+        state.EntityManager.AddComponentData(spawnerEntity, spawnData);
         ecb.Playback(state.EntityManager);
         ecb.Dispose();
 
@@ -236,21 +309,28 @@ partial struct LevelGen_TerrainSystem : ISystem
     }
 
     // Helper Functions
-    private bool InSafeZone(int x, int y, int width, int height, int radius)
+    private bool InSafeZone(int x, int y, int width, int height, int radius, float3[] spawns)
     {
-        bool corner = (x < radius || x >= width - radius) && (y < radius || y >= height - radius);
-        bool center = math.abs(x - width / 2) <= radius && math.abs(y - height / 2) <= radius;
-        return corner || center;
+        bool res = false;
+        float2 currentPos = new float2(x + 1000 - width / 2, y + 1000 - height / 2);
+        foreach (float3 spawn in spawns)
+        {
+            if (math.distance(currentPos, spawn.xy) < radius)
+            {
+                res = true;
+            }
+        }
+        return res;
     }
 
-    private int[,] SmoothAsteroidCaves(int[,] oldGrid, int width, int height, int radius)
+    private int[,] SmoothAsteroidCaves(int[,] oldGrid, int width, int height, int radius, float3[] spawns)
     {
         int[,] newGrid = new int[width, height];
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (InSafeZone(x, y, width, height, radius)) { newGrid[x, y] = 0; continue; }
+                if (InSafeZone(x, y, width, height, radius, spawns)) { newGrid[x, y] = 0; continue; }
                 int walls = GetSurroundingWallCount(oldGrid, x, y, width, height);
                 if (walls > 4) newGrid[x, y] = 1;
                 else if (walls < 4) newGrid[x, y] = 0;
