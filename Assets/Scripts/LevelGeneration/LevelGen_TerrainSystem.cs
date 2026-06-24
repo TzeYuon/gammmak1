@@ -64,6 +64,89 @@ partial struct LevelGen_TerrainSystem : ISystem
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
         LevelSpawnData spawnData = new LevelSpawnData();
 
+        float Xtl = 1000 - width / 2 + safezoneRadius;
+        float Ytl = 1000 + height / 2 - safezoneRadius;
+        float Xtr = 1000 + width / 2 - safezoneRadius;
+        float Ytr = 1000 + height / 2 - safezoneRadius;
+        float Xbr = 1000 + width / 2 - safezoneRadius;
+        float Ybr = 1000 - height / 2 + safezoneRadius;
+        float Xbl = 1000 - width / 2 + safezoneRadius;
+        float Ybl = 1000 - height / 2 + safezoneRadius;
+        float Xt = 1000;
+        float Yt = 1000 + height / 2 - safezoneRadius;
+        float Xr = 1000 + width / 2 - safezoneRadius;
+        float Yr = 1000;
+        float Xl = 1000 - width / 2 + safezoneRadius;
+        float Yl = 1000;
+        float Xb = 1000;
+        float Yb = 1000 - height / 2 + safezoneRadius;
+
+        unsafe
+        {
+            switch (blueprint.TerrainType)
+            {
+                case TerrainType.Asteroids:
+                    // Default
+                    spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                    spawnData.ActiveHiveCount = 1;
+                    spawnData.HiveSpawnsX[0] = Xtr;
+                    spawnData.HiveSpawnsY[0] = Ytr;
+                    break;
+
+                case TerrainType.Cavern:
+                    // Maybe can spawn new hives periodically while starting with <8?
+                    spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                    spawnData.ActiveHiveCount = 8;
+                    spawnData.HiveSpawnsX[0] = Xtl;
+                    spawnData.HiveSpawnsY[0] = Ytl;
+                    spawnData.HiveSpawnsX[1] = Xtr;
+                    spawnData.HiveSpawnsY[1] = Ytr;
+                    spawnData.HiveSpawnsX[2] = Xbr;
+                    spawnData.HiveSpawnsY[2] = Ybr;
+                    spawnData.HiveSpawnsX[3] = Xbl;
+                    spawnData.HiveSpawnsY[3] = Ybl;
+                    spawnData.HiveSpawnsX[4] = Xt;
+                    spawnData.HiveSpawnsY[4] = Yt;
+                    spawnData.HiveSpawnsX[5] = Xr;
+                    spawnData.HiveSpawnsY[5] = Yr;
+                    spawnData.HiveSpawnsX[6] = Xl;
+                    spawnData.HiveSpawnsY[6] = Yl;
+                    spawnData.HiveSpawnsX[7] = Xb;
+                    spawnData.HiveSpawnsY[7] = Yb;
+                    break;
+
+                case TerrainType.OneTunnel:
+                    spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                    spawnData.ActiveHiveCount = 1;
+                    spawnData.HiveSpawnsX[0] = Xtr;
+                    spawnData.HiveSpawnsY[0] = Ytr;
+                    break;
+
+                default:
+                    spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                    spawnData.ActiveHiveCount = 4;
+                    spawnData.HiveSpawnsX[0] = Xtl;
+                    spawnData.HiveSpawnsY[0] = Ytl;
+                    spawnData.HiveSpawnsX[1] = Xtr;
+                    spawnData.HiveSpawnsY[1] = Ytr;
+                    spawnData.HiveSpawnsX[2] = Xbr;
+                    spawnData.HiveSpawnsY[2] = Ybr;
+                    spawnData.HiveSpawnsX[3] = Xbl;
+                    spawnData.HiveSpawnsY[3] = Ybl;
+                    break;
+            }
+        }
+
+        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.ActiveHiveCount + 1, Allocator.Temp);
+        spawnPoints[0] = spawnData.MothershipSpawn;
+        unsafe
+        {
+            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
+            {
+                spawnPoints[i + 1] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
+            }
+        }
+
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
         float randomOffset = rng.NextFloat(0f, 9999f);
 
@@ -87,163 +170,89 @@ partial struct LevelGen_TerrainSystem : ISystem
         {
             for (int y = 0; y < height; y++)
             {
+                if (InSafeZone(x, y, width, height, safezoneRadius, spawnPoints, worldOrigin)) continue;
                 // Base noise
                 float elevation = noise.snoise(new float2(x + randomOffset, y + randomOffset) * blueprint.NoiseScale * 0.8f) * 0.5f + 0.5f;
                 float distToCenter = math.distance(new float2(x, y), new float2(centerX, centerY));
 
                 // Generate Terrain based on enum
-                unsafe
+                switch (blueprint.TerrainType)
                 {
-                    switch (blueprint.TerrainType)
-                    {
-                        case TerrainType.Asteroids:
-                            // Default
-                            spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                            spawnData.ActiveHiveCount = 1;
-                            spawnData.HiveSpawnsX[0] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
-                            break;
+                    case TerrainType.Asteroids:
+                        break;
 
-                        case TerrainType.Cavern:
-                            // Maybe can spawn new hives periodically while starting with <8?
-                            spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                            spawnData.ActiveHiveCount = 8;
-                            spawnData.HiveSpawnsX[0] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[1] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[1] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[2] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[2] = 1000 - height / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsX[3] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[3] = 1000 - height / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsX[4] = 1000;
-                            spawnData.HiveSpawnsY[4] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[5] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[5] = 1000;
-                            spawnData.HiveSpawnsX[6] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[6] = 1000;
-                            spawnData.HiveSpawnsX[7] = 1000;
-                            spawnData.HiveSpawnsY[8] = 1000 - height / 2 + safezoneRadius;
+                    case TerrainType.Cavern:
+                        // Carves a circular cavern in the center
+                        float normalizedDist = distToCenter / maxDistFromCenter;
+                        elevation += (normalizedDist * 1.5f) - 0.5f;
+                        break;
 
-                            // Carves a circular cavern in the center
-                            float normalizedDist = distToCenter / maxDistFromCenter;
-                            elevation += (normalizedDist * 1.5f) - 0.5f;
-                            break;
+                    case TerrainType.OneTunnel:
+                        // Carves a single diagonal trench
+                        float distToDiagonal = math.abs(x - y) * 0.7071f;
+                        float tunnelMask = distToDiagonal / (width * 0.3f);
+                        elevation += tunnelMask * 1.5f;
+                        break;
 
-                        case TerrainType.OneTunnel:
-                            spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                            spawnData.ActiveHiveCount = 1;
-                            spawnData.HiveSpawnsX[0] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
+                    case TerrainType.TwoTunnel:
+                        // Carves a giant "X" connecting all 4 corners
+                        float distToDiag1 = math.abs(x - y) * 0.7071f;
+                        float distToDiag2 = math.abs(x - (height - y)) * 0.7071f;
+                        float closestTunnelDist = math.min(distToDiag1, distToDiag2);
+                        elevation += math.smoothstep(12f, 25f, closestTunnelDist) * 2.0f;
+                        break;
 
-                            // Carves a single diagonal trench
-                            float distToDiagonal = math.abs(x - y) * 0.7071f;
-                            float tunnelMask = distToDiagonal / (width * 0.3f);
-                            elevation += tunnelMask * 1.5f;
-                            break;
-
-                        case TerrainType.TwoTunnel:
-                            spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                            spawnData.ActiveHiveCount = 4;
-                            spawnData.HiveSpawnsX[0] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[1] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[1] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[2] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[2] = 1000 - height / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsX[3] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[3] = 1000 - height / 2 + safezoneRadius;
-
-                            // Carves a giant "X" connecting all 4 corners
-                            float distToDiag1 = math.abs(x - y) * 0.7071f;
-                            float distToDiag2 = math.abs(x - (height - y)) * 0.7071f;
-                            float closestTunnelDist = math.min(distToDiag1, distToDiag2);
-                            elevation += math.smoothstep(12f, 25f, closestTunnelDist) * 2.0f;
-                            break;
-
-                        case TerrainType.Ring:
-                            spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                            spawnData.ActiveHiveCount = 4;
-                            spawnData.HiveSpawnsX[0] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[1] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[1] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[2] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[2] = 1000 - height / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsX[3] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[3] = 1000 - height / 2 + safezoneRadius;
-
-                            // Creates a massive hollow ring of walls between dist 35 and 55
-                            float ringThickness = math.abs(distToCenter - 45f);
-                            if (ringThickness < 10f)
+                    case TerrainType.Ring:
+                        // Creates a massive hollow ring of walls between dist 35 and 55
+                        float ringThickness = math.abs(distToCenter - 45f);
+                        if (ringThickness < 10f)
+                        {
+                            // Carves 4 Entrances (N,S,E,W)
+                            bool isDoor = math.abs(x - centerX) < 12f || math.abs(y - centerY) < 12f;
+                            if (!isDoor)
                             {
-                                // Carves 4 Entrances (N,S,E,W)
-                                bool isDoor = math.abs(x - centerX) < 12f || math.abs(y - centerY) < 12f;
-                                if (!isDoor)
-                                {
-                                    elevation += 2.0f;
-                                }
+                                elevation += 2.0f;
                             }
-                            break;
+                        }
+                        break;
 
-                        case TerrainType.TwoRing:
-                            spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                            spawnData.ActiveHiveCount = 4;
-                            spawnData.HiveSpawnsX[0] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[0] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[1] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[1] = 1000 + height / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsX[2] = 1000 + width / 2 - safezoneRadius;
-                            spawnData.HiveSpawnsY[2] = 1000 - height / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsX[3] = 1000 - width / 2 + safezoneRadius;
-                            spawnData.HiveSpawnsY[3] = 1000 - height / 2 + safezoneRadius;
+                    case TerrainType.TwoRing:
+                        // Logic
+                        float dx = x - centerX;
+                        float dy = y - centerY;
+                        float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
+                        if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
 
-                            // Logic
-                            float dx = x - centerX;
-                            float dy = y - centerY;
-                            float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
-                            if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
+                        float innerRingRadius = 35f;
+                        float outerRingRadius = 70f;
+                        float radiusThickness = 7f;
 
-                            float innerRingRadius = 35f;
-                            float outerRingRadius = 70f;
-                            float radiusThickness = 7f;
+                        float distToInner = math.abs(distToCenter - innerRingRadius);
+                        float distToOuter = math.abs(distToCenter - outerRingRadius);
 
-                            float distToInner = math.abs(distToCenter - innerRingRadius);
-                            float distToOuter = math.abs(distToCenter - outerRingRadius);
+                        // Inner Ring Logic (Entrances at 0, 120, 240)
+                        if (distToInner < radiusThickness)
+                        {
+                            float modInner = angleDeg % 120f;
+                            bool isInnerGap = (modInner < 12f || modInner > 108f);
 
-                            // Inner Ring Logic (Entrances at 0, 120, 240)
-                            if (distToInner < radiusThickness)
-                            {
-                                float modInner = angleDeg % 120f;
-                                bool isInnerGap = (modInner < 12f || modInner > 108f);
+                            if (isInnerGap) elevation -= 1.0f;
+                            else elevation += 2.0f;
+                        }
 
-                                if (isInnerGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
-                            }
+                        // Outer Ring Logic (Entrances at 60, 180, 300)
+                        if (distToOuter < radiusThickness)
+                        {
+                            float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
+                            float modOuter = shiftedAngle % 120f;
+                            bool isOuterGap = (modOuter < 9f || modOuter > 111f);
 
-                            // Outer Ring Logic (Entrances at 60, 180, 300)
-                            if (distToOuter < radiusThickness)
-                            {
-                                float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
-                                float modOuter = shiftedAngle % 120f;
-                                bool isOuterGap = (modOuter < 9f || modOuter > 111f);
-
-                                if (isOuterGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
-                            }
-                            break;
-                    }
-                    grid[x, y] = (elevation > blueprint.WallThreshold) ? 1 : 0;
+                            if (isOuterGap) elevation -= 1.0f;
+                            else elevation += 2.0f;
+                        }
+                        break;
                 }
-            }
-        }
-        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.ActiveHiveCount + 1, Allocator.Temp);
-        spawnPoints[0] = spawnData.MothershipSpawn;
-        unsafe
-        {
-            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
-            {
-                spawnPoints[i + 1] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
+                grid[x, y] = (elevation > blueprint.WallThreshold) ? 1 : 0;
             }
         }
 
@@ -253,17 +262,19 @@ partial struct LevelGen_TerrainSystem : ISystem
         // Merge disconnected islands
         ConnectDisconnectedIslands(grid, width, height);
 
+        int borderThickness = 1;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                float2 currentPos = new float2(x + 1000 - width / 2, y + 1000 - height / 2);
-                for (int i = 0; i < spawnPoints.Length; i++)
+                if (x < borderThickness || x >= width - borderThickness ||
+                    y < borderThickness || y >= height - borderThickness)
                 {
-                    if (math.distance(currentPos, spawnPoints[i].xy) < safezoneRadius)
-                    {
-                        grid[x, y] = 0;
-                    }
+                    grid[x, y] = 1; // Force Wall
+                }
+                else if (InSafeZone(x, y, width, height, safezoneRadius, spawnPoints, worldOrigin))
+                {
+                    grid[x, y] = 0;
                 }
             }
         }
@@ -273,42 +284,30 @@ partial struct LevelGen_TerrainSystem : ISystem
         {
             for (int y = 0; y < height; y++)
             {
-                if (InSafeZone(x, y, width, height, safezoneRadius, spawnPoints, worldOrigin))
+                int currentTile = grid[x, y];
+
+                if (currentTile == 0 && !InSafeZone(x, y, width, height, safezoneRadius, spawnPoints, worldOrigin))
                 {
-                    grid[x, y] = 0;
-                }
-                else if (grid[x, y] == 0)
-                {
-                    // Don't spawn hazards near the spawns!
-                    float2 currentPos = new float2(x + 1000 - width / 2, y + 1000 - height / 2);
                     int wallNeighbors = GetSurroundingWallCount(grid, x, y, width, height);
 
-                    // If this tile is squeezed between 3 or 4 walls, fill it with Mud.
                     if (wallNeighbors >= 3)
                     {
                         grid[x, y] = 2; // Mud
                     }
-
-                    // If this tile is in an open space, it might be a poison lake
                     else if (wallNeighbors <= 1)
                     {
-                        float poisonNoise = noise.snoise(new float2(x + randomOffset, y + randomOffset) * 0.02f);
-                        if (poisonNoise > 0.85f)
-                        {
-                            grid[x, y] = 3;
-                        }
+                        float poisonNoise = noise.snoise(new float2(x + randomOffset, y + randomOffset) * 0.01f); 
+                        if (poisonNoise > blueprint.PoisonThreshold) grid[x, y] = 3; // Poison in open areas
                     }
-                    
                 }
 
-                // Copy to ECS Native Array
                 int finalTile = grid[x, y];
                 obstacleGrid[x + y * width] = finalTile;
                 flowField[x + y * width] = float2.zero;
             }
         }
 
-        var meshGen = TerrainMeshGenerator.GetInstance();
+            var meshGen = TerrainMeshGenerator.GetInstance();
         if (meshGen != null)
         {
             meshGen.BuildTerrainMesh(grid, width, height, worldOrigin);
