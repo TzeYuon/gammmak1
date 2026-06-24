@@ -274,7 +274,7 @@ public class GameplayScreen : UIScreen
 
                 float rawSine = math.sin(surgeState.SurgeTimer * 4);
                 float smoothOpacity = (rawSine * 0.5f) + 0.5f;
-                surgeWarningLbl.style.opacity = smoothOpacity;
+                surgeWarningLbl.style.color = new Color(1, 0, 0, smoothOpacity);
             }
             else
             {
