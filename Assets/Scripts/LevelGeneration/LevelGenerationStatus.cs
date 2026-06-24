@@ -23,14 +23,10 @@ public struct LevelGenerationStatus : IComponentData
 public struct LevelSpawnData : IComponentData
 {
     public float3 MothershipSpawn;
-    public float3 Hive1Spawn;
-    public float3 Hive2Spawn;
-    public float3 Hive3Spawn;
-    public float3 Hive4Spawn;
-    public float3 Hive5Spawn;
-    public float3 Hive6Spawn;
-    public float3 Hive7Spawn;
-    public float3 Hive8Spawn;
+    public unsafe fixed float HiveSpawnsX[8];
+    public unsafe fixed float HiveSpawnsY[8];
+
+    public int ActiveHiveCount;
 }
 
 /// <summary>
