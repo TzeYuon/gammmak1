@@ -7,9 +7,24 @@ using UnityEngine;
 public enum ShipID : byte
 {
     None = 0,
-    Frigate,
-    Destroyer,
-    Cruiser
+    
+    // Frigate class
+    Rodent = 1,
+    Seeker = 2,
+
+    // Destroyer class
+    Explorer = 51,
+    Crab = 52,
+
+    // Cruiser class
+    Sword = 101,
+    Shield = 102,
+
+    // Battleship class
+    Bastion = 151,
+    Invincible = 152,
+
+    // Dreadnought class
 }
 
 public enum ShipClass : byte
@@ -30,7 +45,9 @@ public enum ShipSystemID : byte
     None = 0,
     Engine,
     Hull,
-    Shields
+    Shields,
+    Weapons,
+    Collector
 }
 
 [System.Serializable]
@@ -76,7 +93,7 @@ public class ShipSystemUpgradeEffect
         switch (stat)
         {
             case ShipStat.Cost:
-                return "Cost";
+                return "Deployment Cost";
             case ShipStat.MaxHealth:
                 return "Hull";
             case ShipStat.Speed:
@@ -169,6 +186,19 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
     public float BaseCollectionRadius = 5f;
+
+    public void ResetToBase()
+    {
+        foreach (ShipSystem system in ShipSystems)
+        {
+            system.UpgradeLevel = 0;
+        }
+
+        foreach (WeaponMount mount in Mounts)
+        {
+            mount.EquippedWeapon = null;
+        }
+    }
 
     public bool CanEquipWeaponInMount(WeaponData data, WeaponMount mount)
     {

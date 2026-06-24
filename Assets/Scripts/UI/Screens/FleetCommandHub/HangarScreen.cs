@@ -212,6 +212,7 @@ public class ShipDetailsElement
         system.UpgradeLevel++;
 
         OnPlayerCurrencyChanged();
+        UpdateWeaponCapacity(); // If weapons capacity was affected
     }
 
     void OnSytemItemRefundClicked(ShipSystem system, VisualElement systemItem)

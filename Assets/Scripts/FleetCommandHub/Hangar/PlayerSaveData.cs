@@ -4,19 +4,28 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerSave", menuName = "FleetCommand/Player Save Data")]
 public class PlayerSaveData : ScriptableObject
 {
-    public CurrentSectorData ActiveSector;
-    public int UpgradeCoresRemaining;
+    [HideInInspector] public CurrentSectorData ActiveSector;
 
-    public List<ShipBlueprintData> AvailableShips;
-    public List<WeaponData> AvailableWeapons;
+    [SerializeField] private int startingUpgradeCores;
+    [HideInInspector] public int UpgradeCoresRemaining;
 
-    public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
+    [SerializeField] private List<ShipBlueprintData> startingAvailableShips;
+    [HideInInspector] public List<ShipBlueprintData> AvailableShips;
+
+    [SerializeField] private List<WeaponData> startingAvailableWeapons;
+    [HideInInspector] public List<WeaponData> AvailableWeapons;
+
+    [SerializeField] private ShipBlueprintData[] startingActiveRoster;
+    [HideInInspector] public ShipBlueprintData[] ActiveRoster = new ShipBlueprintData[4];
     public ShipBlueprintData Mothership;
 
     public void OnStartNewRun(Starmap map)
     {
         EnterNewSector(map);
-        UpgradeCoresRemaining = 0;
+        UpgradeCoresRemaining = startingUpgradeCores;
+        AvailableShips = startingAvailableShips;
+        AvailableWeapons = startingAvailableWeapons;
+        ActiveRoster = startingActiveRoster;
     }
 
     public void EnterNewSector(Starmap map)

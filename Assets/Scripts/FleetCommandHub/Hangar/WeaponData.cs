@@ -122,6 +122,11 @@ public class WeaponData : ScriptableObject
     public int BasePierceCount = 0;
     public float BaseTriggerTime = 0;
 
+    public void ResetToBase()
+    {
+        UpgradeLevel = 0;
+    }
+
     public bool CanBeUpgraded()
     {
         return UpgradeLevel < MaxUpgradeLevel;

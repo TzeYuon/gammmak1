@@ -12,6 +12,16 @@ public class LootDatabase : ScriptableObject
 
     public void Init(PlayerSaveData save)
     {
+        foreach (var weapon in allWeapons)
+        {
+            weapon.ResetToBase();
+        }
+
+        foreach (var ship in allShips)
+        {
+            ship.ResetToBase();
+        }
+
         DropableWeapons = allWeapons.Where(x => !save.AvailableWeapons.Contains(x)).ToList();
         DropableShips = allShips.Where(x => !save.AvailableShips.Contains(x)).ToList();
     }
