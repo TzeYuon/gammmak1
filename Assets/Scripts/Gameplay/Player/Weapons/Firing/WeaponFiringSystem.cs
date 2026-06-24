@@ -208,7 +208,7 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
         {
-            ExpirationTime = ElapsedTime + 5.0
+            ExpirationTime = ElapsedTime + 2.0
         });
 
         // TEMPORARY: All weapons have the same vfx

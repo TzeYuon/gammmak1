@@ -142,7 +142,8 @@ public class GameplayScreen : UIScreen
 
                     int cost = cur.GetStatInt(ShipStat.Cost);
                     VisualElement btn = UIFactory.BuildReinforcementBtn(cur.ShipName, cost);
-                    RegisterBtn(btn, count++);
+                    RegisterBtn(btn, count);
+                    count++;
 
                     reinforcementBtns.Add((cost, btn));
                     reinforcementContainer.Add(btn);

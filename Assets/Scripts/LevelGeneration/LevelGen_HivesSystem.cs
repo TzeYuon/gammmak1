@@ -39,19 +39,19 @@ partial struct LevelGen_HivesSystem : ISystem
         // set difficulty config
         float threatLevelMult = levelBlueprint.ThreatLevel switch
         {
-            ThreatLevel.None => 1.0f,
-            ThreatLevel.Low => 1.0f,
-            ThreatLevel.Medium => 1.2f,
+            ThreatLevel.Low => 0.7f,
+            ThreatLevel.Medium => 0.9f,
             ThreatLevel.High => 1.5f,
-            ThreatLevel.Boss => 2.0f,
+            ThreatLevel.Boss => 2f,
             _ => 1.0f // Fallback
         };
 
         // Base values
-        float baseDifficultyPerMinute = 0.15f;
-        float baseDifficultyPerHiveDestroyed = 0.25f;
+        float baseDifficultyPerMinute = 0.05f;
+        float baseDifficultyPerHiveDestroyed = 0.10f;
         float baseMaxSpawnRateMult = 3.0f;
         float baseMaxSpawnCountMult = 4.0f;
+        float baseSurgeInterval = 30;
 
         // set config
         ref var config = ref difficultyConfig.ValueRW;
@@ -70,8 +70,8 @@ partial struct LevelGen_HivesSystem : ISystem
         // reset surge state
         ref var sState = ref surgeState.ValueRW;
         sState.TriggerSurgeThisFrame = false;
-        sState.SurgeTimer = 30; // TEMPORARY: hardcode to 30s between surges
-        sState.CurrentInterval = 30;
+        sState.SurgeTimer = baseSurgeInterval; // TEMPORARY: hardcode to 30s between surges
+        sState.CurrentInterval = baseSurgeInterval;
 
         var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                            .CreateCommandBuffer(state.WorldUnmanaged);
