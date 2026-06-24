@@ -25,6 +25,9 @@ partial struct HeatmapUpdateSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
+        if (!terrainGridComponent.Grid.IsCreated) return;
+
         coarseHeatmapQuery.CompleteDependency();
         fineHeatmapQuery.CompleteDependency();
         CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;

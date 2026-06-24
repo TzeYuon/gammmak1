@@ -9,7 +9,7 @@ using UnityEngine;
 //[BurstCompile]
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct ShipMovementSystem : ISystem
-{
+{   
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<TerrainGridComponent>();
@@ -18,6 +18,9 @@ public partial struct ShipMovementSystem : ISystem
     //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
+        if (!terrainGridComponent.Grid.IsCreated) return;
+
         foreach (var (transform, command, buffer) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<MoveCommand>, DynamicBuffer<ShipWaypoint>>().WithAll<MoveCommand>())
         {
             if (command.ValueRO.Recalculate)
@@ -45,12 +48,10 @@ public partial struct ShipMovementSystem : ISystem
                     command.ValueRW.PathExists = false;
                 }
 
-                // Turn off the recalculate flag
                 command.ValueRW.Recalculate = false;
             }
         }
 
-        TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
         MoveShipJob job = new()
         {
             DeltaTime = SystemAPI.Time.DeltaTime,

@@ -17,6 +17,7 @@ partial struct LevelGen_HivesSystem : ISystem
         state.RequireForUpdate<LevelBlueprint>();
         state.RequireForUpdate<DifficultyConfig>();
         state.RequireForUpdate<DifficultyState>();
+        state.RequireForUpdate<LevelSpawnData>();
     }
 
     [BurstCompile]
@@ -77,17 +78,19 @@ partial struct LevelGen_HivesSystem : ISystem
                            .CreateCommandBuffer(state.WorldUnmanaged);
 
         // Generate hives
-        // TEMPORARY: spawns one in each corner
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
-        Entity hiveEntity1 = ecb.Instantiate(hivePrefab);
-        Entity hiveEntity2 = ecb.Instantiate(hivePrefab);
-        Entity hiveEntity3 = ecb.Instantiate(hivePrefab);
-        Entity hiveEntity4 = ecb.Instantiate(hivePrefab);
+        var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
 
-        //ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(1000, 1010, 0)));
-        ecb.SetComponent(hiveEntity1, LocalTransform.FromPosition(new float3(910, 910, 0)));
-        ecb.SetComponent(hiveEntity2, LocalTransform.FromPosition(new float3(1090, 1090, 0)));
-        ecb.SetComponent(hiveEntity3, LocalTransform.FromPosition(new float3(1090, 910, 0)));
-        ecb.SetComponent(hiveEntity4, LocalTransform.FromPosition(new float3(910, 1090, 0)));
+        unsafe
+        {
+            // Dynamically loop through the exact number of hives this map requires!
+            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
+            {
+                Entity hiveEntity = ecb.Instantiate(hivePrefab);
+
+                float3 spawnPos = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
+                ecb.SetComponent(hiveEntity, LocalTransform.FromPosition(spawnPos));
+            }
+        }
     }
 }

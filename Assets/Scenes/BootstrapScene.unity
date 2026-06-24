@@ -953,7 +953,7 @@ Transform:
   m_GameObject: {fileID: 9188605543483897462}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1000, y: 1000, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -969,6 +969,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6504606915043013966}
   - component: {fileID: 9188605543483897463}
+  - component: {fileID: 9188605543483897465}
+  - component: {fileID: 9188605543483897464}
   m_Layer: 0
   m_Name: TerrainManager
   m_TagString: Untagged
@@ -985,21 +987,69 @@ MonoBehaviour:
   m_GameObject: {fileID: 9188605543483897462}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3043c5b1d82d2a147b281fa71717a317, type: 3}
+  m_Script: {fileID: 11500000, guid: a329f268c678376419b83882226d1011, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GridManager
-  Width: 200
-  Height: 200
-  safezoneRadius: 70
-  worldCentre: {x: 1000, y: 1000}
-  WorldOrigin:
-    x: 0
-    y: 0
-  scale: 0.075
-  randomOffset: 0
-  wallPrefab: {fileID: 1667765430307784710, guid: 7c9764d7cd155e44db4566d150eaf598, type: 3}
-  mudPrefab: {fileID: 5912557210755108530, guid: 03260ede275a4c347a8038f8ca29cc19, type: 3}
-  poisonPrefab: {fileID: 6594686672918771132, guid: 2634575ab0fac7442a3868ab82e2bedd, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainPrefabsAuthoring
+  wallMaterial: {fileID: 2100000, guid: e1615d68bd6f82648829430cdf77839a, type: 2}
+  mudMaterial: {fileID: 2100000, guid: 710ed3e79778d5a4dae6d1e64bce21b4, type: 2}
+  poisonMaterial: {fileID: 2100000, guid: 16bb556f20fc58743b2b516333c773b3, type: 2}
+  outlineMaterial: {fileID: 2100000, guid: 0425425d721f67d4693b9f3a9ff99d2a, type: 2}
+--- !u!23 &9188605543483897464
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9188605543483897462}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials: []
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &9188605543483897465
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9188605543483897462}
+  m_Mesh: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1007,9 +1057,9 @@ SceneRoots:
   - {fileID: 1416371173}
   - {fileID: 976004702}
   - {fileID: 878546418}
-  - {fileID: 6504606915043013966}
   - {fileID: 1302568188}
   - {fileID: 265658062}
+  - {fileID: 6504606915043013966}
   - {fileID: 903249509}
   - {fileID: 1215084226}
   - {fileID: 1772670730}

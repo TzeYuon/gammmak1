@@ -18,6 +18,8 @@ partial struct HeatmapInitSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
+        if (!terrainGridComponent.Grid.IsCreated) return;
         EnemyHeatmapSettings settings = SystemAPI.GetSingleton<EnemyHeatmapSettings>();
 
         Entity e = state.EntityManager.CreateEntity();

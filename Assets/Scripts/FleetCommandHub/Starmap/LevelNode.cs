@@ -37,6 +37,6 @@ public class LevelNode
 public enum RewardType { None, UpgradeCores, WeaponBlueprint, ShipBlueprint, MothershipRepair }
 public enum ThreatLevel { None, Low, Medium, High, Boss }
 public enum ObjectiveType { HiveAssault, Survival }
-public enum TerrainType { Asteroids, Cavern, OneTunnel, TwoTunnel }
+public enum TerrainType { Asteroids, TwoTunnel, Ring, TwoRing, Swamp, Cavern, OneTunnel }
 public enum EnemyProfile { Standard, Tendrils, Ranged }
 public enum AnomalyType { None, DoubleEnemySpeed, ArmouredEnemies, LargerEnemies }
