@@ -15,7 +15,7 @@ MonoBehaviour:
   ShipName: Sword
   ShipClass: 3
   ShipID: 101
-  ShipPrefab: {fileID: 6753536424006035904, guid: 634b0afc504f52a4ebdffb927394868c, type: 3}
+  ShipPrefab: {fileID: 6753536424006035904, guid: bda03cfd1deb323438079fde22c16946, type: 3}
   ShipSystems:
   - SystemID: 1
     UpgradeLevel: 0
@@ -122,13 +122,13 @@ MonoBehaviour:
   BaseWeaponCapacity: 7
   Mounts:
   - Position: {x: 0, y: 3}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    EquippedWeapon: {fileID: 0}
   - Position: {x: 2, y: 2}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    EquippedWeapon: {fileID: 0}
   - Position: {x: -2, y: 2}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    EquippedWeapon: {fileID: 0}
   - Position: {x: 3, y: 0}
-    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+    EquippedWeapon: {fileID: 0}
   BaseCost: 17
   BaseMaxHealth: 20
   BaseSpeed: 13
