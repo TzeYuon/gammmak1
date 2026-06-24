@@ -200,6 +200,16 @@ public class ShipBlueprintData : ScriptableObject
         }
     }
 
+    public bool IsWeaponless()
+    {
+        foreach (WeaponMount mount in Mounts)
+        {
+            if (mount.EquippedWeapon != null) return false;
+        }
+
+        return true;
+    }
+
     public bool CanEquipWeaponInMount(WeaponData data, WeaponMount mount)
     {
         int remainingCap = RemainingWeaponCapacity;

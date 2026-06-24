@@ -38,6 +38,32 @@ public class PlayerSaveData : ScriptableObject
         ActiveSector.CurrentNode = node;
     }
 
+    public bool IsRosterWeaponless()
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] != null && !ActiveRoster[i].IsWeaponless())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool IsRosterEmpty()
+    {
+        for (int i = 0; i < ActiveRoster.Length; i++)
+        {
+            if (ActiveRoster[i] != null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public bool IsRosterFull()
     {
         for (int i = 0; i < ActiveRoster.Length; i++)

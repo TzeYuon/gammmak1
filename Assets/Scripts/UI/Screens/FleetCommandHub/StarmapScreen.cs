@@ -19,6 +19,7 @@ public class StarmapScreen : UIScreen
     private Label nodeTypeLbl, threatLevelLbl, objectiveLbl, enemyProfileLbl, terrainTypeLbl, rewardTypeLbl, anomalyLbl;
 
     private Button deployBtn;
+    private Label cannotDeployLbl;
     private EntityQuery gameStateQuery;
 
     private LevelNode currentNode;
@@ -30,6 +31,7 @@ public class StarmapScreen : UIScreen
         mapDetailsContainer = root.Q<VisualElement>("MapDetailsContainer");
         pathCanvas = root.Q<MapPathCanvas>("MapPathCanvas");
 
+        cannotDeployLbl = root.Q<Label>("CannotDeployLbl");
         deployBtn = root.Q<Button>("DeployBtn");
         deployBtn.clicked += OnDeployBtnClicked;
 
@@ -304,8 +306,35 @@ public class StarmapScreen : UIScreen
 
     void UpdateDeployBtn()
     {
-        if (selectedNode == null) deployBtn.SetEnabled(false);
-        else deployBtn.SetEnabled(true);
+        if (selectedNode == null)
+        {
+            DisableBtn("No selected node. Click on node above to select.");
+        }
+        else if (RunManager.SaveData.IsRosterEmpty())
+        {
+            DisableBtn("No ships in roster. Return to Hangar to assign ships.");
+        }
+        else if (RunManager.SaveData.IsRosterWeaponless())
+        {
+            DisableBtn("No weapons equipped on ships in roster. Return to Hangar to assign weapons to ships.");
+        }
+        else
+        {
+            EnableBtn();
+        }
+
+        void EnableBtn()
+        {
+            deployBtn.SetEnabled(true);
+            cannotDeployLbl.style.visibility = Visibility.Hidden;
+        }
+
+        void DisableBtn(string reason)
+        {
+            deployBtn.SetEnabled(false);
+            cannotDeployLbl.style.visibility = Visibility.Visible;
+            cannotDeployLbl.text = reason;
+        }
     }
 
     void OnDeployBtnClicked()

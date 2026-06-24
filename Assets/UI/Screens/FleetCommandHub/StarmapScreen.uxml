@@ -26,6 +26,7 @@
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 0; height: 12%; border-top-width: 2px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); align-items: center; justify-content: center;">
             <ui:Button text="[ DEPLOY ]" name="DeployBtn" class="button text" style="width: 250px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; height: 75px; font-size: 30px;"/>
+            <ui:Label text="Label" name="CannotDeployLbl" class="text" style="font-size: 18px; visibility: visible;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
