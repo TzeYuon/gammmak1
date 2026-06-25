@@ -18,24 +18,21 @@ MonoBehaviour:
   EquipCost: 4
   UpgradeLevel: 0
   Upgrades:
-  - Cost: 100
+  - Cost: 400
     Description: 
     Effects:
-    - StatType: 0
+    - StatType: 2
       ModifierType: 1
-      Value: 0.1
-    - StatType: 1
+      Value: 0.2
+    - StatType: 4
       ModifierType: 1
       Value: 0.05
-  - Cost: 300
+  - Cost: 700
     Description: 
     Effects:
-    - StatType: 0
-      ModifierType: 1
-      Value: 0.1
     - StatType: 1
       ModifierType: 1
-      Value: 0.1
+      Value: 0.2
   BaseRange: 50
   DensityBias: 1
   AngleBias: 0

@@ -8,20 +8,23 @@ public enum WeaponID : byte
     Laser = 2,
     Missile = 3,
     Railgun = 4,
+    SuperHeavyGun = 5,
+    FlakShotgun = 6,
 }
 
 public enum WeaponStat
 {
-    Damage,
-    FireRate,
-    Range,
-    Spread,
-    HitRadius,
-    ExplosionRadius,
-    ProjectileSpeed,
-    ProjectileTurnSpeed,
-    PierceCount,
-    TriggerTime,
+    Damage = 0,
+    FireRate = 1,
+    Range = 2,
+    Spread = 3,
+    HitRadius = 4,
+    ExplosionRadius = 5,
+    ProjectileSpeed = 6,
+    ProjectileTurnSpeed = 7,
+    PierceCount = 8,
+    TriggerTime = 9,
+    ProjectileCount = 10,
 }
 
 public enum ModifierType : byte
@@ -100,6 +103,7 @@ public class WeaponData : ScriptableObject
 
     [Header("Projectile Stats (Ignore if Hitscan)")]
     public bool IgnoreObstacles = false;
+    public int BaseProjectileCount = 1;
     public float BaseProjectileSpeed = 50f;
     public float BaseProjectileTurnSpeed = 5;
     public float BaseHitRadius = 1.0f;
@@ -134,6 +138,11 @@ public class WeaponData : ScriptableObject
         return Upgrades[UpgradeLevel - 1].Cost;
     }
 
+    public int GetStatInt(WeaponStat statType)
+    {
+        return Mathf.RoundToInt(GetStat(statType));
+    }
+
     public float GetStat(WeaponStat statType)
     {
         // Set base values
@@ -150,6 +159,7 @@ public class WeaponData : ScriptableObject
             case WeaponStat.ProjectileTurnSpeed: baseValue = BaseProjectileTurnSpeed; break;
             case WeaponStat.PierceCount: baseValue = BasePierceCount; break;
             case WeaponStat.TriggerTime: baseValue = BaseTriggerTime; break;
+            case WeaponStat.ProjectileCount: baseValue = BaseProjectileCount; break;
         }
 
         float flatBonus = 0f;

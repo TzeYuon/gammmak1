@@ -38,6 +38,7 @@ public static class EnumUtils
             WeaponStat.ProjectileSpeed => "Projectile Speed",
             WeaponStat.ProjectileTurnSpeed => "Projectile Turn Speed",
             WeaponStat.PierceCount => "Piercing",
+            WeaponStat.ProjectileCount => "Number of projectiles",
             _ => stat.ToString(),
         };
     }

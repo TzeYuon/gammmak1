@@ -48,6 +48,7 @@ public struct WeaponCombatStats : IComponentData
     public float Spread;
 
     public bool IgnoreObstacles;
+    public int ProjectileCount;
     public float ProjectileSpeed;
     public float ProjectileTurnSpeed;
     public float HitRadius;

@@ -164,60 +164,63 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         if (TurretLookup.HasComponent(entity) && math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
 
-        Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
-
-        // Add spread
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
-        float randomAngleOffset = math.radians(rng.NextFloat(-stats.Spread, stats.Spread));
-        float baseAngle = math.atan2(weaponForward.y, weaponForward.x); 
-        float finalAngle = baseAngle + randomAngleOffset;
-        quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
-        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(projectileWeapon.WeaponStartOffset, 0));
+        float baseAngle = math.atan2(weaponForward.y, weaponForward.x);
+        float3 spawnPoint = localToWorld.Position + math.rotate(baseAngle, new float3(projectileWeapon.WeaponStartOffset, 0));
 
-        ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
-            spawnPoint,
-            rotation)
-        );
+        for (int i = 0; i < stats.ProjectileCount; i++) {
+            Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
-        {
-            MovedThisFrame = 0
-        });
+            // Add spread
+            float randomAngleOffset = math.radians(rng.NextFloat(-stats.Spread, stats.Spread));
+            float finalAngle = baseAngle + randomAngleOffset;
+            quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
+            
+            ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
+                spawnPoint,
+                rotation)
+            );
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
-        {
-            Speed = stats.ProjectileSpeed,
-            TurnSpeed = stats.ProjectileTurnSpeed,
-            HomingRange = 60f
-        });
+            ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
+            {
+                MovedThisFrame = 0
+            });
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerState
-        {
-            IsTriggered = false,
-            RemainingHits = stats.PierceCount
-        });
+            ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
+            {
+                Speed = stats.ProjectileSpeed,
+                TurnSpeed = stats.ProjectileTurnSpeed,
+                HomingRange = 60f
+            });
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerStats
-        {
-            TargetPos = targetPos,
-            HitRadius = stats.HitRadius,
-            TriggerTime = stats.TriggerTime,
-        });
+            ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerState
+            {
+                IsTriggered = false,
+                RemainingHits = stats.PierceCount
+            });
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectilePayloadStats
-        {
-            Damage = stats.Damage,
-            ExplosionRadiusSq = stats.ExplosionRadiusSq
-        });
+            ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerStats
+            {
+                TargetPos = targetPos,
+                HitRadius = stats.HitRadius,
+                TriggerTime = stats.TriggerTime,
+            });
 
-        ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
-        {
-            ExpirationTime = ElapsedTime + 2.0
-        });
+            ECB.SetComponent(chunkIndex, projectile, new ProjectilePayloadStats
+            {
+                Damage = stats.Damage,
+                ExplosionRadiusSq = stats.ExplosionRadiusSq
+            });
 
-        if (!stats.IgnoreObstacles)
-        {
-            ECB.AddComponent(chunkIndex, projectile, new CollideWithObstacles());
+            ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
+            {
+                ExpirationTime = ElapsedTime + 2.0
+            });
+
+            if (!stats.IgnoreObstacles)
+            {
+                ECB.AddComponent(chunkIndex, projectile, new CollideWithObstacles());
+            } 
         }
 
         // TEMPORARY: All weapons have the same vfx
