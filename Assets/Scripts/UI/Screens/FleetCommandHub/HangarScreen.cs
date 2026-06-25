@@ -1,4 +1,5 @@
 using Mono.Cecil.Cil;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,6 +7,9 @@ using UnityEngine.UIElements;
 public class HangarScreen : UIScreen
 {
     public FleetCommandHubScreen FleetCommandHubScreen;
+
+    private Label hangarWarningLbl;
+    private IVisualElementScheduledItem hideWarningTask;
 
     private ScrollView shipListContainer;
     private Dictionary<ShipBlueprintData, Button> shipButtons = new();
@@ -20,6 +24,8 @@ public class HangarScreen : UIScreen
     {
         FleetCommandHubScreen = fleetCommandHubScreen;
 
+        hangarWarningLbl = root.Q<Label>("HangarWarningLbl");
+
         shipListContainer = root.Q<ScrollView>("ShipsScrollView");
 
         ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this);
@@ -30,6 +36,7 @@ public class HangarScreen : UIScreen
     {
         ShipDetailsElement.Hide();
         HangarContextMenu.Hide();
+        HideWarningImmediate();
     }
 
     protected override void OnShow()
@@ -37,6 +44,24 @@ public class HangarScreen : UIScreen
         PopulateShipList();
         ShipDetailsElement.Hide();
         HangarContextMenu.Hide();
+        HideWarningImmediate();
+    }
+
+    public void HideWarningImmediate()
+    {
+        hangarWarningLbl.RemoveFromClassList("warning--visible");
+    }
+
+    public void ShowWarning(string message)
+    {
+        hangarWarningLbl.text = message;
+        hangarWarningLbl.AddToClassList("warning--visible");
+
+        hideWarningTask?.Pause();
+        hideWarningTask = hangarWarningLbl.schedule.Execute(() =>
+        {
+            HideWarningImmediate();
+        }).StartingIn(2000);
     }
 
     private void PopulateShipList()
@@ -101,7 +126,7 @@ public class ShipDetailsElement
     private Label shipTitle;
     private Label shipClass;
     private VisualElement shipVisual;
-    private Label ShipDescription;
+    private Label shipDescription;
     private Button toggleRosterBtn;
 
     private PipContainerVisualElement weaponCapacityElement;
@@ -119,6 +144,8 @@ public class ShipDetailsElement
         container = root;
         shipTitle = root.Q<Label>("ShipTitle");
         shipClass = root.Q<Label>("ShipClass");
+
+        shipDescription = root.Q<Label>("ShipDescription");
 
         weaponCapacityElement = root.Q<PipContainerVisualElement>("WeaponCapacityContainer");
         weaponMountsScrollViewContainer = root.Q<VisualElement>("WeaponMountScrollViewContainer");
@@ -152,6 +179,9 @@ public class ShipDetailsElement
 
         // update ship class
         shipClass.text = CurrentShip.ShipClass.ToString().ToUpper();
+
+        // Update ship stats in description
+        UpdateShipStatsDescription();
 
         // update systems scrollview
         systemsScrollView.Clear();
@@ -194,6 +224,16 @@ public class ShipDetailsElement
         container.style.display = DisplayStyle.Flex;
     }
 
+    void UpdateShipStatsDescription()
+    {
+        string stats = "";
+        foreach (ShipStat stat in Enum.GetValues(typeof(ShipStat)))
+        {
+            stats += EnumUtils.GetStatName(stat) + ": " + CurrentShip.GetStat(stat) + "\n";
+        }
+        shipDescription.text = stats.TrimEnd();
+    }
+
     void OnSytemItemUpgradeClicked(ShipSystem system, VisualElement systemItem)
     {
         if (system == null) return;
@@ -213,12 +253,18 @@ public class ShipDetailsElement
 
         OnPlayerCurrencyChanged();
         UpdateWeaponCapacity(); // If weapons capacity was affected
+        UpdateShipStatsDescription(); // stats were affected
     }
 
     void OnSytemItemRefundClicked(ShipSystem system, VisualElement systemItem)
     {
         if (system == null) return;
-        if (!system.CanBeRefunded()) return;
+        if (!CurrentShip.CanRefundSystem(system, out string reason))
+        {
+            // show warning
+            hangarScreen.ShowWarning("Cannot Refund System: " + reason);
+            return;
+        }
 
         // refund cost
         var saveData = RunManager.SaveData;
@@ -230,6 +276,8 @@ public class ShipDetailsElement
 
         // update ui
         OnPlayerCurrencyChanged();
+        UpdateWeaponCapacity(); // If weapons capacity was affected
+        UpdateShipStatsDescription(); // stats were affected
     }
 
     public void UpdateAllSystemItems()

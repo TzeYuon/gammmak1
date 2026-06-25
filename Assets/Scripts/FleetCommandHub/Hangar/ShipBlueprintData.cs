@@ -78,7 +78,7 @@ public class ShipSystemUpgradeEffect
     public string GetDescription()
     {
         float displayValue = Value;
-        string statName = GetStatName(StatType);
+        string statName = EnumUtils.GetStatName(StatType);
 
         string sign = displayValue > 0 ? "+" : "";
 
@@ -88,28 +88,7 @@ public class ShipSystemUpgradeEffect
             return $"{sign}{displayValue} {statName}";
     }
 
-    private string GetStatName(ShipStat stat)
-    {
-        switch (stat)
-        {
-            case ShipStat.Cost:
-                return "Deployment Cost";
-            case ShipStat.MaxHealth:
-                return "Hull";
-            case ShipStat.Speed:
-                return "Max Speed";
-            case ShipStat.Acceleration:
-                return "Acceleration";
-            case ShipStat.TurnSpeed:
-                return "Turn Speed";
-            case ShipStat.CollectionRadius:
-                return "Collection Radius";
-            case ShipStat.WeaponCapacity:
-                return "Weapon Capacity";
-            default:
-                return stat.ToString();
-        }
-    }
+    
 }
 
 [System.Serializable]
@@ -215,6 +194,32 @@ public class ShipBlueprintData : ScriptableObject
         int remainingCap = RemainingWeaponCapacity;
         if (mount.EquippedWeapon != null) return remainingCap + mount.EquippedWeapon.EquipCost >= data.EquipCost;
         else return remainingCap >= data.EquipCost;
+    }
+
+    public bool CanRefundSystem(ShipSystem system, out string reason)
+    {
+        reason = "";
+        if (!system.CanBeRefunded())
+        {
+            reason = "Upgrade level already at minimum";
+            return false;
+        }
+
+        // simulate the refund
+        system.UpgradeLevel--;
+
+        // check if weapon cap will be exceeded
+        if (RemainingWeaponCapacity < 0)
+        {
+            // undo the refund
+            system.UpgradeLevel++;
+
+            reason = "Weapon capacity will be exceeded if refunded. Remove some weapons first.";
+            return false;
+        }
+
+        system.UpgradeLevel++;
+        return true;
     }
 
     public float GetStat(ShipStat statType)

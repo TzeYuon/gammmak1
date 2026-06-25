@@ -40,7 +40,9 @@ public class FleetCommandHubScreen : UIScreen
     protected override void OnShow()
     {
         // Show default screen
-        ShowScreen(hangarScreen);
+        hangarScreen.Hide();
+        weaponsScreen.Hide();
+        starmapScreen.Hide();
         UpdateUpgradeCoreCounter();
     }
 

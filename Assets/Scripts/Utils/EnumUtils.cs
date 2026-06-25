@@ -1,0 +1,44 @@
+using UnityEngine;
+
+public static class EnumUtils
+{
+    public static string GetStatName(ShipStat stat)
+    {
+        switch (stat)
+        {
+            case ShipStat.Cost:
+                return "Deployment Cost";
+            case ShipStat.MaxHealth:
+                return "Hull";
+            case ShipStat.Speed:
+                return "Max Speed";
+            case ShipStat.Acceleration:
+                return "Acceleration";
+            case ShipStat.TurnSpeed:
+                return "Turn Speed";
+            case ShipStat.CollectionRadius:
+                return "Collection Radius";
+            case ShipStat.WeaponCapacity:
+                return "Weapon Capacity";
+            default:
+                return stat.ToString();
+        }
+    }
+
+    public static string GetStatName(WeaponStat stat)
+    {
+        return stat switch
+        {
+            WeaponStat.Damage => "Damage",
+            WeaponStat.FireRate => "Fire Rate",
+            WeaponStat.Range => "Range",
+            WeaponStat.Spread => "Accuracy",
+            WeaponStat.HitRadius => "Projectile Size",
+            WeaponStat.ExplosionRadius => "Blast Radius",
+            WeaponStat.ProjectileSpeed => "Projectile Speed",
+            WeaponStat.ProjectileTurnSpeed => "Projectile Turn Speed",
+            WeaponStat.PierceCount => "Piercing",
+            _ => stat.ToString(),
+        };
+    }
+}

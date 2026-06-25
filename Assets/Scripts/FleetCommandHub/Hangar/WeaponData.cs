@@ -40,7 +40,7 @@ public class WeaponUpgradeEffect
     public string GetDescription()
     {
         float displayValue = Value;
-        string statName = GetStatName(StatType);
+        string statName = EnumUtils.GetStatName(StatType);
 
         if (StatType == WeaponStat.Spread)
         {
@@ -53,23 +53,6 @@ public class WeaponUpgradeEffect
             return $"{sign}{Mathf.RoundToInt(displayValue * 100f)}% {statName}";
         else
             return $"{sign}{displayValue} {statName}";
-    }
-
-    private string GetStatName(WeaponStat stat)
-    {
-        return stat switch
-        {
-            WeaponStat.Damage => "Damage",
-            WeaponStat.FireRate => "Fire Rate",
-            WeaponStat.Range => "Range",
-            WeaponStat.Spread => "Accuracy",
-            WeaponStat.HitRadius => "Projectile Size",
-            WeaponStat.ExplosionRadius => "Blast Radius",
-            WeaponStat.ProjectileSpeed => "Projectile Speed",
-            WeaponStat.ProjectileTurnSpeed => "Projectile Turn Speed",
-            WeaponStat.PierceCount => "Piercing",
-            _ => stat.ToString(),
-        };
     }
 }
 
