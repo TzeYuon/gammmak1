@@ -54,6 +54,12 @@ public class CameraManager : MonoBehaviour
         }
     }
 
+    public void SnapToPosition(Vector3 newPos)
+    {
+        cameraTargetPos = new Vector3(newPos.x, newPos.y, cameraTransform.position.z);
+        cameraTransform.position = cameraTargetPos;
+    }
+
     public void Clear()
     {
         cameraTargetPos = cameraTransform.position;

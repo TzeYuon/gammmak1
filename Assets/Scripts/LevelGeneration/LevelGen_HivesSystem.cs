@@ -83,13 +83,24 @@ partial struct LevelGen_HivesSystem : ISystem
 
         unsafe
         {
-            // Dynamically loop through the exact number of hives this map requires!
-            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
+            for (int i = 0; i < spawnData.TotalHiveSpots; i++)
             {
                 Entity hiveEntity = ecb.Instantiate(hivePrefab);
 
                 float3 spawnPos = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
                 ecb.SetComponent(hiveEntity, LocalTransform.FromPosition(spawnPos));
+
+                if (i < spawnData.ActiveHiveCount)
+                {
+                    ecb.AddComponent<ActiveHiveTag>(hiveEntity);
+                    ecb.SetComponentEnabled<ActiveHiveTag>(hiveEntity, true);
+                    ecb.RemoveComponent<DormantHiveTag>(hiveEntity);
+                }
+                else
+                {
+                    ecb.AddComponent<DormantHiveTag>(hiveEntity);
+                    ecb.RemoveComponent<ActiveHiveTag>(hiveEntity);
+                }
             }
         }
     }

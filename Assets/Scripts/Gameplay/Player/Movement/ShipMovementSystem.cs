@@ -138,7 +138,7 @@ public partial struct MoveShipJob : IJobEntity
         int gridX = (int)math.round(currentPos.x) - WorldOrigin.x;
         int gridY = (int)math.round(currentPos.y) - WorldOrigin.y;
 
-        float shipRadius = 0.65f;
+        float shipRadius = 0.55f;
 
         for (int x = -1; x <= 1; x++)
         {
@@ -191,10 +191,10 @@ public partial struct MoveShipJob : IJobEntity
 
                         float2 centerDir = currentPos - wallCenter;
                         float centerDistSq = math.lengthsq(centerDir);
-                        if (centerDistSq < 1.44f && centerDistSq > 0.01f)
+                        if (centerDistSq < 1.21f && centerDistSq > 0.01f)
                         {
                             float centerDist = math.sqrt(centerDistSq);
-                            float pushStrength = (1.2f - centerDist) * 15.0f;
+                            float pushStrength = (1.1f - centerDist) * 15.0f;
                             float2 slideNormal = centerDir / centerDist;
 
                             float velIntoWall = math.dot(velocity.Value, slideNormal);

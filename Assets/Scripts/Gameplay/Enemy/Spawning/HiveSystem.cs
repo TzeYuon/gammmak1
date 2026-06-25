@@ -43,7 +43,7 @@ partial struct HiveSystem : ISystem
         }
 
         // Trickle spawning behaviour
-        foreach (var (hive, transform, spawnerBuffer, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>, DynamicBuffer<TrickleSpawnerData>>().WithEntityAccess())
+        foreach (var (hive, transform, spawnerBuffer, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>, DynamicBuffer<TrickleSpawnerData>>().WithAll<ActiveHiveTag>().WithEntityAccess())
         {
             float3 hivePosition = transform.ValueRO.Position;
             float spawnRadius = hive.ValueRO.Size;
@@ -81,7 +81,7 @@ partial struct HiveSystem : ISystem
 
         // Surge behaviour
         if (!SystemAPI.TryGetSingleton(out GlobalSurgeState surgeState)) return;
-        foreach (var (hive, transform, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>().WithEntityAccess())
+        foreach (var (hive, transform, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>().WithAll<ActiveHiveTag>().WithEntityAccess())
         {
             // queue spawns for surge
             if (surgeState.TriggerSurgeThisFrame)

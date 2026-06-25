@@ -59,6 +59,10 @@ class HiveAuthoring : MonoBehaviour
                 Value = authoring.Size,
             });
 
+            AddComponent<DormantHiveTag>(entity);
+            AddComponent<ActiveHiveTag>(entity);
+            SetComponentEnabled<ActiveHiveTag>(entity, false);
+
             AddComponent(entity, new DeadTag());
             SetComponentEnabled<DeadTag>(entity, false);
         }
