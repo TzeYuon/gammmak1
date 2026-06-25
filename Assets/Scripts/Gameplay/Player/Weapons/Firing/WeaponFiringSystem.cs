@@ -211,6 +211,11 @@ public partial struct ProjectileFiringJob : IJobEntity
             ExpirationTime = ElapsedTime + 2.0
         });
 
+        if (!stats.IgnoreObstacles)
+        {
+            ECB.AddComponent(chunkIndex, projectile, new CollideWithObstacles());
+        }
+
         // TEMPORARY: All weapons have the same vfx
         VFXWriter.Enqueue(new VFXPayload
         {

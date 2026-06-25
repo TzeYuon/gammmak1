@@ -7,6 +7,7 @@ public enum WeaponID : byte
     PDC = 1,
     Laser = 2,
     Missile = 3,
+    Railgun = 4,
 }
 
 public enum WeaponStat
@@ -98,6 +99,7 @@ public class WeaponData : ScriptableObject
     public float BaseSpreadDegrees = 5f;
 
     [Header("Projectile Stats (Ignore if Hitscan)")]
+    public bool IgnoreObstacles = false;
     public float BaseProjectileSpeed = 50f;
     public float BaseProjectileTurnSpeed = 5;
     public float BaseHitRadius = 1.0f;

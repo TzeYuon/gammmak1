@@ -387,6 +387,7 @@ public partial struct ProjectileLifespanJob : IJobEntity
 }
 
 [BurstCompile]
+[WithAll(typeof(CollideWithObstacles))]
 public partial struct ObstacleTriggerJob : IJobEntity
 {
     [ReadOnly] public NativeArray<int> ObstacleGrid;

@@ -43,6 +43,7 @@ MonoBehaviour:
   BaseDamage: 10
   BaseFireRate: 11
   BaseSpreadDegrees: 5
+  IgnoreObstacles: 0
   BaseProjectileSpeed: 120
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0.3

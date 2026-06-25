@@ -141,6 +141,7 @@ public class LevelHandoff : MonoBehaviour
 
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
+                        IgnoreObstacles = weapon.IgnoreObstacles,
                         Range = weapon.GetStat(WeaponStat.Range),
                         RangeSq = range * range,
                         DensityBias = weapon.DensityBias,
@@ -153,6 +154,7 @@ public class LevelHandoff : MonoBehaviour
                         Damage = weapon.GetStat(WeaponStat.Damage),
                         FireRate = weapon.GetStat(WeaponStat.FireRate),
                         Spread = weapon.GetStat(WeaponStat.Spread),
+                        IgnoreObstacles = weapon.IgnoreObstacles,
                         ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
                         ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
                         HitRadius = weapon.GetStat(WeaponStat.HitRadius),
@@ -214,6 +216,7 @@ public class LevelHandoff : MonoBehaviour
 
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
+                        IgnoreObstacles = weapon.IgnoreObstacles,
                         Range = weapon.GetStat(WeaponStat.Range),
                         RangeSq = range * range,
                         DensityBias = weapon.DensityBias,
@@ -226,6 +229,7 @@ public class LevelHandoff : MonoBehaviour
                         Damage = weapon.GetStat(WeaponStat.Damage),
                         FireRate = weapon.GetStat(WeaponStat.FireRate),
                         Spread = weapon.GetStat(WeaponStat.Spread),
+                        IgnoreObstacles = weapon.IgnoreObstacles,
                         ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
                         ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
                         HitRadius = weapon.GetStat(WeaponStat.HitRadius),

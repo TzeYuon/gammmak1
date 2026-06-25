@@ -3,6 +3,7 @@ using Unity.Mathematics;
 
 public struct WeaponTargetingStats : IComponentData
 {
+    public bool IgnoreObstacles;
     public float Range;
     public float RangeSq;
     public float DensityBias;
@@ -46,6 +47,7 @@ public struct WeaponCombatStats : IComponentData
     public float FireRate;
     public float Spread;
 
+    public bool IgnoreObstacles;
     public float ProjectileSpeed;
     public float ProjectileTurnSpeed;
     public float HitRadius;

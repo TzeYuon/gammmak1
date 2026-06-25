@@ -146,7 +146,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
                         float distSq = math.distancesq(weaponPos, p);
                         if (distSq > rangeSq) continue; // range check
 
-                        if (!GridUtility.HasLineOfSight(
+                        if (!stats.IgnoreObstacles && !GridUtility.HasLineOfSight(
                             weaponPos,
                             p,
                             ObstacleGrid,
@@ -235,7 +235,7 @@ public partial struct HeatmapTargetingJob : IJobEntity
 
                 if (distSq > stats.Range * stats.Range) continue;
 
-                if (!GridUtility.HasLineOfSight(
+                if (!stats.IgnoreObstacles && !GridUtility.HasLineOfSight(
                     weaponPos, 
                     cellWorldPos, 
                     ObstacleGrid,

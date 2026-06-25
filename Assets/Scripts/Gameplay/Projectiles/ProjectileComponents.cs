@@ -83,3 +83,6 @@ public struct ProjectileLifespan : IComponentData
 {
     public double ExpirationTime;
 }
+
+public struct CollideWithObstacles : IComponentData
+{}
