@@ -21,11 +21,14 @@ class ProjectileAuthoring : MonoBehaviour
             AddComponent<LevelEntityTag>(entity);
 
             // Universal stats
+            AddComponent<ProjectileMovement>(entity);
             AddComponent<ProjectileMovementStats>(entity);
             AddComponent<ProjectileTriggerState>(entity);
             AddComponent<ProjectileTriggerStats>(entity);
             AddComponent<ProjectilePayloadStats>(entity);
             AddComponent<ProjectileLifespan>(entity);
+
+            AddBuffer<ProjectileHitElement>(entity);
 
             // Movement
             if (authoring.Movement == MovementType.Linear)

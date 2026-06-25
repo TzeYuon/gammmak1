@@ -179,6 +179,11 @@ public partial struct ProjectileFiringJob : IJobEntity
             rotation)
         );
 
+        ECB.SetComponent(chunkIndex, projectile, new ProjectileMovement
+        {
+            MovedThisFrame = 0
+        });
+
         ECB.SetComponent(chunkIndex, projectile, new ProjectileMovementStats
         {
             Speed = stats.ProjectileSpeed,
@@ -189,7 +194,6 @@ public partial struct ProjectileFiringJob : IJobEntity
         ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerState
         {
             IsTriggered = false,
-            EntityHit = Entity.Null,
             RemainingHits = stats.PierceCount
         });
 

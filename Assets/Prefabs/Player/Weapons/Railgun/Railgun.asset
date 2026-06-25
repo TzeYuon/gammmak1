@@ -41,12 +41,12 @@ MonoBehaviour:
   AngleBias: 0
   DistanceBias: 0
   BaseDamage: 10
-  BaseFireRate: 1
-  BaseSpreadDegrees: 1
+  BaseFireRate: 0.2
+  BaseSpreadDegrees: 0
   IgnoreObstacles: 1
   BaseProjectileSpeed: 200
   BaseProjectileTurnSpeed: 0
-  BaseHitRadius: 3
+  BaseHitRadius: 5
   BaseExplosionRadius: 0
   BasePierceCount: 100
   BaseTriggerTime: 0

@@ -114,9 +114,12 @@ public partial struct LinearFlightJob : IJobEntity
 
     private void Execute(
         ref LocalTransform transform, 
+        ref ProjectileMovement movement,
         in ProjectileMovementStats stats)
     {
+        float3 prevPos = transform.Position;
         transform.Position += new float3(DeltaTime * stats.Speed * transform.Up().xy, 0);
+        movement.MovedThisFrame = (transform.Position - prevPos).xy;
     }
 }
 
@@ -132,6 +135,7 @@ public partial struct HomingFlightJob : IJobEntity
 
     private void Execute(
         ref LocalTransform transform,
+        ref ProjectileMovement movement,
         in ProjectileMovementStats stats,
         in HomingFlight homing
         )
@@ -197,6 +201,8 @@ public partial struct HomingFlightJob : IJobEntity
         // Apply move and rotate
         transform.Position.xy += DeltaTime * stats.Speed * newDir;
         transform.Rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
+
+        movement.MovedThisFrame = transform.Position.xy - currentPos;
     }
 }
 
@@ -207,44 +213,126 @@ public partial struct ContactTriggerJob : IJobEntity
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
     [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
+
     public int2 WorldOrigin;
     public float CellSize;
     public int GridWidth;
 
     private void Execute(
-        in LocalTransform transform, 
+        Entity entity,
+        in LocalTransform transform,
+        in ProjectileMovement movement,
         ref ProjectileTriggerState state,
-        in ProjectileTriggerStats stats
-        )
+        in ProjectileTriggerStats stats,
+        ref DynamicBuffer<ProjectileHitElement> hitBuffer)
     {
         if (state.IsTriggered) return;
 
-        int index = GridUtility.WorldPosToIndex(transform.Position.xy, WorldOrigin, CellSize, GridWidth);
-        if (Map.TryGetFirstValue(index, out Entity bug, out var it))
-        {
-            do
+        float2 currentPos = transform.Position.xy;
+        float2 previousPos = currentPos - (movement.MovedThisFrame.xy);
+
+        float travelDist = math.distance(previousPos, currentPos);
+        int steps = (int)math.ceil(travelDist / (CellSize * 0.5f));
+        int2 lastCheckedCell = new int2(-9999, -9999);
+
+        // Raymarch to simulate entire movement in one frame
+        for (int i = 0; i <= steps; i++)
+        { 
+            float t = steps == 0 ? 1.0f : (float)i / steps;
+            float2 checkPos = math.lerp(previousPos, currentPos, t);
+
+            int2 cell2D = (int2)math.floor((checkPos - WorldOrigin) / CellSize);
+
+            if (cell2D.Equals(lastCheckedCell)) continue;
+            lastCheckedCell = cell2D;
+
+            int index = GridUtility.WorldPosToIndex(checkPos, WorldOrigin, CellSize, GridWidth);
+
+            if (Map.TryGetFirstValue(index, out Entity enemy, out var it))
             {
-                if (!TransformLookup.HasComponent(bug)) continue;
-
-                float targetRadius = 0.5f;
-                if (RadiusLookup.HasComponent(bug))
+                do
                 {
-                    targetRadius = RadiusLookup[bug].Value;
-                }
+                    if (!TransformLookup.HasComponent(enemy)) continue;
 
-                float combinedRadius = stats.HitRadius + targetRadius;
-                float maxHitDistSq = combinedRadius * combinedRadius;
+                    bool alreadyHit = false;
+                    for (int h = 0; h < hitBuffer.Length; h++)
+                    {
+                        if (hitBuffer[h].HitEntity == enemy)
+                        {
+                            alreadyHit = true;
+                            break;
+                        }
+                    }
+                    if (alreadyHit) continue;
 
-                if (math.distancesq(transform.Position.xy, TransformLookup[bug].Position.xy) <= maxHitDistSq)
-                {
-                    state.IsTriggered = true;
-                    state.EntityHit = bug;
-                    break;
-                }
-            } while (Map.TryGetNextValue(out bug, ref it));
+                    float targetRadius = 0.5f;
+                    if (RadiusLookup.HasComponent(enemy))
+                    {
+                        targetRadius = RadiusLookup[enemy].Value;
+                    }
+
+                    float combinedRadius = stats.HitRadius + targetRadius;
+                    float maxHitDistSq = combinedRadius * combinedRadius;
+
+                    float distSq = math.distancesq(checkPos, TransformLookup[enemy].Position.xy);
+
+                    if (distSq <= maxHitDistSq)
+                    {
+                        state.IsTriggered = true;
+                        hitBuffer.Add(new ProjectileHitElement { HitEntity = enemy });
+                    }
+
+                } while (Map.TryGetNextValue(out enemy, ref it));
+            }
         }
     }
 }
+
+//[BurstCompile]
+//[WithAll(typeof(ContactTrigger))]
+//public partial struct ContactTriggerJob : IJobEntity
+//{
+//    [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
+//    [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+//    [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
+//    public int2 WorldOrigin;
+//    public float CellSize;
+//    public int GridWidth;
+
+//    private void Execute(
+//        in LocalTransform transform, 
+//        ref ProjectileTriggerState state,
+//        in ProjectileTriggerStats stats
+//        )
+//    {
+//        if (state.IsTriggered) return;
+
+//        int index = GridUtility.WorldPosToIndex(transform.Position.xy, WorldOrigin, CellSize, GridWidth);
+//        if (Map.TryGetFirstValue(index, out Entity bug, out var it))
+//        {
+//            do
+//            {
+//                if (!TransformLookup.HasComponent(bug)) continue;
+
+//                float targetRadius = 0.5f;
+//                if (RadiusLookup.HasComponent(bug))
+//                {
+//                    targetRadius = RadiusLookup[bug].Value;
+//                }
+
+//                float combinedRadius = stats.HitRadius + targetRadius;
+//                float maxHitDistSq = combinedRadius * combinedRadius;
+
+//                if (math.distancesq(transform.Position.xy, TransformLookup[bug].Position.xy) <= maxHitDistSq)
+//                {
+//                    state.IsTriggered = true;
+//                    state.EntityHit = bug;
+//                    break;
+//                }
+//            } while (Map.TryGetNextValue(out bug, ref it));
+//        }
+//    }
+//}
 
 [BurstCompile]
 [WithAll(typeof(CoordinateTrigger))]
@@ -295,13 +383,21 @@ public partial struct KineticPayloadJob : IJobEntity
         Entity entity, 
         [ChunkIndexInQuery] int chunkIndex, 
         in ProjectileTriggerState trigger,
+        ref DynamicBuffer<ProjectileHitElement> hitBuffer,
         in ProjectilePayloadStats stats
         )
     {
         if (!trigger.IsTriggered) return;
 
         // Apply damage
-        if (trigger.EntityHit != Entity.Null) ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
+        for (int i = 0; i < hitBuffer.Length; i++)
+        {
+            Entity hitEntity = hitBuffer[i].HitEntity;
+            ECB.AppendToBuffer(chunkIndex, hitEntity, new DamageEvent { Value = stats.Damage });
+        }
+
+        // Clear the buffer for the next frame
+        hitBuffer.Clear();
 
         // Destroy the projectile
         ECB.DestroyEntity(chunkIndex, entity);
@@ -317,17 +413,22 @@ public partial struct PiercingPayloadJob : IJobEntity
     private void Execute(
         Entity entity, 
         [ChunkIndexInQuery] int chunkIndex, 
-        ref ProjectileTriggerState trigger, 
+        ref ProjectileTriggerState trigger,
+        ref DynamicBuffer<ProjectileHitElement> hitBuffer,
         in ProjectilePayloadStats stats
         )
     {
         if (!trigger.IsTriggered) return;
 
         // Apply damage
-        if (trigger.EntityHit != Entity.Null) ECB.AppendToBuffer(chunkIndex, trigger.EntityHit, new DamageEvent { Value = stats.Damage });
+        for (int i = 0; i < hitBuffer.Length && trigger.RemainingHits > 0; i++)
+        {
+            Entity hitEntity = hitBuffer[i].HitEntity;
+            ECB.AppendToBuffer(chunkIndex, hitEntity, new DamageEvent { Value = stats.Damage });
 
-        // Decrement pierce count
-        trigger.RemainingHits--;
+            // Decrement pierce count
+            trigger.RemainingHits--;
+        }
 
         // Destroy projectile if no remaining hits
         if (trigger.RemainingHits <= 0)
@@ -335,6 +436,9 @@ public partial struct PiercingPayloadJob : IJobEntity
             ECB.DestroyEntity(chunkIndex, entity);
             return;
         }
+
+        // Clear the buffer for the next frame
+        hitBuffer.Clear();
 
         // Reset trigger
         trigger.IsTriggered = false;

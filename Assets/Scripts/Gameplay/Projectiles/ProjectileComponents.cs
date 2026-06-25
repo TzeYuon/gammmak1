@@ -9,6 +9,11 @@ public struct ProjectileMovementStats : IComponentData
     public float TurnSpeed;
 }
 
+public struct ProjectileMovement : IComponentData
+{
+    public float2 MovedThisFrame;
+}
+
 /// <summary>
 /// Projectile flies straight until trigger
 /// </summary>
@@ -25,12 +30,20 @@ public struct HomingFlight : IComponentData
 
 // Trigger
 /// <summary>
+/// projectile hit entities stored in a buffer on the projectile
+/// </summary>
+[InternalBufferCapacity(4)]
+public struct ProjectileHitElement : IBufferElementData
+{
+    public Entity HitEntity;
+}
+
+/// <summary>
 /// Universal trigger for the payload to read
 /// </summary>
 public struct ProjectileTriggerState : IComponentData
 {
     public bool IsTriggered;
-    public Entity EntityHit;
     public int RemainingHits;
 }
 
