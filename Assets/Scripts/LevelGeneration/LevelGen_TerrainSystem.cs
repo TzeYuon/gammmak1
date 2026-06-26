@@ -98,7 +98,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                     // Maybe can spawn new hives periodically while starting with <8?
                     spawnData.MothershipSpawn = new float3(1000, 1000, 0);
                     spawnData.TotalHiveSpots = 8;
-                    spawnData.ActiveHiveCount = 1;
+                    spawnData.ActiveHiveCount = 2;
                     spawnData.HiveSpawnsX[0] = Xtl;
                     spawnData.HiveSpawnsY[0] = Ytl;
                     spawnData.HiveSpawnsX[1] = Xtr;
