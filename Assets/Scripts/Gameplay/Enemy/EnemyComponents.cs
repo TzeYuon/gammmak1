@@ -13,6 +13,9 @@ public struct HiveComponent : IComponentData
     public float SurgeSpawnAccumulator;
 }
 
+public struct ActiveHiveTag : IComponentData, IEnableableComponent { }
+public struct DormantHiveTag : IComponentData { }
+
 [InternalBufferCapacity(4)]
 public struct TrickleSpawnerData : IBufferElementData
 {

@@ -88,6 +88,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 case TerrainType.Asteroids:
                     // Default
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                    spawnData.TotalHiveSpots = 1;
                     spawnData.ActiveHiveCount = 1;
                     spawnData.HiveSpawnsX[0] = Xtr;
                     spawnData.HiveSpawnsY[0] = Ytr;
@@ -96,7 +97,8 @@ partial struct LevelGen_TerrainSystem : ISystem
                 case TerrainType.Cavern:
                     // Maybe can spawn new hives periodically while starting with <8?
                     spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                    spawnData.ActiveHiveCount = 8;
+                    spawnData.TotalHiveSpots = 8;
+                    spawnData.ActiveHiveCount = 2;
                     spawnData.HiveSpawnsX[0] = Xtl;
                     spawnData.HiveSpawnsY[0] = Ytl;
                     spawnData.HiveSpawnsX[1] = Xtr;
@@ -117,6 +119,7 @@ partial struct LevelGen_TerrainSystem : ISystem
 
                 case TerrainType.OneTunnel:
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                    spawnData.TotalHiveSpots = 1;
                     spawnData.ActiveHiveCount = 1;
                     spawnData.HiveSpawnsX[0] = Xtr;
                     spawnData.HiveSpawnsY[0] = Ytr;
@@ -124,6 +127,7 @@ partial struct LevelGen_TerrainSystem : ISystem
 
                 default:
                     spawnData.MothershipSpawn = new float3(1000, 1000, 0);
+                    spawnData.TotalHiveSpots = 4;
                     spawnData.ActiveHiveCount = 4;
                     spawnData.HiveSpawnsX[0] = Xtl;
                     spawnData.HiveSpawnsY[0] = Ytl;
@@ -137,11 +141,11 @@ partial struct LevelGen_TerrainSystem : ISystem
             }
         }
 
-        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.ActiveHiveCount + 1, Allocator.Temp);
+        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.TotalHiveSpots + 1, Allocator.Temp);
         spawnPoints[0] = spawnData.MothershipSpawn;
         unsafe
         {
-            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
+            for (int i = 0; i < spawnData.TotalHiveSpots; i++)
             {
                 spawnPoints[i + 1] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
             }
@@ -433,11 +437,12 @@ partial struct LevelGen_TerrainSystem : ISystem
                     if (dist < bestDist) { bestDist = dist; bestStart = tileA; bestEnd = tileB; }
                 }
             }
-            CarveTunnel(bestStart, bestEnd, grid, width, height);
+            int tunnelRadius = 4;
+            CarveTunnel(bestStart, bestEnd, grid, width, height, tunnelRadius);
         }
     }
 
-    private void CarveTunnel(Vector2Int start, Vector2Int end, int[,] grid, int width, int height)
+    private void CarveTunnel(Vector2Int start, Vector2Int end, int[,] grid, int width, int height, int tunnelRadius)
     {
         int x = start.x, y = start.y;
         int dx = math.abs(end.x - start.x), dy = math.abs(end.y - start.y);
@@ -446,12 +451,17 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         while (true)
         {
-            for (int tx = -1; tx <= 1; tx++)
+            for (int tx = -tunnelRadius; tx <= tunnelRadius; tx++)
             {
-                for (int ty = -1; ty <= 1; ty++)
+                for (int ty = -tunnelRadius; ty <= tunnelRadius; ty++)
                 {
-                    if (x + tx >= 0 && x + tx < width && y + ty >= 0 && y + ty < height)
-                        grid[x + tx, y + ty] = 0;
+                    if (tx * tx + ty * ty <= tunnelRadius * tunnelRadius)
+                    {
+                        if (x + tx >= 0 && x + tx < width && y + ty >= 0 && y + ty < height)
+                        {
+                            grid[x + tx, y + ty] = 0;
+                        }
+                    }
                 }
             }
             if (x == end.x && y == end.y) break;

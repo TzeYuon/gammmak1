@@ -100,7 +100,7 @@ public partial struct MoveShipJob : IJobEntity
 
             float distToWaypoint = math.distance(currentPos, targetPos);
 
-            if (distToWaypoint < 0.75f)
+            if (distToWaypoint < 1.5f)
             {
                 waypoints.RemoveAt(0);
                 if (waypoints.Length > 0)
@@ -138,7 +138,7 @@ public partial struct MoveShipJob : IJobEntity
         int gridX = (int)math.round(currentPos.x) - WorldOrigin.x;
         int gridY = (int)math.round(currentPos.y) - WorldOrigin.y;
 
-        float shipRadius = 0.65f;
+        float shipRadius = 0.45f;
 
         for (int x = -1; x <= 1; x++)
         {
@@ -165,14 +165,17 @@ public partial struct MoveShipJob : IJobEntity
                             if (distSq < 0.0001f)
                             {
                                 float2 toCenter = currentPos - wallCenter;
+                                float signX = toCenter.x >= 0 ? 1f : -1f;
+                                float signY = toCenter.y >= 0 ? 1f : -1f;
+
                                 if (math.abs(toCenter.x) > math.abs(toCenter.y))
                                 {
-                                    pushNormal = new float2(math.sign(toCenter.x), 0);
+                                    pushNormal = new float2(signX, 0);
                                     overlap = shipRadius + (0.5f - math.abs(toCenter.x));
                                 }
                                 else
                                 {
-                                    pushNormal = new float2(0, math.sign(toCenter.y));
+                                    pushNormal = new float2(0, signY);
                                     overlap = shipRadius + (0.5f - math.abs(toCenter.y));
                                 }
                             }
@@ -211,6 +214,13 @@ public partial struct MoveShipJob : IJobEntity
         currentPos += positionCorrection;
 
         velocity.Value += wallPushForce * DeltaTime;
+
+        float currentSpeedSq = math.lengthsq(velocity.Value);
+        float absoluteMaxSpeed = stats.MaxSpeed * 1.5f;
+        if (currentSpeedSq > absoluteMaxSpeed * absoluteMaxSpeed)
+        {
+            velocity.Value = math.normalize(velocity.Value) * absoluteMaxSpeed;
+        }
 
         transform.Position.xy = currentPos;
 

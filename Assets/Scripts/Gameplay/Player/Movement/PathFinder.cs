@@ -113,7 +113,7 @@ public class Pathfinder : MonoBehaviour
                         if (grid[currNode.x + tup.Item1 + currNode.y * gridWidth] == 1 ||
                             grid[currNode.x + (currNode.y + tup.Item2) * gridWidth] == 1)
                         {
-                            continue; 
+                            continue;
                         }
                     }
 

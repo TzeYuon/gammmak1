@@ -17,7 +17,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         state.RequireForUpdate<LevelSpawnData>();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         if (!SystemAPI.TryGetSingleton<GameStateSingleton>(out var gameState) ||
@@ -47,6 +47,10 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         Entity mothershipEntity = ecb.Instantiate(prefabDatabase.MothershipPrefab);
         var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
         ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(spawnData.MothershipSpawn));
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.SnapToPosition(spawnData.MothershipSpawn);
+        }
 
         // Set ship stats
         ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipHealthComponent);
