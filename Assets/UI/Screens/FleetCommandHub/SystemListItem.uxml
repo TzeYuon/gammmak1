@@ -2,7 +2,7 @@
     <Style src="project://database/Assets/UI/Styles/systemItemStyles.uss?fileID=7433441132597879392&amp;guid=4afa9fad7b8666247837b7b35602f7bc&amp;type=3#systemItemStyles"/>
     <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
     <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
-    <ui:VisualElement name="SystemItem" class="system-item" style="border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; background-color: rgba(26, 26, 26, 0); padding-right: 12px; padding-top: 12px; padding-bottom: 12px; padding-left: 12px;">
+    <ui:VisualElement name="SystemItem" class="system-item" style="border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px; background-color: rgba(26, 26, 26, 0); padding-right: 12px; padding-top: 12px; padding-bottom: 25px; padding-left: 12px;">
         <ui:VisualElement style="width: 45%; flex-grow: 0;">
             <ui:Label name="SystemName" text="SYSTEM NAME" class="text"/>
             <ui:Label name="SystemStats" text="UPGRADE EFFECT" class="subtext"/>
