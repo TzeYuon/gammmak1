@@ -74,8 +74,8 @@ partial struct LevelGen_HivesSystem : ISystem
         sState.SurgeTimer = baseSurgeInterval; // TEMPORARY: hardcode to 30s between surges
         sState.CurrentInterval = baseSurgeInterval;
 
-        var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
-                           .CreateCommandBuffer(state.WorldUnmanaged);
+        //var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+        //                   .CreateCommandBuffer(state.WorldUnmanaged);
 
         // Generate hives
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
@@ -85,21 +85,18 @@ partial struct LevelGen_HivesSystem : ISystem
         {
             for (int i = 0; i < spawnData.TotalHiveSpots; i++)
             {
-                Entity hiveEntity = ecb.Instantiate(hivePrefab);
+                Entity hiveEntity = state.EntityManager.Instantiate(hivePrefab);
 
                 float3 spawnPos = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
-                ecb.SetComponent(hiveEntity, LocalTransform.FromPosition(spawnPos));
+                state.EntityManager.SetComponentData(hiveEntity, LocalTransform.FromPosition(spawnPos));
 
                 if (i < spawnData.ActiveHiveCount)
                 {
-                    ecb.AddComponent<ActiveHiveTag>(hiveEntity);
-                    ecb.SetComponentEnabled<ActiveHiveTag>(hiveEntity, true);
-                    ecb.RemoveComponent<DormantHiveTag>(hiveEntity);
+                    state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, true);
                 }
                 else
                 {
-                    ecb.AddComponent<DormantHiveTag>(hiveEntity);
-                    ecb.RemoveComponent<ActiveHiveTag>(hiveEntity);
+                    state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, false);
                 }
             }
         }

@@ -10,7 +10,10 @@ partial struct HiveDirectorSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<DifficultyState>();
-        state.RequireForUpdate<DormantHiveTag>();
+        state.RequireForUpdate(SystemAPI.QueryBuilder()
+            .WithAll<HiveComponent>()
+            .WithNone<ActiveHiveTag>()
+            .Build());
         wakeUpTimer = 60.0f;
     }
 
@@ -27,7 +30,7 @@ partial struct HiveDirectorSystem : ISystem
             Entity hiveToWake = Entity.Null;
 
             // Find one Dormant Hive
-            foreach (var (dormantTag, entity) in SystemAPI.Query<RefRO<DormantHiveTag>>().WithEntityAccess())
+            foreach (var (dormantTag, entity) in SystemAPI.Query<RefRO<HiveComponent>>().WithNone<ActiveHiveTag>().WithEntityAccess())
             {
                 hiveToWake = entity;
                 break;
@@ -39,7 +42,6 @@ partial struct HiveDirectorSystem : ISystem
 
                 ecb.AddComponent<ActiveHiveTag>(hiveToWake);
                 ecb.SetComponentEnabled<ActiveHiveTag>(hiveToWake, true);
-                ecb.RemoveComponent<DormantHiveTag>(hiveToWake);
             }
         }
     }

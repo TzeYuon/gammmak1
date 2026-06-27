@@ -14,7 +14,6 @@ public struct HiveComponent : IComponentData
 }
 
 public struct ActiveHiveTag : IComponentData, IEnableableComponent { }
-public struct DormantHiveTag : IComponentData { }
 
 [InternalBufferCapacity(4)]
 public struct TrickleSpawnerData : IBufferElementData
