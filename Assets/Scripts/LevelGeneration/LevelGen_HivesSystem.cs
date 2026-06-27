@@ -74,8 +74,6 @@ partial struct LevelGen_HivesSystem : ISystem
         sState.SurgeTimer = baseSurgeInterval; // TEMPORARY: hardcode to 30s between surges
         sState.CurrentInterval = baseSurgeInterval;
 
-        //var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
-        //                   .CreateCommandBuffer(state.WorldUnmanaged);
 
         // Generate hives
         var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
