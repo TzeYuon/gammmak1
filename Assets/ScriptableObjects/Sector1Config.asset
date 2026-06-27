@@ -28,9 +28,9 @@ MonoBehaviour:
         Weight: 1
     TerrainPool:
       Pool:
-      - Item: 6
+      - Item: 5
         Weight: 1
-      - Item: 0
+      - Item: 5
         Weight: 1
     ObjectivePool:
       Pool:
@@ -42,9 +42,9 @@ MonoBehaviour:
         Weight: 1
     StandardRewardPool:
       Pool:
-      - Item: 3
-        Weight: 1
       - Item: 2
+        Weight: 1
+      - Item: 3
         Weight: 1
     BaseUpgradeCoreReward: 200
     EliteRewardPool:

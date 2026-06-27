@@ -61,7 +61,7 @@ public class TerrainMeshGenerator : MonoBehaviour
         List<int> outlineTriangles = new List<int>();
 
         int vertexIndex = 0;
-        float lineThickness = 0.15f;
+        float lineThickness = 0.20f;
 
         for (int x = 0; x < width; x++)
         {
