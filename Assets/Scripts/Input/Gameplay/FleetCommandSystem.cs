@@ -32,6 +32,21 @@ partial struct FleetCommandSystem : ISystem
             }.ScheduleParallel(state.Dependency);
         }
 
+        if (input.WasPressed(PlayerAction.Secondary))
+        {
+            // place move target projection
+            foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommandProjection>().WithEntityAccess())
+            {
+                SystemAPI.SetComponent(entity, new MoveCommandProjection
+                {
+                    MoveTarget = input.MoveCommandStartDragPosition,
+                    UseTargetRotation = input.MoveCommandUseRotation,
+                    targetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
+                });
+                SystemAPI.SetComponentEnabled<MoveCommandProjection>(entity, true);
+            }
+        }
+
         if (input.MoveCommandTriggered)
         {
             // Enables move command
@@ -47,6 +62,9 @@ partial struct FleetCommandSystem : ISystem
                     targetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
                 });
                 SystemAPI.SetComponentEnabled<MoveCommand>(entity, true);
+
+                // disable projection
+                SystemAPI.SetComponentEnabled<MoveCommandProjection>(entity, false);
             }
 
             input.MoveCommandTriggered = false;

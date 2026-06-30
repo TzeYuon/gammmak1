@@ -5,6 +5,13 @@ public struct PlayerTag : IComponentData { }
 public struct MothershipTag : IComponentData { }
 public struct SelectedTag : IComponentData, IEnableableComponent { }
 
+public struct MoveCommandProjection : IComponentData, IEnableableComponent
+{
+    public float2 MoveTarget;
+    public bool UseTargetRotation;
+    public quaternion targetRotation;
+}
+
 public struct MoveCommand : IComponentData, IEnableableComponent
 {
     public float2 MoveTarget;

@@ -11,6 +11,7 @@ partial struct SelectionVisualSystem : ISystem
 {
     private ComponentLookup<SelectedTag> selectedLookup;
     private ComponentLookup<MoveCommand> moveCommandLookup;
+    private ComponentLookup<MoveCommandProjection> moveCommandProjectionLookup;
     private ComponentLookup<LocalTransform> shipTransformLookup;
 
     [BurstCompile]
@@ -18,6 +19,7 @@ partial struct SelectionVisualSystem : ISystem
     {
         selectedLookup = state.GetComponentLookup<SelectedTag>(true);
         moveCommandLookup = state.GetComponentLookup<MoveCommand>(true);
+        moveCommandProjectionLookup = state.GetComponentLookup<MoveCommandProjection>(true);
         shipTransformLookup = state.GetComponentLookup<LocalTransform>(true);
     }
 
@@ -26,6 +28,7 @@ partial struct SelectionVisualSystem : ISystem
     {
         selectedLookup.Update(ref state);
         moveCommandLookup.Update(ref state);
+        moveCommandProjectionLookup.Update(ref state);
         shipTransformLookup.Update(ref state);
         float deltaTime = SystemAPI.Time.DeltaTime;
 
@@ -35,12 +38,24 @@ partial struct SelectionVisualSystem : ISystem
             DeltaTime = deltaTime
         }.ScheduleParallel(state.Dependency);
 
-        state.Dependency = new UpdateMovementLinesJob
+        var movementLineHandle = new UpdateMovementLinesJob
         {
             SelectedLookup = selectedLookup,
             MoveCommandLookup = moveCommandLookup,
             ShipTransformLookup = shipTransformLookup
         }.ScheduleParallel(selectionVisualHandle);
+
+        var movementTargetProjectionHandle = new UpdateMovementTargetProjectionJob
+        {
+            SelectedLookup = selectedLookup,
+            MoveCommandProjectionLookup = moveCommandProjectionLookup,
+        }.ScheduleParallel(movementLineHandle);
+
+        state.Dependency = new UpdateMovementTargetJob
+        {
+            SelectedLookup = selectedLookup,
+            MoveCommandLookup = moveCommandLookup,
+        }.ScheduleParallel(movementTargetProjectionHandle);
     }
 }
 
@@ -118,6 +133,74 @@ public partial struct UpdateMovementLinesJob : IJobEntity
             quaternion rotation = quaternion.RotateZ(angle);
             float3 scale = new(distance, lineVisual.Thickness, 1f);
             localToWorld.Value = float4x4.TRS(midpoint, rotation, scale);
+        }
+        else
+        {
+            localToWorld.Value = float4x4.Scale(0f);
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct UpdateMovementTargetProjectionJob : IJobEntity
+{
+    [ReadOnly] public ComponentLookup<SelectedTag> SelectedLookup;
+    [ReadOnly] public ComponentLookup<MoveCommandProjection> MoveCommandProjectionLookup;
+
+    private void Execute(
+        ref LocalToWorld localToWorld,
+        in MovementTargetProjectionVisualComponent movementTargetProjection,
+        in ShipReference shipRef)
+    {
+        if (shipRef.Value == Entity.Null
+            || !SelectedLookup.HasComponent(shipRef.Value)
+            || !MoveCommandProjectionLookup.HasComponent(shipRef.Value))
+        {
+            localToWorld.Value = float4x4.Scale(0f);
+            return;
+        }
+
+        bool isSelected = SelectedLookup.IsComponentEnabled(shipRef.Value);
+        bool isMoving = MoveCommandProjectionLookup.IsComponentEnabled(shipRef.Value);
+
+        if (isSelected && isMoving)
+        {
+            float2 targetPos = MoveCommandProjectionLookup[shipRef.Value].MoveTarget;
+            localToWorld.Value = float4x4.TRS(new float3(targetPos, 0), quaternion.identity, movementTargetProjection.Scale);
+        }
+        else
+        {
+            localToWorld.Value = float4x4.Scale(0f);
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct UpdateMovementTargetJob : IJobEntity
+{
+    [ReadOnly] public ComponentLookup<SelectedTag> SelectedLookup;
+    [ReadOnly] public ComponentLookup<MoveCommand> MoveCommandLookup;
+
+    private void Execute(
+        ref LocalToWorld localToWorld,
+        in MovementTargetVisualComponent movementTarget,
+        in ShipReference shipRef)
+    {
+        if (shipRef.Value == Entity.Null
+            || !SelectedLookup.HasComponent(shipRef.Value)
+            || !MoveCommandLookup.HasComponent(shipRef.Value))
+        {
+            localToWorld.Value = float4x4.Scale(0f);
+            return;
+        }
+
+        bool isSelected = SelectedLookup.IsComponentEnabled(shipRef.Value);
+        bool isMoving = MoveCommandLookup.IsComponentEnabled(shipRef.Value);
+
+        if (isSelected && isMoving)
+        {
+            float2 targetPos = MoveCommandLookup[shipRef.Value].MoveTarget;
+            localToWorld.Value = float4x4.TRS(new float3(targetPos, 0), quaternion.identity, movementTarget.Scale);
         }
         else
         {
