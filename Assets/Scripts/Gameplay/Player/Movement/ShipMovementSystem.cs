@@ -30,10 +30,10 @@ public partial struct ShipMovementSystem : ISystem
         MoveShipJob moveJob = new MoveShipJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
-            Grid = terrainGridComponent.Grid,
-            GridWidth = terrainGridComponent.GridWidth,
-            GridHeight = terrainGridComponent.GridHeight,
-            WorldOrigin = terrainGridComponent.WorldOrigin
+            //Grid = terrainGridComponent.Grid,
+            //GridWidth = terrainGridComponent.GridWidth,
+            //GridHeight = terrainGridComponent.GridHeight,
+            //WorldOrigin = terrainGridComponent.WorldOrigin
         };
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
     }
@@ -87,182 +87,88 @@ public partial struct CalculateShipPathsJob : IJobEntity
 public partial struct MoveShipJob : IJobEntity
 {
     public float DeltaTime;
-    [ReadOnly] public NativeArray<int> Grid;
-    public int GridWidth;
-    public int GridHeight;
-    public int2 WorldOrigin;
-    void Execute(
-        ref LocalTransform transform,
-        EnabledRefRW<MoveCommand> moveEnabled,
-        ref MoveCommand command,
-        in ShipMovementStatsComponent stats,
-        ref ShipVelocity velocity,
-        ref DynamicBuffer<ShipWaypoint> waypoints
-        )
+
+    private void Execute(
+        ref LocalTransform transform, 
+        ref DynamicBuffer<ShipWaypoint> waypoints, 
+        in ShipMovementStatsComponent stats, 
+        EnabledRefRW<MoveCommand> moveEnabled, 
+        ref MoveCommand command)
     {
         if (command.Recalculate) return;
+
         float2 currentPos = transform.Position.xy;
         float2 targetPos = command.MoveTarget;
 
+        // --- 1. WAYPOINT LOGIC ---
         if (waypoints.Length > 0)
         {
             targetPos = waypoints[0].Value;
-
-            float distToWaypoint = math.distance(currentPos, targetPos);
-
-            if (distToWaypoint < 1.5f)
+            if (math.distancesq(currentPos, targetPos) < 0.25f) // 0.5 unit radius snap
             {
                 waypoints.RemoveAt(0);
-                if (waypoints.Length > 0)
-                {
-                    targetPos = waypoints[0].Value;
-                }
+                if (waypoints.Length > 0) targetPos = waypoints[0].Value;
             }
         }
 
-        float2 directionToTarget = targetPos - currentPos;
-        float distToTarget = math.length(directionToTarget);
+        float2 dirToTarget = targetPos - currentPos;
+        float distToTarget = math.length(dirToTarget);
+        bool isFinalTarget = waypoints.Length == 0;
 
-        // Reached destination
-        if (distToTarget < 0.1f && waypoints.Length == 0)
+        bool hasArrivedPos = distToTarget < 0.1f;
+
+        // --- 2. MOVEMENT ---
+        if (!hasArrivedPos)
         {
-            velocity.Value = float2.zero;
+            float speed = stats.MaxSpeed;
 
-            // Rotate to desired direction
+            // Slow down smoothly when approaching the final destination
+            if (isFinalTarget && distToTarget < stats.BrakingDistance)
+            {
+                float slowdownMultiplier = math.max(0.1f, distToTarget / stats.BrakingDistance);
+                speed *= slowdownMultiplier;
+            }
+
+            currentPos += (dirToTarget / distToTarget) * speed * DeltaTime;
+            transform.Position.xy = currentPos;
+        }
+
+        // --- 3. ROTATION (The Early Turn) ---
+        quaternion desiredRot = transform.Rotation;
+
+        if (isFinalTarget && command.UseTargetRotation && distToTarget < stats.BrakingDistance)
+        {
+            // EARLY ROTATION: As soon as we start braking, we start turning to the final parked angle!
+            desiredRot = command.targetRotation;
+        }
+        else if (!hasArrivedPos)
+        {
+            // NORMAL ROTATION: Face the direction of travel
+            float angle = math.atan2(dirToTarget.y, dirToTarget.x) - (math.PI / 2f);
+            desiredRot = quaternion.RotateZ(angle);
+        }
+
+        // Smoothly rotate toward whatever target we chose
+        transform.Rotation = math.slerp(transform.Rotation, desiredRot, stats.TurnSpeed * DeltaTime);
+
+        // --- 4. COMPLETION CHECK ---
+        if (hasArrivedPos)
+        {
             if (command.UseTargetRotation)
             {
-                quaternion targetRot = command.targetRotation;
-                transform.Rotation = math.slerp(transform.Rotation, targetRot, stats.TurnSpeed * DeltaTime);
+                // Wait for the ship to finish its spin before completing the command
+                float3 currentFwd = math.rotate(transform.Rotation, new float3(0, 1, 0));
+                float3 targetFwd = math.rotate(command.targetRotation, new float3(0, 1, 0));
 
-                // Check if rotated enough
-                float3 currentForward = math.rotate(transform.Rotation, new float3(0, 1, 0));
-                float3 desiredForward = math.rotate(targetRot, new float3(0, 1, 0));
-                if (math.dot(currentForward, desiredForward) <= 0.99f)
-                    return;
-            }
-
-            moveEnabled.ValueRW = false;
-            return;
-        }
-
-        float2 desiredDirection = directionToTarget / distToTarget;
-        float targetSpeed = stats.MaxSpeed;
-
-        if (distToTarget < stats.BrakingDistance && waypoints.Length == 0)
-        {
-            targetSpeed = stats.MaxSpeed * (distToTarget / stats.BrakingDistance);
-        }
-
-        float2 desiredVelocity = desiredDirection * targetSpeed;
-        velocity.Value = math.lerp(velocity.Value, desiredVelocity, stats.Acceleration * DeltaTime);
-
-        currentPos += velocity.Value * DeltaTime;
-
-        float2 wallPushForce = float2.zero;
-        float2 positionCorrection = float2.zero;
-
-        int gridX = (int)math.round(currentPos.x) - WorldOrigin.x;
-        int gridY = (int)math.round(currentPos.y) - WorldOrigin.y;
-
-        float shipRadius = 0.45f;
-
-        for (int x = -1; x <= 1; x++)
-        {
-            for (int y = -1; y <= 1; y++)
-            {
-                int checkX = gridX + x;
-                int checkY = gridY + y;
-
-                if (checkX >= 0 && checkX < GridWidth && checkY >= 0 && checkY < GridHeight)
+                if (math.dot(currentFwd, targetFwd) > 0.99f)
                 {
-                    if (Grid[checkX + checkY * GridWidth] == 1)
-                    {
-                        float2 wallCenter = new float2(checkX + WorldOrigin.x, checkY + WorldOrigin.y);
-
-                        float2 closestPoint = math.clamp(currentPos, wallCenter - 0.5f, wallCenter + 0.5f);
-                        float2 pushDir = currentPos - closestPoint;
-                        float distSq = math.lengthsq(pushDir);
-
-                        if (distSq < shipRadius * shipRadius)
-                        {
-                            float2 pushNormal;
-                            float overlap;
-
-                            if (distSq < 0.0001f)
-                            {
-                                float2 toCenter = currentPos - wallCenter;
-                                float signX = toCenter.x >= 0 ? 1f : -1f;
-                                float signY = toCenter.y >= 0 ? 1f : -1f;
-
-                                if (math.abs(toCenter.x) > math.abs(toCenter.y))
-                                {
-                                    pushNormal = new float2(signX, 0);
-                                    overlap = shipRadius + (0.5f - math.abs(toCenter.x));
-                                }
-                                else
-                                {
-                                    pushNormal = new float2(0, signY);
-                                    overlap = shipRadius + (0.5f - math.abs(toCenter.y));
-                                }
-                            }
-                            else
-                            {
-                                float distance = math.sqrt(distSq);
-                                pushNormal = pushDir / distance;
-                                overlap = shipRadius - distance;
-                            }
-
-                            positionCorrection += pushNormal * overlap;
-
-                            float velIntoWall = math.dot(velocity.Value, pushNormal);
-                            if (velIntoWall < 0) velocity.Value -= pushNormal * velIntoWall;
-                        }
-
-                        float2 centerDir = currentPos - wallCenter;
-                        float centerDistSq = math.lengthsq(centerDir);
-                        if (centerDistSq < 1.0f && centerDistSq > 0.01f)
-                        {
-                            float centerDist = math.sqrt(centerDistSq);
-                            float2 slideNormal = centerDir / centerDist;
-
-                            float forwardDot = math.dot(math.normalizesafe(velocity.Value), -slideNormal);
-
-                            if (forwardDot > 0.1f)
-                            {
-                                float pushStrength = (1.0f - centerDist) * 15.0f;
-
-                                float velIntoWall = math.dot(velocity.Value, slideNormal);
-                                if (velIntoWall < 0) velocity.Value -= slideNormal * velIntoWall;
-
-                                wallPushForce += (slideNormal * pushStrength);
-                            }
-                        }
-                    }
+                    moveEnabled.ValueRW = false; // Pos and Rot arrived!
                 }
             }
-        }
-
-
-        currentPos += positionCorrection;
-
-        velocity.Value += wallPushForce * DeltaTime;
-
-        float currentSpeedSq = math.lengthsq(velocity.Value);
-        float absoluteMaxSpeed = stats.MaxSpeed * 1.5f;
-        if (currentSpeedSq > absoluteMaxSpeed * absoluteMaxSpeed)
-        {
-            velocity.Value = math.normalize(velocity.Value) * absoluteMaxSpeed;
-        }
-
-        transform.Position.xy = currentPos;
-
-        if (math.lengthsq(velocity.Value) > 0.5f)
-        {
-            float angle = math.atan2(velocity.Value.y, velocity.Value.x) - (math.PI / 2f);
-            quaternion targetRotation = quaternion.RotateZ(angle);
-            float dynamicTurnSpeed = stats.TurnSpeed;
-            if (targetSpeed < stats.MaxSpeed * 0.5f) dynamicTurnSpeed *= 2.0f;
-            transform.Rotation = math.slerp(transform.Rotation, targetRotation, stats.TurnSpeed * DeltaTime);
+            else
+            {
+                moveEnabled.ValueRW = false; // Only Pos mattered, arrived!
+            }
         }
     }
 }
