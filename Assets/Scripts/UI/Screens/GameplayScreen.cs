@@ -226,8 +226,8 @@ public class GameplayScreen : UIScreen
             {
                 selectionBox.style.display = DisplayStyle.Flex;
 
-                Vector2 uiStart = ScreenToUI(inputData.MouseStartDragPosition);
-                Vector2 uiCurrent = ScreenToUI(inputData.MouseWorldPosition);
+                Vector2 uiStart = WorldToUI(inputData.MouseStartDragPosition);
+                Vector2 uiCurrent = WorldToUI(inputData.MouseWorldPosition);
 
                 float left = math.min(uiStart.x, uiCurrent.x);
                 float top = math.min(uiStart.y, uiCurrent.y);
@@ -319,10 +319,13 @@ public class GameplayScreen : UIScreen
         }
     }
 
-    private Vector2 ScreenToUI(float2 worldPos)
+    private Vector2 WorldToUI(float2 worldPos)
     {
-        float2 screenPos = (Vector2)camera.WorldToScreenPoint((Vector2)worldPos);
-        return new Vector2(screenPos.x, Screen.height - screenPos.y);
+        return RuntimePanelUtils.CameraTransformWorldToPanel(
+            selectionBox.panel,
+            new Vector3(worldPos.x, worldPos.y, 0f),
+            camera
+        );
     }
 
     private void ToggleReinforcementPopup(bool show)
