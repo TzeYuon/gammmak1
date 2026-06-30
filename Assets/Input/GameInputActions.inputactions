@@ -16,6 +16,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "CameraPan",
+                    "type": "Button",
+                    "id": "762f8e4f-dbc8-4580-943b-6247b8ee7cf4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "CameraZoom",
                     "type": "Value",
                     "id": "bd9d0b2c-5b06-4c89-bcb8-a7a620f6061b",
@@ -191,6 +200,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "ToggleReinforcementPopup",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f21528a6-4a7e-4856-a6c0-a406e4147454",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CameraPan",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

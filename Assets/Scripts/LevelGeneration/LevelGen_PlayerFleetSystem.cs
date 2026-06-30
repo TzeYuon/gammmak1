@@ -49,7 +49,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
         ecb.SetComponent(mothershipEntity, LocalTransform.FromPosition(spawnData.MothershipSpawn));
         if (CameraManager.Instance != null)
         {
-            CameraManager.Instance.SnapToPosition(spawnData.MothershipSpawn);
+            CameraManager.Instance.SnapToMothership(spawnData.MothershipSpawn);
         }
 
         // Set ship stats
