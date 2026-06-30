@@ -18,7 +18,7 @@ partial struct FleetCommandSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var input = SystemAPI.GetSingleton<PlayerInputData>();
+        ref var input = ref SystemAPI.GetSingletonRW<PlayerInputData>().ValueRW;
         float2 mousePos = input.MouseWorldPosition;
 
         if (input.WasReleased(PlayerAction.Primary))
@@ -32,19 +32,24 @@ partial struct FleetCommandSystem : ISystem
             }.ScheduleParallel(state.Dependency);
         }
 
-        if (input.WasPressed(PlayerAction.Secondary))
+        if (input.MoveCommandTriggered)
         {
             // Enables move command
             foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommand>().WithEntityAccess())
             {
                 SystemAPI.SetComponent(entity, new MoveCommand
                 {
-                    MoveTarget = mousePos,
+                    MoveTarget = input.MoveCommandStartDragPosition,
                     Recalculate = true,
-                    ForcePath = false
+                    ForcePath = false,
+
+                    UseTargetRotation = input.MoveCommandUseRotation,
+                    targetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
                 });
                 SystemAPI.SetComponentEnabled<MoveCommand>(entity, true);
             }
+
+            input.MoveCommandTriggered = false;
         }
     }
 

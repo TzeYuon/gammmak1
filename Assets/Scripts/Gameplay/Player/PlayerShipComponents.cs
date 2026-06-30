@@ -12,6 +12,10 @@ public struct MoveCommand : IComponentData, IEnableableComponent
     public bool ForcePath;
     public float2 NextWaypoint;
     public bool PathExists;
+
+    // for manual rotation
+    public bool UseTargetRotation;
+    public quaternion targetRotation;
 }
 
 [InternalBufferCapacity(20)]

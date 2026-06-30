@@ -104,14 +104,6 @@ public partial struct MoveShipJob : IJobEntity
         float2 currentPos = transform.Position.xy;
         float2 targetPos = command.MoveTarget;
 
-        float distToFinal = math.distance(currentPos, targetPos);
-        if (distToFinal < 0.25f)
-        {
-            moveEnabled.ValueRW = false;
-            velocity.Value = float2.zero;
-            return;
-        }
-
         if (waypoints.Length > 0)
         {
             targetPos = waypoints[0].Value;
@@ -130,10 +122,26 @@ public partial struct MoveShipJob : IJobEntity
 
         float2 directionToTarget = targetPos - currentPos;
         float distToTarget = math.length(directionToTarget);
+
+        // Reached destination
         if (distToTarget < 0.1f && waypoints.Length == 0)
         {
-            moveEnabled.ValueRW = false;
             velocity.Value = float2.zero;
+
+            // Rotate to desired direction
+            if (command.UseTargetRotation)
+            {
+                quaternion targetRot = command.targetRotation;
+                transform.Rotation = math.slerp(transform.Rotation, targetRot, stats.TurnSpeed * DeltaTime);
+
+                // Check if rotated enough
+                float3 currentForward = math.rotate(transform.Rotation, new float3(0, 1, 0));
+                float3 desiredForward = math.rotate(targetRot, new float3(0, 1, 0));
+                if (math.dot(currentForward, desiredForward) <= 0.99f)
+                    return;
+            }
+
+            moveEnabled.ValueRW = false;
             return;
         }
 
