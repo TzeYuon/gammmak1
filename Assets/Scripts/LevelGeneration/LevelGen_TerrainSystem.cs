@@ -64,6 +64,9 @@ partial struct LevelGen_TerrainSystem : ISystem
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
         LevelSpawnData spawnData = new LevelSpawnData();
 
+        // Set camera bounds to current map size
+        CameraManager.Instance.SetMapBounds(new Vector2(width / 2f, height / 2f));
+
         float Xtl = 1000 - width / 2 + safezoneRadius;
         float Ytl = 1000 + height / 2 - safezoneRadius;
         float Xtr = 1000 + width / 2 - safezoneRadius;

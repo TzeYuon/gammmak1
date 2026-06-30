@@ -743,6 +743,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59a4716a886111247a26593083df044a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraMoveSpeed: 40
+  edgeScrollSpeed: 0.5
+  dragPanSpeed: 400
+  smoothing: 10
+  enableEdgeScrolling: 1
+  edgeThickness: 20
 --- !u!114 &1416371175
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -56,15 +56,18 @@ public partial class InputManagerSystem : SystemBase
         if (gameInput.Gameplay.ToggleReinforcementPopup.IsPressed()) newState |= PlayerAction.ToggleReinforcementPopup;
         inputData.CurrentState = newState;
 
-        // Handle camera update
+        // Requires camera for mouse pos
         if (CameraManager.Instance != null)
         {
-            Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
-            float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
-            CameraManager.Instance.MoveCamera(cameraMove, cameraZoom);
+            // Handle camera update
             Vector2 screenMousePos = Mouse.current.position.ReadValue();
             float2 mousePos = (Vector2)mainCamera.ScreenToWorldPoint(screenMousePos);
             inputData.MouseWorldPosition = mousePos;
+
+            bool cameraPan = gameInput.Gameplay.CameraPan.IsPressed();
+            Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
+            float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
+            CameraManager.Instance.UpdateCamera(screenMousePos, mousePos, cameraMove, cameraPan, cameraZoom);
 
             if (inputData.WasPressed(PlayerAction.Primary)) // Set start drag position when mouse first pressed
             {

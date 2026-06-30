@@ -102,6 +102,15 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""CameraPan"",
+                    ""type"": ""Button"",
+                    ""id"": ""762f8e4f-dbc8-4580-943b-6247b8ee7cf4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""CameraZoom"",
                     ""type"": ""Value"",
                     ""id"": ""bd9d0b2c-5b06-4c89-bcb8-a7a620f6061b"",
@@ -277,6 +286,17 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""ToggleReinforcementPopup"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f21528a6-4a7e-4856-a6c0-a406e4147454"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""CameraPan"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -885,6 +905,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         // Gameplay
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_CameraMovement = m_Gameplay.FindAction("CameraMovement", throwIfNotFound: true);
+        m_Gameplay_CameraPan = m_Gameplay.FindAction("CameraPan", throwIfNotFound: true);
         m_Gameplay_CameraZoom = m_Gameplay.FindAction("CameraZoom", throwIfNotFound: true);
         m_Gameplay_PrimaryAction = m_Gameplay.FindAction("PrimaryAction", throwIfNotFound: true);
         m_Gameplay_SecondaryAction = m_Gameplay.FindAction("SecondaryAction", throwIfNotFound: true);
@@ -985,6 +1006,7 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Gameplay;
     private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
     private readonly InputAction m_Gameplay_CameraMovement;
+    private readonly InputAction m_Gameplay_CameraPan;
     private readonly InputAction m_Gameplay_CameraZoom;
     private readonly InputAction m_Gameplay_PrimaryAction;
     private readonly InputAction m_Gameplay_SecondaryAction;
@@ -1005,6 +1027,10 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/CameraMovement".
         /// </summary>
         public InputAction @CameraMovement => m_Wrapper.m_Gameplay_CameraMovement;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/CameraPan".
+        /// </summary>
+        public InputAction @CameraPan => m_Wrapper.m_Gameplay_CameraPan;
         /// <summary>
         /// Provides access to the underlying input action "Gameplay/CameraZoom".
         /// </summary>
@@ -1054,6 +1080,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @CameraMovement.started += instance.OnCameraMovement;
             @CameraMovement.performed += instance.OnCameraMovement;
             @CameraMovement.canceled += instance.OnCameraMovement;
+            @CameraPan.started += instance.OnCameraPan;
+            @CameraPan.performed += instance.OnCameraPan;
+            @CameraPan.canceled += instance.OnCameraPan;
             @CameraZoom.started += instance.OnCameraZoom;
             @CameraZoom.performed += instance.OnCameraZoom;
             @CameraZoom.canceled += instance.OnCameraZoom;
@@ -1083,6 +1112,9 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @CameraMovement.started -= instance.OnCameraMovement;
             @CameraMovement.performed -= instance.OnCameraMovement;
             @CameraMovement.canceled -= instance.OnCameraMovement;
+            @CameraPan.started -= instance.OnCameraPan;
+            @CameraPan.performed -= instance.OnCameraPan;
+            @CameraPan.canceled -= instance.OnCameraPan;
             @CameraZoom.started -= instance.OnCameraZoom;
             @CameraZoom.performed -= instance.OnCameraZoom;
             @CameraZoom.canceled -= instance.OnCameraZoom;
@@ -1416,6 +1448,13 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCameraMovement(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CameraPan" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCameraPan(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "CameraZoom" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
