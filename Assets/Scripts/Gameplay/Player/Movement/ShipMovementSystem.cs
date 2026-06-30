@@ -1,58 +1,33 @@
-using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
-//[BurstCompile]
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct ShipMovementSystem : ISystem
-{   
+{
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<TerrainGridComponent>();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
         if (!terrainGridComponent.Grid.IsCreated) return;
 
-        foreach (var (transform, command, buffer) in SystemAPI.Query<RefRO<LocalTransform>, RefRW<MoveCommand>, DynamicBuffer<ShipWaypoint>>().WithAll<MoveCommand>())
+        var pathfindJob = new CalculateShipPathsJob
         {
-            if (command.ValueRO.Recalculate)
-            {
-                float3 curPos = transform.ValueRO.Position;
-                float2 targetPos = command.ValueRO.MoveTarget;
+            Grid = terrainGridComponent.Grid,
+            GridWidth = terrainGridComponent.GridWidth,
+            GridHeight = terrainGridComponent.GridHeight,
+            WorldOrigin = terrainGridComponent.WorldOrigin
+        };
+        state.Dependency = pathfindJob.ScheduleParallel(state.Dependency);
 
-                Vector2Int startWorld = new Vector2Int(Mathf.RoundToInt(curPos.x), Mathf.RoundToInt(curPos.y));
-                Vector2Int endWorld = new Vector2Int(Mathf.RoundToInt(targetPos.x), Mathf.RoundToInt(targetPos.y));
-
-                List<Vector2Int> path = Pathfinder.Astar(startWorld, endWorld, command.ValueRO.ForcePath);
-
-                buffer.Clear();
-
-                if (path != null && path.Count > 0)
-                {
-                    if (path.Count > 1) path.RemoveAt(0);
-                    foreach (var p in path)
-                    {
-                        buffer.Add(new ShipWaypoint { Value = new float2(p.x, p.y) });
-                    }
-                }
-                else
-                {
-                    command.ValueRW.PathExists = false;
-                }
-
-                command.ValueRW.Recalculate = false;
-            }
-        }
-
-        MoveShipJob job = new()
+        MoveShipJob moveJob = new MoveShipJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
             Grid = terrainGridComponent.Grid,
@@ -60,8 +35,51 @@ public partial struct ShipMovementSystem : ISystem
             GridHeight = terrainGridComponent.GridHeight,
             WorldOrigin = terrainGridComponent.WorldOrigin
         };
+        state.Dependency = moveJob.ScheduleParallel(state.Dependency);
+    }
+}
 
-        job.ScheduleParallel();
+[BurstCompile]
+public partial struct CalculateShipPathsJob : IJobEntity
+{
+    [ReadOnly] public NativeArray<int> Grid;
+    public int GridWidth;
+    public int GridHeight;
+    public int2 WorldOrigin;
+
+    void Execute(ref LocalTransform transform, ref MoveCommand command, ref DynamicBuffer<ShipWaypoint> waypoints)
+    {
+        if (!command.Recalculate) return;
+
+        float3 curPos = transform.Position;
+        float2 targetPos = command.MoveTarget;
+
+        int2 startGrid = new int2((int)math.round(curPos.x), (int)math.round(curPos.y)) - WorldOrigin;
+        int2 endGrid = new int2((int)math.round(targetPos.x), (int)math.round(targetPos.y)) - WorldOrigin;
+
+        NativeList<float2> newPath = new NativeList<float2>(Allocator.Temp);
+
+        BurstPathfinder.CalculateAStar(startGrid, endGrid, Grid, GridWidth, GridHeight, WorldOrigin, command.ForcePath, ref newPath);
+
+        waypoints.Clear();
+
+        if (newPath.Length > 0)
+        {
+            if (newPath.Length > 1) newPath.RemoveAt(0);
+
+            for (int i = 0; i < newPath.Length; i++)
+            {
+                waypoints.Add(new ShipWaypoint { Value = newPath[i] });
+            }
+            command.PathExists = true;
+        }
+        else
+        {
+            command.PathExists = false;
+        }
+
+        newPath.Dispose();
+        command.Recalculate = false;
     }
 }
 
@@ -87,7 +105,7 @@ public partial struct MoveShipJob : IJobEntity
         float2 targetPos = command.MoveTarget;
 
         float distToFinal = math.distance(currentPos, targetPos);
-        if (distToFinal < 0.1f)
+        if (distToFinal < 0.25f)
         {
             moveEnabled.ValueRW = false;
             velocity.Value = float2.zero;
@@ -194,16 +212,22 @@ public partial struct MoveShipJob : IJobEntity
 
                         float2 centerDir = currentPos - wallCenter;
                         float centerDistSq = math.lengthsq(centerDir);
-                        if (centerDistSq < 1.44f && centerDistSq > 0.01f)
+                        if (centerDistSq < 1.0f && centerDistSq > 0.01f)
                         {
                             float centerDist = math.sqrt(centerDistSq);
-                            float pushStrength = (1.2f - centerDist) * 15.0f;
                             float2 slideNormal = centerDir / centerDist;
 
-                            float velIntoWall = math.dot(velocity.Value, slideNormal);
-                            if (velIntoWall < 0) velocity.Value -= slideNormal * velIntoWall;
+                            float forwardDot = math.dot(math.normalizesafe(velocity.Value), -slideNormal);
 
-                            wallPushForce += (slideNormal * pushStrength);
+                            if (forwardDot > 0.1f)
+                            {
+                                float pushStrength = (1.0f - centerDist) * 15.0f;
+
+                                float velIntoWall = math.dot(velocity.Value, slideNormal);
+                                if (velIntoWall < 0) velocity.Value -= slideNormal * velIntoWall;
+
+                                wallPushForce += (slideNormal * pushStrength);
+                            }
                         }
                     }
                 }
@@ -224,10 +248,12 @@ public partial struct MoveShipJob : IJobEntity
 
         transform.Position.xy = currentPos;
 
-        if (math.lengthsq(velocity.Value) > 0.01f)
+        if (math.lengthsq(velocity.Value) > 0.5f)
         {
             float angle = math.atan2(velocity.Value.y, velocity.Value.x) - (math.PI / 2f);
             quaternion targetRotation = quaternion.RotateZ(angle);
+            float dynamicTurnSpeed = stats.TurnSpeed;
+            if (targetSpeed < stats.MaxSpeed * 0.5f) dynamicTurnSpeed *= 2.0f;
             transform.Rotation = math.slerp(transform.Rotation, targetRotation, stats.TurnSpeed * DeltaTime);
         }
     }

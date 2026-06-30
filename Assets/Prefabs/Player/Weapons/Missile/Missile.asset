@@ -16,7 +16,7 @@ MonoBehaviour:
   WeaponID: 3
   WeaponPrefab: {fileID: 90229467165131139, guid: d39fd2feb189ed544bc5822e80127972, type: 3}
   EquipCost: 2
-  UpgradeLevel: 0
+  UpgradeLevel: 1
   Upgrades:
   - Cost: 100
     Description: 
@@ -53,9 +53,10 @@ MonoBehaviour:
   BaseFireRate: 0.3
   BaseSpreadDegrees: 0
   IgnoreObstacles: 0
+  BaseProjectileCount: 1
   BaseProjectileSpeed: 40
   BaseProjectileTurnSpeed: 5
   BaseHitRadius: 0.5
-  BaseExplosionRadius: 8
+  BaseExplosionRadius: 4
   BasePierceCount: 0
   BaseTriggerTime: 0
