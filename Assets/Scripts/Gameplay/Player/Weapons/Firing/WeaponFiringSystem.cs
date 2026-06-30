@@ -111,7 +111,7 @@ public partial struct HitscanFiringJob : IJobEntity
         float angleRadians = math.atan2(dir.y, dir.x);
         float angleDegrees = math.degrees(angleRadians);
         quaternion rotation = quaternion.RotateZ(angleRadians - (math.PI / 2f));
-        float3 spawnPoint = localToWorld.Position + math.rotate(rotation, new float3(weapon.WeaponStartOffset, 0));
+        float3 spawnPoint = math.transform(localToWorld.Value, new float3(weapon.WeaponStartOffset, 0));
 
         // TEMPORARY: All weapons have the same vfx
         VFXWriter.Enqueue(new VFXPayload
@@ -166,7 +166,7 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
         float baseAngle = math.atan2(weaponForward.y, weaponForward.x);
-        float3 spawnPoint = localToWorld.Position + math.rotate(baseAngle, new float3(projectileWeapon.WeaponStartOffset, 0));
+        float3 spawnPoint = math.transform(localToWorld.Value, new float3(projectileWeapon.WeaponStartOffset, 0));
 
         for (int i = 0; i < stats.ProjectileCount; i++) {
             Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
