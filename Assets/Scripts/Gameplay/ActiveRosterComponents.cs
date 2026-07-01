@@ -34,6 +34,7 @@ public struct RosterShipBlueprint : IComponentData
 {
     public int SlotIndex;
     public Entity ShipPrefab;
+    public Entity GhostEntity;
     public int BiomassCost; // Cost after upgrades
 
     // Ship stats after upgrades

@@ -9,7 +9,7 @@ public struct MoveCommandProjection : IComponentData, IEnableableComponent
 {
     public float2 MoveTarget;
     public bool UseTargetRotation;
-    public quaternion targetRotation;
+    public quaternion TargetRotation;
 }
 
 public struct MoveCommand : IComponentData, IEnableableComponent
@@ -22,7 +22,7 @@ public struct MoveCommand : IComponentData, IEnableableComponent
 
     // for manual rotation
     public bool UseTargetRotation;
-    public quaternion targetRotation;
+    public quaternion TargetRotation;
 }
 
 [InternalBufferCapacity(20)]

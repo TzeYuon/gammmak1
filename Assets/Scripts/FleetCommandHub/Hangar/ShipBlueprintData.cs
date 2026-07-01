@@ -54,6 +54,8 @@ public enum ShipSystemID : byte
 public class WeaponMount
 {
     public Vector2 Position;
+    public Vector2 Direction;
+    public float MaxAngle;
     public WeaponData EquippedWeapon;
 }
 
@@ -139,6 +141,7 @@ public class ShipBlueprintData : ScriptableObject
     public ShipClass ShipClass;
     public ShipID ShipID;
     public GameObject ShipPrefab;
+    public Mesh ShipMesh;
 
     public List<ShipSystem> ShipSystems = new();
 

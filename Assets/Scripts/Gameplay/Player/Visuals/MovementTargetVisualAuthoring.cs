@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -21,15 +22,15 @@ class MovementTargetVisualAuthoring : MonoBehaviour
 
             AddComponent<NeedsShipReferenceTag>(entity);
 
-            AddComponent(entity, new MovementTargetVisualComponent
-            {
-                Scale = authoring.transform.localScale.x,
-            });
+            AddComponent(entity, new MovementTargetVisualComponent());
         }
     }
 }
 
-public struct MovementTargetVisualComponent : IComponentData
+public struct MovementTargetVisualComponent : IComponentData { }
+
+[MaterialProperty("_ArcAngle")]
+public struct ArcAngleOverride : IComponentData
 {
-    public float Scale;
+    public float Value;
 }

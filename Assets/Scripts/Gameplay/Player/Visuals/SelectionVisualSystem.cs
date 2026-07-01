@@ -148,7 +148,7 @@ public partial struct UpdateMovementTargetProjectionJob : IJobEntity
     [ReadOnly] public ComponentLookup<MoveCommandProjection> MoveCommandProjectionLookup;
 
     private void Execute(
-        ref LocalToWorld localToWorld,
+        ref LocalTransform transform,
         in MovementTargetProjectionVisualComponent movementTargetProjection,
         in ShipReference shipRef)
     {
@@ -156,7 +156,7 @@ public partial struct UpdateMovementTargetProjectionJob : IJobEntity
             || !SelectedLookup.HasComponent(shipRef.Value)
             || !MoveCommandProjectionLookup.HasComponent(shipRef.Value))
         {
-            localToWorld.Value = float4x4.Scale(0f);
+            transform.Scale = 0f;
             return;
         }
 
@@ -165,12 +165,14 @@ public partial struct UpdateMovementTargetProjectionJob : IJobEntity
 
         if (isSelected && isMoving)
         {
-            float2 targetPos = MoveCommandProjectionLookup[shipRef.Value].MoveTarget;
-            localToWorld.Value = float4x4.TRS(new float3(targetPos, 0), quaternion.identity, movementTargetProjection.Scale);
+            var command = MoveCommandProjectionLookup[shipRef.Value];
+            transform.Position = new float3(command.MoveTarget, 0f);
+            transform.Rotation = command.TargetRotation;
+            transform.Scale = 1.0f;
         }
         else
         {
-            localToWorld.Value = float4x4.Scale(0f);
+            transform.Scale = 0f;
         }
     }
 }
@@ -182,7 +184,7 @@ public partial struct UpdateMovementTargetJob : IJobEntity
     [ReadOnly] public ComponentLookup<MoveCommand> MoveCommandLookup;
 
     private void Execute(
-        ref LocalToWorld localToWorld,
+        ref LocalTransform transform,
         in MovementTargetVisualComponent movementTarget,
         in ShipReference shipRef)
     {
@@ -190,7 +192,7 @@ public partial struct UpdateMovementTargetJob : IJobEntity
             || !SelectedLookup.HasComponent(shipRef.Value)
             || !MoveCommandLookup.HasComponent(shipRef.Value))
         {
-            localToWorld.Value = float4x4.Scale(0f);
+            transform.Scale = 0f;
             return;
         }
 
@@ -199,12 +201,14 @@ public partial struct UpdateMovementTargetJob : IJobEntity
 
         if (isSelected && isMoving)
         {
-            float2 targetPos = MoveCommandLookup[shipRef.Value].MoveTarget;
-            localToWorld.Value = float4x4.TRS(new float3(targetPos, 0), quaternion.identity, movementTarget.Scale);
+            var command = MoveCommandLookup[shipRef.Value];
+            transform.Position = new float3(command.MoveTarget, 0f);
+            transform.Rotation = command.TargetRotation;
+            transform.Scale = 1.0f;
         }
         else
         {
-            localToWorld.Value = float4x4.Scale(0f);
+            transform.Scale = 0f;
         }
     }
 }

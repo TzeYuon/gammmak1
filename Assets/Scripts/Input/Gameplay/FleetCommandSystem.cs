@@ -32,7 +32,7 @@ partial struct FleetCommandSystem : ISystem
             }.ScheduleParallel(state.Dependency);
         }
 
-        if (input.WasPressed(PlayerAction.Secondary))
+        if (input.WasPressed(PlayerAction.Secondary) || input.IsHeld(PlayerAction.Secondary))
         {
             // place move target projection
             foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommandProjection>().WithEntityAccess())
@@ -41,7 +41,7 @@ partial struct FleetCommandSystem : ISystem
                 {
                     MoveTarget = input.MoveCommandStartDragPosition,
                     UseTargetRotation = input.MoveCommandUseRotation,
-                    targetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
+                    TargetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
                 });
                 SystemAPI.SetComponentEnabled<MoveCommandProjection>(entity, true);
             }
@@ -59,7 +59,7 @@ partial struct FleetCommandSystem : ISystem
                     ForcePath = false,
 
                     UseTargetRotation = input.MoveCommandUseRotation,
-                    targetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
+                    TargetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
                 });
                 SystemAPI.SetComponentEnabled<MoveCommand>(entity, true);
 

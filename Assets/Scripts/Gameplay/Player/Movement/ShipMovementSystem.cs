@@ -139,7 +139,7 @@ public partial struct MoveShipJob : IJobEntity
         if (isFinalTarget && command.UseTargetRotation && distToTarget < stats.BrakingDistance)
         {
             // EARLY ROTATION: As soon as we start braking, we start turning to the final parked angle!
-            desiredRot = command.targetRotation;
+            desiredRot = command.TargetRotation;
         }
         else if (!hasArrivedPos)
         {
@@ -158,7 +158,7 @@ public partial struct MoveShipJob : IJobEntity
             {
                 // Wait for the ship to finish its spin before completing the command
                 float3 currentFwd = math.rotate(transform.Rotation, new float3(0, 1, 0));
-                float3 targetFwd = math.rotate(command.targetRotation, new float3(0, 1, 0));
+                float3 targetFwd = math.rotate(command.TargetRotation, new float3(0, 1, 0));
 
                 if (math.dot(currentFwd, targetFwd) > 0.99f)
                 {

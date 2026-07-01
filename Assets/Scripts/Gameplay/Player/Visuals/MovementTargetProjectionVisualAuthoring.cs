@@ -21,15 +21,9 @@ class MovementTargetProjectionVisualAuthoring : MonoBehaviour
 
             AddComponent<NeedsShipReferenceTag>(entity);
 
-            AddComponent(entity, new MovementTargetProjectionVisualComponent
-            {
-                Scale = authoring.transform.localScale.x,
-            });
+            AddComponent(entity, new MovementTargetProjectionVisualComponent());
         }
     }
 }
 
-public struct MovementTargetProjectionVisualComponent : IComponentData
-{
-    public float Scale;
-}
+public struct MovementTargetProjectionVisualComponent : IComponentData { }
