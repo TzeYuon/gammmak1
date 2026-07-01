@@ -16,7 +16,7 @@ MonoBehaviour:
   WeaponID: 3
   WeaponPrefab: {fileID: 90229467165131139, guid: d39fd2feb189ed544bc5822e80127972, type: 3}
   EquipCost: 2
-  UpgradeLevel: 1
+  UpgradeLevel: 3
   Upgrades:
   - Cost: 100
     Description: 
@@ -45,6 +45,9 @@ MonoBehaviour:
     - StatType: 1
       ModifierType: 1
       Value: 0.05
+    - StatType: 5
+      ModifierType: 0
+      Value: 1
   BaseRange: 60
   DensityBias: 1
   AngleBias: 0
