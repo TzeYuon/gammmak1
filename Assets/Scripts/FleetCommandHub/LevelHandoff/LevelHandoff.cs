@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
@@ -252,7 +253,7 @@ public class LevelHandoff : MonoBehaviour
                 // Spawn the arc visual
                 Entity arcVisual = entityManager.Instantiate(arcPrefabEntity);
                 entityManager.AddComponentData(arcVisual, new Parent { Value = ghostPrefab });
-                entityManager.AddComponentData(arcVisual, LocalTransform.FromPosition((Vector3)mount.Position));
+                entityManager.AddComponentData(arcVisual, LocalTransform.FromPositionRotation((Vector3)mount.Position, mount.OriginalRotation));
 
                 entityManager.AddComponentData(arcVisual, new ArcAngleOverride
                 {

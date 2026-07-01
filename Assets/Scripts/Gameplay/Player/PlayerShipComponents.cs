@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 
 public struct PlayerTag : IComponentData { }
 public struct MothershipTag : IComponentData { }
@@ -56,4 +57,13 @@ public struct NeedsShipReferenceTag : IComponentData { }
 public struct ShipCollectionRadiusComponent : IComponentData
 {
     public float RadiusSq;
+}
+
+public struct MovementTargetVisualComponent : IComponentData { }
+public struct MovementTargetProjectionVisualComponent : IComponentData { }
+
+[MaterialProperty("_ArcAngle")]
+public struct ArcAngleOverride : IComponentData
+{
+    public float Value;
 }

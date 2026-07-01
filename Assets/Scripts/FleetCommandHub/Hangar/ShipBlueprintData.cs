@@ -54,7 +54,12 @@ public enum ShipSystemID : byte
 public class WeaponMount
 {
     public Vector2 Position;
-    public Vector2 Direction;
+    [HideInInspector] public Quaternion OriginalRotation;
+
+    [Range(-180f, 180f)]
+    [Tooltip("Facing direction of the mount in degrees. 0 is Up, -90 is Right, 90 is Left.")]
+    public float FacingAngleDegrees;
+
     public float MaxAngle;
     public WeaponData EquippedWeapon;
 }
@@ -89,8 +94,6 @@ public class ShipSystemUpgradeEffect
         else
             return $"{sign}{displayValue} {statName}";
     }
-
-    
 }
 
 [System.Serializable]
@@ -168,6 +171,16 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
     public float BaseCollectionRadius = 5f;
+
+    private void OnValidate()
+    {
+        if (Mounts == null) return;
+
+        foreach (var mount in Mounts)
+        {
+            mount.OriginalRotation = Quaternion.Euler(0, 0, mount.FacingAngleDegrees);
+        }
+    }
 
     public void ResetToBase()
     {

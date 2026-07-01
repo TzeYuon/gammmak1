@@ -134,13 +134,15 @@ MonoBehaviour:
         Value: 1
   BaseWeaponCapacity: 2
   Mounts:
-  - Position: {x: 0, y: 0}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: 0, y: 0.5}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    FacingAngleDegrees: 0
+    MaxAngle: 150
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0, y: 0}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: 0, y: -0.5}
+    OriginalRotation: {x: 0, y: 0, z: 1, w: -0.00000004371139}
+    FacingAngleDegrees: 180
+    MaxAngle: 150
     EquippedWeapon: {fileID: 0}
   BaseCost: 5
   BaseMaxHealth: 10
