@@ -1,5 +1,6 @@
 using System;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -15,11 +16,18 @@ partial struct FleetCommandSystem : ISystem
         state.RequireForUpdate<PlayerInputData>();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         ref var input = ref SystemAPI.GetSingletonRW<PlayerInputData>().ValueRW;
         float2 mousePos = input.MouseWorldPosition;
+
+        var obstacleGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        NativeArray<int> obstacleGrid = obstacleGridComponent.Grid;
+        int2 worldOrigin = obstacleGridComponent.WorldOrigin;
+        int gridWidth = obstacleGridComponent.GridWidth;
+        int gridHeight = obstacleGridComponent.GridHeight;
+        float cellSize = obstacleGridComponent.CellSize;
 
         if (input.WasReleased(PlayerAction.Primary))
         {
@@ -35,11 +43,11 @@ partial struct FleetCommandSystem : ISystem
         if (input.WasPressed(PlayerAction.Secondary) || input.IsHeld(PlayerAction.Secondary))
         {
             // place move target projection
-            foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommandProjection>().WithEntityAccess())
+            foreach (var (_, transform, entity) in SystemAPI.Query<RefRO<PlayerTag>, RefRO<LocalTransform>>().WithAll<SelectedTag>().WithPresent<MoveCommandProjection>().WithEntityAccess())
             {
                 SystemAPI.SetComponent(entity, new MoveCommandProjection
                 {
-                    MoveTarget = input.MoveCommandStartDragPosition,
+                    MoveTarget = ValidateMoveTarget(transform.ValueRO.Position.xy, input.MoveCommandStartDragPosition),
                     UseTargetRotation = input.MoveCommandUseRotation,
                     TargetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
                 });
@@ -50,11 +58,11 @@ partial struct FleetCommandSystem : ISystem
         if (input.MoveCommandTriggered)
         {
             // Enables move command
-            foreach (var (_, entity) in SystemAPI.Query<RefRO<PlayerTag>>().WithAll<SelectedTag>().WithPresent<MoveCommand>().WithEntityAccess())
+            foreach (var (_, transform, entity) in SystemAPI.Query<RefRO<PlayerTag>, RefRO<LocalTransform>>().WithAll<SelectedTag>().WithPresent<MoveCommand>().WithEntityAccess())
             {
                 SystemAPI.SetComponent(entity, new MoveCommand
                 {
-                    MoveTarget = input.MoveCommandStartDragPosition,
+                    MoveTarget = ValidateMoveTarget(transform.ValueRO.Position.xy, input.MoveCommandStartDragPosition),
                     Recalculate = true,
                     ForcePath = false,
 
@@ -68,6 +76,60 @@ partial struct FleetCommandSystem : ISystem
             }
 
             input.MoveCommandTriggered = false;
+        }
+
+        Vector2 ValidateMoveTarget(Vector2 start, Vector2 target)
+        {
+            int2 targetCell = GridUtility.WorldPosToCell(target, worldOrigin, cellSize);
+
+            // return immediately if target is valid
+            if (GridUtility.IsWithinBounds(targetCell, gridWidth, gridHeight) 
+                && GridUtility.IsTerrainPassable(target, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize))
+            {
+                return target;
+            }
+
+            // find valid target within range
+            float searchRadiusWorld = 5.0f;
+            int searchRadiusCells = (int)math.ceil(searchRadiusWorld / cellSize);
+            for (int r = 1; r <= searchRadiusCells; r++)
+            {
+                float bestDistSq = float.MaxValue;
+                bool foundInRing = false;
+                int2 bestCell = targetCell;
+
+                // Loop a bounding box for the current ring
+                for (int x = -r; x <= r; x++)
+                {
+                    for (int y = -r; y <= r; y++)
+                    {
+                        if (math.abs(x) != r && math.abs(y) != r) continue;
+
+                        int2 checkCell = targetCell + new int2(x, y);
+
+                        if (!GridUtility.IsWithinBounds(checkCell, gridWidth, gridHeight)) continue;
+                        if (!GridUtility.IsTerrainPassable(checkCell, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize)) continue;
+
+                        // found a target
+                        float distSq = math.distancesq(targetCell, checkCell);
+                        if (distSq < bestDistSq)
+                        {
+                            bestDistSq = distSq;
+                            bestCell = checkCell;
+                            foundInRing = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundInRing)
+                {
+                    return GridUtility.CellToWorldPosCenter(bestCell, worldOrigin, cellSize);
+                }
+            }
+
+            // no valid target found use raymarch
+            return GridUtility.GetLastSafePointOnLine(start, target, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize);
         }
     }
 

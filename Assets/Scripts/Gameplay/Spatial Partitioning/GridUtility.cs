@@ -94,11 +94,11 @@ public static class GridUtility
         NativeArray<int> obstacleGrid,
         int2 worldOrigin,
         int width,
-        int height)
+        int height,
+        float cellSize)
     {
         float dist = math.distance(start, end);
-
-        int steps = (int)math.ceil(dist / 0.5f);
+        int steps = (int)math.ceil(dist / (cellSize * 0.5f));
 
         if (steps <= 0) return true;
 
@@ -107,7 +107,7 @@ public static class GridUtility
 
         for (int i = 0; i < steps; i++)
         {
-            if (GetTerrainAtWorldPos(currentPos, obstacleGrid, worldOrigin, width, height) == 1)
+            if (!IsTerrainPassable(currentPos, obstacleGrid, worldOrigin, width, height, cellSize))
             {
                 return false;
             }
@@ -116,6 +116,39 @@ public static class GridUtility
         }
 
         return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float2 GetLastSafePointOnLine(
+        float2 start,
+        float2 end,
+        NativeArray<int> obstacleGrid,
+        int2 worldOrigin,
+        int width,
+        int height,
+        float cellSize)
+    {
+        float dist = math.distance(start, end);
+        int steps = (int)math.ceil(dist / (cellSize * 0.5f));
+
+        if (steps <= 0) return start;
+
+        float2 stepVector = (end - start) / steps;
+        float2 currentPos = start;
+        float2 lastSafePos = start;
+
+        for (int i = 0; i < steps; i++)
+        {
+            if (!IsTerrainPassable(currentPos, obstacleGrid, worldOrigin, width, height, cellSize))
+            {
+                return lastSafePos;
+            }
+
+            lastSafePos = currentPos;
+            currentPos += stepVector;
+        }
+
+        return end;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -144,10 +177,17 @@ public static class GridUtility
         return gridPos.x + gridPos.y * width;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetTerrainAtWorldPos(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height)
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetTerrainAtWorldPos(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height, float cellSize)
     {
-        if (!IsValidGridManagerWorldPos(pos, worldOrigin, width, height)) return -1;
-        return obstacleGrid[WorldPosToGridManagerIndex(pos, worldOrigin, width)];
+        if (!IsWithinBounds(pos, worldOrigin, cellSize, width, height)) return -1;
+        return obstacleGrid[WorldPosToIndex(pos, worldOrigin, cellSize, width)];
+    }
+
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsTerrainPassable(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height, float cellSize)
+    {
+        int terrain = GetTerrainAtWorldPos(pos, obstacleGrid, worldOrigin, width, height, cellSize);
+        return terrain != 1;
     }
 }

@@ -9,27 +9,19 @@ using UnityEngine;
 [UpdateInGroup(typeof(LateGameplayGroup))]
 partial struct SelectionVisualSystem : ISystem
 {
-    private ComponentLookup<SelectedTag> selectedLookup;
-    private ComponentLookup<MoveCommand> moveCommandLookup;
-    private ComponentLookup<MoveCommandProjection> moveCommandProjectionLookup;
-    private ComponentLookup<LocalTransform> shipTransformLookup;
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        selectedLookup = state.GetComponentLookup<SelectedTag>(true);
-        moveCommandLookup = state.GetComponentLookup<MoveCommand>(true);
-        moveCommandProjectionLookup = state.GetComponentLookup<MoveCommandProjection>(true);
-        shipTransformLookup = state.GetComponentLookup<LocalTransform>(true);
+ 
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        selectedLookup.Update(ref state);
-        moveCommandLookup.Update(ref state);
-        moveCommandProjectionLookup.Update(ref state);
-        shipTransformLookup.Update(ref state);
+        var selectedLookup = SystemAPI.GetComponentLookup<SelectedTag>(true);
+        var moveCommandLookup = SystemAPI.GetComponentLookup<MoveCommand>(true);
+        var moveCommandProjectionLookup = SystemAPI.GetComponentLookup<MoveCommandProjection>(true);
+        var shipTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
         float deltaTime = SystemAPI.Time.DeltaTime;
 
         var selectionVisualHandle = new UpdateSelectionVisualsJob
