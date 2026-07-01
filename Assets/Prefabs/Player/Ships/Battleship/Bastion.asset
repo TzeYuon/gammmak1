@@ -133,7 +133,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   BaseCost: 20
   BaseMaxHealth: 30
-  BaseSpeed: 10
-  BaseAcceleration: 4
-  BaseTurnSpeed: 9
+  BaseSpeed: 8
+  BaseAcceleration: 2
+  BaseTurnSpeed: 7
   BaseCollectionRadius: 5
