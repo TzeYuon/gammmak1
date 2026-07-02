@@ -20,7 +20,7 @@ class MovementLineVisualAuthoring : MonoBehaviour
 
             AddComponent(entity, new MovementLineVisualComponent
             {
-                Thickness = 0.15f
+                Thickness = 0.03f
             });
         }
     }

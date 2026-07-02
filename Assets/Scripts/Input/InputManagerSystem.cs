@@ -73,30 +73,6 @@ public partial class InputManagerSystem : SystemBase
             {
                 inputData.MouseStartDragPosition = mousePos;
             }
-
-            // Set move command and rotation
-            if (inputData.WasPressed(PlayerAction.Secondary))
-            {
-                inputData.MoveCommandStartDragPosition = mousePos;
-            }
-
-            // Check if player wants to add desired rotation
-            Vector2 drag = mousePos - inputData.MoveCommandStartDragPosition;
-            bool isDrag = math.lengthsq(drag) > 0.25f;
-            inputData.MoveCommandUseRotation = isDrag;
-
-            // set desired rotation
-            if (isDrag)
-            {
-                float angle = math.atan2(drag.y, drag.x) - (math.PI / 2f);
-                inputData.MoveCommandTargetRotation = angle;
-            }
-
-            // trigger move command
-            if (inputData.WasReleased(PlayerAction.Secondary))
-            {
-                inputData.MoveCommandTriggered = true;
-            }
         }
 
         SystemAPI.SetSingleton(inputData);
@@ -143,11 +119,6 @@ public struct PlayerInputData : IComponentData
 {
     public float2 MouseWorldPosition;
     public float2 MouseStartDragPosition;
-
-    public bool MoveCommandTriggered;
-    public float2 MoveCommandStartDragPosition;
-    public bool MoveCommandUseRotation;
-    public float MoveCommandTargetRotation;
 
     public PlayerAction CurrentState;
     public PlayerAction PreviousState;

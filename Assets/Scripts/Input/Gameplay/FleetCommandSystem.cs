@@ -10,6 +10,11 @@ using UnityEngine;
 [UpdateInGroup(typeof(CommandAndSpawnGroup))]
 partial struct FleetCommandSystem : ISystem
 {
+    bool moveStarted;
+    float2 moveTarget;
+    quaternion moveTargetRotation;
+    NativeArray<float2> validPositions;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -29,6 +34,7 @@ partial struct FleetCommandSystem : ISystem
         int gridHeight = obstacleGridComponent.GridHeight;
         float cellSize = obstacleGridComponent.CellSize;
 
+        // Handle ship selection
         if (input.WasReleased(PlayerAction.Primary))
         {
             float2 startPos = input.MouseStartDragPosition;
@@ -40,42 +46,164 @@ partial struct FleetCommandSystem : ISystem
             }.ScheduleParallel(state.Dependency);
         }
 
-        if (input.WasPressed(PlayerAction.Secondary) || input.IsHeld(PlayerAction.Secondary))
+        state.Dependency.Complete();
+
+        // Handle ship move command
+        int selectedCount = SystemAPI.QueryBuilder().WithAll<SelectedTag, PlayerTag>().Build().CalculateEntityCount();
+        if (selectedCount == 0)
         {
-            // place move target projection
-            foreach (var (_, transform, entity) in SystemAPI.Query<RefRO<PlayerTag>, RefRO<LocalTransform>>().WithAll<SelectedTag>().WithPresent<MoveCommandProjection>().WithEntityAccess())
-            {
-                SystemAPI.SetComponent(entity, new MoveCommandProjection
-                {
-                    MoveTarget = ValidateMoveTarget(transform.ValueRO.Position.xy, input.MoveCommandStartDragPosition),
-                    UseTargetRotation = input.MoveCommandUseRotation,
-                    TargetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
-                });
-                SystemAPI.SetComponentEnabled<MoveCommandProjection>(entity, true);
-            }
+            // no ships can be assigned to move, cancel move
+            moveStarted = false;
+            state.Dependency = new HideProjectionJob().ScheduleParallel(state.Dependency);
+            return;
         }
 
-        if (input.MoveCommandTriggered)
+        // Start move command
+        if (input.WasPressed(PlayerAction.Secondary))
         {
-            // Enables move command
-            foreach (var (_, transform, entity) in SystemAPI.Query<RefRO<PlayerTag>, RefRO<LocalTransform>>().WithAll<SelectedTag>().WithPresent<MoveCommand>().WithEntityAccess())
+            // get center of all selected ships
+            float3 centerOfMass = float3.zero;
+            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag, SelectedTag>().WithDisabled<DeadTag>())
             {
-                SystemAPI.SetComponent(entity, new MoveCommand
+                centerOfMass += transform.ValueRO.Position;
+            }
+            centerOfMass /= selectedCount;
+
+            // find a target position that is reachable
+            moveStarted = true;
+            moveTarget = ValidateMoveTarget(centerOfMass.xy, mousePos);
+
+            // create positions to assign to ships when move command is given
+            float shipSpacing = 1f;
+            if (validPositions.IsCreated) validPositions.Dispose();
+            validPositions = GenerateBFSFormationPositions(
+                selectedCount,
+                moveTarget,
+                shipSpacing,
+                obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize,
+                Allocator.Persistent
+            );
+        }
+
+        if (!moveStarted) return;
+
+        // Check if player wants to add desired rotation
+        Vector2 drag = mousePos - moveTarget;
+        bool useRotation = math.lengthsq(drag) > 0.25f;
+
+        // set desired rotation
+        if (useRotation) moveTargetRotation = quaternion.RotateZ(math.atan2(drag.y, drag.x) - (math.PI / 2f));
+
+        if (input.WasReleased(PlayerAction.Secondary) && moveStarted) // move command triggered
+        {
+            var moveJob = new AssignMoveCommandJob
+            {
+                ValidPositions = validPositions,
+                UseRotation = useRotation,
+                TargetRotation = moveTargetRotation
+            };
+            state.Dependency = moveJob.ScheduleParallel(state.Dependency);
+
+            // dispose valid positions array
+            validPositions.Dispose(state.Dependency);
+
+            moveStarted = false;
+        }
+        else if (input.WasPressed(PlayerAction.Secondary) || input.IsHeld(PlayerAction.Secondary)) // not yet released right click
+        {
+            var projectionJob = new AssignProjectionJob
+            {
+                ValidPositions = validPositions,
+                UseRotation = useRotation,
+                TargetRotation = moveTargetRotation
+            };
+            state.Dependency = projectionJob.ScheduleParallel(state.Dependency);
+        }
+
+        static NativeArray<float2> GenerateBFSFormationPositions(
+            int totalCount,
+            float2 center,
+            float shipSpacing,
+            NativeArray<int> obstacleGrid,
+            int2 worldOrigin,
+            int gridWidth,
+            int gridHeight,
+            float obstacleCellSize,
+            Allocator allocator)
+        {
+            var validPositions = new NativeArray<float2>(totalCount, allocator);
+
+            // We use a Queue and a HashSet to track our "Virtual Grid" coordinates.
+            // E.g., (0,0) is center, (1,0) is one ship-space to the right.
+            var queue = new NativeQueue<int2>(Allocator.Temp);
+            var visited = new NativeHashSet<int2>(totalCount * 4, Allocator.Temp);
+
+            // 1. Initialize the BFS at the clicked center
+            queue.Enqueue(int2.zero);
+            visited.Add(int2.zero);
+
+            int foundCount = 0;
+
+            // 4-way expansion directions (Up, Down, Left, Right)
+            // This creates a diamond/circular organic blob.
+            NativeArray<int2> directions = new NativeArray<int2>(4, Allocator.Temp);
+            directions[0] = new int2(1, 0);
+            directions[1] = new int2(-1, 0);
+            directions[2] = new int2(0, 1);
+            directions[3] = new int2(0, -1);
+
+            // 2. Run the BFS until we find enough safe spots
+            while (queue.Count > 0 && foundCount < totalCount)
+            {
+                int2 virtualCoord = queue.Dequeue();
+
+                // A. Convert Virtual Coord to Physical Offset using Ship Spacing
+                float2 offset = new float2(virtualCoord.x * shipSpacing, virtualCoord.y * shipSpacing);
+
+                // C. Get the absolute World Position
+                float2 worldPos = center + offset;
+
+                // D. Check the actual Obstacle Grid!
+                // Because Ship Spacing might be 1.0 and Obstacle Cell might be 5.0, 
+                // multiple virtual coordinates will naturally map to the same obstacle cell.
+                int2 obstacleCell = GridUtility.WorldPosToCell(worldPos, worldOrigin, obstacleCellSize);
+
+                bool isSafe = GridUtility.IsWithinBounds(obstacleCell, gridWidth, gridHeight) &&
+                              GridUtility.IsTerrainPassable(worldPos, obstacleGrid, worldOrigin, gridWidth, gridHeight, obstacleCellSize);
+
+                if (isSafe)
                 {
-                    MoveTarget = ValidateMoveTarget(transform.ValueRO.Position.xy, input.MoveCommandStartDragPosition),
-                    Recalculate = true,
-                    ForcePath = false,
+                    // We found a safe spot! Add it to our final list.
+                    validPositions[foundCount] = worldPos;
+                    foundCount++;
 
-                    UseTargetRotation = input.MoveCommandUseRotation,
-                    TargetRotation = quaternion.RotateZ(input.MoveCommandTargetRotation),
-                });
-                SystemAPI.SetComponentEnabled<MoveCommand>(entity, true);
-
-                // disable projection
-                SystemAPI.SetComponentEnabled<MoveCommandProjection>(entity, false);
+                    // Enqueue neighbors ONLY if this current cell was safe.
+                    // This prevents the BFS from "jumping over" walls!
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int2 neighbor = virtualCoord + directions[i];
+                        if (visited.Add(neighbor)) // .Add() returns true if it wasn't already in the HashSet
+                        {
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
             }
 
-            input.MoveCommandTriggered = false;
+            // 3. Fallback Safety Net
+            // If the player clicked inside a tiny sealed-off box that can't fit the whole fleet,
+            // we just stack the remaining ships on the last safe position found.
+            for (int i = foundCount; i < totalCount; i++)
+            {
+                validPositions[i] = foundCount > 0 ? validPositions[foundCount - 1] : center;
+            }
+
+            // Cleanup
+            directions.Dispose();
+            queue.Dispose();
+            visited.Dispose();
+
+            return validPositions;
         }
 
         Vector2 ValidateMoveTarget(Vector2 start, Vector2 target)
@@ -121,12 +249,13 @@ partial struct FleetCommandSystem : ISystem
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-        
+        if (validPositions.IsCreated) validPositions.Dispose();
     }
 }
 
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
+[WithDisabled(typeof(DeadTag))]
 [WithAbsent(typeof(MothershipTag))]
 [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct CheckSelectionBoxJob : IJobEntity
@@ -146,5 +275,73 @@ public partial struct CheckSelectionBoxJob : IJobEntity
 
         if (inBox) selected.ValueRW = true;
         else if (!AddToSelection) selected.ValueRW = false;
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag))]
+[WithPresent(typeof(MoveCommandProjection))]
+[WithDisabled(typeof(DeadTag))]
+public partial struct HideProjectionJob : IJobEntity
+{
+    private void Execute(
+        EnabledRefRW<MoveCommandProjection> projection)
+    {
+        projection.ValueRW = false;
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag), typeof(SelectedTag))]
+[WithDisabled(typeof(DeadTag))]
+[WithPresent(typeof(MoveCommandProjection))]
+public partial struct AssignProjectionJob : IJobEntity
+{
+    [ReadOnly] public NativeArray<float2> ValidPositions;
+    public bool UseRotation;
+    public quaternion TargetRotation;
+
+    private void Execute(
+        [EntityIndexInQuery] int index,
+        ref MoveCommandProjection projection,
+        EnabledRefRW<MoveCommandProjection> projectionEnabled)
+    {
+        // safety check
+        if (index >= ValidPositions.Length) return;
+
+        projection.MoveTarget = ValidPositions[index];
+        projection.UseTargetRotation = UseRotation;
+        projection.TargetRotation = TargetRotation;
+
+        projectionEnabled.ValueRW = true;
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag), typeof(SelectedTag))]
+[WithDisabled(typeof(DeadTag))]
+[WithPresent(typeof(MoveCommand))]
+public partial struct AssignMoveCommandJob : IJobEntity
+{
+    [ReadOnly] public NativeArray<float2> ValidPositions;
+    public bool UseRotation;
+    public quaternion TargetRotation;
+
+    private void Execute(
+        [EntityIndexInQuery] int index,
+        ref MoveCommand command,
+        EnabledRefRW<MoveCommand> commandEnabled,
+        EnabledRefRW<MoveCommandProjection> projectionEnabled)
+    {
+        if (index >= ValidPositions.Length) return;
+
+        command.MoveTarget = ValidPositions[index];
+        command.Recalculate = true;
+        command.ForcePath = false;
+        command.UseTargetRotation = UseRotation;
+        command.TargetRotation = TargetRotation;
+
+        commandEnabled.ValueRW = true;
+        projectionEnabled.ValueRW = false;
     }
 }
