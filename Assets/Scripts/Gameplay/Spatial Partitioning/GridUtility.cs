@@ -6,6 +6,12 @@ using UnityEngine;
 public static class GridUtility
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float2 RoundWorldPosToCorner(float2 worldPos, int2 worldOrigin, float cellSize)
+    {
+        return CellToWorldPosCorner(WorldPosToCell(worldPos, worldOrigin, cellSize), worldOrigin, cellSize);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int2 WorldPosToCell(float2 worldPos, int2 worldOrigin, float cellSize)
     {
         int gridX = (int)math.floor((worldPos.x - worldOrigin.x) / cellSize);
@@ -141,7 +147,7 @@ public static class GridUtility
         {
             if (!IsTerrainPassable(currentPos, obstacleGrid, worldOrigin, width, height, cellSize))
             {
-                return lastSafePos;
+                return RoundWorldPosToCorner(lastSafePos, worldOrigin, cellSize);
             }
 
             lastSafePos = currentPos;
@@ -188,6 +194,6 @@ public static class GridUtility
     public static bool IsTerrainPassable(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height, float cellSize)
     {
         int terrain = GetTerrainAtWorldPos(pos, obstacleGrid, worldOrigin, width, height, cellSize);
-        return terrain != 1;
+        return terrain != 1 && terrain != -1;
     }
 }

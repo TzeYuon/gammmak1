@@ -94,10 +94,6 @@ partial struct FleetCommandSystem : ISystem
             int searchRadiusCells = (int)math.ceil(searchRadiusWorld / cellSize);
             for (int r = 1; r <= searchRadiusCells; r++)
             {
-                float bestDistSq = float.MaxValue;
-                bool foundInRing = false;
-                int2 bestCell = targetCell;
-
                 // Loop a bounding box for the current ring
                 for (int x = -r; x <= r; x++)
                 {
@@ -106,25 +102,14 @@ partial struct FleetCommandSystem : ISystem
                         if (math.abs(x) != r && math.abs(y) != r) continue;
 
                         int2 checkCell = targetCell + new int2(x, y);
+                        float2 checkWorldPos = GridUtility.CellToWorldPosCorner(checkCell, worldOrigin, cellSize);
 
                         if (!GridUtility.IsWithinBounds(checkCell, gridWidth, gridHeight)) continue;
-                        if (!GridUtility.IsTerrainPassable(checkCell, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize)) continue;
+                        if (!GridUtility.IsTerrainPassable(checkWorldPos, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize)) continue;
 
-                        // found a target
-                        float distSq = math.distancesq(targetCell, checkCell);
-                        if (distSq < bestDistSq)
-                        {
-                            bestDistSq = distSq;
-                            bestCell = checkCell;
-                            foundInRing = true;
-                            break;
-                        }
+                        // found a target, return target immediately
+                        return checkWorldPos;
                     }
-                }
-
-                if (foundInRing)
-                {
-                    return GridUtility.CellToWorldPosCenter(bestCell, worldOrigin, cellSize);
                 }
             }
 
