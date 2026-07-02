@@ -64,6 +64,11 @@ partial struct LevelGen_TerrainSystem : ISystem
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
         LevelSpawnData spawnData = new LevelSpawnData();
 
+        if (FogOfWarManager.Instance != null)
+        {
+            FogOfWarManager.Instance.InitializeFog(width, height, new Vector2Int(worldOrigin.x, worldOrigin.y));
+        }
+
         // Set camera bounds to current map size
         CameraManager.Instance.SetMapBounds(new Vector2(width / 2f, height / 2f));
 
