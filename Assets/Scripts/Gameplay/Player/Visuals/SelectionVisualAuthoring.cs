@@ -30,8 +30,3 @@ public struct SelectionVisualComponent : IComponentData
 {
     public float Scale;
 }
-
-public struct MovementLineVisualComponent : IComponentData
-{
-    public float Thickness;
-}

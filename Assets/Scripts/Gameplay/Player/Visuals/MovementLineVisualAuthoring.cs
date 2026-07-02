@@ -25,3 +25,8 @@ class MovementLineVisualAuthoring : MonoBehaviour
         }
     }
 }
+
+public struct MovementLineVisualComponent : IComponentData
+{
+    public float Thickness;
+}

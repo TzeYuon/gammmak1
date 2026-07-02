@@ -1,9 +1,17 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 
 public struct PlayerTag : IComponentData { }
 public struct MothershipTag : IComponentData { }
 public struct SelectedTag : IComponentData, IEnableableComponent { }
+
+public struct MoveCommandProjection : IComponentData, IEnableableComponent
+{
+    public float2 MoveTarget;
+    public bool UseTargetRotation;
+    public quaternion TargetRotation;
+}
 
 public struct MoveCommand : IComponentData, IEnableableComponent
 {
@@ -12,6 +20,10 @@ public struct MoveCommand : IComponentData, IEnableableComponent
     public bool ForcePath;
     public float2 NextWaypoint;
     public bool PathExists;
+
+    // for manual rotation
+    public bool UseTargetRotation;
+    public quaternion TargetRotation;
 }
 
 [InternalBufferCapacity(20)]
@@ -45,4 +57,13 @@ public struct NeedsShipReferenceTag : IComponentData { }
 public struct ShipCollectionRadiusComponent : IComponentData
 {
     public float RadiusSq;
+}
+
+public struct MovementTargetVisualComponent : IComponentData { }
+public struct MovementTargetProjectionVisualComponent : IComponentData { }
+
+[MaterialProperty("_ArcAngle")]
+public struct ArcAngleOverride : IComponentData
+{
+    public float Value;
 }

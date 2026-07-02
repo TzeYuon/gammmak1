@@ -16,6 +16,7 @@ MonoBehaviour:
   ShipClass: 3
   ShipID: 101
   ShipPrefab: {fileID: 6753536424006035904, guid: bda03cfd1deb323438079fde22c16946, type: 3}
+  ShipMesh: {fileID: -2781392939962136033, guid: fb128d9504f9c5c41944d92d219d5b64, type: 3}
   ShipSystems:
   - SystemID: 1
     UpgradeLevel: 0
@@ -122,12 +123,20 @@ MonoBehaviour:
   BaseWeaponCapacity: 7
   Mounts:
   - Position: {x: 0, y: 3}
+    Direction: {x: 0, y: 0}
+    MaxAngle: 0
     EquippedWeapon: {fileID: 0}
   - Position: {x: 2, y: 2}
+    Direction: {x: 0, y: 0}
+    MaxAngle: 0
     EquippedWeapon: {fileID: 0}
   - Position: {x: -2, y: 2}
+    Direction: {x: 0, y: 0}
+    MaxAngle: 0
     EquippedWeapon: {fileID: 0}
   - Position: {x: 3, y: 0}
+    Direction: {x: 0, y: 0}
+    MaxAngle: 0
     EquippedWeapon: {fileID: 0}
   BaseCost: 17
   BaseMaxHealth: 20

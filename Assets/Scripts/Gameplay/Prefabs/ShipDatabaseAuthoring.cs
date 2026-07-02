@@ -4,9 +4,16 @@ using UnityEngine;
 
 class ShipDatabaseAuthoring : MonoBehaviour
 {
-    public GameObject MothershipPrefab;
-    public List<ShipBlueprintData> AllGameShips;
-    public List<WeaponData> AllGameWeapons;
+    [Header("Ship prefabs")]
+    [SerializeField] private GameObject mothershipPrefab;
+    [SerializeField] private List<ShipBlueprintData> allGameShips;
+
+    [Header("Weapon prefabs")]
+    [SerializeField] private List<WeaponData> allGameWeapons;
+
+    [Header("Ship visual prefabs")]
+    [SerializeField] private GameObject ghostPrefab;
+    [SerializeField] private GameObject arcVisualPrefab;
 
     class Baker : Baker<ShipDatabaseAuthoring>
     {
@@ -14,12 +21,12 @@ class ShipDatabaseAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.None);
 
-            var mothershipEntity = GetEntity(authoring.MothershipPrefab, TransformUsageFlags.Dynamic);
+            var mothershipEntity = GetEntity(authoring.mothershipPrefab, TransformUsageFlags.Dynamic);
             AddComponent(entity, new MothershipPrefabDatabase { MothershipPrefab = mothershipEntity });
 
             // Create the database buffer
             var shipDBBuffer = AddBuffer<BakedShipData>(entity);
-            foreach (var shipSO in authoring.AllGameShips)
+            foreach (var shipSO in authoring.allGameShips)
             {
                 if (shipSO != null && shipSO.ShipPrefab != null)
                 {
@@ -33,7 +40,7 @@ class ShipDatabaseAuthoring : MonoBehaviour
             }
 
             var weaponDBBuffer = AddBuffer<BakedWeaponData>(entity);
-            foreach (var weaponSO in authoring.AllGameWeapons)
+            foreach (var weaponSO in authoring.allGameWeapons)
             {
                 if (weaponSO != null && weaponSO.WeaponPrefab != null)
                 {
@@ -45,8 +52,20 @@ class ShipDatabaseAuthoring : MonoBehaviour
                     });
                 }
             }
+
+            AddComponent(entity, new ShipVisualDatabase
+            {
+                GhostVisualPrefab = GetEntity(authoring.ghostPrefab, TransformUsageFlags.Dynamic),
+                ArcVisualPrefab = GetEntity(authoring.arcVisualPrefab, TransformUsageFlags.Dynamic),
+            });
         }
     }
+}
+
+public partial struct ShipVisualDatabase : IComponentData
+{
+    public Entity GhostVisualPrefab;
+    public Entity ArcVisualPrefab;
 }
 
 public partial struct MothershipPrefabDatabase : IComponentData

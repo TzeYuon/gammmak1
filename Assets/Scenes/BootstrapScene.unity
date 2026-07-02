@@ -609,6 +609,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelHandoff
   playerSaveData: {fileID: 11400000, guid: f3b095d919907a84198ee7e196198de6, type: 2}
+  ghostMaterial: {fileID: 2100000, guid: 46c0ac334d08e364384ef408b660e532, type: 2}
 --- !u!4 &1215084226
 Transform:
   m_ObjectHideFlags: 0

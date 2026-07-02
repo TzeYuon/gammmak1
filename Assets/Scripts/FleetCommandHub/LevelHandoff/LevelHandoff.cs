@@ -1,10 +1,15 @@
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class LevelHandoff : MonoBehaviour
 {
     [SerializeField] private PlayerSaveData playerSaveData;
+    [SerializeField] private Material ghostMaterial;
 
     private void Start()
     {
@@ -52,6 +57,9 @@ public class LevelHandoff : MonoBehaviour
 
     void ConvertRosterToComponents(EntityManager entityManager)
     {
+        var world = World.DefaultGameObjectInjectionWorld;
+        if (world == null) return;
+
         var query = entityManager.CreateEntityQuery(typeof(BakedShipData), typeof(BakedWeaponData));
         if (query.IsEmptyIgnoreFilter)
         {
@@ -64,6 +72,13 @@ public class LevelHandoff : MonoBehaviour
         // Get database
         var shipDB = entityManager.GetBuffer<BakedShipData>(databaseEntity).ToNativeArray(Allocator.Temp);
         var weaponDB = entityManager.GetBuffer<BakedWeaponData>(databaseEntity).ToNativeArray(Allocator.Temp);
+
+        // Prepare variables for ghost
+        var shipVisualDB = entityManager.GetComponentData<ShipVisualDatabase>(databaseEntity);
+        Entity ghostPrefabEntity = shipVisualDB.GhostVisualPrefab;
+        Entity arcPrefabEntity = shipVisualDB.ArcVisualPrefab;
+        var graphicsSystem = world.GetExistingSystemManaged<EntitiesGraphicsSystem>();
+        BatchMaterialID hologramMatID = graphicsSystem.RegisterMaterial(ghostMaterial);
 
         // Update mothership stats and weapons
         entityManager = CreateMothershipBlueprint(entityManager, weaponDB);
@@ -93,11 +108,15 @@ public class LevelHandoff : MonoBehaviour
 
             entityManager.AddComponentData(blueprintEntity, new LevelEntityTag());
 
+            // Create ghost for movement visual
+            entityManager = CreateGhostPrefab(entityManager, blueprint, out Entity ghostPrefab);
+
             // add blueprint to spawn in the ship
             entityManager.AddComponentData(blueprintEntity, new RosterShipBlueprint
             {
                 SlotIndex = count++,
                 ShipPrefab = matchedPrefab,
+                GhostEntity = ghostPrefab,
                 BiomassCost = Mathf.RoundToInt(blueprint.GetStat(ShipStat.Cost)),
 
                 ShipHealthComponent = new HealthComponent
@@ -121,6 +140,44 @@ public class LevelHandoff : MonoBehaviour
             });
 
             // Create weapon blueprints for each weapon mount on the ship
+            entityManager = CreateWeaponBlueprints(entityManager, weaponDB, blueprint, blueprintEntity);
+        }
+
+        shipDB.Dispose();
+        weaponDB.Dispose();
+
+        EntityManager CreateMothershipBlueprint(EntityManager entityManager, NativeArray<BakedWeaponData> weaponDB)
+        {
+            ShipBlueprintData mBlueprint = playerSaveData.Mothership;
+            Entity mBlueprintEntity = entityManager.CreateEntity();
+
+            // Calculate final ship stats
+            float mHealth = mBlueprint.GetStat(ShipStat.MaxHealth);
+            float mCollectionRadius = mBlueprint.GetStat(ShipStat.CollectionRadius);
+
+            entityManager.AddComponentData(mBlueprintEntity, new LevelEntityTag());
+
+            // add blueprint to spawn in the ship
+            entityManager.AddComponentData(mBlueprintEntity, new MothershipBlueprint
+            {
+                ShipHealthComponent = new HealthComponent
+                {
+                    MaxValue = mHealth,
+                    Value = mHealth
+                },
+
+                ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
+                {
+                    RadiusSq = mCollectionRadius * mCollectionRadius
+                }
+            });
+
+            // Create weapon blueprints for each weapon mount on the ship
+            return CreateWeaponBlueprints(entityManager, weaponDB, mBlueprint, mBlueprintEntity);
+        }
+
+        EntityManager CreateWeaponBlueprints(EntityManager entityManager, NativeArray<BakedWeaponData> weaponDB, ShipBlueprintData blueprint, Entity blueprintEntity)
+        {
             var weaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(blueprintEntity);
             for (int m = 0; m < blueprint.Mounts.Count; m++)
             {
@@ -165,81 +222,53 @@ public class LevelHandoff : MonoBehaviour
                     }
                 });
             }
+
+            return entityManager;
         }
-
-        shipDB.Dispose();
-        weaponDB.Dispose();
-
-        EntityManager CreateMothershipBlueprint(EntityManager entityManager, NativeArray<BakedWeaponData> weaponDB)
+    
+        EntityManager CreateGhostPrefab(EntityManager entityManager, ShipBlueprintData blueprint, out Entity ghostPrefab)
         {
-            ShipBlueprintData mBlueprint = playerSaveData.Mothership;
-            Entity mBlueprintEntity = entityManager.CreateEntity();
+            ghostPrefab = entityManager.Instantiate(ghostPrefabEntity);
 
-            // Calculate final ship stats
-            float mHealth = mBlueprint.GetStat(ShipStat.MaxHealth);
-            float mCollectionRadius = mBlueprint.GetStat(ShipStat.CollectionRadius);
-
-            entityManager.AddComponentData(mBlueprintEntity, new LevelEntityTag());
-
-            // add blueprint to spawn in the ship
-            entityManager.AddComponentData(mBlueprintEntity, new MothershipBlueprint
+            if (blueprint.ShipMesh != null)
             {
-                ShipHealthComponent = new HealthComponent
+                BatchMeshID ghostMeshID = graphicsSystem.RegisterMesh(blueprint.ShipMesh);
+                entityManager.SetComponentData(ghostPrefab, new MaterialMeshInfo
                 {
-                    MaxValue = mHealth,
-                    Value = mHealth
-                },
-
-                ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
-                {
-                    RadiusSq = mCollectionRadius * mCollectionRadius
-                }
-            });
-
-            // Create weapon blueprints for each weapon mount on the ship
-            var mWeaponBuffer = entityManager.AddBuffer<RosterWeaponBlueprint>(mBlueprintEntity);
-            for (int m = 0; m < mBlueprint.Mounts.Count; m++)
-            {
-                var mount = mBlueprint.Mounts[m];
-                WeaponData weapon = mount.EquippedWeapon;
-                if (weapon == null) continue;
-
-                Entity weaponPrefab = GetPrefabFromDatabase(weaponDB, weapon.WeaponID);
-
-                float range = weapon.GetStat(WeaponStat.Range);
-                float explosionRadius = weapon.GetStat(WeaponStat.ExplosionRadius);
-
-                // add blueprint to spawn weapon
-                mWeaponBuffer.Add(new RosterWeaponBlueprint
-                {
-                    WeaponPrefab = weaponPrefab,
-                    Position = mount.Position,
-
-                    WeaponTargetingStats = new WeaponTargetingStats
-                    {
-                        IgnoreObstacles = weapon.IgnoreObstacles,
-                        Range = weapon.GetStat(WeaponStat.Range),
-                        RangeSq = range * range,
-                        DensityBias = weapon.DensityBias,
-                        AngleBias = weapon.AngleBias,
-                        DistanceBias = weapon.DistanceBias,
-                    },
-
-                    WeaponCombatStats = new WeaponCombatStats
-                    {
-                        Damage = weapon.GetStat(WeaponStat.Damage),
-                        FireRate = weapon.GetStat(WeaponStat.FireRate),
-                        Spread = weapon.GetStat(WeaponStat.Spread),
-                        IgnoreObstacles = weapon.IgnoreObstacles,
-                        ProjectileCount = weapon.GetStatInt(WeaponStat.ProjectileCount),
-                        ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
-                        ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
-                        HitRadius = weapon.GetStat(WeaponStat.HitRadius),
-                        ExplosionRadiusSq = explosionRadius * explosionRadius,
-                        PierceCount = Mathf.RoundToInt(weapon.GetStat(WeaponStat.PierceCount)),
-                        TriggerTime = weapon.GetStat(WeaponStat.TriggerTime),
-                    }
+                    MeshID = ghostMeshID,
+                    MaterialID = hologramMatID,
+                    SubMesh = 0
                 });
+            }
+            else
+            {
+                Debug.LogWarning($"[Handoff] {blueprint.ShipName} is missing a ShipMesh in its ScriptableObject!");
+            }
+
+            for (int m = 0; m < blueprint.Mounts.Count; m++)
+            {
+                var mount = blueprint.Mounts[m];
+                if (mount.EquippedWeapon == null) continue;
+
+                // Spawn the arc visual
+                Entity arcVisual = entityManager.Instantiate(arcPrefabEntity);
+                entityManager.AddComponentData(arcVisual, new Parent { Value = ghostPrefab });
+                entityManager.AddComponentData(arcVisual, LocalTransform.FromPositionRotation((Vector3)mount.Position, mount.OriginalRotation));
+
+                entityManager.AddComponentData(arcVisual, new ArcAngleOverride
+                {
+                    Value = mount.MaxAngle,
+                });
+
+                // add weapon arc to same group as the ghost
+                if (!entityManager.HasBuffer<LinkedEntityGroup>(ghostPrefab))
+                {
+                    var newBuffer = entityManager.AddBuffer<LinkedEntityGroup>(ghostPrefab);
+                    newBuffer.Add(new LinkedEntityGroup { Value = ghostPrefab });
+                }
+
+                var linkedGroup = entityManager.GetBuffer<LinkedEntityGroup>(ghostPrefab);
+                linkedGroup.Add(new LinkedEntityGroup { Value = arcVisual });
             }
 
             return entityManager;

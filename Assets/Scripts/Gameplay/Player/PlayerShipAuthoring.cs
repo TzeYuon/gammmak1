@@ -60,6 +60,9 @@ class PlayerShipAuthoring : MonoBehaviour
             AddComponent<SelectedTag>(entity);
             SetComponentEnabled<SelectedTag>(entity, false);
 
+            AddComponent<MoveCommandProjection>(entity);
+            SetComponentEnabled<MoveCommandProjection>(entity, false);
+
             AddComponent<MoveCommand>(entity);
             SetComponentEnabled<MoveCommand>(entity, false);
             AddBuffer<ShipWaypoint>(entity);

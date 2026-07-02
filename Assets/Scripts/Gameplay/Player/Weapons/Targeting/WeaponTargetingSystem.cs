@@ -34,6 +34,7 @@ partial struct WeaponTargetingSystem : ISystem
         int2 obstacleWorldOrigin = terrainGridComponent.WorldOrigin;
         int obstacleGridWidth = terrainGridComponent.GridWidth;
         int obstacleGridHeight = terrainGridComponent.GridHeight;
+        float obstacleGridCellSize = terrainGridComponent.CellSize;
 
         PrecisionTargetingJob precisionJob = new()
         {
@@ -50,6 +51,7 @@ partial struct WeaponTargetingSystem : ISystem
             ObstacleWorldOrigin = obstacleWorldOrigin,
             ObstacleGridWidth = obstacleGridWidth,
             ObstacleGridHeight = obstacleGridHeight,
+            ObstacleGridCellSize = obstacleGridCellSize
         };
 
         HeatmapTargetingJob heatmapJob = new()
@@ -64,6 +66,7 @@ partial struct WeaponTargetingSystem : ISystem
             ObstacleWorldOrigin = obstacleWorldOrigin,
             ObstacleGridWidth = obstacleGridWidth,
             ObstacleGridHeight = obstacleGridHeight,
+            ObstacleGridCellSize = obstacleGridCellSize
         };
 
         state.Dependency = JobHandle.CombineDependencies(
@@ -98,6 +101,7 @@ public partial struct PrecisionTargetingJob : IJobEntity
     public int2 ObstacleWorldOrigin;
     public int ObstacleGridWidth;
     public int ObstacleGridHeight;
+    public float ObstacleGridCellSize;
 
     private void Execute(
         in LocalToWorld transform,
@@ -152,7 +156,8 @@ public partial struct PrecisionTargetingJob : IJobEntity
                             ObstacleGrid,
                             ObstacleWorldOrigin,
                             ObstacleGridWidth,
-                            ObstacleGridHeight))
+                            ObstacleGridHeight,
+                            ObstacleGridCellSize))
                         {
                             continue; // no line of sight
                         }
@@ -198,6 +203,7 @@ public partial struct HeatmapTargetingJob : IJobEntity
     public int2 ObstacleWorldOrigin;
     public int ObstacleGridWidth;
     public int ObstacleGridHeight;
+    public float ObstacleGridCellSize;
 
     private void Execute(
         ref WeaponState state,
@@ -241,7 +247,8 @@ public partial struct HeatmapTargetingJob : IJobEntity
                     ObstacleGrid,
                     ObstacleWorldOrigin,
                     ObstacleGridWidth,
-                    ObstacleGridHeight))
+                    ObstacleGridHeight,
+                    ObstacleGridCellSize))
                 {
                     continue; // no line of sight
                 }

@@ -125,6 +125,17 @@ public partial struct ShipSpawnerSystem : ISystem
 
                 ecb.AppendToBuffer(newShip, new LinkedEntityGroup { Value = weapon });
             }
+
+            // Spawn ghosts for movement visuals
+            var ghost1 = ecb.Instantiate(shipBlueprint.GhostEntity);
+            ecb.AddComponent(ghost1, new ShipReference { Value = newShip });
+            ecb.AddComponent(ghost1, new LevelEntityTag());
+            ecb.AddComponent(ghost1, new MovementTargetVisualComponent());
+
+            var ghost2 = ecb.Instantiate(shipBlueprint.GhostEntity);
+            ecb.AddComponent(ghost2, new ShipReference { Value = newShip });
+            ecb.AddComponent(ghost1, new LevelEntityTag());
+            ecb.AddComponent(ghost2, new MovementTargetProjectionVisualComponent());
         }
     }
 }

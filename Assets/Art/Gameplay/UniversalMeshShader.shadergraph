@@ -167,7 +167,7 @@
         "m_SerializedTexture": "",
         "m_Guid": ""
     },
-    "isMainTexture": false,
+    "isMainTexture": true,
     "useTilingAndOffset": false,
     "useTexelSize": true,
     "m_Modifiable": true,

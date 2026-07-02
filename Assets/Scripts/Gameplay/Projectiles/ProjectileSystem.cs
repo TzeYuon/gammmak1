@@ -40,6 +40,7 @@ partial struct ProjectileSystem : ISystem
         int2 obstacleWorldOrigin = terrainGridComponent.WorldOrigin;
         int obstacleGridWidth = terrainGridComponent.GridWidth;
         int obstacleGridHeight = terrainGridComponent.GridHeight;
+        float obstacleGridCellSize = terrainGridComponent.CellSize;
 
         // Movement
         var linearHandle = new LinearFlightJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);
@@ -75,6 +76,7 @@ partial struct ProjectileSystem : ISystem
             ObstacleWorldOrigin = obstacleWorldOrigin,
             ObstacleGridWidth = obstacleGridWidth,
             ObstacleGridHeight = obstacleGridHeight,
+            ObstacleGridCellSize = obstacleGridCellSize,
         }.ScheduleParallel(contactHandle);
 
         var triggerhandle = obstacleHandle;
@@ -498,6 +500,7 @@ public partial struct ObstacleTriggerJob : IJobEntity
     public int2 ObstacleWorldOrigin;
     public int ObstacleGridWidth;
     public int ObstacleGridHeight;
+    public float ObstacleGridCellSize;
 
     private void Execute(
         ref ProjectileTriggerState state,
@@ -506,7 +509,7 @@ public partial struct ObstacleTriggerJob : IJobEntity
         if (state.IsTriggered) return;
 
         float2 currentPos = transform.Position.xy;
-        if (GridUtility.GetTerrainAtWorldPos(currentPos, ObstacleGrid, ObstacleWorldOrigin, ObstacleGridWidth, ObstacleGridHeight) == 1)
+        if (!GridUtility.IsTerrainPassable(currentPos, ObstacleGrid, ObstacleWorldOrigin, ObstacleGridWidth, ObstacleGridHeight, ObstacleGridCellSize))
         {
             state.IsTriggered = true;
         }
