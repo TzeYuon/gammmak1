@@ -3,13 +3,21 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 public partial struct ShipMovementSystem : ISystem
 {
+    EntityQuery shipQuery; 
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<TerrainGridComponent>();
+
+        shipQuery = SystemAPI.QueryBuilder()
+            .WithAll<PlayerTag, LocalTransform>()
+            .WithDisabled<DeadTag>()
+            .Build();
     }
 
     [BurstCompile]
@@ -17,6 +25,8 @@ public partial struct ShipMovementSystem : ISystem
     {
         if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
         if (!terrainGridComponent.Grid.IsCreated) return;
+
+        var allShipTransforms = shipQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
 
         var pathfindJob = new CalculateShipPathsJob
         {
@@ -30,12 +40,16 @@ public partial struct ShipMovementSystem : ISystem
         MoveShipJob moveJob = new MoveShipJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
-            //Grid = terrainGridComponent.Grid,
-            //GridWidth = terrainGridComponent.GridWidth,
-            //GridHeight = terrainGridComponent.GridHeight,
-            //WorldOrigin = terrainGridComponent.WorldOrigin
+            AllShipTransforms = allShipTransforms,
+            ObstacleGrid = terrainGridComponent.Grid,
+            CellSize = terrainGridComponent.CellSize,
+            GridWidth = terrainGridComponent.GridWidth,
+            GridHeight = terrainGridComponent.GridHeight,
+            WorldOrigin = terrainGridComponent.WorldOrigin
         };
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
+
+        allShipTransforms.Dispose(state.Dependency);
     }
 }
 
@@ -84,15 +98,23 @@ public partial struct CalculateShipPathsJob : IJobEntity
 }
 
 [BurstCompile]
+[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct MoveShipJob : IJobEntity
 {
     public float DeltaTime;
 
+    [ReadOnly] public NativeArray<LocalTransform> AllShipTransforms;
+    [ReadOnly] public NativeArray<int> ObstacleGrid;
+    public float CellSize;
+    public int GridWidth;
+    public int GridHeight;
+    public int2 WorldOrigin;
+
     private void Execute(
-        ref LocalTransform transform, 
-        ref DynamicBuffer<ShipWaypoint> waypoints, 
-        in ShipMovementStatsComponent stats, 
-        EnabledRefRW<MoveCommand> moveEnabled, 
+        ref LocalTransform transform,
+        ref DynamicBuffer<ShipWaypoint> waypoints,
+        in ShipMovementStatsComponent stats,
+        EnabledRefRW<MoveCommand> moveEnabled,
         ref MoveCommand command)
     {
         if (command.Recalculate) return;
@@ -100,75 +122,163 @@ public partial struct MoveShipJob : IJobEntity
         float2 currentPos = transform.Position.xy;
         float2 targetPos = command.MoveTarget;
 
-        // --- 1. WAYPOINT LOGIC ---
-        if (waypoints.Length > 0)
+        if (moveEnabled.ValueRO)
         {
-            targetPos = waypoints[0].Value;
-            if (math.distancesq(currentPos, targetPos) < 0.25f) // 0.5 unit radius snap
+            // move to next waypoint if close enough
+            if (waypoints.Length > 0)
             {
-                waypoints.RemoveAt(0);
-                if (waypoints.Length > 0) targetPos = waypoints[0].Value;
-            }
-        }
-
-        float2 dirToTarget = targetPos - currentPos;
-        float distToTarget = math.length(dirToTarget);
-        bool isFinalTarget = waypoints.Length == 0;
-
-        bool hasArrivedPos = distToTarget < 0.1f;
-
-        // --- 2. MOVEMENT ---
-        if (!hasArrivedPos)
-        {
-            float speed = stats.MaxSpeed;
-
-            // Slow down smoothly when approaching the final destination
-            if (isFinalTarget && distToTarget < stats.BrakingDistance)
-            {
-                float slowdownMultiplier = math.max(0.1f, distToTarget / stats.BrakingDistance);
-                speed *= slowdownMultiplier;
-            }
-
-            currentPos += (dirToTarget / distToTarget) * speed * DeltaTime;
-            transform.Position.xy = currentPos;
-        }
-
-        // --- 3. ROTATION (The Early Turn) ---
-        quaternion desiredRot = transform.Rotation;
-
-        if (isFinalTarget && command.UseTargetRotation && distToTarget < stats.BrakingDistance)
-        {
-            // EARLY ROTATION: As soon as we start braking, we start turning to the final parked angle!
-            desiredRot = command.TargetRotation;
-        }
-        else if (!hasArrivedPos)
-        {
-            // NORMAL ROTATION: Face the direction of travel
-            float angle = math.atan2(dirToTarget.y, dirToTarget.x) - (math.PI / 2f);
-            desiredRot = quaternion.RotateZ(angle);
-        }
-
-        // Smoothly rotate toward whatever target we chose
-        transform.Rotation = math.slerp(transform.Rotation, desiredRot, stats.TurnSpeed * DeltaTime);
-
-        // --- 4. COMPLETION CHECK ---
-        if (hasArrivedPos)
-        {
-            if (command.UseTargetRotation)
-            {
-                // Wait for the ship to finish its spin before completing the command
-                float3 currentFwd = math.rotate(transform.Rotation, new float3(0, 1, 0));
-                float3 targetFwd = math.rotate(command.TargetRotation, new float3(0, 1, 0));
-
-                if (math.dot(currentFwd, targetFwd) > 0.99f)
+                targetPos = waypoints[0].Value;
+                if (math.distancesq(currentPos, targetPos) < 0.25f)
                 {
-                    moveEnabled.ValueRW = false; // Pos and Rot arrived!
+                    waypoints.RemoveAt(0);
+                    if (waypoints.Length > 0) targetPos = waypoints[0].Value;
                 }
             }
-            else
+
+            float2 dirToTarget = targetPos - currentPos;
+            float distToTarget = math.length(dirToTarget);
+            bool isFinalTarget = waypoints.Length == 0;
+            bool hasArrivedPos = distToTarget < 0.1f;
+
+            // movement
+            if (!hasArrivedPos)
             {
-                moveEnabled.ValueRW = false; // Only Pos mattered, arrived!
+                float speed = stats.MaxSpeed;
+
+                // Slow down smoothly when approaching the final destination
+                if (isFinalTarget && distToTarget < stats.BrakingDistance)
+                {
+                    float slowdownMultiplier = math.max(0.1f, distToTarget / stats.BrakingDistance);
+                    speed *= slowdownMultiplier;
+                }
+
+                currentPos += DeltaTime * speed * (dirToTarget / distToTarget);
+                transform.Position.xy = currentPos;
             }
+
+            // rotation
+            quaternion desiredRot = transform.Rotation;
+            if (isFinalTarget && command.UseTargetRotation && distToTarget < stats.BrakingDistance)
+            {
+                // rotate towards target rotation
+                desiredRot = command.TargetRotation;
+            }
+            else if (!hasArrivedPos)
+            {
+                // face direction of movement
+                float angle = math.atan2(dirToTarget.y, dirToTarget.x) - (math.PI / 2f);
+                desiredRot = quaternion.RotateZ(angle);
+            }
+
+            // perform rotation
+            transform.Rotation = math.slerp(transform.Rotation, desiredRot, stats.TurnSpeed * DeltaTime);
+
+            // check if arrived then stop moving
+            if (hasArrivedPos)
+            {
+                if (command.UseTargetRotation)
+                {
+                    // wait for rotation to finish
+                    float3 currentFwd = math.rotate(transform.Rotation, new float3(0, 1, 0));
+                    float3 targetFwd = math.rotate(command.TargetRotation, new float3(0, 1, 0));
+
+                    if (math.dot(currentFwd, targetFwd) > 0.99f)
+                    {
+                        moveEnabled.ValueRW = false;
+                    }
+                }
+                else
+                {
+                    moveEnabled.ValueRW = false;
+                }
+            }
+        }
+        else
+        {
+            // player ship avoidance
+            // always happens even without move command
+            float2 avoidanceForce = float2.zero;
+            float avoidRadius = 1f;
+            float avoidRadiusSq = 1;
+            float avoidanceWeight = 1;
+
+            for (int i = 0; i < AllShipTransforms.Length; i++)
+            {
+                float2 otherPos = AllShipTransforms[i].Position.xy;
+                if (math.all(currentPos == otherPos)) continue; // Skip self
+
+                float2 offset = currentPos - otherPos;
+                float distSq = math.lengthsq(offset);
+
+                if (distSq < avoidRadiusSq && distSq > 0.001f)
+                {
+                    float dist = math.sqrt(distSq);
+                    float pushStrength = (avoidRadius - dist) / avoidRadius;
+                    avoidanceForce += (offset / dist) * pushStrength;
+                }
+            }
+
+            int2 currentCell = GridUtility.WorldPosToCell(currentPos, WorldOrigin, CellSize);
+            int flatIndex = GridUtility.CellToIndex(currentCell, GridWidth);
+
+            // Terrain avoidance
+            // always happens even without move command
+            float2 wallAvoidanceForce = float2.zero;
+            float avoidDistance = 1f;
+            int2 centerCell = (int2)math.floor(currentPos / CellSize);
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    int2 checkCell = centerCell + new int2(x, y);
+                    if (!GridUtility.IsTerrainPassable(checkCell, ObstacleGrid, GridWidth, GridHeight))
+                    {
+                        float2 worldPos = GridUtility.CellToWorldPosCorner(checkCell, WorldOrigin, CellSize);
+                        float2 offset = currentPos - worldPos;
+
+                        float2 absOffset = math.abs(offset);
+                        float2 halfSize = new float2(CellSize * 0.5f);
+                        float2 d = math.max(absOffset - halfSize, 0f);
+                        float distToFace = math.length(d);
+
+                        if (distToFace < avoidDistance)
+                        {
+                            float2 pushNormal = distToFace > 0.001f
+                                ? math.normalize(d * math.sign(offset))
+                                : math.normalizesafe(offset, float2.zero);
+
+                            float pushStrength = (avoidDistance - distToFace) / avoidDistance;
+                            pushStrength = math.pow(pushStrength, 2.0f);
+
+                            wallAvoidanceForce += pushNormal * pushStrength;
+                        }
+                    }
+                }
+            }
+            avoidanceForce += wallAvoidanceForce * 3.0f;
+
+            // Check if movement would result in the ship entering the walls
+            float2 nextPosition = currentPos + avoidanceWeight * DeltaTime * avoidanceForce;
+            int2 nextCell = GridUtility.WorldPosToCell(nextPosition, WorldOrigin, CellSize);
+            if (!GridUtility.IsTerrainPassable(nextCell, ObstacleGrid, GridWidth, GridHeight))
+            {
+                // Check if we can move in x
+                int2 cellX = nextCell;
+                cellX.y = currentCell.y;
+                bool canMoveX = GridUtility.IsTerrainPassable(cellX, ObstacleGrid, GridWidth, GridHeight);
+
+                // Check if we can move in y
+                int2 cellY = nextCell;
+                cellY.x = currentCell.x;
+                bool canMoveY = GridUtility.IsTerrainPassable(cellY, ObstacleGrid, GridWidth, GridHeight);
+
+                if (canMoveX) avoidanceForce.y = 0f; // slide along x
+                else if (canMoveY) avoidanceForce.x = 0f; // slide along y
+                else return; // cannot move completely
+            }
+
+            // move the ship
+            transform.Position += avoidanceWeight * DeltaTime * new float3(avoidanceForce, 0);
         }
     }
 }

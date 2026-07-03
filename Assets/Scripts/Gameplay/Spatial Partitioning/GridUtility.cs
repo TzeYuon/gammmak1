@@ -6,6 +6,12 @@ using UnityEngine;
 public static class GridUtility
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float2 RoundWorldPosToCenter(float2 worldPos, int2 worldOrigin, float cellSize)
+    {
+        return CellToWorldPosCenter(WorldPosToCell(worldPos, worldOrigin, cellSize), worldOrigin, cellSize);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float2 RoundWorldPosToCorner(float2 worldPos, int2 worldOrigin, float cellSize)
     {
         return CellToWorldPosCorner(WorldPosToCell(worldPos, worldOrigin, cellSize), worldOrigin, cellSize);
@@ -14,9 +20,7 @@ public static class GridUtility
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int2 WorldPosToCell(float2 worldPos, int2 worldOrigin, float cellSize)
     {
-        int gridX = (int)math.floor((worldPos.x - worldOrigin.x) / cellSize);
-        int gridY = (int)math.floor((worldPos.y - worldOrigin.y) / cellSize);
-        return new int2(gridX, gridY);
+        return (int2)math.floor((worldPos - worldOrigin) / cellSize);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -65,12 +69,7 @@ public static class GridUtility
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsWithinBounds(int index, int gridWidth, int gridHeight)
     {
-        int2 checkCell = IndexToCell(index, gridWidth);
-        if (checkCell.x < 0 || checkCell.x >= gridWidth ||
-            checkCell.y < 0 || checkCell.y >= gridHeight)
-            return false;
-
-        return true;
+        return index >= 0 && index < (gridWidth * gridHeight);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -158,42 +157,44 @@ public static class GridUtility
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsValidGridManagerWorldPos(float2 pos, int2 worldOrigin, int width, int height) {
-        var gridPos = WorldPosToGridManagerPos(pos, worldOrigin);
-
-        if (gridPos.x < 0 || gridPos.x >= width ||
-            gridPos.y < 0 || gridPos.y >= height)
-            return false;
-
-        return true;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int2 WorldPosToGridManagerPos(float2 pos, int2 worldOrigin)
-    {
-        int gridX = (int)math.round(pos.x) - worldOrigin.x;
-        int gridY = (int)math.round(pos.y) - worldOrigin.y;
-        return new int2(gridX, gridY);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int WorldPosToGridManagerIndex(float2 pos, int2 worldOrigin, int width)
-    {
-        var gridPos = WorldPosToGridManagerPos(pos, worldOrigin);
-        return gridPos.x + gridPos.y * width;
-    }
-
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetTerrainAtWorldPos(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height, float cellSize)
     {
         if (!IsWithinBounds(pos, worldOrigin, cellSize, width, height)) return -1;
         return obstacleGrid[WorldPosToIndex(pos, worldOrigin, cellSize, width)];
     }
 
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetTerrainAtWorldPos(int2 cell, NativeArray<int> obstacleGrid, int width, int height)
+    {
+        if (!IsWithinBounds(cell, width, height)) return -1;
+        return obstacleGrid[CellToIndex(cell, width)];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetTerrainAtWorldPos(int index, NativeArray<int> obstacleGrid, int width, int height)
+    {
+        if (!IsWithinBounds(index, width, height)) return -1;
+        return obstacleGrid[index];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsTerrainPassable(float2 pos, NativeArray<int> obstacleGrid, int2 worldOrigin, int width, int height, float cellSize)
     {
         int terrain = GetTerrainAtWorldPos(pos, obstacleGrid, worldOrigin, width, height, cellSize);
+        return terrain != 1 && terrain != -1;
+    }
+
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsTerrainPassable(int2 cell, NativeArray<int> obstacleGrid, int width, int height)
+    {
+        int terrain = GetTerrainAtWorldPos(cell, obstacleGrid, width, height);
+        return terrain != 1 && terrain != -1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsTerrainPassable(int index, NativeArray<int> obstacleGrid, int width, int height)
+    {
+        int terrain = GetTerrainAtWorldPos(index, obstacleGrid, width, height);
         return terrain != 1 && terrain != -1;
     }
 }

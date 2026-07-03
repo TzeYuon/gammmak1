@@ -134,6 +134,7 @@ public partial struct UpdateMovementLinesJob : IJobEntity
 }
 
 [BurstCompile]
+[WithAll(typeof(MovementTargetProjectionVisualComponent))]
 public partial struct UpdateMovementTargetProjectionJob : IJobEntity
 {
     [ReadOnly] public ComponentLookup<SelectedTag> SelectedLookup;
@@ -141,7 +142,6 @@ public partial struct UpdateMovementTargetProjectionJob : IJobEntity
 
     private void Execute(
         ref LocalTransform transform,
-        in MovementTargetProjectionVisualComponent movementTargetProjection,
         in ShipReference shipRef)
     {
         if (shipRef.Value == Entity.Null
@@ -170,6 +170,7 @@ public partial struct UpdateMovementTargetProjectionJob : IJobEntity
 }
 
 [BurstCompile]
+[WithAll(typeof(MovementTargetVisualComponent))]
 public partial struct UpdateMovementTargetJob : IJobEntity
 {
     [ReadOnly] public ComponentLookup<SelectedTag> SelectedLookup;
@@ -177,7 +178,6 @@ public partial struct UpdateMovementTargetJob : IJobEntity
 
     private void Execute(
         ref LocalTransform transform,
-        in MovementTargetVisualComponent movementTarget,
         in ShipReference shipRef)
     {
         if (shipRef.Value == Entity.Null
