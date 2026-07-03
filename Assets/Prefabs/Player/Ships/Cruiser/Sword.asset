@@ -25,14 +25,14 @@ MonoBehaviour:
       Description: 
       Effects:
       - StatType: 2
-        ModifierType: 1
-        Value: 0.4
+        ModifierType: 0
+        Value: 0.5
       - StatType: 3
-        ModifierType: 1
-        Value: 0.4
+        ModifierType: 0
+        Value: 0.1
       - StatType: 4
-        ModifierType: 1
-        Value: 0.4
+        ModifierType: 0
+        Value: 0.5
       - StatType: 0
         ModifierType: 0
         Value: 2
@@ -41,13 +41,13 @@ MonoBehaviour:
       Effects:
       - StatType: 2
         ModifierType: 1
-        Value: 0.4
+        Value: 1
       - StatType: 3
         ModifierType: 1
-        Value: 0.4
+        Value: 0.2
       - StatType: 4
         ModifierType: 1
-        Value: 0.4
+        Value: 1
       - StatType: 0
         ModifierType: 0
         Value: 2
@@ -140,7 +140,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 0}
   BaseCost: 17
   BaseMaxHealth: 20
-  BaseSpeed: 13
-  BaseAcceleration: 6
-  BaseTurnSpeed: 12
+  BaseSpeed: 8
+  BaseAcceleration: 2
+  BaseTurnSpeed: 6
   BaseCollectionRadius: 5

@@ -978,6 +978,7 @@ GameObject:
   - component: {fileID: 9188605543483897463}
   - component: {fileID: 9188605543483897465}
   - component: {fileID: 9188605543483897464}
+  - component: {fileID: 9188605543483897466}
   m_Layer: 0
   m_Name: TerrainManager
   m_TagString: Untagged
@@ -1057,6 +1058,25 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9188605543483897462}
   m_Mesh: {fileID: 0}
+--- !u!114 &9188605543483897466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9188605543483897462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76a00ec2ec870564ab5bd2b104bad3b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FogOfWarManager
+  fogAlpha: 1
+  fogColor: {r: 0, g: 0, b: 0, a: 1}
+  fogMaterial: {fileID: 2100000, guid: 9b580a4d0d5e32e4a96d620baade8635, type: 2}
+  MaxFogDarkness: 255
+  width: 0
+  height: 0
+  origin: {x: 0, y: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
