@@ -6,6 +6,12 @@ using UnityEngine;
 public static class GridUtility
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float2 RoundWorldPosToCenter(float2 worldPos, int2 worldOrigin, float cellSize)
+    {
+        return CellToWorldPosCenter(WorldPosToCell(worldPos, worldOrigin, cellSize), worldOrigin, cellSize);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float2 RoundWorldPosToCorner(float2 worldPos, int2 worldOrigin, float cellSize)
     {
         return CellToWorldPosCorner(WorldPosToCell(worldPos, worldOrigin, cellSize), worldOrigin, cellSize);

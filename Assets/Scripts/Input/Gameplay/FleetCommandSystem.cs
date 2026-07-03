@@ -71,7 +71,7 @@ partial struct FleetCommandSystem : ISystem
 
             // find a target position that is reachable
             moveStarted = true;
-            moveTarget = ValidateMoveTarget(centerOfMass.xy, mousePos);
+            moveTarget = ValidateMoveTarget(centerOfMass.xy, math.round(mousePos));
 
             // create positions to assign to ships when move command is given
             float shipSpacing = 1f;
@@ -197,7 +197,7 @@ partial struct FleetCommandSystem : ISystem
             if (GridUtility.IsWithinBounds(targetCell, gridWidth, gridHeight) 
                 && GridUtility.IsTerrainPassable(target, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize))
             {
-                return GridUtility.RoundWorldPosToCorner(target, worldOrigin, cellSize);
+                return target;
             }
 
             // find valid target within range
