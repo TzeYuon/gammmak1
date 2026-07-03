@@ -25,14 +25,14 @@ MonoBehaviour:
       Description: 
       Effects:
       - StatType: 2
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 0.5
       - StatType: 3
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 0.3
       - StatType: 4
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 0.5
       - StatType: 0
         ModifierType: 0
         Value: 1
@@ -40,14 +40,14 @@ MonoBehaviour:
       Description: 
       Effects:
       - StatType: 2
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 1
       - StatType: 3
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 0.5
       - StatType: 4
-        ModifierType: 1
-        Value: 0.2
+        ModifierType: 0
+        Value: 1
       - StatType: 0
         ModifierType: 0
         Value: 1
@@ -138,7 +138,7 @@ MonoBehaviour:
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     FacingAngleDegrees: 0
     MaxAngle: 150
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - Position: {x: 0, y: -0.5}
     OriginalRotation: {x: 0, y: 0, z: 1, w: -0.00000004371139}
     FacingAngleDegrees: 180
@@ -146,7 +146,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 0}
   BaseCost: 5
   BaseMaxHealth: 10
-  BaseSpeed: 15
-  BaseAcceleration: 10
-  BaseTurnSpeed: 15
+  BaseSpeed: 7
+  BaseAcceleration: 3
+  BaseTurnSpeed: 7
   BaseCollectionRadius: 5

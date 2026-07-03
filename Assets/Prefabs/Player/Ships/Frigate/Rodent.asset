@@ -29,7 +29,7 @@ MonoBehaviour:
         Value: 0.5
       - StatType: 3
         ModifierType: 0
-        Value: 0.1
+        Value: 0.3
       - StatType: 4
         ModifierType: 0
         Value: 0.5
@@ -44,7 +44,7 @@ MonoBehaviour:
         Value: 1
       - StatType: 3
         ModifierType: 0
-        Value: 0.2
+        Value: 0.5
       - StatType: 4
         ModifierType: 0
         Value: 1
@@ -126,12 +126,13 @@ MonoBehaviour:
   BaseWeaponCapacity: 2
   Mounts:
   - Position: {x: 0, y: 0}
-    Direction: {x: 0, y: 0}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    FacingAngleDegrees: 0
     MaxAngle: 0
     EquippedWeapon: {fileID: 0}
   BaseCost: 3
   BaseMaxHealth: 6
   BaseSpeed: 8
   BaseAcceleration: 2
-  BaseTurnSpeed: 8
+  BaseTurnSpeed: 7
   BaseCollectionRadius: 7

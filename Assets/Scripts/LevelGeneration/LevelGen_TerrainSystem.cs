@@ -64,11 +64,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
         LevelSpawnData spawnData = new LevelSpawnData();
 
-        if (FogOfWarManager.Instance != null)
-        {
-            FogOfWarManager.Instance.InitializeFog(width, height, new Vector2Int(worldOrigin.x, worldOrigin.y));
-        }
-
         // Set camera bounds to current map size
         CameraManager.Instance.SetMapBounds(new Vector2(width / 2f, height / 2f));
 
@@ -320,6 +315,8 @@ partial struct LevelGen_TerrainSystem : ISystem
                 flowField[x + y * width] = float2.zero;
             }
         }
+        ecb.Playback(state.EntityManager);
+        ecb.Dispose();
 
         var meshGen = TerrainMeshGenerator.GetInstance();
         if (meshGen != null)
@@ -334,8 +331,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         var spawnerEntity = state.EntityManager.CreateEntity();
         state.EntityManager.AddComponentData(spawnerEntity, spawnData);
         state.EntityManager.AddComponentData(spawnerEntity, new LevelEntityTag());
-        ecb.Playback(state.EntityManager);
-        ecb.Dispose();
 
         // Update global singletons
         RefRW<TerrainGridComponent> terrainComp = SystemAPI.GetSingletonRW<TerrainGridComponent>();
