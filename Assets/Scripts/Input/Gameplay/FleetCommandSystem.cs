@@ -133,39 +133,28 @@ partial struct FleetCommandSystem : ISystem
         {
             var validPositions = new NativeArray<float2>(totalCount, allocator);
 
-            // We use a Queue and a HashSet to track our "Virtual Grid" coordinates.
-            // E.g., (0,0) is center, (1,0) is one ship-space to the right.
             var queue = new NativeQueue<int2>(Allocator.Temp);
             var visited = new NativeHashSet<int2>(totalCount * 4, Allocator.Temp);
 
-            // 1. Initialize the BFS at the clicked center
             queue.Enqueue(int2.zero);
             visited.Add(int2.zero);
 
             int foundCount = 0;
 
-            // 4-way expansion directions (Up, Down, Left, Right)
-            // This creates a diamond/circular organic blob.
             NativeArray<int2> directions = new NativeArray<int2>(4, Allocator.Temp);
             directions[0] = new int2(1, 0);
             directions[1] = new int2(-1, 0);
             directions[2] = new int2(0, 1);
             directions[3] = new int2(0, -1);
 
-            // 2. Run the BFS until we find enough safe spots
             while (queue.Count > 0 && foundCount < totalCount)
             {
                 int2 virtualCoord = queue.Dequeue();
 
-                // A. Convert Virtual Coord to Physical Offset using Ship Spacing
                 float2 offset = new float2(virtualCoord.x * shipSpacing, virtualCoord.y * shipSpacing);
 
-                // C. Get the absolute World Position
                 float2 worldPos = center + offset;
 
-                // D. Check the actual Obstacle Grid!
-                // Because Ship Spacing might be 1.0 and Obstacle Cell might be 5.0, 
-                // multiple virtual coordinates will naturally map to the same obstacle cell.
                 int2 obstacleCell = GridUtility.WorldPosToCell(worldPos, worldOrigin, obstacleCellSize);
 
                 bool isSafe = GridUtility.IsWithinBounds(obstacleCell, gridWidth, gridHeight) &&
@@ -173,16 +162,13 @@ partial struct FleetCommandSystem : ISystem
 
                 if (isSafe)
                 {
-                    // We found a safe spot! Add it to our final list.
                     validPositions[foundCount] = worldPos;
                     foundCount++;
 
-                    // Enqueue neighbors ONLY if this current cell was safe.
-                    // This prevents the BFS from "jumping over" walls!
                     for (int i = 0; i < 4; i++)
                     {
                         int2 neighbor = virtualCoord + directions[i];
-                        if (visited.Add(neighbor)) // .Add() returns true if it wasn't already in the HashSet
+                        if (visited.Add(neighbor))
                         {
                             queue.Enqueue(neighbor);
                         }
@@ -190,9 +176,6 @@ partial struct FleetCommandSystem : ISystem
                 }
             }
 
-            // 3. Fallback Safety Net
-            // If the player clicked inside a tiny sealed-off box that can't fit the whole fleet,
-            // we just stack the remaining ships on the last safe position found.
             for (int i = foundCount; i < totalCount; i++)
             {
                 validPositions[i] = foundCount > 0 ? validPositions[foundCount - 1] : center;
@@ -214,7 +197,7 @@ partial struct FleetCommandSystem : ISystem
             if (GridUtility.IsWithinBounds(targetCell, gridWidth, gridHeight) 
                 && GridUtility.IsTerrainPassable(target, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize))
             {
-                return target;
+                return GridUtility.RoundWorldPosToCorner(target, worldOrigin, cellSize);
             }
 
             // find valid target within range
