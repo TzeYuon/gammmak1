@@ -55,6 +55,8 @@ public struct WeaponCombatStats : IComponentData
     public float ExplosionRadiusSq;
     public int PierceCount;
     public float TriggerTime;
+
+    public float ProjectileLifetime;
 }
 
 public struct HitscanWeapon : IComponentData

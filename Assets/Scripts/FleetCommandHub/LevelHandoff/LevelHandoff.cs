@@ -189,7 +189,8 @@ public class LevelHandoff : MonoBehaviour
 
                 float range = weapon.GetStat(WeaponStat.Range);
                 float explosionRadius = weapon.GetStat(WeaponStat.ExplosionRadius);
-
+                float projectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed);
+  
                 // add blueprint to spawn weapon
                 weaponBuffer.Add(new RosterWeaponBlueprint
                 {
@@ -219,6 +220,7 @@ public class LevelHandoff : MonoBehaviour
                         ExplosionRadiusSq = explosionRadius * explosionRadius,
                         PierceCount = Mathf.RoundToInt(weapon.GetStat(WeaponStat.PierceCount)),
                         TriggerTime = weapon.GetStat(WeaponStat.TriggerTime),
+                        ProjectileLifetime = range / projectileSpeed,
                     }
                 });
             }
