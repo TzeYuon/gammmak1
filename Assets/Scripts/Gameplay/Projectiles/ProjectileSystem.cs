@@ -290,52 +290,6 @@ public partial struct ContactTriggerJob : IJobEntity
     }
 }
 
-//[BurstCompile]
-//[WithAll(typeof(ContactTrigger))]
-//public partial struct ContactTriggerJob : IJobEntity
-//{
-//    [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
-//    [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
-//    [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
-//    public int2 WorldOrigin;
-//    public float CellSize;
-//    public int GridWidth;
-
-//    private void Execute(
-//        in LocalTransform transform, 
-//        ref ProjectileTriggerState state,
-//        in ProjectileTriggerStats stats
-//        )
-//    {
-//        if (state.IsTriggered) return;
-
-//        int index = GridUtility.WorldPosToIndex(transform.Position.xy, WorldOrigin, CellSize, GridWidth);
-//        if (Map.TryGetFirstValue(index, out Entity bug, out var it))
-//        {
-//            do
-//            {
-//                if (!TransformLookup.HasComponent(bug)) continue;
-
-//                float targetRadius = 0.5f;
-//                if (RadiusLookup.HasComponent(bug))
-//                {
-//                    targetRadius = RadiusLookup[bug].Value;
-//                }
-
-//                float combinedRadius = stats.HitRadius + targetRadius;
-//                float maxHitDistSq = combinedRadius * combinedRadius;
-
-//                if (math.distancesq(transform.Position.xy, TransformLookup[bug].Position.xy) <= maxHitDistSq)
-//                {
-//                    state.IsTriggered = true;
-//                    state.EntityHit = bug;
-//                    break;
-//                }
-//            } while (Map.TryGetNextValue(out bug, ref it));
-//        }
-//    }
-//}
-
 [BurstCompile]
 [WithAll(typeof(CoordinateTrigger))]
 public partial struct CoordinateTriggerJob : IJobEntity
