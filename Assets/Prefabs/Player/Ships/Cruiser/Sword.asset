@@ -122,21 +122,29 @@ MonoBehaviour:
         Value: 2
   BaseWeaponCapacity: 7
   Mounts:
-  - Position: {x: 0, y: 3}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: -0.449, y: -0.286}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 49
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 2, y: 2}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: 0.449, y: -0.286}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 49
     EquippedWeapon: {fileID: 0}
-  - Position: {x: -2, y: 2}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: 0, y: 0.98}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 2
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 3, y: 0}
-    Direction: {x: 0, y: 0}
-    MaxAngle: 0
+  - Position: {x: 0, y: -0.25}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 49
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: -0.267, y: -0.42}
+    OriginalRotation: {x: 0, y: 0, z: 0.94566053, w: 0.32515556}
+    MaxAngle: 102
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0.267, y: -0.42}
+    OriginalRotation: {x: 0, y: 0, z: -0.9456606, w: 0.3251556}
+    MaxAngle: 102
     EquippedWeapon: {fileID: 0}
   BaseCost: 17
   BaseMaxHealth: 20
