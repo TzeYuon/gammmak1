@@ -215,7 +215,8 @@ public partial struct HeatmapTargetingJob : IJobEntity
     {
         if (ship.Value == Entity.Null) return; // ship ref not set up yet
         LocalToWorld shipWorld = WorldLookup[ship.Value];
-        float3 shipForwardWorld = math.rotate(shipWorld.Rotation, arc.BaseDirection);
+        quaternion combinedWorldRot = math.mul(shipWorld.Rotation, arc.RestingRotation);
+        float3 shipForwardWorld = math.rotate(combinedWorldRot, new float3(0, 1, 0));
         float3 currentBarrelForward = weaponWorld.Up;
 
         float bestScore = -1f;

@@ -221,6 +221,12 @@ public class LevelHandoff : MonoBehaviour
                         PierceCount = Mathf.RoundToInt(weapon.GetStat(WeaponStat.PierceCount)),
                         TriggerTime = weapon.GetStat(WeaponStat.TriggerTime),
                         ProjectileLifetime = range / projectileSpeed,
+                    },
+
+                    WeaponFiringArc = new WeaponFiringArc
+                    {
+                        RestingRotation = mount.OriginalRotation,
+                        MaxAngle = mount.MaxAngle,
                     }
                 });
             }

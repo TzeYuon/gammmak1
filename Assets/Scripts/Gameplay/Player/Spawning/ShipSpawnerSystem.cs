@@ -122,6 +122,7 @@ public partial struct ShipSpawnerSystem : ISystem
                 // Set weapon stats
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponTargetingStats);
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponCombatStats);
+                ecb.SetComponent(weapon, weaponBlueprint.WeaponFiringArc);
 
                 ecb.AppendToBuffer(newShip, new LinkedEntityGroup { Value = weapon });
             }

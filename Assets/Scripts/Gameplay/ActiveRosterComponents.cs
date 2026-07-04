@@ -51,4 +51,5 @@ public struct RosterWeaponBlueprint : IBufferElementData
     // Weapon stats after upgrades
     public WeaponTargetingStats WeaponTargetingStats;
     public WeaponCombatStats WeaponCombatStats;
+    public WeaponFiringArc WeaponFiringArc;
 }
