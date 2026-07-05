@@ -214,7 +214,7 @@ public partial struct ProjectileFiringJob : IJobEntity
 
             ECB.SetComponent(chunkIndex, projectile, new ProjectileLifespan
             {
-                ExpirationTime = ElapsedTime + 2.0
+                ExpirationTime = ElapsedTime + stats.ProjectileLifetime
             });
 
             if (!stats.IgnoreObstacles)

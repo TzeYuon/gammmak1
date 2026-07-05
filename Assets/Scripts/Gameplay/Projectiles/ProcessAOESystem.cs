@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -27,11 +28,13 @@ partial struct ProcessAOESystem : ISystem
         {
             SpatialMap = fineHeatmap.Map,
             TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            RadiusLookup = SystemAPI.GetComponentLookup<CollisionRadius>(true),
             ECB = ecb,
             VfxQueue = vfxQueue,
             WorldOrigin = fineHeatmap.WorldOrigin,
             CellSize = fineHeatmap.CellSize,
             GridWidth = fineHeatmap.GridWidth,
+            GridHeight = fineHeatmap.GridHeight,
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);
@@ -50,37 +53,55 @@ public partial struct ProcessExplosionsJob : IJobEntity
 {
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> SpatialMap;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+    [ReadOnly] public ComponentLookup<CollisionRadius> RadiusLookup;
 
-    public EntityCommandBuffer.ParallelWriter ECB;
     public NativeQueue<VFXPayload>.ParallelWriter VfxQueue;
-    public int2 WorldOrigin;
+    public EntityCommandBuffer.ParallelWriter ECB;
     public float CellSize;
     public int GridWidth;
+    public int GridHeight;
+    public int2 WorldOrigin;
 
     private void Execute(
         Entity entity, [ChunkIndexInQuery] int chunkIndex,
         in LocalTransform transform,
         in ExplosionEvent explosion)
     {
+        NativeHashSet<Entity> uniqueHits = new NativeHashSet<Entity>(128, Allocator.Temp);
+
         float3 centerPos = transform.Position;
-        int radiusCells = (int)math.ceil(math.sqrt(explosion.RadiusSq) / CellSize);
         int2 centerCell = GridUtility.WorldPosToCell(centerPos, WorldOrigin, CellSize);
+        float radius = math.sqrt(explosion.RadiusSq);
+        int radiusCells = (int)math.ceil(radius / CellSize);
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
             for (int y = -radiusCells; y <= radiusCells; y++)
             {
-                int index = GridUtility.CellToIndex(centerCell + new int2(x, y), GridWidth);
+                int2 checkCell = centerCell + new int2(x, y);
+                if (!GridUtility.IsWithinBounds(checkCell, GridWidth, GridHeight)) continue;
+
+                int index = GridUtility.CellToIndex(checkCell, GridWidth);
                 if (SpatialMap.TryGetFirstValue(index, out Entity enemy, out var it))
                 {
                     do
                     {
                         if (!TransformLookup.HasComponent(enemy)) continue;
+                        if (!RadiusLookup.HasComponent(enemy)) continue;
 
-                        float distSq = math.distancesq(centerPos, TransformLookup[enemy].Position);
-                        if (distSq <= explosion.RadiusSq)
+                        // check distance from explosion center
+                        float3 enemyPos = TransformLookup[enemy].Position;
+                        float distSq = math.distancesq(centerPos, enemyPos);
+                        float radiusEnemy = RadiusLookup[enemy].Value;
+                        float maxReach = radius + radiusEnemy;
+
+                        if (distSq <= maxReach * maxReach)
                         {
-                            ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = explosion.Damage });
+                            // only deal damage to unique enemies
+                            if (uniqueHits.Add(enemy))
+                            {
+                                ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = explosion.Damage });
+                            }
                         }
                     } while (SpatialMap.TryGetNextValue(out enemy, ref it));
                 }
@@ -96,7 +117,7 @@ public partial struct ProcessExplosionsJob : IJobEntity
             CustomData = new float4(math.sqrt(explosion.RadiusSq) * 2, 0, 0, 0)
         });
 
-        // Destroy explosion entity
+        uniqueHits.Dispose();
         ECB.DestroyEntity(chunkIndex, entity);
     }
 }
