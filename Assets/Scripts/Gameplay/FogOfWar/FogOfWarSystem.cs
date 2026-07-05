@@ -12,11 +12,11 @@ partial struct FogOfWarSystem : ISystem
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-        if (SystemAPI.TryGetSingletonRW<FogOfWarState>(out var fogCompRW))
+        if (SystemAPI.TryGetSingletonRW<FogOfWarState>(out var fogState))
         {
-            if (fogCompRW.ValueRW.FogArray.IsCreated)
+            if (fogState.ValueRW.FogArray.IsCreated)
             {
-                fogCompRW.ValueRW.FogArray.Dispose();
+                fogState.ValueRW.FogArray.Dispose();
             }
         }
     }

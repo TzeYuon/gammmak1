@@ -16,6 +16,7 @@ class EnemyAuthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
             AddComponent(entity, new LevelEntityTag());
+            AddComponent(entity, new HideInFogTag());
             AddComponent(entity, new SwarmTag());
             AddComponent(entity, new SwarmVelocityComponent());
             AddComponent(entity, new SwarmMovementStatsComponent()

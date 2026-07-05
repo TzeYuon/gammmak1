@@ -51,6 +51,7 @@ public partial class ActionAndMovementGroup : ComponentSystemGroup { }
     ShipMovementSystem
     EnemySwarmMovementSystem
     ProjectileSystem
+    PoisonDamageSystem
 */
 
 [UpdateInGroup(typeof(GameplayMasterGroup))]
