@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f0f76c6a054bc48bd7402d7ffe0151, type: 3}
   m_Name: CurrentSave
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveData
-  startingUpgradeCores: 20000
-  UpgradeCoresRemaining: 10000
+  startingUpgradeCores: 200
+  UpgradeCoresRemaining: 19300
   startingAvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
