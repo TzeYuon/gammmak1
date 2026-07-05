@@ -140,7 +140,7 @@ GameObject:
   - component: {fileID: 5606985980331434683}
   - component: {fileID: 5202131218792644633}
   m_Layer: 0
-  m_Name: Hexagon Point Top
+  m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

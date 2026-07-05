@@ -17,7 +17,7 @@
             <ui:Label text="SHIP CLASS" name="ShipClass" class="text" style="font-size: 20px; letter-spacing: 5px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 20px; padding-left: 0; -unity-text-align: upper-center; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;"/>
             <ui:VisualElement name="Container" style="flex-grow: 1; flex-direction: row;">
                 <ui:VisualElement name="LeftContainer" style="flex-grow: 0; width: 50%;">
-                    <ui:VisualElement name="ShipVisualContainer" style="flex-grow: 0; width: auto; height: 40%; align-items: center; align-content: auto; justify-content: center;">
+                    <ui:VisualElement name="ShipVisualContainer" style="flex-grow: 0; width: auto; height: 40%; align-items: center; align-content: auto; justify-content: center; background-image: url(&quot;project://database/Assets/UI/Screens/FleetCommandHub/ShipPreview.renderTexture?fileID=8400000&amp;guid=61a69b9133a10a842a366d9d63d2dd28&amp;type=2#ShipPreview&quot;);">
                         <ui:VisualElement name="ShipVisual" style="flex-grow: 0; width: auto; height: auto; background-image: none;"/>
                     </ui:VisualElement>
                     <ui:VisualElement name="ShipDescriptionContainer" style="flex-grow: 0; padding-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; margin-right: 0; height: 60%; width: 100%;">

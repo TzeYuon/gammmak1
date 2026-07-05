@@ -20,7 +20,8 @@ public class HangarScreen : UIScreen
     public HangarScreen(
         UIScreenManager manager, 
         VisualElement root,
-        FleetCommandHubScreen fleetCommandHubScreen) : base(manager, root)
+        FleetCommandHubScreen fleetCommandHubScreen,
+        HangarShipPreviewManager hangarShipPreviewManager) : base(manager, root)
     {
         FleetCommandHubScreen = fleetCommandHubScreen;
 
@@ -28,7 +29,7 @@ public class HangarScreen : UIScreen
 
         shipListContainer = root.Q<ScrollView>("ShipsScrollView");
 
-        ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this);
+        ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this, hangarShipPreviewManager);
         HangarContextMenu = new (root.Q<VisualElement>("HangarContextMenu"), this);
     }
 
@@ -125,7 +126,10 @@ public class ShipDetailsElement
     private VisualElement container;
     private Label shipTitle;
     private Label shipClass;
+
+    HangarShipPreviewManager hangarShipPreviewManager;
     private VisualElement shipVisual;
+
     private Label shipDescription;
     private Button toggleRosterBtn;
 
@@ -138,14 +142,18 @@ public class ShipDetailsElement
 
     public ShipBlueprintData CurrentShip;
 
-    public ShipDetailsElement(VisualElement root, HangarScreen hangarScreen)
+    public ShipDetailsElement(VisualElement root, HangarScreen hangarScreen, HangarShipPreviewManager hangarShipPreviewManager)
     {
         this.hangarScreen = hangarScreen;
         container = root;
         shipTitle = root.Q<Label>("ShipTitle");
         shipClass = root.Q<Label>("ShipClass");
 
+        shipVisual = root.Q<VisualElement>("ShipVisualContainer");
+
         shipDescription = root.Q<Label>("ShipDescription");
+
+        this.hangarShipPreviewManager = hangarShipPreviewManager;
 
         weaponCapacityElement = root.Q<PipContainerVisualElement>("WeaponCapacityContainer");
         weaponMountsScrollViewContainer = root.Q<VisualElement>("WeaponMountScrollViewContainer");
@@ -179,6 +187,9 @@ public class ShipDetailsElement
 
         // update ship class
         shipClass.text = CurrentShip.ShipClass.ToString().ToUpper();
+
+        // Update ship preview
+        hangarShipPreviewManager.DisplayShip(CurrentShip.ShipID);
 
         // Update ship stats in description
         UpdateShipStatsDescription();
