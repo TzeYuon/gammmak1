@@ -73,9 +73,13 @@ public static class UIFactory
         pipContainer.Value = weapon.UpgradeLevel;
     }
 
-    public static Button BuildWeaponMountItem(WeaponMount mount)
+    public static Button BuildWeaponMountItem(WeaponMount mount, Vector2 pos)
     {
         Button weaponMountItem = UIScreenManager.UIAssetsDatabase.WeaponMountItem.Instantiate().Q<Button>("WeaponMountItem");
+
+        weaponMountItem.style.position = Position.Absolute;
+        weaponMountItem.style.top = pos.y;
+        weaponMountItem.style.left = pos.x;
 
         UpdateWeaponMountItem(weaponMountItem, mount);
 

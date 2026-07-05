@@ -128,13 +128,13 @@ public class ShipDetailsElement
     private Label shipClass;
 
     HangarShipPreviewManager hangarShipPreviewManager;
-    private VisualElement shipVisual;
+    private VisualElement shipVisualContainer;
 
     private Label shipDescription;
     private Button toggleRosterBtn;
 
     private PipContainerVisualElement weaponCapacityElement;
-    private VisualElement weaponMountsScrollViewContainer;
+    private VisualElement weaponMountsContainer;
     private Dictionary<WeaponMount, Button> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
@@ -149,14 +149,13 @@ public class ShipDetailsElement
         shipTitle = root.Q<Label>("ShipTitle");
         shipClass = root.Q<Label>("ShipClass");
 
-        shipVisual = root.Q<VisualElement>("ShipVisualContainer");
+        shipVisualContainer = root.Q<VisualElement>("ShipVisualContainer");
+        this.hangarShipPreviewManager = hangarShipPreviewManager;
 
         shipDescription = root.Q<Label>("ShipDescription");
 
-        this.hangarShipPreviewManager = hangarShipPreviewManager;
-
         weaponCapacityElement = root.Q<PipContainerVisualElement>("WeaponCapacityContainer");
-        weaponMountsScrollViewContainer = root.Q<VisualElement>("WeaponMountScrollViewContainer");
+        weaponMountsContainer = root.Q<VisualElement>("WeaponMountsContainer");
 
         systemsScrollView = root.Q<ScrollView>("SystemsScrollView");
 
@@ -216,19 +215,25 @@ public class ShipDetailsElement
         UpdateWeaponCapacity();
 
         // update weapon mounts
-        weaponMountButtons.Clear();
-        weaponMountsScrollViewContainer.Clear();
-        foreach (var mount in CurrentShip.Mounts)
+        shipVisualContainer.schedule.Execute(() =>
         {
-            Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount);
-            weaponMountItem.clicked += () =>
+            weaponMountButtons.Clear();
+            weaponMountsContainer.Clear();
+            float scale = shipVisualContainer.layout.width / (hangarShipPreviewManager.CameraSize * 2.0f);
+            foreach (var mount in CurrentShip.Mounts)
             {
-                OnWeaponMountItemClicked(mount, weaponMountItem);
-            };
+                Vector2 pos = new (mount.Position.x * scale, -mount.Position.y * scale);
+                Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount, pos);
+                weaponMountItem.clicked += () =>
+                {
+                    OnWeaponMountItemClicked(mount, weaponMountItem);
+                };
 
-            weaponMountButtons.Add(mount, weaponMountItem);
-            weaponMountsScrollViewContainer.Add(weaponMountItem);
-        }
+                // place mounts over shipvisual
+                weaponMountsContainer.Add(weaponMountItem);
+                weaponMountButtons.Add(mount, weaponMountItem);
+            }
+        }).Until(() => shipVisualContainer.layout.width > 0.1f);
 
         UpdateToggleRosterBtn();
 
@@ -554,12 +559,13 @@ public class WeaponMountContextMenu
             ) 
         {
             // hide btn
-            upgradeBtn.style.visibility = Visibility.Hidden;
+            upgradeBtn.SetEnabled(false);
+            upgradeBtn.text = "MAX LEVEL";
             return; 
         }
 
         // btn visible
-        upgradeBtn.style.visibility = Visibility.Visible;
+        upgradeBtn.SetEnabled(true);
 
         // update cost of upgrade on label, update colour if not affordable
         int cost = currentViewingWeapon.GetUpgradeCost();
@@ -601,12 +607,13 @@ public class WeaponMountContextMenu
             )
         {
             // hide btn
-            refundWeaponBtn.style.visibility = Visibility.Hidden;
+            refundWeaponBtn.SetEnabled(false);
+            refundWeaponBtn.text = "MIN LEVEL";
             return;
         }
 
         // btn visible
-        refundWeaponBtn.style.visibility = Visibility.Visible;
+        refundWeaponBtn.SetEnabled(true);
 
         // update refund value on label
         refundWeaponBtn.text = $"REFUND [<color=#CCFF00>+{currentViewingWeapon.GetRefundValue()}</color>]";

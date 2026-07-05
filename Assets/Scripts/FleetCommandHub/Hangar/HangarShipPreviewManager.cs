@@ -2,12 +2,14 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class HangarShipPreviewManager : MonoBehaviour
 {
     [SerializeField] Transform SpawnPoint;
     [SerializeField] Camera hangarCamera;
 
+    public float CameraSize { get { return hangarCamera.orthographicSize; } }
     private EntityManager entityManager;
     private Entity currentVisualEntity = Entity.Null;
 
@@ -64,18 +66,18 @@ public class HangarShipPreviewManager : MonoBehaviour
         currentVisualEntity = entityManager.Instantiate(GetPrefabFromDatabase(shipDB, shipID));
         entityManager.SetComponentData(currentVisualEntity, LocalTransform.FromPosition(
             SpawnPoint.position));
-    }
 
-    Entity GetPrefabFromDatabase(NativeArray<BakedShipData> db, ShipID id)
-    {
-        for (int i = 0; i < db.Length; i++)
+        Entity GetPrefabFromDatabase(NativeArray<BakedShipData> db, ShipID id)
         {
-            if (db[i].ShipID == id)
+            for (int i = 0; i < db.Length; i++)
             {
-                return db[i].PrefabEntity;
+                if (db[i].ShipID == id)
+                {
+                    return db[i].PrefabEntity;
+                }
             }
-        }
 
-        return Entity.Null;
+            return Entity.Null;
+        }
     }
 }
