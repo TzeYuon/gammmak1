@@ -4,8 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(LateGameplayGroup))]
-[UpdateBefore(typeof(ProcessDamageSystem))]
+[UpdateInGroup(typeof(GameplayMasterGroup))]
 partial struct PoisonDamageSystem : ISystem
 {
     private float tickTimer;

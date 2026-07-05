@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CurrentSave
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveData
   startingUpgradeCores: 200
-  UpgradeCoresRemaining: 200
+  UpgradeCoresRemaining: 19300
   startingAvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
@@ -26,7 +26,6 @@ MonoBehaviour:
   AvailableWeapons:
   - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  - {fileID: 11400000, guid: 6ffb12206990c074d97210cf561f2889, type: 2}
   startingActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
