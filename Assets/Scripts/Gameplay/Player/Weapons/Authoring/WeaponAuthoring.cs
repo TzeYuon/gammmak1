@@ -72,7 +72,7 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new TurretComponent { TurnSpeed = authoring.TurnSpeed });
 
             AddComponent(entity, new WeaponFiringArc {
-                BaseDirection = authoring.BaseDirection,
+                RestingRotation = quaternion.RotateZ(math.atan2(authoring.BaseDirection.y, authoring.BaseDirection.x) - (math.PI / 2f)),
                 MaxAngle = authoring.MaxAngle
             });
 

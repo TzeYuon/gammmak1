@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: SuperHeavyGun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Super Heavy Gun
+  AbbrWpnName: SHG
   WeaponID: 5
   WeaponPrefab: {fileID: 90229467165131139, guid: b778a2cacfd0c2749aedffc5ba9e2473, type: 3}
   EquipCost: 4
@@ -44,6 +45,7 @@ MonoBehaviour:
   BaseFireRate: 0.2
   BaseSpreadDegrees: 0
   IgnoreObstacles: 0
+  BaseProjectileCount: 1
   BaseProjectileSpeed: 120
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 1

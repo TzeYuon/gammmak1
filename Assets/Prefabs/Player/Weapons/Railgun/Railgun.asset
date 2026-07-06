@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Railgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Railgun
+  AbbrWpnName: RAL
   WeaponID: 4
   WeaponPrefab: {fileID: 90229467165131139, guid: d4b8a55dcfe4af043a72d86d88bb0399, type: 3}
   EquipCost: 4
@@ -41,6 +42,7 @@ MonoBehaviour:
   BaseFireRate: 0.2
   BaseSpreadDegrees: 0
   IgnoreObstacles: 1
+  BaseProjectileCount: 1
   BaseProjectileSpeed: 200
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 5

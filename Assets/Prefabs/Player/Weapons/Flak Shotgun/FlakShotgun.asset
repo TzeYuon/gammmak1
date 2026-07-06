@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FlakShotgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Flak Shotgun
+  AbbrWpnName: FLK
   WeaponID: 6
   WeaponPrefab: {fileID: 90229467165131139, guid: c0b4035cf3facbb45a0e51a7a211a169, type: 3}
   EquipCost: 3

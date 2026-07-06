@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Laser
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Laser
+  AbbrWpnName: LAS
   WeaponID: 2
   WeaponPrefab: {fileID: 90229467165131139, guid: e2177913980be5242b015600eb02fc31, type: 3}
   EquipCost: 1
@@ -62,6 +63,7 @@ MonoBehaviour:
   BaseFireRate: 1
   BaseSpreadDegrees: 0
   IgnoreObstacles: 0
+  BaseProjectileCount: 1
   BaseProjectileSpeed: 0
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0

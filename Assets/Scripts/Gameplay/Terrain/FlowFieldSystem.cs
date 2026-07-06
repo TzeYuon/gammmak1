@@ -35,6 +35,12 @@ partial struct FlowFieldSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
+        var gamestate = SystemAPI.GetSingleton<GameStateSingleton>();
+        if (gamestate.CurrentState != GameState.Gameplay) return;
+
+        _timer -= SystemAPI.Time.DeltaTime;
+        if (_timer > 0) return;
+        _timer = 0.45f;
         if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGrid)) return;
         if (!SystemAPI.TryGetSingleton<EnemyFlowFieldComponent>(out var flowFieldComp)) return;
 

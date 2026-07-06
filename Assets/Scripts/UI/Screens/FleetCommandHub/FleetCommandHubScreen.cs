@@ -15,11 +15,12 @@ public class FleetCommandHubScreen : UIScreen
     public FleetCommandHubScreen(
         UIScreenManager manager, 
         VisualElement root, 
-        PlayerSaveData playerSaveData) : base(manager, root)
+        PlayerSaveData playerSaveData, 
+        HangarShipPreviewManager hangarShipPreviewManager) : base(manager, root)
     {
         this.playerSaveData = playerSaveData;
 
-        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), this);
+        hangarScreen = new HangarScreen(manager, root.Q<VisualElement>("HangarScreen"), this, hangarShipPreviewManager);
         weaponsScreen = new WeaponsScreen(manager, root.Q<VisualElement>("WeaponsScreen"));
         starmapScreen = new StarmapScreen(manager, root.Q<VisualElement>("StarmapScreen"));
 

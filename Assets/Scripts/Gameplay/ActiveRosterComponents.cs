@@ -47,8 +47,10 @@ public struct RosterWeaponBlueprint : IBufferElementData
 {
     public Entity WeaponPrefab;
     public float2 Position;
+    public quaternion OriginalRotation;
 
     // Weapon stats after upgrades
     public WeaponTargetingStats WeaponTargetingStats;
     public WeaponCombatStats WeaponCombatStats;
+    public WeaponFiringArc WeaponFiringArc;
 }

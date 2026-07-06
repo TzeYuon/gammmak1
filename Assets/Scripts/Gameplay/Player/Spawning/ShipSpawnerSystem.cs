@@ -117,11 +117,12 @@ public partial struct ShipSpawnerSystem : ISystem
 
                 Entity weapon = ecb.Instantiate(weaponPrefab);
                 ecb.AddComponent(weapon, new Parent { Value = newShip });
-                ecb.SetComponent(weapon, LocalTransform.FromPosition(new float3(weaponBlueprint.Position, 0)));
+                ecb.SetComponent(weapon, LocalTransform.FromPositionRotation(new float3(weaponBlueprint.Position, 0), weaponBlueprint.OriginalRotation));
 
                 // Set weapon stats
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponTargetingStats);
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponCombatStats);
+                ecb.SetComponent(weapon, weaponBlueprint.WeaponFiringArc);
 
                 ecb.AppendToBuffer(newShip, new LinkedEntityGroup { Value = weapon });
             }

@@ -1,0 +1,78 @@
+:root {
+}
+
+.weapon-mount {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-left-color: rgb(255, 235, 4);
+    border-right-color: rgb(255, 235, 4);
+    border-top-color: rgb(255, 235, 4);
+    border-bottom-color: rgb(255, 235, 4);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    background-color: rgb(26, 26, 26);
+    align-self: center;
+    align-content: center;
+}
+
+.weapon-mount:hover {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-left-color: rgb(255, 235, 4);
+    border-right-color: rgb(255, 235, 4);
+    border-top-color: rgb(255, 235, 4);
+    border-bottom-color: rgb(255, 235, 4);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    background-color: rgb(26, 26, 26);
+}
+
+.weapon-mount:active {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    background-color: rgb(26, 26, 26);
+}
+
+.weapon-mount-text {
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto_Mono/static/RobotoMono-Bold.ttf?fileID=12800000&guid=b4c6db6af0eb9324ba661e41df476f51&type=3#RobotoMono-Bold");
+    color: rgb(224, 255, 255);
+    letter-spacing: 5px;
+    position: absolute;
+    top: 21px;
+}

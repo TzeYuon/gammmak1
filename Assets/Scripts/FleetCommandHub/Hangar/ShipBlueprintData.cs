@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Unique ID for each ship blueprint.
@@ -55,10 +58,6 @@ public class WeaponMount
 {
     public Vector2 Position;
     [HideInInspector] public Quaternion OriginalRotation;
-
-    [Range(-180f, 180f)]
-    [Tooltip("Facing direction of the mount in degrees. 0 is Up, -90 is Right, 90 is Left.")]
-    public float FacingAngleDegrees;
 
     public float MaxAngle;
     public WeaponData EquippedWeapon;
@@ -172,16 +171,6 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseTurnSpeed = 15f;
     public float BaseCollectionRadius = 5f;
 
-    private void OnValidate()
-    {
-        if (Mounts == null) return;
-
-        foreach (var mount in Mounts)
-        {
-            mount.OriginalRotation = Quaternion.Euler(0, 0, mount.FacingAngleDegrees);
-        }
-    }
-
     public void ResetToBase()
     {
         foreach (ShipSystem system in ShipSystems)
@@ -283,4 +272,37 @@ public class ShipBlueprintData : ScriptableObject
     {
         return Mathf.RoundToInt(GetStat(statType));
     }
+
+#if UNITY_EDITOR
+    // Adds a right-click option on the ScriptableObject in the top of the Inspector menu
+    /// <summary>
+    /// Syncs the weapon mounts on the prefab of the ship and clears all weapons
+    /// </summary>
+    [ContextMenu("Sync Weapon Mounts From Prefab")]
+    public void SyncMounts()
+    {
+        if (ShipPrefab == null)
+        {
+            Debug.LogError($"No ShipVisualPrefab assigned to Ship Blueprint");
+            return;
+        }
+
+        var visualizers = ShipPrefab.GetComponentsInChildren<WeaponMountVisualiser>(true);
+        Mounts.Clear();
+
+        foreach (var vis in visualizers)
+        {
+            Mounts.Add(new WeaponMount
+            {
+                Position = vis.transform.localPosition,
+                OriginalRotation = vis.transform.localRotation,
+                MaxAngle = vis.MaxAngleLimit,
+                EquippedWeapon = null,
+            });
+        }
+
+        EditorUtility.SetDirty(this);
+        AssetDatabase.SaveAssets();
+    }
+#endif
 }
