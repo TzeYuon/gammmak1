@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PDC
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: PDC
+  AbbrWpnName: PDC
   WeaponID: 1
   WeaponPrefab: {fileID: 90229467165131139, guid: 0d329c13581d0534d87d3b68894b1b88, type: 3}
   EquipCost: 1
@@ -44,6 +45,7 @@ MonoBehaviour:
   BaseFireRate: 11
   BaseSpreadDegrees: 5
   IgnoreObstacles: 0
+  BaseProjectileCount: 1
   BaseProjectileSpeed: 120
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0.3

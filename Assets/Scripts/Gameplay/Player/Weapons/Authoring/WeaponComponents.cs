@@ -32,7 +32,7 @@ public struct HeatmapTargetingComponent : IComponentData
 /// </summary>
 public struct WeaponFiringArc : IComponentData
 {
-    public float3 BaseDirection;
+    public quaternion RestingRotation;
     public float MaxAngle;
 }
 

@@ -67,8 +67,7 @@ public partial struct RotateJob : IJobEntity
         else
         {
             // Return to base rotation
-            float desiredLocalAngle = math.atan2(arc.BaseDirection.y, arc.BaseDirection.x) - (math.PI / 2f);
-            desiredLocalRotation = quaternion.RotateZ(desiredLocalAngle);
+            desiredLocalRotation = arc.RestingRotation;
         }
 
         transform.Rotation = math.slerp(transform.Rotation, desiredLocalRotation, turret.TurnSpeed * DeltaTime);

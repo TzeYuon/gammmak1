@@ -20,7 +20,8 @@ public class HangarScreen : UIScreen
     public HangarScreen(
         UIScreenManager manager, 
         VisualElement root,
-        FleetCommandHubScreen fleetCommandHubScreen) : base(manager, root)
+        FleetCommandHubScreen fleetCommandHubScreen,
+        HangarShipPreviewManager hangarShipPreviewManager) : base(manager, root)
     {
         FleetCommandHubScreen = fleetCommandHubScreen;
 
@@ -28,7 +29,7 @@ public class HangarScreen : UIScreen
 
         shipListContainer = root.Q<ScrollView>("ShipsScrollView");
 
-        ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this);
+        ShipDetailsElement = new (root.Q<VisualElement>("DetailsContainer"), this, hangarShipPreviewManager);
         HangarContextMenu = new (root.Q<VisualElement>("HangarContextMenu"), this);
     }
 
@@ -125,30 +126,36 @@ public class ShipDetailsElement
     private VisualElement container;
     private Label shipTitle;
     private Label shipClass;
-    private VisualElement shipVisual;
+
+    HangarShipPreviewManager hangarShipPreviewManager;
+    private VisualElement shipVisualContainer;
+
     private Label shipDescription;
     private Button toggleRosterBtn;
 
     private PipContainerVisualElement weaponCapacityElement;
-    private VisualElement weaponMountsScrollViewContainer;
-    private Dictionary<WeaponMount, Button> weaponMountButtons = new();
+    private VisualElement weaponMountsContainer;
+    private Dictionary<WeaponMount, WeaponMountElement> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
     private List<(ShipSystem system, VisualElement element)> systemItems = new();
 
     public ShipBlueprintData CurrentShip;
 
-    public ShipDetailsElement(VisualElement root, HangarScreen hangarScreen)
+    public ShipDetailsElement(VisualElement root, HangarScreen hangarScreen, HangarShipPreviewManager hangarShipPreviewManager)
     {
         this.hangarScreen = hangarScreen;
         container = root;
         shipTitle = root.Q<Label>("ShipTitle");
         shipClass = root.Q<Label>("ShipClass");
 
+        shipVisualContainer = root.Q<VisualElement>("ShipVisualContainer");
+        this.hangarShipPreviewManager = hangarShipPreviewManager;
+
         shipDescription = root.Q<Label>("ShipDescription");
 
         weaponCapacityElement = root.Q<PipContainerVisualElement>("WeaponCapacityContainer");
-        weaponMountsScrollViewContainer = root.Q<VisualElement>("WeaponMountScrollViewContainer");
+        weaponMountsContainer = root.Q<VisualElement>("WeaponMountsContainer");
 
         systemsScrollView = root.Q<ScrollView>("SystemsScrollView");
 
@@ -180,6 +187,9 @@ public class ShipDetailsElement
         // update ship class
         shipClass.text = CurrentShip.ShipClass.ToString().ToUpper();
 
+        // Update ship preview
+        hangarShipPreviewManager.DisplayShip(CurrentShip.ShipID);
+
         // Update ship stats in description
         UpdateShipStatsDescription();
 
@@ -205,19 +215,25 @@ public class ShipDetailsElement
         UpdateWeaponCapacity();
 
         // update weapon mounts
-        weaponMountButtons.Clear();
-        weaponMountsScrollViewContainer.Clear();
-        foreach (var mount in CurrentShip.Mounts)
+        shipVisualContainer.schedule.Execute(() =>
         {
-            Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount);
-            weaponMountItem.clicked += () =>
+            weaponMountButtons.Clear();
+            weaponMountsContainer.Clear();
+            float scale = shipVisualContainer.layout.width / (hangarShipPreviewManager.CameraSize * 2.0f);
+            foreach (var mount in CurrentShip.Mounts)
             {
-                OnWeaponMountItemClicked(mount, weaponMountItem);
-            };
+                Vector2 pos = new (mount.Position.x * scale, -mount.Position.y * scale);
+                WeaponMountElement weaponMountItem = UIFactory.BuildWeaponMountItem(mount, pos);
+                weaponMountItem.RegisterCallback<ClickEvent>(evt =>
+                {
+                    OnWeaponMountItemClicked(mount, weaponMountItem);
+                });
 
-            weaponMountButtons.Add(mount, weaponMountItem);
-            weaponMountsScrollViewContainer.Add(weaponMountItem);
-        }
+                // place mounts over shipvisual
+                weaponMountsContainer.Add(weaponMountItem);
+                weaponMountButtons.Add(mount, weaponMountItem);
+            }
+        }).Until(() => shipVisualContainer.layout.width > 0.1f);
 
         UpdateToggleRosterBtn();
 
@@ -322,23 +338,20 @@ public class ShipDetailsElement
         weaponCapacityElement.Value = CurrentShip.UsedWeaponCapacity;
     }
 
-    private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)
+    private void OnWeaponMountItemClicked(WeaponMount mount, WeaponMountElement clickedMountElement)
     {
-        // Clear style for other buttons
-        foreach (var btn in weaponMountButtons.Values)
-        {
-            btn.style.backgroundColor = Color.clear;
-        }
-
-        // show style for currently viewed mount
-        clickedButton.style.backgroundColor = new Color(0, 1, 1, 0.1f);
-
         hangarScreen.HangarContextMenu.ShowWeaponMount(mount);
+
+        foreach (var mountElement in weaponMountButtons.Values)
+        {
+            mountElement.SetActivePseudoState(false);
+        }
+        clickedMountElement.SetActivePseudoState(true);
     }
 
     public void UpdateWeaponMountItem(WeaponMount mount)
     {
-        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount);
+        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount]);
         UpdateWeaponCapacity();
     }
 
@@ -543,12 +556,13 @@ public class WeaponMountContextMenu
             ) 
         {
             // hide btn
-            upgradeBtn.style.visibility = Visibility.Hidden;
+            upgradeBtn.SetEnabled(false);
+            upgradeBtn.text = "MAX LEVEL";
             return; 
         }
 
         // btn visible
-        upgradeBtn.style.visibility = Visibility.Visible;
+        upgradeBtn.SetEnabled(true);
 
         // update cost of upgrade on label, update colour if not affordable
         int cost = currentViewingWeapon.GetUpgradeCost();
@@ -590,12 +604,13 @@ public class WeaponMountContextMenu
             )
         {
             // hide btn
-            refundWeaponBtn.style.visibility = Visibility.Hidden;
+            refundWeaponBtn.SetEnabled(false);
+            refundWeaponBtn.text = "MIN LEVEL";
             return;
         }
 
         // btn visible
-        refundWeaponBtn.style.visibility = Visibility.Visible;
+        refundWeaponBtn.SetEnabled(true);
 
         // update refund value on label
         refundWeaponBtn.text = $"REFUND [<color=#CCFF00>+{currentViewingWeapon.GetRefundValue()}</color>]";
