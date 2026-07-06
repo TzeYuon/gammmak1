@@ -196,6 +196,7 @@ public class LevelHandoff : MonoBehaviour
                 {
                     WeaponPrefab = weaponPrefab,
                     Position = mount.Position,
+                    OriginalRotation = mount.OriginalRotation,
 
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
