@@ -131,11 +131,11 @@ MonoBehaviour:
     MaxAngle: 180
     EquippedWeapon: {fileID: 0}
   - Position: {x: 0.336, y: 0.548}
-    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    OriginalRotation: {x: 0, y: 0, z: -0.15419307, w: 0.98804075}
     MaxAngle: 70
     EquippedWeapon: {fileID: 0}
   - Position: {x: -0.336, y: 0.548}
-    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    OriginalRotation: {x: 0, y: 0, z: 0.15419307, w: 0.98804075}
     MaxAngle: 70
     EquippedWeapon: {fileID: 0}
   BaseCost: 15

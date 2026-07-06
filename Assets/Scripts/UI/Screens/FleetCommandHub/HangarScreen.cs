@@ -135,7 +135,7 @@ public class ShipDetailsElement
 
     private PipContainerVisualElement weaponCapacityElement;
     private VisualElement weaponMountsContainer;
-    private Dictionary<WeaponMount, Button> weaponMountButtons = new();
+    private Dictionary<WeaponMount, WeaponMountElement> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
     private List<(ShipSystem system, VisualElement element)> systemItems = new();
@@ -223,11 +223,11 @@ public class ShipDetailsElement
             foreach (var mount in CurrentShip.Mounts)
             {
                 Vector2 pos = new (mount.Position.x * scale, -mount.Position.y * scale);
-                Button weaponMountItem = UIFactory.BuildWeaponMountItem(mount, pos);
-                weaponMountItem.clicked += () =>
+                WeaponMountElement weaponMountItem = UIFactory.BuildWeaponMountItem(mount, pos);
+                weaponMountItem.RegisterCallback<ClickEvent>(evt =>
                 {
                     OnWeaponMountItemClicked(mount, weaponMountItem);
-                };
+                });
 
                 // place mounts over shipvisual
                 weaponMountsContainer.Add(weaponMountItem);
@@ -338,23 +338,20 @@ public class ShipDetailsElement
         weaponCapacityElement.Value = CurrentShip.UsedWeaponCapacity;
     }
 
-    private void OnWeaponMountItemClicked(WeaponMount mount, Button clickedButton)
+    private void OnWeaponMountItemClicked(WeaponMount mount, WeaponMountElement clickedMountElement)
     {
-        // Clear style for other buttons
-        foreach (var btn in weaponMountButtons.Values)
-        {
-            btn.style.backgroundColor = Color.clear;
-        }
-
-        // show style for currently viewed mount
-        clickedButton.style.backgroundColor = new Color(0, 1, 1, 0.1f);
-
         hangarScreen.HangarContextMenu.ShowWeaponMount(mount);
+
+        foreach (var mountElement in weaponMountButtons.Values)
+        {
+            mountElement.SetActivePseudoState(false);
+        }
+        clickedMountElement.SetActivePseudoState(true);
     }
 
     public void UpdateWeaponMountItem(WeaponMount mount)
     {
-        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount], mount);
+        UIFactory.UpdateWeaponMountItem(weaponMountButtons[mount]);
         UpdateWeaponCapacity();
     }
 

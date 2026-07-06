@@ -20,13 +20,15 @@ MonoBehaviour:
   AvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
+  - {fileID: 11400000, guid: 49d1512f0bdf5e04dae07211a87f4080, type: 2}
+  - {fileID: 11400000, guid: cb7b39492b5217f428f7cd818164442f, type: 2}
   startingAvailableWeapons:
   - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   AvailableWeapons:
   - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
   - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  - {fileID: 11400000, guid: 6ffb12206990c074d97210cf561f2889, type: 2}
+  - {fileID: 11400000, guid: 899c5c1bd7bc0294ea8e0c96f221c916, type: 2}
   startingActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}

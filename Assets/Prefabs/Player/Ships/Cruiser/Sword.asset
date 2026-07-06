@@ -122,30 +122,30 @@ MonoBehaviour:
         Value: 2
   BaseWeaponCapacity: 7
   Mounts:
-  - Position: {x: -0.449, y: -0.286}
-    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+  - Position: {x: -0.396, y: -0.1}
+    OriginalRotation: {x: 0, y: 0, z: 0.14012365, w: 0.99013406}
     MaxAngle: 49
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.449, y: -0.286}
-    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+  - Position: {x: 0.396, y: -0.1}
+    OriginalRotation: {x: 0, y: 0, z: -0.14012356, w: 0.99013406}
     MaxAngle: 49
     EquippedWeapon: {fileID: 0}
   - Position: {x: 0, y: 0.98}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 2
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0, y: -0.25}
+  - Position: {x: 0, y: 0.37}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 49
     EquippedWeapon: {fileID: 0}
-  - Position: {x: -0.267, y: -0.42}
-    OriginalRotation: {x: 0, y: 0, z: 0.94566053, w: 0.32515556}
-    MaxAngle: 102
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.267, y: -0.42}
+  - Position: {x: 0.327, y: -0.576}
     OriginalRotation: {x: 0, y: 0, z: -0.9456606, w: 0.3251556}
     MaxAngle: 102
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+  - Position: {x: -0.327, y: -0.576}
+    OriginalRotation: {x: 0, y: 0, z: 0.94566053, w: 0.32515556}
+    MaxAngle: 102
+    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
   BaseCost: 17
   BaseMaxHealth: 20
   BaseSpeed: 13

@@ -73,41 +73,20 @@ public static class UIFactory
         pipContainer.Value = weapon.UpgradeLevel;
     }
 
-    public static Button BuildWeaponMountItem(WeaponMount mount, Vector2 pos)
+    public static WeaponMountElement BuildWeaponMountItem(WeaponMount mount, Vector2 pos)
     {
-        Button weaponMountItem = UIScreenManager.UIAssetsDatabase.WeaponMountItem.Instantiate().Q<Button>("WeaponMountItem");
-
-        weaponMountItem.style.position = Position.Absolute;
+        WeaponMountElement weaponMountItem = new();
         weaponMountItem.style.top = pos.y;
         weaponMountItem.style.left = pos.x;
 
-        UpdateWeaponMountItem(weaponMountItem, mount);
+        weaponMountItem.Init(mount);
 
         return weaponMountItem;
     }
 
-    public static void UpdateWeaponMountItem(Button weaponMountItem, WeaponMount mount)
+    public static void UpdateWeaponMountItem(WeaponMountElement weaponMountItem)
     {
-        // Display equipped weapon if not empty
-        Label emptyLabel = weaponMountItem.Q<Label>("EmptyLabel");
-        VisualElement weaponListItemContainer = weaponMountItem.Q<VisualElement>("WeaponListItemContainer");
-        weaponListItemContainer.Clear();
-        if (mount.EquippedWeapon == null)
-        {
-            emptyLabel.style.display = DisplayStyle.Flex;
-            weaponListItemContainer.style.display = DisplayStyle.None;
-        }
-        else
-        {
-            emptyLabel.style.display = DisplayStyle.None;
-            weaponListItemContainer.style.display = DisplayStyle.Flex;
-            var weaponListItem = BuildWeaponListItem(mount.EquippedWeapon);
-            weaponListItem.pickingMode = PickingMode.Ignore;
-            weaponListItem.style.width = 125;
-            weaponListItem.RemoveFromClassList("list-item");
-            weaponListItem.AddToClassList("inactive-list-item");
-            weaponListItemContainer.Add(weaponListItem);
-        }
+        weaponMountItem.Rebuild();
     }
 
     public static void BuildWeaponUpgradeContainer(VisualElement container, WeaponData weapon)
