@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -82,9 +83,21 @@ partial struct LevelGen_HivesSystem : ISystem
 
         unsafe
         {
-            var hivePool = state.EntityManager.GetBuffer<HiveBlueprint>(statusEntity);
+            // Create hive blueprint array for indexing
+            var query = SystemAPI.QueryBuilder().WithAll<HiveBlueprint>().Build();
+            int blueprintCount = query.CalculateEntityCount();
+
+            NativeArray<HiveBlueprint> hivePool = new NativeArray<HiveBlueprint>(blueprintCount, Allocator.Temp);
+            int index = 0;
+            foreach (var hive in SystemAPI.Query<RefRO<HiveBlueprint>>())
+            {
+                hivePool[index] = hive.ValueRO;
+                index++;
+            }
+
             var rng = new Unity.Mathematics.Random(levelBlueprint.Seed);
 
+            // Spawn hives at given spots
             for (int i = 0; i < spawnData.TotalHiveSpots; i++)
             {
                 Entity hiveEntity = state.EntityManager.Instantiate(hivePrefab);
@@ -118,13 +131,19 @@ partial struct LevelGen_HivesSystem : ISystem
 
                         state.EntityManager.SetComponentData(hiveEntity, selectedHive.HiveSurgeComponent);
 
+                        // Copy trickle spawn data to native array
                         var recipeTrickles = state.EntityManager.GetBuffer<TrickleSpawnerData>(selectedHive.RecipeEntity);
+                        var cachedTrickles = recipeTrickles.ToNativeArray(Allocator.Temp);
+
+                        // Create trickle spawn data array on actual hive entity
                         var trickleBuffer = state.EntityManager.AddBuffer<TrickleSpawnerData>(hiveEntity);
-                        for (int t = 0; t < recipeTrickles.Length; t++)
+                        for (int t = 0; t < cachedTrickles.Length; t++)
                         {
-                            var trickleSpawn = recipeTrickles[t];
+                            var trickleSpawn = cachedTrickles[t];
                             trickleBuffer.Add(trickleSpawn);
                         }
+
+                        cachedTrickles.Dispose();
                     }
                 }
                 else
@@ -132,6 +151,8 @@ partial struct LevelGen_HivesSystem : ISystem
                     state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, false);
                 }
             }
+
+            hivePool.Dispose();
         }
     }
 }

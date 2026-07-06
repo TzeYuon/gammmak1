@@ -48,7 +48,6 @@ public class LevelHandoff : MonoBehaviour
         entityManager.AddComponentData(generatingStatus, levelBlueprint);
 
         // Convert enemy profile to buffer
-        entityManager.AddBuffer<HiveBlueprint>(generatingStatus);
         foreach (var archetype in currentLevel.EnemyProfile.PossibleHives.Pool)
         {
             if (archetype.Weight <= 0) continue;
@@ -67,8 +66,7 @@ public class LevelHandoff : MonoBehaviour
                 });
             }
 
-            var buffer = entityManager.GetBuffer<HiveBlueprint>(generatingStatus);
-            buffer.Add(new HiveBlueprint
+            entityManager.AddComponentData(recipeEntity, new HiveBlueprint
             {
                 Weight = archetype.Weight,
                 RecipeEntity = recipeEntity,

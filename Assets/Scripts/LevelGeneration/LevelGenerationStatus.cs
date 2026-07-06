@@ -58,8 +58,7 @@ public struct LevelBlueprint : IComponentData
     public float TotalHiveWeight;
 }
 
-[InternalBufferCapacity(8)]
-public struct HiveBlueprint : IBufferElementData
+public struct HiveBlueprint : IComponentData
 {
     public int Weight;
     public Entity RecipeEntity;
