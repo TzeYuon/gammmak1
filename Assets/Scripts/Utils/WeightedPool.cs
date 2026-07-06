@@ -13,6 +13,7 @@ public class WeightedPool<T>
 {
     private bool isInit = false;
     private int totalWeight;
+    public int TotalWeight { get { return totalWeight; } }
     public List<WeightedItem<T>> Pool = new List<WeightedItem<T>>();
 
     public T GetRandom()

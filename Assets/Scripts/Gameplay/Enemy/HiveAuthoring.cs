@@ -26,13 +26,16 @@ class HiveAuthoring : MonoBehaviour
             AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new HiveComponent
             {
+                Size = authoring.Size
+            });
+
+            AddComponent(entity, new HiveSurgeComponent
+            {
                 SurgeEnemyType = authoring.surgeEnemyType,
                 SurgeSpawnCount = authoring.surgeSpawnCount,
                 SurgeSpawnRate = 100,
                 SurgeSpawnAccumulator = 0,
                 SurgePendingSpawns = 0,
-
-                Size = authoring.Size
             });
 
             DynamicBuffer<TrickleSpawnerData> ambientBuffer = AddBuffer<TrickleSpawnerData>(entity);
@@ -66,12 +69,4 @@ class HiveAuthoring : MonoBehaviour
             SetComponentEnabled<DeadTag>(entity, false);
         }
     }
-}
-
-[System.Serializable]
-public struct SpawnConfig
-{
-    public EnemyType Type;
-    public int SpawnCount;
-    public float Interval;
 }

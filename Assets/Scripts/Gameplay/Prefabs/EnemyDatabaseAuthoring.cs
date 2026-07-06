@@ -7,6 +7,9 @@ class EnemyDatabaseAuthoring : MonoBehaviour
     public GameObject StandardHivePrefab;
 
     public GameObject StandardPrefab;
+    public GameObject GoliathPrefab;
+    public GameObject LocustPrefab;
+    public GameObject SpitterPrefab;
 
     class Baker : Baker<EnemyDatabaseAuthoring>
     {
@@ -22,6 +25,9 @@ class EnemyDatabaseAuthoring : MonoBehaviour
             AddComponent(entity, new EnemyPrefabDatabase
             {
                 StandardPrefab = GetEntity(authoring.StandardPrefab, TransformUsageFlags.Dynamic),
+                GoliathPrefab = GetEntity(authoring.GoliathPrefab, TransformUsageFlags.Dynamic),
+                //LocustPrefab = GetEntity(authoring.LocustPrefab, TransformUsageFlags.Dynamic),
+                //SpitterPrefab = GetEntity(authoring.SpitterPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }
@@ -50,11 +56,17 @@ public struct HivePrefabDatabase : IComponentData
 public enum EnemyType : byte
 {
     Standard,
+    Goliath,
+    Locust,
+    Spitter
 }
 
 public struct EnemyPrefabDatabase : IComponentData
 {
     public Entity StandardPrefab;
+    public Entity GoliathPrefab;
+    public Entity LocustPrefab;
+    public Entity SpitterPrefab;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] 
     public Entity GetPrefab(EnemyType type)
@@ -62,6 +74,9 @@ public struct EnemyPrefabDatabase : IComponentData
         return type switch
         {
             EnemyType.Standard => StandardPrefab,
+            EnemyType.Goliath => GoliathPrefab,
+            EnemyType.Locust => LocustPrefab,
+            EnemyType.Spitter => SpitterPrefab,
             _ => Entity.Null,
         };
     }

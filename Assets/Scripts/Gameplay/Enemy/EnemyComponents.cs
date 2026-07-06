@@ -5,7 +5,10 @@ public struct HiveComponent : IComponentData
 {
     // for targeting and damage
     public float Size;
+}
 
+public struct HiveSurgeComponent : IComponentData
+{
     public EnemyType SurgeEnemyType;
     public int SurgeSpawnCount;
     public int SurgePendingSpawns;

@@ -23,7 +23,8 @@ partial struct LevelGen_HivesSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<GameStateSingleton>(out var gameState) 
+        if (!SystemAPI.TryGetSingleton<GameStateSingleton>(out var gameState)
+            || !SystemAPI.TryGetSingletonEntity<LevelGenerationStatus>(out var statusEntity)
             || !SystemAPI.TryGetSingletonRW<LevelGenerationStatus>(out var status)
             || status.ValueRO.HivesGenerated
             || !SystemAPI.TryGetSingleton<LevelBlueprint>(out var levelBlueprint)
@@ -52,7 +53,7 @@ partial struct LevelGen_HivesSystem : ISystem
         float baseDifficultyPerHiveDestroyed = 0.10f;
         float baseMaxSpawnRateMult = 3.0f;
         float baseMaxSpawnCountMult = 4.0f;
-        float baseSurgeInterval = 30;
+        float baseSurgeInterval = 30; // TEMPORARY: hardcode to 30s between surges
 
         // set config
         ref var config = ref difficultyConfig.ValueRW;
@@ -71,7 +72,7 @@ partial struct LevelGen_HivesSystem : ISystem
         // reset surge state
         ref var sState = ref surgeState.ValueRW;
         sState.TriggerSurgeThisFrame = false;
-        sState.SurgeTimer = baseSurgeInterval; // TEMPORARY: hardcode to 30s between surges
+        sState.SurgeTimer = baseSurgeInterval; 
         sState.CurrentInterval = baseSurgeInterval;
 
 
@@ -81,6 +82,9 @@ partial struct LevelGen_HivesSystem : ISystem
 
         unsafe
         {
+            var hivePool = state.EntityManager.GetBuffer<HiveBlueprint>(statusEntity);
+            var rng = new Unity.Mathematics.Random(levelBlueprint.Seed);
+
             for (int i = 0; i < spawnData.TotalHiveSpots; i++)
             {
                 Entity hiveEntity = state.EntityManager.Instantiate(hivePrefab);
@@ -88,9 +92,40 @@ partial struct LevelGen_HivesSystem : ISystem
                 float3 spawnPos = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
                 state.EntityManager.SetComponentData(hiveEntity, LocalTransform.FromPosition(spawnPos));
 
+                state.EntityManager.AddComponent<LevelEntityTag>(hiveEntity);
+
                 if (i < spawnData.ActiveHiveCount)
                 {
                     state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, true);
+
+                    if (hivePool.Length > 0)
+                    {
+                        float roll = rng.NextFloat(0f, levelBlueprint.TotalHiveWeight);
+                        float cumulativeWeight = 0f;
+                        HiveBlueprint selectedHive = hivePool[0];
+
+                        for (int p = 0; p < hivePool.Length; p++)
+                        {
+                            HiveBlueprint h = hivePool[p];
+                            cumulativeWeight += h.Weight;
+
+                            if (roll <= cumulativeWeight)
+                            {
+                                selectedHive = h;
+                                break;
+                            }
+                        }
+
+                        state.EntityManager.SetComponentData(hiveEntity, selectedHive.HiveSurgeComponent);
+
+                        var recipeTrickles = state.EntityManager.GetBuffer<TrickleSpawnerData>(selectedHive.RecipeEntity);
+                        var trickleBuffer = state.EntityManager.AddBuffer<TrickleSpawnerData>(hiveEntity);
+                        for (int t = 0; t < recipeTrickles.Length; t++)
+                        {
+                            var trickleSpawn = recipeTrickles[t];
+                            trickleBuffer.Add(trickleSpawn);
+                        }
+                    }
                 }
                 else
                 {

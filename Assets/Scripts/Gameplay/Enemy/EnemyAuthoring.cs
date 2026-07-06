@@ -6,6 +6,7 @@ using UnityEngine;
 class EnemyAuthoring : MonoBehaviour
 {
     [SerializeField] float maxHealth;
+    [SerializeField] float damageReduction = 0;
     [SerializeField] float baseSpeed;
     [SerializeField] float hitboxRadius;
 
@@ -28,6 +29,7 @@ class EnemyAuthoring : MonoBehaviour
             {
                 MaxValue = authoring.maxHealth,
                 Value = authoring.maxHealth,
+                FlatDamageReduction = authoring.damageReduction
             });
             AddBuffer<DamageEvent>(entity);
 

@@ -1,5 +1,6 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 [UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct ProcessDamageSystem : ISystem
@@ -42,7 +43,7 @@ public partial struct ApplyDamageJob : IJobEntity
         float totalDamage = 0f;
         for (int i = 0; i < damageBuffer.Length; i++)
         {
-            totalDamage += damageBuffer[i].Value;
+            totalDamage += math.max(damageBuffer[i].Value - health.FlatDamageReduction, 0);
         }
 
         health.Value -= totalDamage;

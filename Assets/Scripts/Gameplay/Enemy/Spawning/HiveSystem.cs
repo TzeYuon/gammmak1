@@ -81,28 +81,28 @@ partial struct HiveSystem : ISystem
 
         // Surge behaviour
         if (!SystemAPI.TryGetSingleton(out GlobalSurgeState surgeState)) return;
-        foreach (var (hive, transform, entity) in SystemAPI.Query<RefRW<HiveComponent>, RefRO<LocalTransform>>().WithAll<ActiveHiveTag>().WithEntityAccess())
+        foreach (var (surge, hive, transform, entity) in SystemAPI.Query<RefRW<HiveSurgeComponent>, RefRO<HiveComponent>, RefRO<LocalTransform>>().WithAll<ActiveHiveTag>().WithEntityAccess())
         {
             // queue spawns for surge
             if (surgeState.TriggerSurgeThisFrame)
             {
-                hive.ValueRW.SurgePendingSpawns += (int)math.floor(hive.ValueRO.SurgeSpawnCount * difficultyState.SpawnCountMult);
+                surge.ValueRW.SurgePendingSpawns += (int)math.floor(surge.ValueRO.SurgeSpawnCount * difficultyState.SpawnCountMult);
             }
 
             // spawn over multiple frames
             float3 hivePosition = transform.ValueRO.Position;
             float spawnRadius = hive.ValueRO.Size;
-            if (hive.ValueRO.SurgePendingSpawns > 0)
+            if (surge.ValueRO.SurgePendingSpawns > 0)
             {
-                hive.ValueRW.SurgeSpawnAccumulator += hive.ValueRO.SurgeSpawnRate * deltaTime;
-                int spawnCount = (int)math.floor(hive.ValueRO.SurgeSpawnAccumulator);
+                surge.ValueRW.SurgeSpawnAccumulator += surge.ValueRO.SurgeSpawnRate * deltaTime;
+                int spawnCount = (int)math.floor(surge.ValueRO.SurgeSpawnAccumulator);
 
                 if (spawnCount > 0)
                 {
-                    int amountToSpawn = math.min(spawnCount, hive.ValueRO.SurgePendingSpawns);
-                    hive.ValueRW.SurgeSpawnAccumulator -= amountToSpawn;
+                    int amountToSpawn = math.min(spawnCount, surge.ValueRO.SurgePendingSpawns);
+                    surge.ValueRW.SurgeSpawnAccumulator -= amountToSpawn;
 
-                    Entity prefab = enemyPrefabDatabase.GetPrefab(hive.ValueRO.SurgeEnemyType);
+                    Entity prefab = enemyPrefabDatabase.GetPrefab(surge.ValueRO.SurgeEnemyType);
                     for (int i = 0; i < amountToSpawn; i++)
                     {
                         Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
@@ -115,7 +115,7 @@ partial struct HiveSystem : ISystem
                         ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
                     }
 
-                    hive.ValueRW.SurgePendingSpawns -= amountToSpawn;
+                    surge.ValueRW.SurgePendingSpawns -= amountToSpawn;
                 }
             }
         }

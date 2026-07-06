@@ -21,7 +21,7 @@ public class LevelNode
     public ThreatLevel ThreatLevel;
     public ObjectiveType ObjectiveType;
     public TerrainType TerrainType;
-    public EnemyProfile EnemyProfile;
+    public EnemyProfileData EnemyProfile;
     public AnomalyType AnomalyType;
 
     public int UpgradeCoreReward;
@@ -38,5 +38,4 @@ public enum RewardType { None, UpgradeCores, WeaponBlueprint, ShipBlueprint, Mot
 public enum ThreatLevel { None, Low, Medium, High, Boss }
 public enum ObjectiveType { HiveAssault, Survival }
 public enum TerrainType { Asteroids, TwoTunnel, Ring, TwoRing, Swamp, Cavern, OneTunnel, Maze }
-public enum EnemyProfile { Standard, Tendrils, Ranged }
 public enum AnomalyType { None, DoubleEnemySpeed, ArmouredEnemies, LargerEnemies }

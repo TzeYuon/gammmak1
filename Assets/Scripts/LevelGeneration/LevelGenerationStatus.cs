@@ -43,7 +43,6 @@ public struct LevelBlueprint : IComponentData
     public RewardType RewardType;
     public ThreatLevel ThreatLevel;
     public ObjectiveType ObjectiveType;
-    public EnemyProfile EnemyProfile;
     public AnomalyType AnomalyType;
     public int UpgradeCoreReward;
 
@@ -54,4 +53,15 @@ public struct LevelBlueprint : IComponentData
     public float WallThreshold; // Anything above this number becomes a wall
     public float PoisonThreshold; // Anything above this number becomes Poison
     public float MudThreshold; // Anything below this number becomes Mud
+
+    // Enemy profile variables
+    public float TotalHiveWeight;
+}
+
+[InternalBufferCapacity(8)]
+public struct HiveBlueprint : IBufferElementData
+{
+    public int Weight;
+    public Entity RecipeEntity;
+    public HiveSurgeComponent HiveSurgeComponent;
 }
