@@ -315,6 +315,8 @@ partial struct LevelGen_TerrainSystem : ISystem
                 flowField[x + y * width] = float2.zero;
             }
         }
+        ecb.Playback(state.EntityManager);
+        ecb.Dispose();
 
         var meshGen = TerrainMeshGenerator.GetInstance();
         if (meshGen != null)
@@ -329,8 +331,6 @@ partial struct LevelGen_TerrainSystem : ISystem
         var spawnerEntity = state.EntityManager.CreateEntity();
         state.EntityManager.AddComponentData(spawnerEntity, spawnData);
         state.EntityManager.AddComponentData(spawnerEntity, new LevelEntityTag());
-        ecb.Playback(state.EntityManager);
-        ecb.Dispose();
 
         // Update global singletons
         RefRW<TerrainGridComponent> terrainComp = SystemAPI.GetSingletonRW<TerrainGridComponent>();

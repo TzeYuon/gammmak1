@@ -208,6 +208,8 @@ MonoBehaviour:
       Pool:
       - Item: 5
         Weight: 1
+      - Item: 7
+        Weight: 1
     ObjectivePool:
       Pool:
       - Item: 0

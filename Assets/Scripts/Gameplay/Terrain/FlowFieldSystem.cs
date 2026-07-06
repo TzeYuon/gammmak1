@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -11,8 +9,15 @@ using Unity.Transforms;
 partial struct FlowFieldSystem : ISystem
 {
     private float _timer;
+    private int _genState; // 0=Idle, 1=Setup, 2=Dijkstra, 3=Vectors, 4=Apply
+
+    
     private NativeArray<int> _integrationField;
     private NativeArray<byte> _costField;
+    private NativeArray<float2> _backBufferFlowField;
+
+    private NativeQueue<int2> _cellsToCheck;
+    private NativeList<int2> _targetPositions;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -20,6 +25,12 @@ partial struct FlowFieldSystem : ISystem
         state.RequireForUpdate<PlayerTag>();
         state.RequireForUpdate<TerrainGridComponent>();
         state.RequireForUpdate<EnemyFlowFieldComponent>();
+
+        _genState = 0;
+        _timer = 0.45f;
+
+        _cellsToCheck = new NativeQueue<int2>(Allocator.Persistent);
+        _targetPositions = new NativeList<int2>(Allocator.Persistent);
     }
 
     public void OnUpdate(ref SystemState state)
@@ -30,74 +41,140 @@ partial struct FlowFieldSystem : ISystem
         _timer -= SystemAPI.Time.DeltaTime;
         if (_timer > 0) return;
         _timer = 0.45f;
+        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGrid)) return;
+        if (!SystemAPI.TryGetSingleton<EnemyFlowFieldComponent>(out var flowFieldComp)) return;
 
-        var terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
-        int gridWidth = terrainGridComponent.GridWidth;
-        int gridHeight = terrainGridComponent.GridHeight;
+        int gridWidth = terrainGrid.GridWidth;
+        int gridHeight = terrainGrid.GridHeight;
         int totalCells = gridWidth * gridHeight;
-
-        var flowFieldComponent = SystemAPI.GetSingletonRW<EnemyFlowFieldComponent>();
 
         if (!_integrationField.IsCreated || _integrationField.Length != totalCells)
         {
             if (_integrationField.IsCreated) _integrationField.Dispose();
-            _integrationField = new NativeArray<int>(totalCells, Allocator.Persistent);
-        }
-
-        if (!_costField.IsCreated || _costField.Length != totalCells)
-        {
             if (_costField.IsCreated) _costField.Dispose();
+            if (_backBufferFlowField.IsCreated) _backBufferFlowField.Dispose();
+
+            _integrationField = new NativeArray<int>(totalCells, Allocator.Persistent);
             _costField = new NativeArray<byte>(totalCells, Allocator.Persistent);
+            _backBufferFlowField = new NativeArray<float2>(totalCells, Allocator.Persistent);
         }
 
-        var noiseFieldHandle = new GenerateNoiseFieldJob
-        {
-            CostGrid = _costField,
-            ObstacleGrid = terrainGridComponent.Grid,
-            GridWidth = gridWidth,
-            CellSize = 1,
-            ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
-            NoiseFrequency = 0.05f,
-            MaxNoiseCost = 10
-        }.Schedule(totalCells, 4096, state.Dependency);
 
-        NativeList<int2> targetPositions = new NativeList<int2>(Allocator.TempJob);
-        foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
+        if (_genState == 0) // State 0: Idle
         {
-            int2 gridPos = new int2(
-                (int)math.round(transform.ValueRO.Position.x) - terrainGridComponent.WorldOrigin.x,
-                (int)math.round(transform.ValueRO.Position.y) - terrainGridComponent.WorldOrigin.y
-            );
-            targetPositions.Add(gridPos);
+            _timer -= SystemAPI.Time.DeltaTime;
+            if (_timer > 0) return;
+
+            _genState = 1; 
         }
-
-        var job = new GenerateFlowFieldJob
+        else if (_genState == 1) // State 1: Setup and Noise Generation
         {
-            Grid = terrainGridComponent.Grid,
-            IntegrationField = _integrationField,
-            CostGrid = _costField,
-            FlowField = flowFieldComponent.ValueRW.FlowField,
-            TargetPositions = targetPositions,
-            GridWidth = gridWidth,
-            GridHeight = gridHeight,
-            ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
-        };
+            _targetPositions.Clear();
+            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
+            {
+                int2 gridPos = new int2(
+                    (int)math.round(transform.ValueRO.Position.x),
+                    (int)math.round(transform.ValueRO.Position.y)
+                ) - terrainGrid.WorldOrigin;
+                _targetPositions.Add(gridPos);
+            }
 
-        state.Dependency = job.Schedule(noiseFieldHandle);
+            // Schedule the Parallel Noise generation
+            var setupJob = new SetupAndNoiseJob
+            {
+                IntegrationField = _integrationField,
+                FlowField = _backBufferFlowField,
+                CostGrid = _costField,
+                ObstacleGrid = terrainGrid.Grid,
+                GridWidth = gridWidth,
+                CellSize = 1,
+                ElapsedTime = (float)SystemAPI.Time.ElapsedTime,
+                NoiseFrequency = 0.05f,
+                MaxNoiseCost = 10
+            }.Schedule(totalCells, 2048, state.Dependency);
 
-        targetPositions.Dispose(state.Dependency);
+            // Schedule the job that puts the player ship into the Dijkstra Queue
+            var initQueueJob = new InitializeDijkstraTargetsJob
+            {
+                Targets = _targetPositions.AsArray(),
+                IntegrationField = _integrationField,
+                CellsToCheck = _cellsToCheck.AsParallelWriter(),
+                Grid = terrainGrid.Grid,
+                GridWidth = gridWidth
+            }.Schedule(setupJob);
+
+            state.Dependency = initQueueJob;
+            _genState = 2;
+        }
+        else if (_genState == 2) // State 2: Dijkstra in Chunks
+        {
+            // Wait for the previous jobs to finish before starting Dijkstra
+            state.Dependency.Complete();
+
+            if (_cellsToCheck.IsEmpty())
+            {
+                _genState = 3;
+            }
+            else
+            {
+                var dijkstraJob = new ChunkedDijkstraJob
+                {
+                    CellsToCheck = _cellsToCheck,
+                    IntegrationField = _integrationField,
+                    CostGrid = _costField,
+                    Grid = terrainGrid.Grid,
+                    GridWidth = gridWidth,
+                    GridHeight = gridHeight,
+                    MaxCellsPerFrame = 5000
+                }.Schedule(state.Dependency);
+
+                state.Dependency = dijkstraJob;
+                
+            }
+        }
+        else if (_genState == 3) // State 3: Vector Generation
+        {
+            var vectorJob = new GenerateVectorsJob
+            {
+                IntegrationField = _integrationField,
+                Grid = terrainGrid.Grid,
+                Targets = _targetPositions.AsArray(),
+                FlowField = _backBufferFlowField,
+                GridWidth = gridWidth,
+                GridHeight = gridHeight
+            }.Schedule(totalCells, 2048, state.Dependency);
+
+            state.Dependency = vectorJob;
+            _genState = 4;
+        }
+        else if (_genState == 4) // State 4: Apply to flow field and reset
+        {
+            state.Dependency.Complete();
+
+            _backBufferFlowField.CopyTo(flowFieldComp.FlowField);
+
+            _timer = 0.25f;
+            _genState = 0; 
+        }
     }
 
     public void OnDestroy(ref SystemState state)
     {
         if (_integrationField.IsCreated) _integrationField.Dispose();
         if (_costField.IsCreated) _costField.Dispose();
+        if (_backBufferFlowField.IsCreated) _backBufferFlowField.Dispose();
+        if (_cellsToCheck.IsCreated) _cellsToCheck.Dispose();
+        if (_targetPositions.IsCreated) _targetPositions.Dispose();
     }
 }
 
+// Burst Jobs
+
 [BurstCompile]
-public struct GenerateNoiseFieldJob : IJobParallelFor
+public struct SetupAndNoiseJob : IJobParallelFor
 {
+    [WriteOnly] public NativeArray<int> IntegrationField;
+    [WriteOnly] public NativeArray<float2> FlowField;
     [WriteOnly] public NativeArray<byte> CostGrid;
     [ReadOnly] public NativeArray<int> ObstacleGrid;
     public int GridWidth;
@@ -108,6 +185,9 @@ public struct GenerateNoiseFieldJob : IJobParallelFor
 
     public void Execute(int index)
     {
+        IntegrationField[index] = 9999999;
+        FlowField[index] = float2.zero;
+
         if (ObstacleGrid[index] > 0)
         {
             CostGrid[index] = 255;
@@ -121,63 +201,57 @@ public struct GenerateNoiseFieldJob : IJobParallelFor
         float noiseZ = ElapsedTime * 0.2f;
         float rawNoise = noise.snoise(new float3(noiseX, noiseY, noiseZ));
         float normalizedNoise = (rawNoise + 1.0f) * 0.5f;
-        byte finalCost = (byte)math.clamp(math.lerp(1, MaxNoiseCost, normalizedNoise), 1, 254);
-        CostGrid[index] = finalCost;
+        CostGrid[index] = (byte)math.clamp(math.lerp(1, MaxNoiseCost, normalizedNoise), 1, 254);
     }
 }
 
 [BurstCompile]
-public struct GenerateFlowFieldJob : IJob
+public struct InitializeDijkstraTargetsJob : IJob
 {
-    [ReadOnly] public NativeArray<int> Grid;
-    [ReadOnly] public NativeList<int2> TargetPositions;
-    public int GridWidth;
-    public int GridHeight;
-
+    [ReadOnly] public NativeArray<int2> Targets;
     public NativeArray<int> IntegrationField;
-    public NativeArray<byte> CostGrid;
-    public NativeArray<float2> FlowField;
-
-    public float ElapsedTime;
-
-    private const int MAX_COST = 9999999;
+    public NativeQueue<int2>.ParallelWriter CellsToCheck;
+    [ReadOnly] public NativeArray<int> Grid;
+    public int GridWidth;
 
     public void Execute()
     {
-        for (int i = 0; i < IntegrationField.Length; i++)
+        for (int i = 0; i < Targets.Length; i++)
         {
-            IntegrationField[i] = MAX_COST;
-            FlowField[i] = float2.zero;
-        }
-
-        NativeQueue<int2> cellsToCheck = new NativeQueue<int2>(Allocator.Temp);
-
-        for (int i = 0; i < TargetPositions.Length; i++)
-        {
-            int2 pos = TargetPositions[i];
-            if (pos.x >= 0 && pos.x < GridWidth && pos.y >= 0 && pos.y < GridHeight)
+            int2 pos = Targets[i];
+            if (Grid[pos.x + pos.y * GridWidth] != 1)
             {
-                if (Grid[pos.x + pos.y * GridWidth] != 1)
-                {
-                    IntegrationField[pos.x + pos.y * GridWidth] = 0;
-                    cellsToCheck.Enqueue(pos);
-                }
+                IntegrationField[pos.x + pos.y * GridWidth] = 0;
+                CellsToCheck.Enqueue(pos);
             }
         }
+    }
+}
 
-        NativeArray<int2> neighbors = new NativeArray<int2>(8, Allocator.Temp);
-        neighbors[0] = new int2(0, 1);
-        neighbors[1] = new int2(0, -1);
-        neighbors[2] = new int2(-1, 0);
-        neighbors[3] = new int2(1, 0);
-        neighbors[4] = new int2(-1, 1);
-        neighbors[5] = new int2(1, 1);
-        neighbors[6] = new int2(-1, -1);
-        neighbors[7] = new int2(1, -1);
+[BurstCompile]
+public struct ChunkedDijkstraJob : IJob
+{
+    public NativeQueue<int2> CellsToCheck;
+    public NativeArray<int> IntegrationField;
+    [ReadOnly] public NativeArray<byte> CostGrid;
+    [ReadOnly] public NativeArray<int> Grid;
+    public int GridWidth;
+    public int GridHeight;
+    public int MaxCellsPerFrame;
 
-        while (cellsToCheck.TryDequeue(out int2 current))
+    public void Execute()
+    {
+        NativeArray<int2> neighbors = new NativeArray<int2>(4, Allocator.Temp);
+        neighbors[0] = new int2(0, 1); neighbors[1] = new int2(0, -1);
+        neighbors[2] = new int2(-1, 0); neighbors[3] = new int2(1, 0);
+
+        int cellsProcessed = 0;
+
+        while (cellsProcessed < MaxCellsPerFrame && CellsToCheck.TryDequeue(out int2 current))
         {
-            for (int i = 0; i < 8; i++)
+            cellsProcessed++;
+
+            for (int i = 0; i < 4; i++)
             {
                 int2 neighbor = current + neighbors[i];
 
@@ -186,9 +260,7 @@ public struct GenerateFlowFieldJob : IJob
                     int tileType = Grid[neighbor.x + neighbor.y * GridWidth];
                     if (tileType == 1) continue;
 
-                    int baseCost = (tileType == 2) ? 250 : (tileType == 3) ? 1000 : 10;
-                    int cost = (i < 4) ? baseCost : (int)(baseCost * 1.414f);
-
+                    int cost = (tileType == 2) ? 5 : (tileType == 3) ? 25 : 1;
                     int current1D = current.x + current.y * GridWidth;
                     int neighbor1D = neighbor.x + neighbor.y * GridWidth;
 
@@ -197,83 +269,72 @@ public struct GenerateFlowFieldJob : IJob
                     if (newCost < IntegrationField[neighbor1D])
                     {
                         IntegrationField[neighbor1D] = newCost;
-                        cellsToCheck.Enqueue(neighbor);
+                        CellsToCheck.Enqueue(neighbor);
                     }
                 }
             }
         }
-
-        for (int x = 0; x < GridWidth; x++)
-        {
-            for (int y = 0; y < GridHeight; y++)
-            {
-                int idx = x + y * GridWidth;
-
-                if (Grid[idx] == 1)
-                {
-                    int minWallCost = MAX_COST;
-                    float2 escapeDir = float2.zero;
-
-                    for (int i = 0; i < 8; i++)
-                    {
-                        int nx = x + neighbors[i].x;
-                        int ny = y + neighbors[i].y;
-                        if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
-                        {
-                            if (Grid[nx + ny * GridWidth] != 1)
-                            {
-                                int nCost = IntegrationField[nx + ny * GridWidth];
-                                if (nCost < minWallCost)
-                                {
-                                    minWallCost = nCost;
-                                    escapeDir = new float2(neighbors[i].x, neighbors[i].y);
-                                }
-                            }
-                        }
-                    }
-
-                    if (math.lengthsq(escapeDir) > 0.01f) FlowField[idx] = math.normalize(escapeDir);
-                    else FlowField[idx] = float2.zero;
-
-                    continue;
-                }
-
-                int currentCost = IntegrationField[idx];
-                int minCost = currentCost;
-                float2 bestDir = float2.zero;
-
-                for (int i = 0; i < 8; i++)
-                {
-                    int nx = x + neighbors[i].x;
-                    int ny = y + neighbors[i].y;
-
-                    if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
-                    {
-                        if (Grid[nx + ny * GridWidth] != 1) // Ignore walls
-                        {
-                            int neighborCost = IntegrationField[nx + ny * GridWidth];
-
-                            if (neighborCost < minCost)
-                            {
-                                minCost = neighborCost;
-                                bestDir = new float2(neighbors[i].x, neighbors[i].y);
-                            }
-                        }
-                    }
-                }
-
-                if (math.lengthsq(bestDir) > 0.01f)
-                {
-                    FlowField[idx] = math.normalize(bestDir);
-                }
-                else
-                {
-                    FlowField[idx] = float2.zero;
-                }
-            }
-        }
-
-        cellsToCheck.Dispose();
         neighbors.Dispose();
+    }
+}
+
+[BurstCompile]
+public struct GenerateVectorsJob : IJobParallelFor
+{
+    [ReadOnly] public NativeArray<int> IntegrationField;
+    [ReadOnly] public NativeArray<int> Grid;
+    [ReadOnly] public NativeArray<int2> Targets;
+    public int GridWidth;
+    public int GridHeight;
+
+    [WriteOnly] public NativeArray<float2> FlowField;
+
+    public void Execute(int idx)
+    {
+        if (Grid[idx] == 1) return;
+
+        int x = idx % GridWidth;
+        int y = idx / GridWidth;
+        int bestCost = IntegrationField[idx];
+
+        if (bestCost >= 9999999 && Targets.Length > 0)
+        {
+            int2 dir = Targets[0] - new int2(x, y);
+            float2 fallbackDir = new float2(dir.x, dir.y);
+            if (math.lengthsq(fallbackDir) > 0.1f) FlowField[idx] = math.normalize(fallbackDir);
+            return;
+        }
+
+        int2 bestDir = int2.zero;
+
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                if (dx == 0 && dy == 0) continue;
+
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx >= 0 && nx < GridWidth && ny >= 0 && ny < GridHeight)
+                {
+                    if (dx != 0 && dy != 0)
+                    {
+                        if (Grid[(x + dx) + y * GridWidth] != 0 || Grid[x + (y + dy) * GridWidth] != 0) continue;
+                    }
+
+                    int nIdx = nx + ny * GridWidth;
+                    if (IntegrationField[nIdx] < bestCost)
+                    {
+                        bestCost = IntegrationField[nIdx];
+                        bestDir = new int2(dx, dy);
+                    }
+                }
+            }
+        }
+
+        float2 direction = new float2(bestDir.x, bestDir.y);
+        if (math.lengthsq(direction) > 0.1f) direction = math.normalize(direction);
+        FlowField[idx] = direction;
     }
 }
