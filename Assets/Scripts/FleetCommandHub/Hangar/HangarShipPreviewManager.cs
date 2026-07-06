@@ -37,6 +37,16 @@ public class HangarShipPreviewManager : MonoBehaviour
         else
         {
             hangarCamera.gameObject.SetActive(false);
+            ClearPreviewShip();
+        }
+    }
+
+    void ClearPreviewShip()
+    {
+        if (entityManager.Exists(currentVisualEntity))
+        {
+            entityManager.DestroyEntity(currentVisualEntity);
+            currentVisualEntity = Entity.Null;
         }
     }
 
@@ -54,11 +64,7 @@ public class HangarShipPreviewManager : MonoBehaviour
         var shipDB = entityManager.GetBuffer<BakedShipData>(databaseEntity).ToNativeArray(Allocator.Temp);
 
         // remove previous preview
-        if (entityManager.Exists(currentVisualEntity))
-        {
-            entityManager.DestroyEntity(currentVisualEntity);
-            currentVisualEntity = Entity.Null;
-        }
+        ClearPreviewShip();
 
         if (shipID == ShipID.None) return;
 
