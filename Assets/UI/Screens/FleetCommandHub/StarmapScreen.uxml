@@ -12,15 +12,16 @@
                 </ui:VisualElement>
             </ui:ScrollView>
             <ui:VisualElement name="" style="flex-grow: 1; align-items: center; justify-content: center;">
-                <ui:VisualElement name="MapDetailsContainer" class="details-panel details-panel--open" style="flex-grow: 0; overflow: hidden;">
+                <ui:VisualElement name="MapDetailsContainer" class="details-panel details-panel--open" style="flex-grow: 0; overflow: hidden; width: 70%;">
                     <ui:Label text="INTEL" name="Header" class="text" style="-unity-text-align: middle-center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 10px; padding-right: 0; padding-bottom: 5px; padding-left: 0; font-size: 20px; border-bottom-width: 2px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3);"/>
                     <ui:Label text="Label" name="NodeTypeLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;"/>
                     <ui:Label text="Label" name="ThreatLevelLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;"/>
                     <ui:Label text="Label" name="ObjectiveLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; display: none;"/>
-                    <ui:Label text="Label" name="EnemyProfileLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; display: none;"/>
                     <ui:Label text="Label" name="TerrainTypeLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;"/>
                     <ui:Label text="Label" name="RewardTypeLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;"/>
                     <ui:Label text="Label" name="AnomalyLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; display: none;"/>
+                    <ui:Label text="SWARM COMPOSITION" name="EnemyProfileHeader" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 5px; padding-top: 15px; padding-right: 5px; padding-bottom: 0; padding-left: 0; font-size: 16px; display: flex; -unity-text-align: upper-left; align-self: flex-start; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 2px;"/>
+                    <ui:Label text="Label" name="EnemyProfileLbl" class="subtext" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; display: flex;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

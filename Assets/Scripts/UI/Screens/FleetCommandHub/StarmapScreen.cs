@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,7 +25,7 @@ public class StarmapScreen : UIScreen
     private EntityQuery gameStateQuery;
 
     private LevelNode currentNode;
-    private LevelNode selectedNode;
+    private LevelNode viewingNode;
 
     public StarmapScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
@@ -203,7 +205,7 @@ public class StarmapScreen : UIScreen
         mapContainer.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged);
         mapDetailsContainer.UnregisterCallback<TransitionEndEvent>(OnTransitionFinished);
 
-        ToggleMapDetailsContainer(selectedNode != null);
+        ToggleMapDetailsContainer(viewingNode != null);
     }
 
     protected override void OnShow()
@@ -214,7 +216,7 @@ public class StarmapScreen : UIScreen
         UpdateMapNodeStates();
         UpdateDeployBtn();
 
-        ToggleMapDetailsContainer(selectedNode != null);
+        ToggleMapDetailsContainer(viewingNode != null);
     }
 
     void UpdateMapNodeStates()
@@ -246,9 +248,11 @@ public class StarmapScreen : UIScreen
         }
 
         // set selected node if it exists
-        if (selectedNode != null && mapNodes.ContainsKey(selectedNode))
+        if (viewingNode != null && mapNodes.ContainsKey(viewingNode))
         {
-            mapNodes[selectedNode].NodeState = MapNodeState.Selected;
+            MapNodeVisualElement element = mapNodes[viewingNode];
+            if (element.NodeState == MapNodeState.Selectable) mapNodes[viewingNode].NodeState = MapNodeState.Selectable;
+            else mapNodes[viewingNode].NodeState = MapNodeState.Viewing;
         }
     }
 
@@ -256,9 +260,10 @@ public class StarmapScreen : UIScreen
     {
         if (!mapNodes.ContainsKey(node)) return; // Node does not exist
         MapNodeVisualElement element = mapNodes[node];
-        if (element.NodeState != MapNodeState.Selectable) return; // Cannot be selected
+        if (element.NodeState == MapNodeState.Current) return; // Cannot select current node to view
+        if (element.NodeState == MapNodeState.OnPath) return; // Cannot select previous completed nodes
 
-        selectedNode = node;
+        viewingNode = node;
         UpdateMapNodeStates();
         UpdateDeployBtn();
 
@@ -298,7 +303,7 @@ public class StarmapScreen : UIScreen
         nodeTypeLbl.text = $"NODE TYPE : [ {node.NodeType.ToString().ToUpper()} ]";
         threatLevelLbl.text = $"THREAT LEVEL : [ {node.ThreatLevel.ToString().ToUpper()} ]";
         objectiveLbl.text = $"OBJECTIVE : [ {node.ObjectiveType.ToString().ToUpper()} ]";
-        enemyProfileLbl.text = $"ENEMY PROFILE : [ {node.EnemyProfile.ToString().ToUpper()} ]";
+        enemyProfileLbl.text = GenerateThreatReport(node.EnemyProfile);
         terrainTypeLbl.text = $"TERRAIN : [ {node.TerrainType.ToString().ToUpper()} ]";
         rewardTypeLbl.text = $"REWARD : [ {node.RewardType.ToString().ToUpper()} ]";
         anomalyLbl.text = $"ANOMALY : [ {node.AnomalyType.ToString().ToUpper()} ]";
@@ -306,9 +311,17 @@ public class StarmapScreen : UIScreen
 
     void UpdateDeployBtn()
     {
-        if (selectedNode == null)
+        if (viewingNode == null)
         {
             DisableBtn("No selected node. Click on node above to select.");
+        }
+        else if (!mapNodes.ContainsKey(viewingNode))
+        {
+            DisableBtn("No selected node. Click on node above to select."); // Node does not exist
+        }
+        else if (mapNodes[viewingNode].NodeState != MapNodeState.Selectable)
+        {
+            DisableBtn("Node not reachable now. Choose another node.");
         }
         else if (RunManager.SaveData.IsRosterEmpty())
         {
@@ -339,21 +352,87 @@ public class StarmapScreen : UIScreen
 
     void OnDeployBtnClicked()
     {
-        if (selectedNode == null) return; // no next level selected
+        if (viewingNode == null) return; // no next level selected
 
         if (gameStateQuery.IsEmptyIgnoreFilter) return;
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
         gameState.ValueRW.CurrentState = GameState.Generating;
 
-        map.CurrentLevel = selectedNode;
+        map.CurrentLevel = viewingNode;
 
         map.PathTaken.Add(currentNode);
 
-        currentNode = selectedNode;
-        selectedNode = null;
+        currentNode = viewingNode;
+        viewingNode = null;
 
         RunManager.SaveData.MoveToNode(currentNode);
+    }
+
+    public static string GenerateThreatReport(EnemyProfileData profile)
+    {
+        if (profile == null || profile.PossibleHives.Pool.Count == 0)
+            return "SCANNER ERROR: NO DATA";
+
+        float totalWeight = profile.PossibleHives.TotalWeight;
+        Dictionary<EnemyType, float> estimatedSpawnsPerMinute = new Dictionary<EnemyType, float>();
+
+        foreach (var hive in profile.PossibleHives.Pool)
+        {
+            float probability = hive.Weight / totalWeight;
+            HiveArchetypeData archetype = hive.Item;
+
+            // Estimate trickle impact
+            foreach (var trickle in archetype.TrickleSpawns)
+            {
+                if (trickle.Interval <= 0) continue; // safety check
+
+                float spawnsPerMin = (60f / trickle.Interval) * trickle.SpawnCount;
+                float weightedSpawns = spawnsPerMin * probability;
+
+                AddToDictionary(estimatedSpawnsPerMinute, trickle.Type, weightedSpawns);
+            }
+
+            // Estimate surge impact
+            if (archetype.SurgeCount > 0)
+            {
+                float weightedSurge = archetype.SurgeCount * 2 * probability; // *2 because happens twice per minute
+                AddToDictionary(estimatedSpawnsPerMinute, archetype.SurgeType, weightedSurge);
+            }
+        }
+
+        return FormatReportString(estimatedSpawnsPerMinute);
+
+        static void AddToDictionary(Dictionary<EnemyType, float> dict, EnemyType type, float amount)
+        {
+            if (dict.ContainsKey(type))
+                dict[type] += amount;
+            else
+                dict[type] = amount;
+        }
+
+        static string FormatReportString(Dictionary<EnemyType, float> spawnData)
+        {
+            float totalSpawns = spawnData.Values.Sum();
+            if (totalSpawns <= 0) return "NO DETECTABLE BIO-SIGNATURES";
+
+            string output = "";
+            var sortedTypes = spawnData.OrderByDescending(x => x.Value).ToList();
+            foreach (var kvp in sortedTypes)
+            {
+                EnemyType type = kvp.Key;
+                float rawAmount = kvp.Value;
+                int percentage = Mathf.RoundToInt((rawAmount / totalSpawns) * 100f);
+
+                string enemyName = type.ToString().ToUpper();
+                string line = $"{enemyName} ".PadRight(20, '.') + $" {percentage:00}%";
+                if (percentage < 1) line = $"{enemyName} ".PadRight(20, '.') + $" <1%";
+
+                output += line + "\n";
+            }
+
+            return output.TrimEnd();
+        }
     }
 }
 
@@ -361,7 +440,7 @@ public enum MapNodeState
 {
     Default,
     Current,
-    Selected,
+    Viewing,
     OnPath,
     Selectable,
 }
@@ -481,7 +560,7 @@ public partial class MapNodeVisualElement : VisualElement
             case MapNodeState.Current:
                 AddToClassList("map-node-current");
                 break;
-            case MapNodeState.Selected:
+            case MapNodeState.Viewing:
                 AddToClassList("map-node-selected");
                 break;
             case MapNodeState.OnPath:

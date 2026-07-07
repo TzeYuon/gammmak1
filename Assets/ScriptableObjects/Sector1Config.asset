@@ -89,7 +89,7 @@ MonoBehaviour:
     EnemyPool:
       Pool:
       - Item: {fileID: 11400000, guid: b9a646cf0aca34b4cb013eeaa9299ed1, type: 2}
-        Weight: 2
+        Weight: 1
       - Item: {fileID: 11400000, guid: 78b3fc3306b84fc46a2604c68c6c616c, type: 2}
         Weight: 1
       - Item: {fileID: 11400000, guid: e9affc43877562f4cb63b9275f2b7cfd, type: 2}
@@ -158,9 +158,9 @@ MonoBehaviour:
         Weight: 1
     EnemyPool:
       Pool:
-      - Item: {fileID: 11400000, guid: e9affc43877562f4cb63b9275f2b7cfd, type: 2}
-        Weight: 1
       - Item: {fileID: 11400000, guid: 78b3fc3306b84fc46a2604c68c6c616c, type: 2}
+        Weight: 1
+      - Item: {fileID: 11400000, guid: e9affc43877562f4cb63b9275f2b7cfd, type: 2}
         Weight: 1
     StandardRewardPool:
       Pool:

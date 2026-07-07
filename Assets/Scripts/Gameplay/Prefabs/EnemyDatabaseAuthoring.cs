@@ -26,7 +26,7 @@ class EnemyDatabaseAuthoring : MonoBehaviour
             {
                 StandardPrefab = GetEntity(authoring.StandardPrefab, TransformUsageFlags.Dynamic),
                 GoliathPrefab = GetEntity(authoring.GoliathPrefab, TransformUsageFlags.Dynamic),
-                //LocustPrefab = GetEntity(authoring.LocustPrefab, TransformUsageFlags.Dynamic),
+                LocustPrefab = GetEntity(authoring.LocustPrefab, TransformUsageFlags.Dynamic),
                 //SpitterPrefab = GetEntity(authoring.SpitterPrefab, TransformUsageFlags.Dynamic),
             });
         }

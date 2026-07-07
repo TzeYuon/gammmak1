@@ -353,7 +353,7 @@ MonoBehaviour:
   StandardHivePrefab: {fileID: 6219016280823009493, guid: c8baea5da49927d458f13fb59d168496, type: 3}
   StandardPrefab: {fileID: 8958559792771996627, guid: 45f282945948bad40a005a786f0a0f8f, type: 3}
   GoliathPrefab: {fileID: 8958559792771996627, guid: 8e8ea6a779cefc541b1d76b59349af5b, type: 3}
-  LocustPrefab: {fileID: 0}
+  LocustPrefab: {fileID: 8958559792771996627, guid: be4ae26e8c69015488a78105cc84aeba, type: 3}
   SpitterPrefab: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

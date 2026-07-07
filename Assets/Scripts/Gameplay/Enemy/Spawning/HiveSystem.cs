@@ -20,7 +20,7 @@ partial struct HiveSystem : ISystem
             .Build();
     }
 
-    [BurstCompile]
+    //[BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         float elapsedTime = (float)SystemAPI.Time.ElapsedTime;

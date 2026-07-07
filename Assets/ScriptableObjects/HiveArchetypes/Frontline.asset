@@ -18,6 +18,6 @@ MonoBehaviour:
     Interval: 2.5
   - Type: 1
     SpawnCount: 1
-    Interval: 5
+    Interval: 7
   SurgeType: 1
-  SurgeCount: 30
+  SurgeCount: 10
