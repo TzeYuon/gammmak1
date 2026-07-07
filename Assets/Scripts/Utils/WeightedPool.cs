@@ -11,18 +11,16 @@ public class WeightedItem<T>
 [System.Serializable]
 public class WeightedPool<T>
 {
-    private bool isInit = false;
     private int totalWeight;
     public int TotalWeight { get { return totalWeight; } }
     public List<WeightedItem<T>> Pool = new List<WeightedItem<T>>();
 
     public T GetRandom()
     {
-        if (!isInit)
-        {
-            isInit = true;
-            CalculateTotalWeight();
-        }
+        if (Pool == null || Pool.Count == 0) return default;
+
+        CalculateTotalWeight();
+        if (totalWeight <= 0) return Pool[0].Item;
 
         if (Pool.Count == 0) return default;
 

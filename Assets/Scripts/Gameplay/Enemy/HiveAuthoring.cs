@@ -4,13 +4,6 @@ using UnityEngine;
 
 class HiveAuthoring : MonoBehaviour
 {
-    [Header("Trickle Spawner Settings")]
-    [SerializeField] List<SpawnConfig> trickleSpawnConfigs = new();
-
-    [Header("Surge Spawning Settings")]
-    [SerializeField] EnemyType surgeEnemyType = EnemyType.Standard;
-    [SerializeField] int surgeSpawnCount = 500;
-
     [Header("Collision Settings")]
     [SerializeField] float Size = 5;
 
@@ -29,26 +22,9 @@ class HiveAuthoring : MonoBehaviour
                 Size = authoring.Size
             });
 
-            AddComponent(entity, new HiveSurgeComponent
-            {
-                SurgeEnemyType = authoring.surgeEnemyType,
-                SurgeSpawnCount = authoring.surgeSpawnCount,
-                SurgeSpawnRate = 100,
-                SurgeSpawnAccumulator = 0,
-                SurgePendingSpawns = 0,
-            });
+            AddComponent(entity, new HiveSurgeComponent());
 
-            DynamicBuffer<TrickleSpawnerData> ambientBuffer = AddBuffer<TrickleSpawnerData>(entity);
-            foreach (var config in authoring.trickleSpawnConfigs)
-            {
-                ambientBuffer.Add(new TrickleSpawnerData
-                {
-                    Type = config.Type,
-                    SpawnCount = config.SpawnCount,
-                    Interval = config.Interval,
-                    NextSpawnTime = config.Interval,
-                });
-            }
+            AddBuffer<TrickleSpawnerData>(entity);
 
             AddComponent(entity, new HealthComponent
             {

@@ -47,12 +47,14 @@ public class LevelHandoff : MonoBehaviour
         LevelBlueprint levelBlueprint = ConvertLevelToComponent(entityManager, currentLevel);
         entityManager.AddComponentData(generatingStatus, levelBlueprint);
 
-        // Convert enemy profile to buffer
+        // Convert enemy profile to components
         foreach (var archetype in currentLevel.EnemyProfile.PossibleHives.Pool)
         {
             if (archetype.Weight <= 0) continue;
 
             Entity recipeEntity = entityManager.CreateEntity();
+
+            entityManager.AddComponentData(recipeEntity, new LevelEntityTag());
 
             var trickleBuffer = entityManager.AddBuffer<TrickleSpawnerData>(recipeEntity);
             foreach (var trickle in archetype.Item.TrickleSpawns)
