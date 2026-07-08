@@ -16,8 +16,9 @@ MonoBehaviour:
   - Type: 0
     SpawnCount: 3
     Interval: 2.5
-  - Type: 2
+  - Type: 3
     SpawnCount: 20
     Interval: 15
-  SurgeType: 2
-  SurgeCount: 200
+  SurgeType: 3
+  SurgeCountIgnoreScaling: 0
+  SurgeCount: 40

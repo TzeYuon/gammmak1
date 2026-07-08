@@ -9,6 +9,7 @@ public class HiveArchetypeData : ScriptableObject
 
     [Header("Surge Settings")]
     public EnemyType SurgeType;
+    public bool SurgeCountIgnoreScaling = false;
     public int SurgeCount;
 }
 

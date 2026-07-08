@@ -35,8 +35,8 @@ MonoBehaviour:
       ModifierType: 1
       Value: 0.2
   BaseRange: 50
-  DensityBias: 1
-  AngleBias: 0
+  DensityBias: 2
+  AngleBias: 1
   DistanceBias: 0
   BaseDamage: 10
   BaseFireRate: 0.2

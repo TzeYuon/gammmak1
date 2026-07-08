@@ -69,6 +69,16 @@ partial struct HiveSystem : ISystem
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
                         ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+
+                        // set up siege enemy if correct type
+                        if (spawner.Type == EnemyType.Siege)
+                        {
+                            ecb.AddComponent(entity.Index, spawnedEnemy, new PathFollowerComponent
+                            {
+                                TargetPath = entity,
+                                CurrentProgress = 0,
+                            });
+                        }
                     }
 
                     spawnerBuffer.RemoveAt(i);
@@ -83,26 +93,30 @@ partial struct HiveSystem : ISystem
         if (!SystemAPI.TryGetSingleton(out GlobalSurgeState surgeState)) return;
         foreach (var (surge, hive, transform, entity) in SystemAPI.Query<RefRW<HiveSurgeComponent>, RefRO<HiveComponent>, RefRO<LocalTransform>>().WithAll<ActiveHiveTag>().WithEntityAccess())
         {
+            ref var surgeRW = ref surge.ValueRW;
+
             // queue spawns for surge
             if (surgeState.TriggerSurgeThisFrame)
             {
-                surge.ValueRW.SurgePendingSpawns += (int)math.floor(surge.ValueRO.SurgeSpawnCount * difficultyState.SpawnCountMult);
+                if (surgeRW.SurgeCountIgnoreScaling) surgeRW.SurgePendingSpawns += surgeRW.SurgeSpawnCount;
+                else surgeRW.SurgePendingSpawns += (int)math.floor(surgeRW.SurgeSpawnCount * difficultyState.SpawnCountMult);
             }
 
             // spawn over multiple frames
             float3 hivePosition = transform.ValueRO.Position;
             float spawnRadius = hive.ValueRO.Size;
-            if (surge.ValueRO.SurgePendingSpawns > 0)
+            if (surgeRW.SurgePendingSpawns > 0)
             {
-                surge.ValueRW.SurgeSpawnAccumulator += surge.ValueRO.SurgeSpawnRate * deltaTime;
-                int spawnCount = (int)math.floor(surge.ValueRO.SurgeSpawnAccumulator);
+                surgeRW.SurgeSpawnAccumulator += surgeRW.SurgeSpawnRate * deltaTime;
+                int spawnCount = (int)math.floor(surgeRW.SurgeSpawnAccumulator);
 
                 if (spawnCount > 0)
                 {
-                    int amountToSpawn = math.min(spawnCount, surge.ValueRO.SurgePendingSpawns);
-                    surge.ValueRW.SurgeSpawnAccumulator -= amountToSpawn;
+                    int amountToSpawn = math.min(spawnCount, surgeRW.SurgePendingSpawns);
+                    surgeRW.SurgeSpawnAccumulator -= amountToSpawn;
 
-                    Entity prefab = enemyPrefabDatabase.GetPrefab(surge.ValueRO.SurgeEnemyType);
+                    var enemyType = surgeRW.SurgeEnemyType;
+                    Entity prefab = enemyPrefabDatabase.GetPrefab(enemyType);
                     for (int i = 0; i < amountToSpawn; i++)
                     {
                         Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
@@ -113,9 +127,19 @@ partial struct HiveSystem : ISystem
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
                         ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+
+                        // set up siege enemy if correct type
+                        if (enemyType == EnemyType.Siege)
+                        {
+                            ecb.AddComponent(entity.Index, spawnedEnemy, new PathFollowerComponent
+                            {
+                                TargetPath = entity,
+                                CurrentProgress = 0,
+                            });
+                        }
                     }
 
-                    surge.ValueRW.SurgePendingSpawns -= amountToSpawn;
+                    surgeRW.SurgePendingSpawns -= amountToSpawn;
                 }
             }
         }

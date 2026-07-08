@@ -75,6 +75,7 @@ public class LevelHandoff : MonoBehaviour
                 HiveSurgeComponent = new HiveSurgeComponent
                 {
                     SurgeEnemyType = archetype.Item.SurgeType,
+                    SurgeCountIgnoreScaling = archetype.Item.SurgeCountIgnoreScaling,
                     SurgeSpawnCount = archetype.Item.SurgeCount,
                     SurgeSpawnRate = 100,
                     SurgeSpawnAccumulator = 0,

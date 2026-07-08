@@ -22,9 +22,12 @@ class HiveAuthoring : MonoBehaviour
                 Size = authoring.Size
             });
 
+            // spawning
             AddComponent(entity, new HiveSurgeComponent());
-
             AddBuffer<TrickleSpawnerData>(entity);
+
+            // siege enemy path
+            AddBuffer<SiegePathWaypointElement>(entity);
 
             AddComponent(entity, new HealthComponent
             {

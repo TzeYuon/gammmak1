@@ -10,6 +10,7 @@ public struct HiveComponent : IComponentData
 public struct HiveSurgeComponent : IComponentData
 {
     public EnemyType SurgeEnemyType;
+    public bool SurgeCountIgnoreScaling;
     public int SurgeSpawnCount;
     public int SurgePendingSpawns;
     public float SurgeSpawnRate;
@@ -27,11 +28,25 @@ public struct TrickleSpawnerData : IBufferElementData
     public float NextSpawnTime;
 }
 
+[InternalBufferCapacity(16)]
+public struct SiegePathWaypointElement : IBufferElementData
+{
+    public float2 Position;
+}
+
 public struct SwarmMovementStatsComponent : IComponentData
 {
     public float BaseSpeed;   
     public float SpawnIndex;
+    public float SeparationWeight;
+    public float TerrainAvoidanceWeight;
+    public float NoiseWeight;
 }   
+
+public struct SwarmDamageComponent : IComponentData
+{
+    public float Damage;
+}
 
 public struct SwarmVelocityComponent : IComponentData
 {
@@ -39,6 +54,12 @@ public struct SwarmVelocityComponent : IComponentData
 }
 
 public struct SwarmTag : IComponentData { }
+
+public struct PathFollowerComponent : IComponentData
+{
+    public Entity TargetPath;
+    public float CurrentProgress;
+}
 
 public struct CollisionRadius : IComponentData
 {
