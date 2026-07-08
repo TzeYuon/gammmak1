@@ -40,6 +40,16 @@ partial struct LevelGen_TerrainSystem : ISystem
         status.ValueRW.TerrainGenerated = true;
         var oldTerrainQuery = state.EntityManager.CreateEntityQuery(typeof(ProceduralTerrainTag));
         state.EntityManager.DestroyEntity(oldTerrainQuery);
+        var oldFogQuery = state.EntityManager.CreateEntityQuery(typeof(FogOfWarState));
+        if (!oldFogQuery.IsEmptyIgnoreFilter)
+        {
+            var oldFogState = oldFogQuery.GetSingleton<FogOfWarState>();
+            if (oldFogState.FogArray.IsCreated)
+            {
+                oldFogState.FogArray.Dispose();
+            }
+            state.EntityManager.DestroyEntity(oldFogQuery);
+        }
 
         if (!SystemAPI.TryGetSingleton(out LevelBlueprint blueprint))
         {
