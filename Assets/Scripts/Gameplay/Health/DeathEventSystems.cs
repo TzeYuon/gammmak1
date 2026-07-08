@@ -72,6 +72,7 @@ public partial struct HiveDeathEventSystem : ISystem
         state.RequireForUpdate<BiomassConfig>();
         state.RequireForUpdate<GlobalVFXQueue>();
         state.RequireForUpdate<DifficultyState>();
+        state.RequireForUpdate<LevelSpawnData>();
     }
 
     [BurstCompile]
@@ -82,11 +83,39 @@ public partial struct HiveDeathEventSystem : ISystem
         var vfxQueue = vfxSingleton.ValueRW.Queue;
 
         RefRW<DifficultyState> difficultyState = SystemAPI.GetSingletonRW<DifficultyState>();
+        var spawnDataComp = SystemAPI.GetSingletonRW<LevelSpawnData>();
+        ref var spawnData = ref spawnDataComp.ValueRW;
 
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, HiveComponent>().WithEntityAccess())
         {
-            difficultyState.ValueRW.HivesDestroyed++;
 
+            unsafe
+            {
+                int newIndex = spawnData.ExpansionSpotCount;
+                if (SystemAPI.HasComponent<HiveDirectorSystem.CaravanQueenComponent>(entity))
+                {
+                    var queen = SystemAPI.GetComponent<HiveDirectorSystem.CaravanQueenComponent>(entity);
+                    if (newIndex < 10)
+                    {
+                        spawnData.ExpansionSpotsX[newIndex] = queen.Destination.x;
+                        spawnData.ExpansionSpotsY[newIndex] = queen.Destination.y;
+                        spawnData.ExpansionSpotCount++;
+                    }
+                }
+                else
+                {
+                    difficultyState.ValueRW.HivesDestroyed++;
+
+                    if (newIndex < 8)
+                    {
+                        spawnData.ExpansionSpotsX[newIndex] = transform.ValueRO.Position.x;
+                        spawnData.ExpansionSpotsY[newIndex] = transform.ValueRO.Position.y;
+                        spawnData.ExpansionSpotCount++;
+
+                        if (spawnData.ActiveHiveCount > 0) spawnData.ActiveHiveCount--;
+                    }
+                }
+            }
             // TODO: Change death visual for hives
             // Create death visual
             vfxQueue.Enqueue(new VFXPayload
