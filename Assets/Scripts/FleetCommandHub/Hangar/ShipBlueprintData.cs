@@ -50,7 +50,8 @@ public enum ShipSystemID : byte
     Hull,
     Shields,
     Weapons,
-    Collector
+    Collector,
+    Sensors
 }
 
 [System.Serializable]
