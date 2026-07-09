@@ -54,6 +54,7 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
 
         // Set ship stats
         ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipHealthComponent);
+        ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipRevealFogRadius);
         ecb.SetComponent(mothershipEntity, mothershipBlueprint.ShipCollectionRadiusStat);
 
         // spawn weapons

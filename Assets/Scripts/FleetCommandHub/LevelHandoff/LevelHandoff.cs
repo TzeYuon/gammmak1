@@ -135,6 +135,7 @@ public class LevelHandoff : MonoBehaviour
 
             // Calculate final ship stats
             float health = blueprint.GetStat(ShipStat.MaxHealth);
+            float revealFogRadius = blueprint.GetStat(ShipStat.RevealFogRadius);
             float collectionRadius = blueprint.GetStat(ShipStat.CollectionRadius);
 
             // Calculate braking distance
@@ -171,6 +172,12 @@ public class LevelHandoff : MonoBehaviour
                     BrakingDistance = finalBrakingRadius
                 },
 
+                ShipRevealFogRadius = new ShipRevealFogRadius
+                {
+                    Value = revealFogRadius,
+                    ValueSq = revealFogRadius * revealFogRadius
+                },
+
                 ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
                 {
                     RadiusSq = collectionRadius * collectionRadius
@@ -191,6 +198,7 @@ public class LevelHandoff : MonoBehaviour
 
             // Calculate final ship stats
             float mHealth = mBlueprint.GetStat(ShipStat.MaxHealth);
+            float mRevealFogRadius = mBlueprint.GetStat(ShipStat.RevealFogRadius);
             float mCollectionRadius = mBlueprint.GetStat(ShipStat.CollectionRadius);
 
             entityManager.AddComponentData(mBlueprintEntity, new LevelEntityTag());
@@ -202,6 +210,12 @@ public class LevelHandoff : MonoBehaviour
                 {
                     MaxValue = mHealth,
                     Value = mHealth
+                },
+
+                ShipRevealFogRadius = new ShipRevealFogRadius
+                {
+                    Value = mRevealFogRadius,
+                    ValueSq = mRevealFogRadius * mRevealFogRadius,
                 },
 
                 ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
