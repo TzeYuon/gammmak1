@@ -26,7 +26,7 @@ partial struct HiveDirectorSystem : ISystem
     {
         eventTimer -= SystemAPI.Time.DeltaTime;
         if (eventTimer > 0) return;
-        eventTimer = 10.0f; // Change this
+        eventTimer = 120.0f;
 
         var spawnDataComp = SystemAPI.GetSingletonRW<LevelSpawnData>();
         ref var spawnData = ref spawnDataComp.ValueRW;
@@ -54,55 +54,61 @@ partial struct HiveDirectorSystem : ISystem
             break;
         }
 
+        var terrainGrid = SystemAPI.GetSingleton<TerrainGridComponent>();
+        int2 startGrid = new int2((int)math.round(startPos.x), (int)math.round(startPos.y)) - terrainGrid.WorldOrigin;
+        int2 endGrid = new int2((int)math.round(destinationPos.x), (int)math.round(destinationPos.y)) - terrainGrid.WorldOrigin;
+
+        NativeList<float2> path = new NativeList<float2>(Allocator.Temp);
+
+        BurstPathfinder.CalculateAStar(startGrid, endGrid, terrainGrid.Grid, terrainGrid.GridWidth, terrainGrid.GridHeight, terrainGrid.WorldOrigin, false, ref path);
+
         if (math.lengthsq(startPos) > 0)
         {
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var prefabs = SystemAPI.GetSingleton<HivePrefabDatabase>();
-            var swarmPrefab = SystemAPI.GetSingleton<EnemyPrefabDatabase>();
+            var swarmPrefab = SystemAPI.GetSingleton<EnemyPrefabDatabase>().GetPrefab(EnemyType.Standard);
+            float scale = 0.2f;
 
             Entity queen = ecb.Instantiate(prefabs.GetPrefab(HiveType.Standard));
-            ecb.SetComponent(queen, LocalTransform.FromPosition(startPos));
+            ecb.SetComponent(queen, LocalTransform.FromPosition(startPos).WithScale(scale));
 
             ecb.AddComponent(queen, new SwarmVelocityComponent { Value = float2.zero });
             ecb.AddComponent(queen, new CaravanQueenComponent
             {
                 Destination = destinationPos,
-                Speed = 20.0f, // Change this
+                Speed = 5.0f,
                 HasArrived = false,
-                IncubationTimer = 10.0f
+                IncubationTimer = 30.0f,
+                Scale = scale
             });
 
-            for (int i = 0; i < 20; i++) // dont hard code later
+            for (int i = 0; i < 30; i++) // dont hard code the value later
             {
-                Entity guard = ecb.Instantiate(swarmPrefab.GetPrefab(EnemyType.Standard));
-                ecb.SetComponent(guard, LocalTransform.FromPosition(startPos));
-                ecb.AddComponent(guard, new SwarmVelocityComponent { Value = float2.zero });
+                Entity guard = ecb.Instantiate(swarmPrefab);
+                float angle = rng.NextFloat(0, math.PI * 2);
+                float dist = math.sqrt(rng.NextFloat()) * 5.0f;
+                float3 spawnPos = startPos + new float3(math.cos(angle) * dist, math.sin(angle) * dist, 0);
 
-                ecb.AddComponent(guard, new CaravanGuardComponent
-                {
-                    QueenEntity = queen,
-                    OrbitAngle = (math.PI * 2 / 20) * i,
-                    OrbitRadius = 8.0f
-                });
+                ecb.SetComponent(guard, LocalTransform.FromPosition(spawnPos));
             }
 
             UnityEngine.Debug.LogWarning("WARNING: A HIVE SEED HAS DEPARTED!");
         }
     }
 
-
-public struct CaravanQueenComponent : IComponentData
+    public struct CaravanQueenComponent : IComponentData
     {
         public float3 Destination;
         public float Speed;
         public bool HasArrived;
         public float IncubationTimer;
+        public float Scale;
     }
 
-    public struct CaravanGuardComponent : IComponentData
-    {
-        public Entity QueenEntity;
-        public float OrbitAngle;
-        public float OrbitRadius;
-    }
+    //[InternalBuffer
+    //apacity(20)]
+    //public struct CaravanWaypoint : IBufferElementData
+    //{
+    //    public float2 Value;
+    //}
 }

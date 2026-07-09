@@ -26,6 +26,7 @@ partial struct HiveSystem : ISystem
         float elapsedTime = (float)SystemAPI.Time.ElapsedTime;
         float deltaTime = SystemAPI.Time.DeltaTime;
         var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
+                           .CreateCommandBuffer(state.WorldUnmanaged);
 
         int currentEnemyCount = swarmQuery.CalculateEntityCount();
         
@@ -60,6 +61,7 @@ partial struct HiveSystem : ISystem
                     int spawnCount = (int)math.floor(spawner.SpawnCount * difficultyState.SpawnCountMult);
                     for (int b = 0; b < spawnCount; b++)
                     {
+                        Entity spawnedEnemy = ecb.Instantiate(prefab);
 
                         float angle = rng.NextFloat(0, math.PI * 2);
                         float dist = math.sqrt(rng.NextFloat()) * spawnRadius;

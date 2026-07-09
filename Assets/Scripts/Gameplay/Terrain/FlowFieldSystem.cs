@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using static HiveDirectorSystem;
 
 [UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 partial struct FlowFieldSystem : ISystem
@@ -68,6 +69,15 @@ partial struct FlowFieldSystem : ISystem
         {
             _targetPositions.Clear();
             foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<PlayerTag>())
+            {
+                int2 gridPos = new int2(
+                    (int)math.round(transform.ValueRO.Position.x),
+                    (int)math.round(transform.ValueRO.Position.y)
+                ) - terrainGrid.WorldOrigin;
+                _targetPositions.Add(gridPos);
+            }
+
+            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<CaravanQueenComponent>())
             {
                 int2 gridPos = new int2(
                     (int)math.round(transform.ValueRO.Position.x),

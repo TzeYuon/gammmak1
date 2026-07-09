@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -34,6 +33,9 @@ partial struct CaravanMovementSystem : ISystem
             {
                 velocity.ValueRW.Value = float2.zero;
                 queen.ValueRW.IncubationTimer -= deltaTime;
+
+                float growthScale = math.lerp(queen.ValueRO.Scale, 1.0f, 1.0f - (queen.ValueRO.IncubationTimer / 30.0f));
+                transform.ValueRW.Scale = growthScale;
 
                 if (queen.ValueRO.IncubationTimer <= 0)
                 {
@@ -95,24 +97,6 @@ partial struct CaravanMovementSystem : ISystem
             velocity.ValueRW.Value = direction.xy * queen.ValueRO.Speed;
             transform.ValueRW.Position += math.float3(velocity.ValueRW.Value, 0) * deltaTime;
         }
-
-        foreach (var (guard, transform, velocity, entity) in SystemAPI.Query<RefRW<CaravanGuardComponent>, RefRW<LocalTransform>, RefRW<SwarmVelocityComponent>>().WithEntityAccess())
-        {
-            if (!SystemAPI.Exists(guard.ValueRO.QueenEntity))
-            {
-                ecb.RemoveComponent<CaravanGuardComponent>(entity);
-                continue;
-            }
-
-            if (transformLookup.TryGetComponent(guard.ValueRO.QueenEntity, out LocalTransform queenTransform))
-            {
-                guard.ValueRW.OrbitAngle += 1.5f * deltaTime;
-                float3 orbitOffset = new float3(math.cos(guard.ValueRO.OrbitAngle), math.sin(guard.ValueRO.OrbitAngle), 0) * guard.ValueRO.OrbitRadius;
-                float3 targetPos = queenTransform.Position + orbitOffset;
-
-                velocity.ValueRW.Value = (targetPos - transform.ValueRO.Position).xy * 15.0f;
-                transform.ValueRW.Position += math.float3(velocity.ValueRW.Value, 0) * deltaTime;
-            }
         }
     }
 }
