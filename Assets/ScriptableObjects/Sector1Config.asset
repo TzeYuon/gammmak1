@@ -56,15 +56,13 @@ MonoBehaviour:
     EliteAnomalyChance: 0
     AnomalyPool:
       Pool: []
-  - NumLayers: 3
+  - NumLayers: 2
     NumNodes:
       min: 2
       max: 3
     NodePool:
       Pool:
       - Item: 0
-        Weight: 3
-      - Item: 1
         Weight: 1
     ThreatPool:
       Pool:
@@ -122,24 +120,62 @@ MonoBehaviour:
         Weight: 1
       - Item: 3
         Weight: 1
-  - NumLayers: 3
+  - NumLayers: 1
+    NumNodes:
+      min: 1
+      max: 1
+    NodePool:
+      Pool:
+      - Item: 1
+        Weight: 1
+    ThreatPool:
+      Pool:
+      - Item: 4
+        Weight: 1
+    TerrainPool:
+      Pool:
+      - Item: 3
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    ObjectivePool:
+      Pool:
+      - Item: 0
+        Weight: 1
+    EnemyPool:
+      Pool:
+      - Item: {fileID: 11400000, guid: 3a490bdbcb0c7b44788a4d3f8a58c389, type: 2}
+        Weight: 1
+    StandardRewardPool:
+      Pool: []
+    BaseUpgradeCoreReward: 0
+    EliteRewardPool:
+      Pool:
+      - Item: 3
+        Weight: 1
+      - Item: 2
+        Weight: 1
+    EliteUpgradeCoreReward: 1000
+    StandardAnomalyChance: 0
+    EliteAnomalyChance: 0
+    AnomalyPool:
+      Pool: []
+  - NumLayers: 2
     NumNodes:
       min: 3
       max: 5
     NodePool:
       Pool:
       - Item: 0
-        Weight: 3
-      - Item: 1
         Weight: 1
     ThreatPool:
       Pool:
       - Item: 1
         Weight: 1
       - Item: 2
-        Weight: 3
+        Weight: 4
       - Item: 3
-        Weight: 2
+        Weight: 3
     TerrainPool:
       Pool:
       - Item: 1
@@ -161,6 +197,8 @@ MonoBehaviour:
       - Item: {fileID: 11400000, guid: 78b3fc3306b84fc46a2604c68c6c616c, type: 2}
         Weight: 1
       - Item: {fileID: 11400000, guid: e9affc43877562f4cb63b9275f2b7cfd, type: 2}
+        Weight: 1
+      - Item: {fileID: 11400000, guid: 16df9df2e08163149a77e027881e8fb7, type: 2}
         Weight: 1
     StandardRewardPool:
       Pool:
@@ -214,7 +252,7 @@ MonoBehaviour:
         Weight: 1
     EnemyPool:
       Pool:
-      - Item: {fileID: 11400000, guid: b9a646cf0aca34b4cb013eeaa9299ed1, type: 2}
+      - Item: {fileID: 11400000, guid: 3a490bdbcb0c7b44788a4d3f8a58c389, type: 2}
         Weight: 1
     StandardRewardPool:
       Pool: []

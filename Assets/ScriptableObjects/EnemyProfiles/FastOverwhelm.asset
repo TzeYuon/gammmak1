@@ -16,3 +16,5 @@ MonoBehaviour:
     Pool:
     - Item: {fileID: 11400000, guid: 1683a1b8ef7dacc47869b503689b2ff6, type: 2}
       Weight: 1
+    - Item: {fileID: 11400000, guid: 0d51b1be9dc5c3940b54af10e0bb911f, type: 2}
+      Weight: 1

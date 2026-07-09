@@ -11,6 +11,7 @@ class EnemyDatabaseAuthoring : MonoBehaviour
     public GameObject SiegePrefab;
     public GameObject LocustPrefab;
     public GameObject SpitterPrefab;
+    public GameObject BombPrefab;
 
     class Baker : Baker<EnemyDatabaseAuthoring>
     {
@@ -30,6 +31,7 @@ class EnemyDatabaseAuthoring : MonoBehaviour
                 SiegePrefab = GetEntity(authoring.SiegePrefab, TransformUsageFlags.Dynamic),
                 LocustPrefab = GetEntity(authoring.LocustPrefab, TransformUsageFlags.Dynamic),
                 //SpitterPrefab = GetEntity(authoring.SpitterPrefab, TransformUsageFlags.Dynamic),
+                BombPrefab = GetEntity(authoring.BombPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }
@@ -58,7 +60,8 @@ public enum EnemyType : byte
     Goliath,
     Siege,
     Locust,
-    Spitter
+    Spitter,
+    Bomb
 }
 
 public struct EnemyPrefabDatabase : IComponentData
@@ -68,6 +71,7 @@ public struct EnemyPrefabDatabase : IComponentData
     public Entity SiegePrefab;
     public Entity LocustPrefab;
     public Entity SpitterPrefab;
+    public Entity BombPrefab;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity GetPrefab(EnemyType type) => type switch
@@ -77,6 +81,7 @@ public struct EnemyPrefabDatabase : IComponentData
         EnemyType.Siege => SiegePrefab,
         EnemyType.Locust => LocustPrefab,
         EnemyType.Spitter => SpitterPrefab,
+        EnemyType.Bomb => BombPrefab,
         _ => Entity.Null,
     };
 }
