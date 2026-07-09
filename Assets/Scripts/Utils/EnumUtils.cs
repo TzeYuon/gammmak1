@@ -22,6 +22,8 @@ public static class EnumUtils
                 return "Fog Reveal Radius";
             case ShipStat.WeaponCapacity:
                 return "Weapon Capacity";
+            case ShipStat.DamageReduction:
+                return "Damage Reduction";
             default:
                 return stat.ToString();
         }

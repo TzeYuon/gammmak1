@@ -73,7 +73,8 @@ public enum ShipStat
     TurnSpeed,
     CollectionRadius,
     WeaponCapacity,
-    RevealFogRadius
+    RevealFogRadius,
+    DamageReduction
 }
 
 [System.Serializable]
@@ -168,6 +169,7 @@ public class ShipBlueprintData : ScriptableObject
     [Header("Base Stats")]
     public float BaseCost = 5f;
     public float BaseMaxHealth = 10f;
+    public float BaseDamageReduction = 0f;
     public float BaseSpeed = 15f;
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
@@ -238,6 +240,7 @@ public class ShipBlueprintData : ScriptableObject
         {
             case ShipStat.Cost: baseValue = BaseCost; break;
             case ShipStat.MaxHealth: baseValue = BaseMaxHealth; break;
+            case ShipStat.DamageReduction: baseValue = BaseDamageReduction; break;
             case ShipStat.Speed: baseValue = BaseSpeed; break;
             case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
             case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
