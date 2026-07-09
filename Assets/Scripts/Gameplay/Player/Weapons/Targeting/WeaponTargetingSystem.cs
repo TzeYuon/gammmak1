@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 [UpdateInGroup(typeof(CombatTargetingGroup))]
 partial struct WeaponTargetingSystem : ISystem
@@ -19,6 +20,7 @@ partial struct WeaponTargetingSystem : ISystem
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
         state.RequireForUpdate<TerrainGridComponent>();
+        state.RequireForUpdate<FogOfWarState>();
     }
 
     [BurstCompile]
@@ -27,6 +29,7 @@ partial struct WeaponTargetingSystem : ISystem
         CoarseEnemyHeatmapComponent coarseHeatmap = SystemAPI.GetSingleton<CoarseEnemyHeatmapComponent>();
         FineEnemyHeatmapComponent fineEntityMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
         TerrainGridComponent terrainGridComponent = SystemAPI.GetSingleton<TerrainGridComponent>();
+        FogOfWarState fogOfWarState = SystemAPI.GetSingleton<FogOfWarState>();
 
         ComponentLookup<LocalToWorld> worldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
@@ -56,6 +59,7 @@ partial struct WeaponTargetingSystem : ISystem
 
         HeatmapTargetingJob heatmapJob = new()
         {
+            FogArray = fogOfWarState.FogArray,
             FineDensityMap = fineEntityMap.DensityMap,
             HeatmapWorldOrigin = fineEntityMap.WorldOrigin,
             GridWidth = fineEntityMap.GridWidth,
@@ -191,6 +195,8 @@ public partial struct PrecisionTargetingJob : IJobEntity
 [WithAll(typeof(HeatmapTargetingComponent))]
 public partial struct HeatmapTargetingJob : IJobEntity
 {
+    [ReadOnly] public NativeArray<Color32> FogArray;
+
     [ReadOnly] public NativeArray<int> FineDensityMap;
     public int2 HeatmapWorldOrigin;
     public int GridWidth;
@@ -233,15 +239,23 @@ public partial struct HeatmapTargetingJob : IJobEntity
                 int2 checkCell = centerCell + new int2(x, y);
                 if (!GridUtility.IsWithinBounds(checkCell, GridWidth, GridHeight)) continue;
 
-                int density = FineDensityMap[GridUtility.CellToIndex(checkCell, GridWidth)];
+                // check if there are any targets in this cell
+                int heatmapIndex = GridUtility.CellToIndex(checkCell, GridWidth);
+                int density = FineDensityMap[heatmapIndex];
                 if (density <= 0) continue;
 
                 float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, HeatmapWorldOrigin, CellSize);
                 float2 vectorToCell = cellWorldPos - weaponWorld.Position.xy;
                 float distSq = math.lengthsq(vectorToCell);
 
+                // check range
                 if (distSq > stats.Range * stats.Range) continue;
 
+                // check if cell is revealed
+                int obstacleIndex = GridUtility.WorldPosToIndex(cellWorldPos, ObstacleWorldOrigin, ObstacleGridCellSize, ObstacleGridWidth);
+                if (FogArray[obstacleIndex].a != 0) continue;
+
+                // check line of sight
                 if (!stats.IgnoreObstacles && !GridUtility.HasLineOfSight(
                     weaponPos, 
                     cellWorldPos, 
