@@ -50,7 +50,8 @@ public enum ShipSystemID : byte
     Hull,
     Shields,
     Weapons,
-    Collector
+    Collector,
+    Sensors
 }
 
 [System.Serializable]
@@ -72,6 +73,7 @@ public enum ShipStat
     TurnSpeed,
     CollectionRadius,
     WeaponCapacity,
+    RevealFogRadius
 }
 
 [System.Serializable]
@@ -169,6 +171,7 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseSpeed = 15f;
     public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
+    public float BaseRevealFogRadius = 25f;
     public float BaseCollectionRadius = 5f;
 
     public void ResetToBase()
@@ -238,6 +241,7 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.Speed: baseValue = BaseSpeed; break;
             case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
             case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
+            case ShipStat.RevealFogRadius: baseValue = BaseRevealFogRadius; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
             case ShipStat.WeaponCapacity: baseValue = BaseWeaponCapacity; break;
         }

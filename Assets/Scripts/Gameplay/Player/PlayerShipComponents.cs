@@ -44,6 +44,12 @@ public struct ShipVelocity : IComponentData
     public float2 Value;
 }
 
+public struct ShipRevealFogRadius : IComponentData
+{
+    public float Value;
+    public float ValueSq;
+}
+
 /// <summary>
 /// Used by other parts of the ships (weapons) to get ship components
 /// </summary>

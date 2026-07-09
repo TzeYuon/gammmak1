@@ -6,7 +6,6 @@ public class FogOfWarAuthoring : MonoBehaviour
 {
     public Material FogMaterial;
     public byte MemFogValue = 200;
-    public float FogRadius = 25;
     class FogOfWarBaker : Baker<FogOfWarAuthoring>
     {
         public override void Bake(FogOfWarAuthoring authoring)
@@ -21,7 +20,6 @@ public class FogOfWarAuthoring : MonoBehaviour
             AddComponent(entity, new FogOfWarSettings
             {
                 MemFogValue = authoring.MemFogValue,
-                FogRadius = authoring.FogRadius
             });
         }
     }
@@ -35,7 +33,6 @@ public class FogVisualsComponent : IComponentData
 public struct FogOfWarSettings : IComponentData
 {
     public int MemFogValue;
-    public float FogRadius;
 }
 
 public struct FogOfWarState : IComponentData

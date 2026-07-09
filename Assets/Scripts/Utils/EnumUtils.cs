@@ -18,6 +18,8 @@ public static class EnumUtils
                 return "Turn Speed";
             case ShipStat.CollectionRadius:
                 return "Collection Radius";
+            case ShipStat.RevealFogRadius:
+                return "Fog Reveal Radius";
             case ShipStat.WeaponCapacity:
                 return "Weapon Capacity";
             default:

@@ -120,6 +120,36 @@ MonoBehaviour:
       - StatType: 0
         ModifierType: 0
         Value: 2
+  - SystemID: 6
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 200
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
+    - Cost: 300
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
+    - Cost: 400
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
   BaseWeaponCapacity: 7
   Mounts:
   - Position: {x: -0.396, y: -0.1}
@@ -151,4 +181,5 @@ MonoBehaviour:
   BaseSpeed: 6
   BaseAcceleration: 2
   BaseTurnSpeed: 6
+  BaseRevealFogRadius: 25
   BaseCollectionRadius: 5

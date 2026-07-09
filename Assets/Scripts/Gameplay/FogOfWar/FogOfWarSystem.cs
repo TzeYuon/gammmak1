@@ -45,14 +45,12 @@ partial struct FogOfWarSystem : ISystem
             MemFogValue = settings.ValueRO.MemFogValue
         }.Schedule(totalCells, 1024, state.Dependency);
 
-        float FogRadius = settings.ValueRO.FogRadius;
         var revealJob = new RevealFogJob
         {
             FogArray = fogStateRW.ValueRW.FogArray,
             GridWidth = terrainGrid.GridWidth,
             GridHeight = terrainGrid.GridHeight,
             WorldOrigin = terrainGrid.WorldOrigin,
-            VisionRadiusSq = FogRadius * FogRadius
         }.ScheduleParallel(fadeJob);
 
         state.Dependency = revealJob;
@@ -82,19 +80,20 @@ public partial struct RevealFogJob : IJobEntity
     public int GridWidth;
     public int GridHeight;
     public int2 WorldOrigin;
-    public float VisionRadiusSq;
 
-    void Execute(in LocalTransform transform)
+    void Execute(in LocalTransform transform, in ShipRevealFogRadius revealRadius)
     {
+        float radius = revealRadius.Value;
+        float radiusSq = revealRadius.ValueSq;
         int gridX = (int)math.round(transform.Position.x) - WorldOrigin.x;
         int gridY = (int)math.round(transform.Position.y) - WorldOrigin.y;
-        int radiusCells = (int)math.sqrt(VisionRadiusSq);
+        int radiusCells = (int)radius;
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
             for (int y = -radiusCells; y <= radiusCells; y++)
             {
-                if (x * x + y * y <= VisionRadiusSq)
+                if (x * x + y * y <= radiusSq)
                 {
                     int checkX = gridX + x;
                     int checkY = gridY + y;

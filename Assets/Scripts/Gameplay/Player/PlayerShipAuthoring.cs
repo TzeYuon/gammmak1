@@ -15,6 +15,9 @@ class PlayerShipAuthoring : MonoBehaviour
     [Header("Biomass Collection Stats")]
     [SerializeField] float BiomassCollectionRadius = 10f;
 
+    [Header("Fog of war reveal radius")]
+    [SerializeField] float revealRadius = 25;
+
     class PlayerShipAuthoringBaker : Baker<PlayerShipAuthoring>
     {
         public override void Bake(PlayerShipAuthoring authoring)
@@ -38,6 +41,13 @@ class PlayerShipAuthoring : MonoBehaviour
             AddComponent(entity, new ShipVelocity
             {
                 Value = float2.zero,
+            });
+
+            // fog of war component
+            AddComponent(entity, new ShipRevealFogRadius
+            {
+                Value = authoring.revealRadius,
+                ValueSq = authoring.revealRadius * authoring.revealRadius,
             });
 
             // Identity components
