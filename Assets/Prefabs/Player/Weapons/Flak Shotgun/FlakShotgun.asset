@@ -17,7 +17,7 @@ MonoBehaviour:
   WeaponID: 6
   WeaponPrefab: {fileID: 90229467165131139, guid: c0b4035cf3facbb45a0e51a7a211a169, type: 3}
   EquipCost: 3
-  UpgradeLevel: 0
+  UpgradeLevel: 2
   Upgrades:
   - Cost: 400
     Description: 
@@ -47,7 +47,7 @@ MonoBehaviour:
   DensityBias: 0
   AngleBias: 0
   DistanceBias: 1
-  BaseDamage: 3
+  BaseDamage: 10
   BaseFireRate: 1
   BaseSpreadDegrees: 10
   IgnoreObstacles: 0

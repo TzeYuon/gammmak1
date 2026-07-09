@@ -53,7 +53,7 @@ MonoBehaviour:
   DensityBias: 1
   AngleBias: 0
   DistanceBias: 0
-  BaseDamage: 10
+  BaseDamage: 50
   BaseFireRate: 0.3
   BaseSpreadDegrees: 0
   IgnoreObstacles: 0

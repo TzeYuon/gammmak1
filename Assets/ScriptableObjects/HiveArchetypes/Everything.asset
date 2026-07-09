@@ -20,7 +20,7 @@ MonoBehaviour:
     SpawnCount: 3
     Interval: 30
   - Type: 5
-    SpawnCount: 20
+    SpawnCount: 10
     Interval: 30
   - Type: 3
     SpawnCount: 30
