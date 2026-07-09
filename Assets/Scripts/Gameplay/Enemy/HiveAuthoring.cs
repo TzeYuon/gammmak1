@@ -4,13 +4,6 @@ using UnityEngine;
 
 class HiveAuthoring : MonoBehaviour
 {
-    [Header("Trickle Spawner Settings")]
-    [SerializeField] List<SpawnConfig> trickleSpawnConfigs = new();
-
-    [Header("Surge Spawning Settings")]
-    [SerializeField] EnemyType surgeEnemyType = EnemyType.Standard;
-    [SerializeField] int surgeSpawnCount = 500;
-
     [Header("Collision Settings")]
     [SerializeField] float Size = 5;
 
@@ -26,26 +19,15 @@ class HiveAuthoring : MonoBehaviour
             AddComponent<LevelEntityTag>(entity);
             AddComponent(entity, new HiveComponent
             {
-                SurgeEnemyType = authoring.surgeEnemyType,
-                SurgeSpawnCount = authoring.surgeSpawnCount,
-                SurgeSpawnRate = 100,
-                SurgeSpawnAccumulator = 0,
-                SurgePendingSpawns = 0,
-
                 Size = authoring.Size
             });
 
-            DynamicBuffer<TrickleSpawnerData> ambientBuffer = AddBuffer<TrickleSpawnerData>(entity);
-            foreach (var config in authoring.trickleSpawnConfigs)
-            {
-                ambientBuffer.Add(new TrickleSpawnerData
-                {
-                    Type = config.Type,
-                    SpawnCount = config.SpawnCount,
-                    Interval = config.Interval,
-                    NextSpawnTime = config.Interval,
-                });
-            }
+            // spawning
+            AddComponent(entity, new HiveSurgeComponent());
+            AddBuffer<TrickleSpawnerData>(entity);
+
+            // siege enemy path
+            AddBuffer<SiegePathWaypointElement>(entity);
 
             AddComponent(entity, new HealthComponent
             {
@@ -66,12 +48,4 @@ class HiveAuthoring : MonoBehaviour
             SetComponentEnabled<DeadTag>(entity, false);
         }
     }
-}
-
-[System.Serializable]
-public struct SpawnConfig
-{
-    public EnemyType Type;
-    public int SpawnCount;
-    public float Interval;
 }

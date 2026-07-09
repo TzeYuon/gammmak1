@@ -5,9 +5,17 @@ using UnityEngine;
 
 class EnemyAuthoring : MonoBehaviour
 {
+    [Header("Combat stats")]
     [SerializeField] float maxHealth;
+    [SerializeField] float damageReduction = 0;
     [SerializeField] float baseSpeed;
     [SerializeField] float hitboxRadius;
+    [SerializeField] float damage;
+
+    [Header("Movement weights")]
+    [SerializeField] float separationWeight = 0.5f;
+    [SerializeField] float terrainAvoidanceWeight = 1;
+    [SerializeField] float noiseWeight = 1;
 
     class EnemyAuthoringBaker : Baker<EnemyAuthoring>
     {
@@ -22,12 +30,23 @@ class EnemyAuthoring : MonoBehaviour
             AddComponent(entity, new SwarmMovementStatsComponent()
             {
                 BaseSpeed = authoring.baseSpeed,
+                SeparationWeight = authoring.separationWeight,
+                TerrainAvoidanceWeight = authoring.terrainAvoidanceWeight,
+                NoiseWeight = authoring.noiseWeight,
             });
-            
+
+            // damage
+            AddComponent(entity, new SwarmDamageComponent
+            {
+                Damage = authoring.damage,
+            });
+
+            // health
             AddComponent(entity, new HealthComponent
             {
                 MaxValue = authoring.maxHealth,
                 Value = authoring.maxHealth,
+                FlatDamageReduction = authoring.damageReduction
             });
             AddBuffer<DamageEvent>(entity);
 

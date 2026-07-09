@@ -416,11 +416,14 @@ public partial struct ExplosivePayloadJob : IJobEntity
     {
         if (!trigger.IsTriggered) return;
 
+        var position = transform.Position;
+
         // Create explosion event
         Entity explosion = ECB.CreateEntity(chunkIndex);
-        ECB.AddComponent(chunkIndex, explosion, new LocalTransform { Position = transform.Position });
-        ECB.AddComponent(chunkIndex, explosion, new ExplosionEvent
+        ECB.AddComponent(chunkIndex, explosion, new LocalTransform { Position = position });
+        ECB.AddComponent(chunkIndex, explosion, new ExplosionEventTargetSwarm
         {
+            Position = position,
             Damage = stats.Damage,
             RadiusSq = stats.ExplosionRadiusSq,
             Colour = new float4(0, 1, 1, 0)

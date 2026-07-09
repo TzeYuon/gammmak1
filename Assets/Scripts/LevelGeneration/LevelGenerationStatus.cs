@@ -14,10 +14,11 @@ public struct LevelGenerationStatus : IComponentData
     public bool PlayerFleetSpawned;
     public bool TerrainGenerated;
     public bool HivesGenerated;
+    public bool HiveSiegePathsGenerated;
 
     public bool IsComplete()
     {
-        return PlayerFleetSpawned && TerrainGenerated && HivesGenerated;
+        return PlayerFleetSpawned && TerrainGenerated && HivesGenerated && HiveSiegePathsGenerated;
     }
 }
 public struct LevelSpawnData : IComponentData
@@ -43,7 +44,6 @@ public struct LevelBlueprint : IComponentData
     public RewardType RewardType;
     public ThreatLevel ThreatLevel;
     public ObjectiveType ObjectiveType;
-    public EnemyProfile EnemyProfile;
     public AnomalyType AnomalyType;
     public int UpgradeCoreReward;
 
@@ -54,4 +54,14 @@ public struct LevelBlueprint : IComponentData
     public float WallThreshold; // Anything above this number becomes a wall
     public float PoisonThreshold; // Anything above this number becomes Poison
     public float MudThreshold; // Anything below this number becomes Mud
+
+    // Enemy profile variables
+    public float TotalHiveWeight;
+}
+
+public struct HiveBlueprint : IComponentData
+{
+    public int Weight;
+    public Entity RecipeEntity;
+    public HiveSurgeComponent HiveSurgeComponent;
 }

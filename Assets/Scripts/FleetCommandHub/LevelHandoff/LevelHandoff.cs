@@ -43,9 +43,47 @@ public class LevelHandoff : MonoBehaviour
         Entity generatingStatus = entityManager.CreateEntity();
 
         // Convert the level data to usable components
-        LevelBlueprint levelBlueprint = ConvertLevelToComponent(entityManager);
+        LevelNode currentLevel = playerSaveData.ActiveSector.SectorMap.CurrentLevel;
+        LevelBlueprint levelBlueprint = ConvertLevelToComponent(entityManager, currentLevel);
         entityManager.AddComponentData(generatingStatus, levelBlueprint);
-        
+
+        // Convert enemy profile to components
+        foreach (var archetype in currentLevel.EnemyProfile.PossibleHives.Pool)
+        {
+            if (archetype.Weight <= 0) continue;
+
+            Entity recipeEntity = entityManager.CreateEntity();
+
+            entityManager.AddComponentData(recipeEntity, new LevelEntityTag());
+
+            var trickleBuffer = entityManager.AddBuffer<TrickleSpawnerData>(recipeEntity);
+            foreach (var trickle in archetype.Item.TrickleSpawns)
+            {
+                trickleBuffer.Add(new TrickleSpawnerData
+                {
+                    Type = trickle.Type,
+                    SpawnCount = trickle.SpawnCount,
+                    Interval = trickle.Interval,
+                    NextSpawnTime = trickle.Interval,
+                });
+            }
+
+            entityManager.AddComponentData(recipeEntity, new HiveBlueprint
+            {
+                Weight = archetype.Weight,
+                RecipeEntity = recipeEntity,
+                HiveSurgeComponent = new HiveSurgeComponent
+                {
+                    SurgeEnemyType = archetype.Item.SurgeType,
+                    SurgeCountIgnoreScaling = archetype.Item.SurgeCountIgnoreScaling,
+                    SurgeSpawnCount = archetype.Item.SurgeCount,
+                    SurgeSpawnRate = 100,
+                    SurgeSpawnAccumulator = 0,
+                    SurgePendingSpawns = 0,
+                }
+            });
+        }
+
         // init all to incomplete
         entityManager.AddComponentData(generatingStatus, new LevelGenerationStatus
         {
@@ -284,24 +322,24 @@ public class LevelHandoff : MonoBehaviour
         }
     }
 
-    LevelBlueprint ConvertLevelToComponent(EntityManager entityManager)
+    LevelBlueprint ConvertLevelToComponent(EntityManager entityManager, LevelNode currentLevel)
     {
-        LevelNode levelToGenerate = playerSaveData.ActiveSector.SectorMap.CurrentLevel;
-
         // Copy relevant level generation details over to component
         return new LevelBlueprint
         {
-            NodeType = levelToGenerate.NodeType,
-            RewardType = levelToGenerate.RewardType,
-            ThreatLevel = levelToGenerate.ThreatLevel,
-            ObjectiveType = levelToGenerate.ObjectiveType,
-            TerrainType = levelToGenerate.TerrainType,
-            EnemyProfile = levelToGenerate.EnemyProfile,
-            AnomalyType = levelToGenerate.AnomalyType,
-            UpgradeCoreReward = levelToGenerate.UpgradeCoreReward,
+            NodeType = currentLevel.NodeType,
+            RewardType = currentLevel.RewardType,
+            ThreatLevel = currentLevel.ThreatLevel,
+            ObjectiveType = currentLevel.ObjectiveType,
+            TerrainType = currentLevel.TerrainType,
+            AnomalyType = currentLevel.AnomalyType,
+            UpgradeCoreReward = currentLevel.UpgradeCoreReward,
 
             // Generate random seed
-            Seed = (uint)System.DateTime.Now.Ticks
+            Seed = (uint)System.DateTime.Now.Ticks,
+
+            // Store enemy profile variables
+            TotalHiveWeight = currentLevel.EnemyProfile.PossibleHives.TotalWeight,
         };
     }
 

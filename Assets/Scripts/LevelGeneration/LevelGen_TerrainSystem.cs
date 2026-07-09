@@ -19,7 +19,6 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         state.EntityManager.CreateSingleton(new TerrainGridComponent());
         state.EntityManager.CreateSingleton(new EnemyFlowFieldComponent());
-
     }
 
     public void OnDestroy(ref SystemState state)

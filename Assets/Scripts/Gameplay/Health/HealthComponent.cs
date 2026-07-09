@@ -5,6 +5,7 @@ public struct HealthComponent : IComponentData
 {
     public float Value;
     public float MaxValue;
+    public float FlatDamageReduction;
 }
 
 public struct DeathVFXEvent

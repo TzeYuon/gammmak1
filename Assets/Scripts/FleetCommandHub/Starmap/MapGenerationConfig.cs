@@ -24,7 +24,7 @@ public class LayerRangeConfig
     public WeightedPool<ThreatLevel> ThreatPool;
     public WeightedPool<TerrainType> TerrainPool;
     public WeightedPool<ObjectiveType> ObjectivePool;
-    public WeightedPool<EnemyProfile> EnemyPool;
+    public WeightedPool<EnemyProfileData> EnemyPool;
 
     [Header("Standard Node Rewards")]
     public WeightedPool<RewardType> StandardRewardPool;
