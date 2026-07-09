@@ -60,6 +60,9 @@ MonoBehaviour:
       - StatType: 1
         ModifierType: 0
         Value: 10
+      - StatType: 8
+        ModifierType: 0
+        Value: 0.15
       - StatType: 0
         ModifierType: 0
         Value: 2
@@ -69,6 +72,9 @@ MonoBehaviour:
       - StatType: 1
         ModifierType: 0
         Value: 20
+      - StatType: 8
+        ModifierType: 0
+        Value: 0.15
       - StatType: 0
         ModifierType: 0
         Value: 2
@@ -182,6 +188,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 0}
   BaseCost: 7
   BaseMaxHealth: 17
+  BaseDamageReduction: 0
   BaseSpeed: 3
   BaseAcceleration: 1
   BaseTurnSpeed: 3
