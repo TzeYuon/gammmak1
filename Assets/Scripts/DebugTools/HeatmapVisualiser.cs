@@ -42,7 +42,7 @@ public class HeatmapVisualiser : MonoBehaviour
             {
                 int flatIndex = x + (y * heatmap.GridWidth);
                 int density = arr[flatIndex];
-                Debug.Log(density);
+
                 if (density > 0)
                 {
                     // Calculate World Position (Center of the cell)
