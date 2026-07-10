@@ -45,23 +45,6 @@ partial struct HiveSeedMovementSystem : ISystem
                         }
                     }
                 }
-
-                float explodeRadius = explosion.ValueRO.Radius;
-                float explodeDamage = explosion.ValueRO.Damage;
-                bool targetSwarm = explosion.ValueRO.TargetSwarm;
-
-                foreach (var (targetTransform, targetBuffer, targetEntity) in SystemAPI.Query<RefRO<LocalTransform>, DynamicBuffer<DamageEvent>>().WithAll<HealthComponent>().WithEntityAccess())
-                {
-                    if (math.distance(targetTransform.ValueRO.Position, curPos) < explodeRadius)
-                    {
-                        bool isSwarm = SystemAPI.HasComponent<SwarmTag>(targetEntity);
-                        if (!targetSwarm && isSwarm) continue;
-
-                        targetBuffer.Add(new DamageEvent { Value = explodeDamage });
-                    }
-                }
-
-                ecb.DestroyEntity(entity);
                 continue;
             }
 
@@ -70,7 +53,7 @@ partial struct HiveSeedMovementSystem : ISystem
                 velocity.ValueRW.Value = float2.zero;
                 seed.ValueRW.IncubationTimer -= deltaTime;
 
-                transform.ValueRW.Scale = math.lerp(seed.ValueRO.Scale, 1.0f, 1.0f - (seed.ValueRO.IncubationTimer / 120.0f));
+                transform.ValueRW.Scale = math.lerp(seed.ValueRO.Scale, 1.0f, 1.0f - (seed.ValueRO.IncubationTimer / 30.0f));
 
                 if (seed.ValueRO.IncubationTimer <= 0)
                 {

@@ -102,6 +102,9 @@ partial struct LevelGen_TerrainSystem : ISystem
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
                     spawnData.ActiveHiveCount = 1;
                     spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
+                    spawnData.ExpansionSpotCount = 2;
+                    spawnData.ExpansionSpotsX[0] = Xtl; spawnData.ExpansionSpotsY[0] = Ytl;
+                    spawnData.ExpansionSpotsX[1] = Xbr; spawnData.ExpansionSpotsY[1] = Ybr;
                     break;
 
                 case TerrainType.Cavern:

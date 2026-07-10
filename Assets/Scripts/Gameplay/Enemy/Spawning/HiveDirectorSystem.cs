@@ -66,7 +66,7 @@ partial struct HiveDirectorSystem : ISystem
             ecb.AddComponent<SwarmTag>(seed);
 
             ecb.AddComponent(seed, new SwarmVelocityComponent { Value = float2.zero });
-            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = true,  Radius = 15.0f, Damage = 9999.0f });
+            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = false,  Radius = 15.0f, Damage = 9999.0f });
             ecb.AddComponent(seed, new HiveSeedComponent
             {
                 Destination = destinationPos,
