@@ -49,9 +49,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAuthoring
   maxHealth: 1
   damageReduction: 0
-  baseSpeed: 15
+  baseSpeed: 16
   hitboxRadius: 0.25
   damage: 1
+  value: 1
   separationWeight: 0.5
   terrainAvoidanceWeight: 1
   noiseWeight: 2

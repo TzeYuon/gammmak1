@@ -196,8 +196,7 @@ MonoBehaviour:
   WorldCentre: {x: 1000, y: 1000}
   MapWidth: 400
   MapHeight: 400
-  CoarseCellSize: 16
-  FineCellSizeMultiplier: 16
+  CellSize: 1
 --- !u!4 &523752878
 Transform:
   m_ObjectHideFlags: 0
@@ -244,7 +243,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FogOfWarAuthoring
   FogMaterial: {fileID: 2100000, guid: 9b580a4d0d5e32e4a96d620baade8635, type: 2}
   MemFogValue: 200
-  FogRadius: 25
 --- !u!4 &2126288652
 Transform:
   m_ObjectHideFlags: 0
@@ -356,6 +354,7 @@ MonoBehaviour:
   SiegePrefab: {fileID: 8958559792771996627, guid: 01d9e4ef11a7fac4eaad4988a9c2ad1b, type: 3}
   LocustPrefab: {fileID: 8958559792771996627, guid: be4ae26e8c69015488a78105cc84aeba, type: 3}
   SpitterPrefab: {fileID: 0}
+  BombPrefab: {fileID: 8958559792771996627, guid: 1006157f228ae6643aed96de6ffdb550, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

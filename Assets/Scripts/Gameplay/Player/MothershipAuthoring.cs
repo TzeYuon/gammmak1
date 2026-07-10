@@ -5,6 +5,7 @@ using UnityEngine;
 class MothershipAuthoring : MonoBehaviour
 {
     public float Health;
+    public float RevealRadius;
     public float BiomassCollectionRadius;
 
     class MothershipAuthoringBaker : Baker<MothershipAuthoring>
@@ -25,6 +26,13 @@ class MothershipAuthoring : MonoBehaviour
                 MaxValue = authoring.Health,
             });
             AddBuffer<DamageEvent>(entity);
+
+            // fog of war component
+            AddComponent(entity, new ShipRevealFogRadius
+            {
+                Value = authoring.RevealRadius,
+                ValueSq = authoring.RevealRadius * authoring.RevealRadius,
+            });
 
             // Death tag
             AddComponent(entity, new DeadTag());

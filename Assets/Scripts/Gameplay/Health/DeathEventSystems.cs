@@ -29,14 +29,33 @@ public partial struct SwarmDeathEventSystem : ISystem
         BiomassConfig prefabSingleton = SystemAPI.GetSingleton<BiomassConfig>();
         Entity biomassPrefab = prefabSingleton.BiomassPrefab;
 
+        var explodeLookup = SystemAPI.GetComponentLookup<ExplosionOnDeath>(true);
+
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, SwarmTag>().WithEntityAccess())
         {
+            var position = transform.ValueRO.Position;
+
             // Create death visual
             vfxQueue.Enqueue(new VFXPayload { 
-                Position = transform.ValueRO.Position,
+                Position = position,
                 Type = (uint)VFXType.DeathExplosion,
                 Colour = new float4(1, 0, 0, 0), 
             });
+
+            // Explode if entity has relevant component
+            if (explodeLookup.HasComponent(entity))
+            {
+                ExplosionOnDeath explosion = explodeLookup[entity];
+                Entity explosionEntity = ecb.CreateEntity();
+                ecb.AddComponent(explosionEntity, LocalTransform.FromPosition(position));
+                ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
+                {
+                    Position = position,
+                    Damage = explosion.Damage,
+                    RadiusSq = explosion.Radius,
+                    Colour = new float4(1, 0, 0, 0)
+                });
+            }
 
             // Random chance to drop biomass
             var rng = Random.CreateFromIndex((uint)(entity.Index * SystemAPI.Time.ElapsedTime));

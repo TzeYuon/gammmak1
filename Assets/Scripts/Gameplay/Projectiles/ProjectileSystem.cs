@@ -48,7 +48,7 @@ partial struct ProjectileSystem : ISystem
         var homingHandle = new HomingFlightJob 
         { 
             DeltaTime = deltaTime,
-            Map = fineHeatmap.DensityMap,
+            Map = fineHeatmap.DensityGrid,
             WorldOrigin = fineHeatmap.WorldOrigin,
             GridWidth = fineHeatmap.GridWidth,
             GridHeight = fineHeatmap.GridHeight,
@@ -92,17 +92,12 @@ partial struct ProjectileSystem : ISystem
             ECB = ecb
         }.ScheduleParallel(kineticHandle);
 
-        var piercingHandle = new PiercingPayloadJob
-        {
-            ECB = ecb,
-        }.ScheduleParallel(explosiveHandle);
-
         // Lifespan
         var lifespanHandle = new ProjectileLifespanJob
         {
             ElapsedTime = elapsedTime,
             ECB = ecb,
-        }.ScheduleParallel(piercingHandle);
+        }.ScheduleParallel(explosiveHandle);
 
         state.Dependency = lifespanHandle;
     }
@@ -338,37 +333,6 @@ public partial struct KineticPayloadJob : IJobEntity
     private void Execute(
         Entity entity, 
         [ChunkIndexInQuery] int chunkIndex, 
-        in ProjectileTriggerState trigger,
-        ref DynamicBuffer<ProjectileHitElement> hitBuffer,
-        in ProjectilePayloadStats stats
-        )
-    {
-        if (!trigger.IsTriggered) return;
-
-        // Apply damage
-        for (int i = 0; i < hitBuffer.Length; i++)
-        {
-            Entity hitEntity = hitBuffer[i].HitEntity;
-            ECB.AppendToBuffer(chunkIndex, hitEntity, new DamageEvent { Value = stats.Damage });
-        }
-
-        // Clear the buffer for the next frame
-        hitBuffer.Clear();
-
-        // Destroy the projectile
-        ECB.DestroyEntity(chunkIndex, entity);
-    }
-}
-
-[BurstCompile]
-[WithAll(typeof(PiercingPayload))]
-public partial struct PiercingPayloadJob : IJobEntity
-{
-    public EntityCommandBuffer.ParallelWriter ECB;
-
-    private void Execute(
-        Entity entity, 
-        [ChunkIndexInQuery] int chunkIndex, 
         ref ProjectileTriggerState trigger,
         ref DynamicBuffer<ProjectileHitElement> hitBuffer,
         in ProjectilePayloadStats stats
@@ -377,7 +341,7 @@ public partial struct PiercingPayloadJob : IJobEntity
         if (!trigger.IsTriggered) return;
 
         // Apply damage
-        for (int i = 0; i < hitBuffer.Length && trigger.RemainingHits > 0; i++)
+        for (int i = 0; i < hitBuffer.Length && trigger.RemainingHits >= 0; i++)
         {
             Entity hitEntity = hitBuffer[i].HitEntity;
             ECB.AppendToBuffer(chunkIndex, hitEntity, new DamageEvent { Value = stats.Damage });
@@ -416,11 +380,14 @@ public partial struct ExplosivePayloadJob : IJobEntity
     {
         if (!trigger.IsTriggered) return;
 
+        var position = transform.Position;
+
         // Create explosion event
         Entity explosion = ECB.CreateEntity(chunkIndex);
-        ECB.AddComponent(chunkIndex, explosion, new LocalTransform { Position = transform.Position });
-        ECB.AddComponent(chunkIndex, explosion, new ExplosionEvent
+        ECB.AddComponent(chunkIndex, explosion, new LocalTransform { Position = position });
+        ECB.AddComponent(chunkIndex, explosion, new ExplosionEventTargetSwarm
         {
+            Position = position,
             Damage = stats.Damage,
             RadiusSq = stats.ExplosionRadiusSq,
             Colour = new float4(0, 1, 1, 0)

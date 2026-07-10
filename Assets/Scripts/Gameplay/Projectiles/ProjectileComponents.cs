@@ -77,14 +77,9 @@ public struct ProjectilePayloadStats : IComponentData
 }
 
 /// <summary>
-/// Used by contact trigger projectiles to apply damage directly to entities hit
+/// Used by contact trigger projectiles to apply damage directly to entities hit, can be used for piercing weapons as well
 /// </summary>
 public struct KineticPayload : IComponentData { }
-
-/// <summary>
-/// Used by contact trigger projectiles to apply damage directly to multiple entities hit
-/// </summary>
-public struct PiercingPayload : IComponentData { }
 
 /// <summary>
 /// Used by any trigger to create an explosion

@@ -10,6 +10,9 @@ class EnemyAuthoring : MonoBehaviour
     [SerializeField] float hitboxRadius;
     [SerializeField] float damage;
 
+    [Header("Weapon Targeting Variables")]
+    [SerializeField] int value;
+
     [Header("Movement weights")]
     [SerializeField] float separationWeight = 0.5f;
     [SerializeField] float terrainAvoidanceWeight = 1;
@@ -37,6 +40,12 @@ class EnemyAuthoring : MonoBehaviour
             AddComponent(entity, new SwarmDamageComponent
             {
                 Damage = authoring.damage,
+            });
+
+            // weapon targeting
+            AddComponent(entity, new EnemyValueComponent
+            {
+                Value = authoring.value,
             });
 
             // health

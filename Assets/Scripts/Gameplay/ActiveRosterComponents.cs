@@ -17,6 +17,7 @@ public struct MothershipBlueprint : IComponentData
 {
     // Ship stats after upgrades
     public HealthComponent ShipHealthComponent;
+    public ShipRevealFogRadius ShipRevealFogRadius;
     public ShipCollectionRadiusComponent ShipCollectionRadiusStat;
 }
 
@@ -40,6 +41,7 @@ public struct RosterShipBlueprint : IComponentData
     // Ship stats after upgrades
     public HealthComponent ShipHealthComponent;
     public ShipMovementStatsComponent ShipMovementStats;
+    public ShipRevealFogRadius ShipRevealFogRadius;
     public ShipCollectionRadiusComponent ShipCollectionRadiusStat;
 }
 

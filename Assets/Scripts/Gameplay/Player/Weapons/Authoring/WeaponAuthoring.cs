@@ -14,7 +14,6 @@ class WeaponAuthoring : MonoBehaviour
     public float Range = 30f;
 
     // Targeting
-    public TargetingType Targeting = TargetingType.Heatmap;
     /// <summary>
     /// Higher number prefers higher density
     /// </summary>
@@ -46,6 +45,9 @@ class WeaponAuthoring : MonoBehaviour
     public float Spread;
     public float TriggerTime;
 
+    // vfx
+    public Color VFXColour;
+
     class Baker : Baker<WeaponAuthoring>
     {
         public override void Bake(WeaponAuthoring authoring)
@@ -62,10 +64,6 @@ class WeaponAuthoring : MonoBehaviour
                 AngleBias = authoring.AngleBias,
                 DistanceBias = authoring.DistanceBias,
             });
-            if (authoring.Targeting == TargetingType.Heatmap)
-                AddComponent(entity, new HeatmapTargetingComponent());
-            else if (authoring.Targeting == TargetingType.Precision)
-                AddComponent(entity, new PrecisionTargetingComponent());
 
             // Rotation
             if (authoring.HasTurret)
@@ -95,6 +93,7 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new HitscanWeapon()
                 {
                     WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
+                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3)
                 });
             }
             else
@@ -117,9 +116,10 @@ public class WeaponAuthoringEditor : Editor
 {
     // Properties
     SerializedProperty p_Damage, p_FireRate, p_Range;
-    SerializedProperty p_Targeting, p_DensityBias, p_AngleBias, p_DistanceBias;
+    SerializedProperty p_DensityBias, p_AngleBias, p_DistanceBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
     SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_ProjectileTurnSpeed, p_Spread, p_TriggerTime;
+    SerializedProperty p_VFXColour;
 
     private void OnEnable()
     {
@@ -127,7 +127,6 @@ public class WeaponAuthoringEditor : Editor
         p_FireRate = serializedObject.FindProperty("FireRate");
         p_Range = serializedObject.FindProperty("Range");
 
-        p_Targeting = serializedObject.FindProperty("Targeting");
         p_DensityBias = serializedObject.FindProperty("DensityBias");
         p_AngleBias = serializedObject.FindProperty("AngleBias");
         p_DistanceBias = serializedObject.FindProperty("DistanceBias");
@@ -147,6 +146,8 @@ public class WeaponAuthoringEditor : Editor
         p_ProjectileTurnSpeed = serializedObject.FindProperty("ProjectileTurnSpeed");
         p_Spread = serializedObject.FindProperty("Spread");
         p_TriggerTime = serializedObject.FindProperty("TriggerTime");
+
+        p_VFXColour = serializedObject.FindProperty("VFXColour");
     }
 
     public override void OnInspectorGUI()
@@ -164,7 +165,6 @@ public class WeaponAuthoringEditor : Editor
         // Targeting
         EditorGUILayout.LabelField("TARGETING");
         EditorGUILayout.BeginVertical("helpbox");
-        EditorGUILayout.PropertyField(p_Targeting);
         EditorGUILayout.PropertyField(p_DensityBias, new GUIContent("Density Bias"));
         EditorGUILayout.PropertyField(p_AngleBias, new GUIContent("Angle Bias (Laziness)"));
         EditorGUILayout.PropertyField(p_DistanceBias, new GUIContent("Distance Bias"));
@@ -209,6 +209,13 @@ public class WeaponAuthoringEditor : Editor
         }
 
         EditorGUILayout.PropertyField(p_WeaponStartPoint);
+        EditorGUILayout.EndVertical();
+
+        // VFX
+        EditorGUILayout.LabelField("VFX");
+        EditorGUILayout.BeginVertical("helpbox");
+
+        EditorGUILayout.PropertyField(p_VFXColour);
         EditorGUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();

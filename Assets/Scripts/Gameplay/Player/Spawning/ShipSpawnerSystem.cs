@@ -102,6 +102,7 @@ public partial struct ShipSpawnerSystem : ISystem
             // Set ship stats
             ecb.SetComponent(newShip, shipBlueprint.ShipHealthComponent);
             ecb.SetComponent(newShip, shipBlueprint.ShipMovementStats);
+            ecb.SetComponent(newShip, shipBlueprint.ShipRevealFogRadius);
             ecb.SetComponent(newShip, shipBlueprint.ShipCollectionRadiusStat);
 
             // spawn weapons

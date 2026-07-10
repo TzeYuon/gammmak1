@@ -47,11 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fae42492bc90454bb2306baa7e2478f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAuthoring
-  maxHealth: 500
-  damageReduction: 0.75
+  maxHealth: 100
+  damageReduction: 0.4
   baseSpeed: 3
   hitboxRadius: 1.5
   damage: 20
+  value: 1000
   separationWeight: 0
   terrainAvoidanceWeight: 0
   noiseWeight: 0
