@@ -31,10 +31,9 @@ public class HeatmapVisualiser : MonoBehaviour
 
         // 4. Draw the Grid
         // A 100x100 grid is 10,000 cells. Drawing 10,000 empty cubes will lag the Unity Editor.
-        // So, we ONLY draw cells that actually contain bugs!
 
         float halfCell = heatmap.CellSize * 0.5f;
-        Vector3 size = new Vector3(heatmap.CellSize, heatmap.CellSize, 0.1f); // Adjust Z for 2D/3D
+        Vector3 size = new Vector3(heatmap.CellSize, heatmap.CellSize, 0.1f);
 
         for (int x = 0; x < heatmap.GridWidth; x++)
         {

@@ -12,22 +12,6 @@ public struct WeaponTargetingStats : IComponentData
 }
 
 /// <summary>
-/// For weapons that target specific enemies
-/// </summary>
-public struct PrecisionTargetingComponent : IComponentData
-{
-    
-}
-
-/// <summary>
-/// For weapons that target the highest density
-/// </summary>
-public struct HeatmapTargetingComponent : IComponentData
-{
-
-}
-
-/// <summary>
 /// The angles that the weapon is allowed to point towards
 /// </summary>
 public struct WeaponFiringArc : IComponentData

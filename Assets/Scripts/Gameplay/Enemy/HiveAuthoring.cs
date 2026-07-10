@@ -10,6 +10,9 @@ class HiveAuthoring : MonoBehaviour
     [Header("Health Settings")]
     [SerializeField] float maxHealth = 500;
 
+    [Header("Weapon Targeting Variables")]
+    [SerializeField] float value;
+
     class HiveAuthoringBaker : Baker<HiveAuthoring>
     {
         public override void Bake(HiveAuthoring authoring)
@@ -25,6 +28,12 @@ class HiveAuthoring : MonoBehaviour
             // spawning
             AddComponent(entity, new HiveSurgeComponent());
             AddBuffer<TrickleSpawnerData>(entity);
+
+            // weapon targeting
+            AddComponent(entity, new EnemyValueComponent
+            {
+                Value = authoring.value,
+            });
 
             // siege enemy path
             AddBuffer<SiegePathWaypointElement>(entity);

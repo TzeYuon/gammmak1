@@ -107,7 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileAuthoring
   Movement: 1
   Trigger: 0
-  Payload: 2
+  Payload: 1
 --- !u!1001 &418564153977100380
 PrefabInstance:
   m_ObjectHideFlags: 0

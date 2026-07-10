@@ -15,8 +15,7 @@ class HeatmapAuthoring : MonoBehaviour
     /// In unity units
     /// </summary>
     public int MapHeight;
-    public float CoarseCellSize;
-    public int FineCellSizeMultiplier;
+    public float CellSize;
 
     class HeatmapAuthoringBaker : Baker<HeatmapAuthoring>
     {
@@ -27,18 +26,12 @@ class HeatmapAuthoring : MonoBehaviour
             int2 worldOrigin = (int2)math.round(new float2(
                 authoring.WorldCentre.x - authoring.MapWidth / 2, 
                 authoring.WorldCentre.y - authoring.MapHeight / 2));
-            float coarseSize = authoring.CoarseCellSize;
-            int coarseWidth = Mathf.FloorToInt(authoring.MapWidth / coarseSize);
-            int coarseHeight = Mathf.FloorToInt(authoring.MapHeight / coarseSize);
-            float fineSize = coarseSize / authoring.FineCellSizeMultiplier;
-            int fineWidth = coarseWidth * authoring.FineCellSizeMultiplier;
-            int fineHeight = coarseHeight * authoring.FineCellSizeMultiplier;
+            float fineSize = authoring.CellSize;
+            int fineWidth = Mathf.FloorToInt(authoring.MapWidth / fineSize);
+            int fineHeight = Mathf.FloorToInt(authoring.MapHeight / fineSize);
             AddComponent(entity, new EnemyHeatmapSettings
             {
                 WorldOrigin = worldOrigin,
-                CoarseCellSize = coarseSize,
-                CoarseWidth = coarseWidth,
-                CoarseHeight = coarseHeight,
                 FineCellSize = fineSize,
                 FineWidth = fineWidth,
                 FineHeight = fineHeight,
@@ -50,9 +43,6 @@ class HeatmapAuthoring : MonoBehaviour
 public partial struct EnemyHeatmapSettings : IComponentData
 {
     public int2 WorldOrigin;
-    public float CoarseCellSize;
-    public int CoarseWidth;
-    public int CoarseHeight;
     public float FineCellSize;
     public int FineWidth;
     public int FineHeight;

@@ -14,7 +14,6 @@ class WeaponAuthoring : MonoBehaviour
     public float Range = 30f;
 
     // Targeting
-    public TargetingType Targeting = TargetingType.Heatmap;
     /// <summary>
     /// Higher number prefers higher density
     /// </summary>
@@ -62,10 +61,6 @@ class WeaponAuthoring : MonoBehaviour
                 AngleBias = authoring.AngleBias,
                 DistanceBias = authoring.DistanceBias,
             });
-            if (authoring.Targeting == TargetingType.Heatmap)
-                AddComponent(entity, new HeatmapTargetingComponent());
-            else if (authoring.Targeting == TargetingType.Precision)
-                AddComponent(entity, new PrecisionTargetingComponent());
 
             // Rotation
             if (authoring.HasTurret)
@@ -117,7 +112,7 @@ public class WeaponAuthoringEditor : Editor
 {
     // Properties
     SerializedProperty p_Damage, p_FireRate, p_Range;
-    SerializedProperty p_Targeting, p_DensityBias, p_AngleBias, p_DistanceBias;
+    SerializedProperty p_DensityBias, p_AngleBias, p_DistanceBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
     SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_ProjectileTurnSpeed, p_Spread, p_TriggerTime;
 
@@ -127,7 +122,6 @@ public class WeaponAuthoringEditor : Editor
         p_FireRate = serializedObject.FindProperty("FireRate");
         p_Range = serializedObject.FindProperty("Range");
 
-        p_Targeting = serializedObject.FindProperty("Targeting");
         p_DensityBias = serializedObject.FindProperty("DensityBias");
         p_AngleBias = serializedObject.FindProperty("AngleBias");
         p_DistanceBias = serializedObject.FindProperty("DistanceBias");
@@ -164,7 +158,6 @@ public class WeaponAuthoringEditor : Editor
         // Targeting
         EditorGUILayout.LabelField("TARGETING");
         EditorGUILayout.BeginVertical("helpbox");
-        EditorGUILayout.PropertyField(p_Targeting);
         EditorGUILayout.PropertyField(p_DensityBias, new GUIContent("Density Bias"));
         EditorGUILayout.PropertyField(p_AngleBias, new GUIContent("Angle Bias (Laziness)"));
         EditorGUILayout.PropertyField(p_DistanceBias, new GUIContent("Distance Bias"));

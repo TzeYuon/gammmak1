@@ -15,22 +15,15 @@ partial struct HeatmapUpdateSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-        state.RequireForUpdate<CoarseEnemyHeatmapComponent>();
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
 
-        coarseHeatmapQuery = SystemAPI.QueryBuilder().WithAll<CoarseEnemyHeatmapComponent>().Build();
         fineHeatmapQuery = SystemAPI.QueryBuilder().WithAll<FineEnemyHeatmapComponent>().Build();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
-        if (!terrainGridComponent.Grid.IsCreated) return;
-
-        coarseHeatmapQuery.CompleteDependency();
         fineHeatmapQuery.CompleteDependency();
-        CoarseEnemyHeatmapComponent coarseEnemyHeatmap = SystemAPI.GetSingletonRW<CoarseEnemyHeatmapComponent>().ValueRW;
         RefRW<FineEnemyHeatmapComponent> fineEnemyHeatmap = SystemAPI.GetSingletonRW<FineEnemyHeatmapComponent>();
 
         int livingEnemiesCount = SystemAPI.QueryBuilder().WithAll<SwarmTag>().Build().CalculateEntityCount();
@@ -42,17 +35,11 @@ partial struct HeatmapUpdateSystem : ISystem
         }
 
         fineEnemyHeatmap.ValueRO.Map.Clear();
-        ClearArray(coarseEnemyHeatmap.Map);
         ClearArray(fineEnemyHeatmap.ValueRW.DensityMap);
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
         {
-            WorldOrigin = coarseEnemyHeatmap.WorldOrigin,
-
-            CoarseMap = coarseEnemyHeatmap.Map,
-            CoarseCellSize = coarseEnemyHeatmap.CellSize,
-            CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
-            CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
+            WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
             FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
@@ -63,12 +50,7 @@ partial struct HeatmapUpdateSystem : ISystem
 
         var hiveHeatmapHandle = new HiveHeatmapJob
         {
-            WorldOrigin = coarseEnemyHeatmap.WorldOrigin,
-
-            CoarseMap = coarseEnemyHeatmap.Map,
-            CoarseCellSize = coarseEnemyHeatmap.CellSize,
-            CoarseGridWidth = coarseEnemyHeatmap.GridWidth,
-            CoarseGridHeight = coarseEnemyHeatmap.GridHeight,
+            WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
             FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
@@ -98,38 +80,11 @@ partial struct HeatmapUpdateSystem : ISystem
 }
 
 [BurstCompile]
-public struct ClearCoarseEnemyJob : IJobParallelFor
-{
-    [WriteOnly] public NativeArray<int> Map;
-
-    public void Execute(int index)
-    {
-        Map[index] = 0;
-    }
-}
-
-[BurstCompile]
-public struct ClearFineEnemyJob : IJobParallelFor
-{
-    [WriteOnly] public NativeArray<int> Map;
-
-    public void Execute(int index)
-    {
-        Map[index] = 0;
-    }
-}
-
-[BurstCompile]
 [WithAll(typeof(SwarmTag))]
 [WithDisabled(typeof(DeadTag))]
 public partial struct SwarmHeatmapJob : IJobEntity
 {
     public int2 WorldOrigin;
-
-    [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
-    public float CoarseCellSize;
-    public int CoarseGridWidth;
-    public int CoarseGridHeight;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
     [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
@@ -143,12 +98,6 @@ public partial struct SwarmHeatmapJob : IJobEntity
         )
     {
         float2 pos = transform.Position.xy;
-        int2 coarseCell = GridUtility.WorldPosToCell(pos, WorldOrigin, CoarseCellSize);
-        if (GridUtility.IsWithinBounds(coarseCell, CoarseGridWidth, CoarseGridHeight)) 
-        {
-            int coarseIndex = GridUtility.CellToIndex(coarseCell, CoarseGridWidth);
-            CoarseMap.InterlockedAdd(coarseIndex, 1);
-        }
 
         int2 fineCell = GridUtility.WorldPosToCell(pos, WorldOrigin, FineCellSize);
         if (GridUtility.IsWithinBounds(fineCell, FineGridWidth, FineGridHeight))
@@ -166,11 +115,6 @@ public partial struct HiveHeatmapJob : IJobEntity
 {
     public int2 WorldOrigin;
 
-    [NativeDisableParallelForRestriction] public NativeArray<int> CoarseMap;
-    public float CoarseCellSize;
-    public int CoarseGridWidth;
-    public int CoarseGridHeight;
-
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
     [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
     public float FineCellSize;
@@ -183,27 +127,7 @@ public partial struct HiveHeatmapJob : IJobEntity
         in LocalTransform transform
         )
     {
-        // Update coarse heatmap
-        int coarseRadiusCells = (int)math.ceil(hive.Size / CoarseCellSize);
-        int2 coarseCenterCell = GridUtility.WorldPosToCell(transform.Position.xy, WorldOrigin, CoarseCellSize);
         float radiusSq = hive.Size * hive.Size;
-        for (int x = -coarseRadiusCells; x <= coarseRadiusCells; x++)
-        {
-            for (int y = -coarseRadiusCells; y <= coarseRadiusCells; y++)
-            {
-                int2 checkCell = coarseCenterCell + new int2(x, y);
-                float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, WorldOrigin, CoarseCellSize);
-
-                if (math.distancesq(transform.Position.xy, cellWorldPos) <= radiusSq)
-                {
-                    if (GridUtility.IsWithinBounds(checkCell, CoarseGridWidth, CoarseGridHeight))
-                    {
-                        int coarseIndex = GridUtility.CellToIndex(checkCell, CoarseGridWidth);
-                        CoarseMap.InterlockedAdd(coarseIndex, 1);
-                    }
-                }
-            }
-        }
 
         // Update fine heatmap
         int fineRadiusCells = (int)math.ceil(hive.Size / FineCellSize);

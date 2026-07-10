@@ -196,8 +196,7 @@ MonoBehaviour:
   WorldCentre: {x: 1000, y: 1000}
   MapWidth: 400
   MapHeight: 400
-  CoarseCellSize: 16
-  FineCellSizeMultiplier: 16
+  CellSize: 1
 --- !u!4 &523752878
 Transform:
   m_ObjectHideFlags: 0
@@ -244,7 +243,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FogOfWarAuthoring
   FogMaterial: {fileID: 2100000, guid: 9b580a4d0d5e32e4a96d620baade8635, type: 2}
   MemFogValue: 200
-  FogRadius: 25
 --- !u!4 &2126288652
 Transform:
   m_ObjectHideFlags: 0
