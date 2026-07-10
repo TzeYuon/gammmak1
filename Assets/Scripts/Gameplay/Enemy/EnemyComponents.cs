@@ -63,7 +63,7 @@ public struct PathFollowerComponent : IComponentData
 
 public struct EnemyValueComponent : IComponentData
 {
-    public float Value;
+    public int Value;
 }
 
 public struct CollisionRadius : IComponentData

@@ -37,14 +37,16 @@ MonoBehaviour:
     - StatType: 1
       ModifierType: 1
       Value: 0.1
+  IgnoreObstacles: 0
+  RequireTargetEntity: 0
   BaseRange: 50
-  DensityBias: 1
-  AngleBias: 0
+  DensityBias: 2
+  ThreatBias: 0
+  AngleBias: 1
   DistanceBias: 0
   BaseDamage: 10
   BaseFireRate: 0.2
   BaseSpreadDegrees: 0
-  IgnoreObstacles: 0
   BaseProjectileCount: 1
   BaseProjectileSpeed: 120
   BaseProjectileTurnSpeed: 0

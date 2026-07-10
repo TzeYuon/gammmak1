@@ -61,6 +61,9 @@ public partial struct WeaponFiringSystem : ISystem
     }
 }
 
+/// <summary>
+/// Hitscan weapons must have a specific entity target
+/// </summary>
 [BurstCompile]
 public partial struct HitscanFiringJob : IJobEntity
 {
@@ -94,14 +97,9 @@ public partial struct HitscanFiringJob : IJobEntity
 
         if (TurretLookup.HasComponent(entity) && math.dot(barrelForward, dirToTarget) < 0.98f) return; // mostly facing target
 
-        int index = GridUtility.WorldPosToIndex(state.TargetPos, WorldOrigin, CellSize, GridWidth);
-        if (FineHeatmap.TryGetFirstValue(index, out Entity enemy, out var it))
-        {
-            do
-            {
-                ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = stats.Damage });
-            } while (FineHeatmap.TryGetNextValue(out enemy, ref it));
-        }
+        // deal damage to specific target
+        var enemy = state.TargetEntity;
+        ECB.AppendToBuffer(chunkIndex, enemy, new DamageEvent { Value = stats.Damage });
 
         float3 startPos = localToWorld.Position;
         float3 dir = new float3(state.TargetPos, localToWorld.Position.z) - localToWorld.Position;
@@ -118,7 +116,7 @@ public partial struct HitscanFiringJob : IJobEntity
         {
             Position = midpoint,
             Type = (uint)VFXType.Laser,
-            Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
+            Colour = weapon.VFXColour,
             CustomData = new float4(angleDegrees, distance, 0, 0),
         });
 
@@ -126,7 +124,7 @@ public partial struct HitscanFiringJob : IJobEntity
         {
             Position = spawnPoint,
             Type = (uint)VFXType.MuzzleFlash,
-            Colour = new float4(0.0f, 1.0f, 1.0f, 3.0f),
+            Colour = weapon.VFXColour,
             CustomData = new float4(angleRadians - (math.PI / 2f), 0, 0, 0)
         });
     }

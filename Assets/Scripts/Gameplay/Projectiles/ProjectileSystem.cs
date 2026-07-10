@@ -48,7 +48,7 @@ partial struct ProjectileSystem : ISystem
         var homingHandle = new HomingFlightJob 
         { 
             DeltaTime = deltaTime,
-            Map = fineHeatmap.DensityMap,
+            Map = fineHeatmap.DensityGrid,
             WorldOrigin = fineHeatmap.WorldOrigin,
             GridWidth = fineHeatmap.GridWidth,
             GridHeight = fineHeatmap.GridHeight,

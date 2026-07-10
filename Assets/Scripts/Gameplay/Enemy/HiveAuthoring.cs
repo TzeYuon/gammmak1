@@ -11,7 +11,7 @@ class HiveAuthoring : MonoBehaviour
     [SerializeField] float maxHealth = 500;
 
     [Header("Weapon Targeting Variables")]
-    [SerializeField] float value;
+    [SerializeField] int value;
 
     class HiveAuthoringBaker : Baker<HiveAuthoring>
     {

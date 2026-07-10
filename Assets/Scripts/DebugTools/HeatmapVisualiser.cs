@@ -27,11 +27,12 @@ public class HeatmapVisualiser : MonoBehaviour
 
         // 3. Read the data
         var heatmap = entityManager.GetComponentData<FineEnemyHeatmapComponent>(entity);
-        var arr = heatmap.DensityMap;
+        var arr = heatmap.DensityGrid;
 
         // 4. Draw the Grid
         // A 100x100 grid is 10,000 cells. Drawing 10,000 empty cubes will lag the Unity Editor.
 
+        int2 worldOrigin = heatmap.WorldOrigin;
         float halfCell = heatmap.CellSize * 0.5f;
         Vector3 size = new Vector3(heatmap.CellSize, heatmap.CellSize, 0.1f);
 
@@ -41,12 +42,12 @@ public class HeatmapVisualiser : MonoBehaviour
             {
                 int flatIndex = x + (y * heatmap.GridWidth);
                 int density = arr[flatIndex];
-
+                Debug.Log(density);
                 if (density > 0)
                 {
                     // Calculate World Position (Center of the cell)
-                    float worldX = (x * heatmap.CellSize) + halfCell;
-                    float worldY = (y * heatmap.CellSize) + halfCell;
+                    float worldX = (x * heatmap.CellSize) + halfCell + worldOrigin.x;
+                    float worldY = (y * heatmap.CellSize) + halfCell + worldOrigin.y;
                     Vector3 cellCenter = new Vector3(worldX, worldY, 0);
 
                     // Interpolate color: Blue (1 bug) to Red (Max bugs)

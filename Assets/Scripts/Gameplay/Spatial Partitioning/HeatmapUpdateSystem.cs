@@ -9,7 +9,6 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(EnvironmentUpdateGroup))]
 partial struct HeatmapUpdateSystem : ISystem
 {
-    EntityQuery coarseHeatmapQuery;
     EntityQuery fineHeatmapQuery;
 
     [BurstCompile]
@@ -35,14 +34,16 @@ partial struct HeatmapUpdateSystem : ISystem
         }
 
         fineEnemyHeatmap.ValueRO.Map.Clear();
-        ClearArray(fineEnemyHeatmap.ValueRW.DensityMap);
+        ClearArray(fineEnemyHeatmap.ValueRW.DensityGrid);
+        ClearArray(fineEnemyHeatmap.ValueRW.ThreatGrid);
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
         {
             WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
-            FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
+            DensityGrid = fineEnemyHeatmap.ValueRO.DensityGrid,
+            ThreatGrid = fineEnemyHeatmap.ValueRO.ThreatGrid,
             FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
             FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
             FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
@@ -53,7 +54,8 @@ partial struct HeatmapUpdateSystem : ISystem
             WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
-            FineDensityMap = fineEnemyHeatmap.ValueRO.DensityMap,
+            DensityGrid = fineEnemyHeatmap.ValueRO.DensityGrid,
+            ThreatGrid = fineEnemyHeatmap.ValueRO.ThreatGrid,
             FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
             FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
             FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
@@ -87,13 +89,15 @@ public partial struct SwarmHeatmapJob : IJobEntity
     public int2 WorldOrigin;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
-    [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
+    [NativeDisableParallelForRestriction] public NativeArray<int> DensityGrid;
+    [NativeDisableParallelForRestriction] public NativeArray<int> ThreatGrid;
     public float FineCellSize;
     public int FineGridWidth;
     public int FineGridHeight;
 
     void Execute(
         Entity entity,
+        in EnemyValueComponent enemyValue,
         in LocalTransform transform
         )
     {
@@ -104,7 +108,8 @@ public partial struct SwarmHeatmapJob : IJobEntity
         {
             int fineCellIndex = GridUtility.CellToIndex(fineCell, FineGridWidth);
             FineMap.Add(fineCellIndex, entity);
-            FineDensityMap.InterlockedAdd(fineCellIndex, 1);
+            DensityGrid.InterlockedAdd(fineCellIndex, 1);
+            ThreatGrid.InterlockedAdd(fineCellIndex, enemyValue.Value);
         }
     }
 }
@@ -116,7 +121,8 @@ public partial struct HiveHeatmapJob : IJobEntity
     public int2 WorldOrigin;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
-    [NativeDisableParallelForRestriction] public NativeArray<int> FineDensityMap;
+    [NativeDisableParallelForRestriction] public NativeArray<int> DensityGrid;
+    [NativeDisableParallelForRestriction] public NativeArray<int> ThreatGrid;
     public float FineCellSize;
     public int FineGridWidth;
     public int FineGridHeight;
@@ -124,6 +130,7 @@ public partial struct HiveHeatmapJob : IJobEntity
     void Execute(
         Entity entity,
         in HiveComponent hive,
+        in EnemyValueComponent enemyValue,
         in LocalTransform transform
         )
     {
@@ -145,7 +152,8 @@ public partial struct HiveHeatmapJob : IJobEntity
                     {
                         int fineCellIndex = GridUtility.CellToIndex(checkCell, FineGridWidth);
                         FineMap.Add(fineCellIndex, entity);
-                        FineDensityMap.InterlockedAdd(fineCellIndex, 1);
+                        DensityGrid.InterlockedAdd(fineCellIndex, 1);
+                        ThreatGrid.InterlockedAdd(fineCellIndex, enemyValue.Value);
                     }
                 }
             }

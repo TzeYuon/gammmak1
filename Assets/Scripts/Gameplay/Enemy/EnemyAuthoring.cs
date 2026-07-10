@@ -13,7 +13,7 @@ class EnemyAuthoring : MonoBehaviour
     [SerializeField] float damage;
 
     [Header("Weapon Targeting Variables")]
-    [SerializeField] float value;
+    [SerializeField] int value;
 
     [Header("Movement weights")]
     [SerializeField] float separationWeight = 0.5f;

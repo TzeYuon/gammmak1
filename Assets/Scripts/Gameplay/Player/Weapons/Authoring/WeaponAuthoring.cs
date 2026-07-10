@@ -45,6 +45,9 @@ class WeaponAuthoring : MonoBehaviour
     public float Spread;
     public float TriggerTime;
 
+    // vfx
+    public Color VFXColour;
+
     class Baker : Baker<WeaponAuthoring>
     {
         public override void Bake(WeaponAuthoring authoring)
@@ -90,6 +93,7 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new HitscanWeapon()
                 {
                     WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
+                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3)
                 });
             }
             else
@@ -115,6 +119,7 @@ public class WeaponAuthoringEditor : Editor
     SerializedProperty p_DensityBias, p_AngleBias, p_DistanceBias;
     SerializedProperty p_HasTurret, p_TurnSpeed, p_RestingDirection, p_MaxAngleLimit;
     SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint, p_HitRadius, p_ExplosionRadius, p_PierceCount, p_ProjectileSpeed, p_ProjectileTurnSpeed, p_Spread, p_TriggerTime;
+    SerializedProperty p_VFXColour;
 
     private void OnEnable()
     {
@@ -141,6 +146,8 @@ public class WeaponAuthoringEditor : Editor
         p_ProjectileTurnSpeed = serializedObject.FindProperty("ProjectileTurnSpeed");
         p_Spread = serializedObject.FindProperty("Spread");
         p_TriggerTime = serializedObject.FindProperty("TriggerTime");
+
+        p_VFXColour = serializedObject.FindProperty("VFXColour");
     }
 
     public override void OnInspectorGUI()
@@ -202,6 +209,13 @@ public class WeaponAuthoringEditor : Editor
         }
 
         EditorGUILayout.PropertyField(p_WeaponStartPoint);
+        EditorGUILayout.EndVertical();
+
+        // VFX
+        EditorGUILayout.LabelField("VFX");
+        EditorGUILayout.BeginVertical("helpbox");
+
+        EditorGUILayout.PropertyField(p_VFXColour);
         EditorGUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();

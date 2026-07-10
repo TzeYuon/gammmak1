@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HiveAuthoring
   Size: 5
   maxHealth: 500
-  value: 100
+  value: 10000
 --- !u!212 &693153602026284644
 SpriteRenderer:
   serializedVersion: 2
