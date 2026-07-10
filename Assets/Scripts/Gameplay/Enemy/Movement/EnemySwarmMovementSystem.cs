@@ -36,7 +36,7 @@ partial struct EnemySwarmMovementSystem : ISystem
             GridHeight = terrainGrid.GridHeight,
             WorldOrigin = terrainGrid.WorldOrigin,
 
-            Heatmap = fineEnemyHeatmap.DensityMap,
+            Heatmap = fineEnemyHeatmap.DensityGrid,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
             HeatmapCellSize = fineEnemyHeatmap.CellSize,
             HeatmapGridWidth = fineEnemyHeatmap.GridWidth,
@@ -54,7 +54,7 @@ partial struct EnemySwarmMovementSystem : ISystem
             GridHeight = terrainGrid.GridHeight,
             WorldOrigin = terrainGrid.WorldOrigin,
 
-            Heatmap = fineEnemyHeatmap.DensityMap,
+            Heatmap = fineEnemyHeatmap.DensityGrid,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
             HeatmapCellSize = fineEnemyHeatmap.CellSize,
             HeatmapGridWidth = fineEnemyHeatmap.GridWidth,

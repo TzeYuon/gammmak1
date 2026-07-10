@@ -83,11 +83,17 @@ public class WeaponData : ScriptableObject
     public List<WeaponUpgrade> Upgrades = new();
 
     [Header("Base Targeting Stats")]
+    public bool IgnoreObstacles = false;
+    public bool RequireTargetEntity = false;
     public float BaseRange = 30f;
     /// <summary>
     /// Higher number prefers higher density
     /// </summary>
     public float DensityBias = 1.0f;
+    /// <summary>
+    /// Higher number prefers higher target value/threat level
+    /// </summary>
+    public float ThreatBias = 1.0f;
     /// <summary>
     /// Higher number prefers less rotation
     /// </summary>
@@ -103,7 +109,6 @@ public class WeaponData : ScriptableObject
     public float BaseSpreadDegrees = 5f;
 
     [Header("Projectile Stats (Ignore if Hitscan)")]
-    public bool IgnoreObstacles = false;
     public int BaseProjectileCount = 1;
     public float BaseProjectileSpeed = 50f;
     public float BaseProjectileTurnSpeed = 5;

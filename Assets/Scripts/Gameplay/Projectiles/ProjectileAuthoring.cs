@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum MovementType { Linear, Homing }
 public enum TriggerType { Contact, Coordinate, Timer }
-public enum PayloadType { Kinetic, Piercing, Explosive }
+public enum PayloadType { Kinetic, Explosive }
 
 class ProjectileAuthoring : MonoBehaviour
 {
@@ -55,8 +55,6 @@ class ProjectileAuthoring : MonoBehaviour
                 AddComponent<KineticPayload>(entity);
             else if (authoring.Payload == PayloadType.Explosive)
                 AddComponent<ExplosivePayload>(entity);
-            else if (authoring.Payload == PayloadType.Piercing)
-                AddComponent<PiercingPayload>(entity);
         }
     }
 }

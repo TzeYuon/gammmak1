@@ -253,9 +253,11 @@ public class LevelHandoff : MonoBehaviour
                     WeaponTargetingStats = new WeaponTargetingStats
                     {
                         IgnoreObstacles = weapon.IgnoreObstacles,
+                        RequireTargetEntity = weapon.RequireTargetEntity,
                         Range = weapon.GetStat(WeaponStat.Range),
                         RangeSq = range * range,
                         DensityBias = weapon.DensityBias,
+                        ThreatBias = weapon.ThreatBias,
                         AngleBias = weapon.AngleBias,
                         DistanceBias = weapon.DistanceBias,
                     },

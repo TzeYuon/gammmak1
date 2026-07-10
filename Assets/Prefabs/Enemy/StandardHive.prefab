@@ -45,11 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6270de34e21c4e428e67668a4af3ae2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HiveAuthoring
-  trickleSpawnConfigs: []
-  surgeEnemyType: 0
-  surgeSpawnCount: 250
   Size: 5
   maxHealth: 500
+  value: 10000
 --- !u!212 &693153602026284644
 SpriteRenderer:
   serializedVersion: 2

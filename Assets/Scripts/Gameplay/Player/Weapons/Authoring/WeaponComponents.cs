@@ -1,30 +1,17 @@
+using System.Drawing;
 using Unity.Entities;
 using Unity.Mathematics;
 
 public struct WeaponTargetingStats : IComponentData
 {
     public bool IgnoreObstacles;
+    public bool RequireTargetEntity;
     public float Range;
     public float RangeSq;
     public float DensityBias;
+    public float ThreatBias;
     public float AngleBias;
     public float DistanceBias;
-}
-
-/// <summary>
-/// For weapons that target specific enemies
-/// </summary>
-public struct PrecisionTargetingComponent : IComponentData
-{
-    
-}
-
-/// <summary>
-/// For weapons that target the highest density
-/// </summary>
-public struct HeatmapTargetingComponent : IComponentData
-{
-
 }
 
 /// <summary>
@@ -62,6 +49,7 @@ public struct WeaponCombatStats : IComponentData
 public struct HitscanWeapon : IComponentData
 {
     public float2 WeaponStartOffset;
+    public float4 VFXColour;
 }
 
 public struct ProjectileWeapon : IComponentData
@@ -74,5 +62,6 @@ public struct WeaponState : IComponentData
 {
     public float FireTimer;
     public float2 TargetPos;
+    public Entity TargetEntity;
     public bool HasTarget;
 }

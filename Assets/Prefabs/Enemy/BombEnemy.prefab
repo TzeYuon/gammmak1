@@ -52,7 +52,8 @@ MonoBehaviour:
   damageReduction: 0
   baseSpeed: 10
   hitboxRadius: 0.75
-  damage: 100
+  damage: 20
+  value: 1000
   separationWeight: 0.25
   terrainAvoidanceWeight: 1
   noiseWeight: 0.7
