@@ -54,26 +54,20 @@ partial struct HiveDirectorSystem : ISystem
             break;
         }
 
-        var terrainGrid = SystemAPI.GetSingleton<TerrainGridComponent>();
-        int2 startGrid = new int2((int)math.round(startPos.x), (int)math.round(startPos.y)) - terrainGrid.WorldOrigin;
-        int2 endGrid = new int2((int)math.round(destinationPos.x), (int)math.round(destinationPos.y)) - terrainGrid.WorldOrigin;
-
-        NativeList<float2> path = new NativeList<float2>(Allocator.Temp);
-
-        BurstPathfinder.CalculateAStar(startGrid, endGrid, terrainGrid.Grid, terrainGrid.GridWidth, terrainGrid.GridHeight, terrainGrid.WorldOrigin, false, ref path);
-
         if (math.lengthsq(startPos) > 0)
         {
             var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             var prefabs = SystemAPI.GetSingleton<HivePrefabDatabase>();
-            var swarmPrefab = SystemAPI.GetSingleton<EnemyPrefabDatabase>().GetPrefab(EnemyType.Standard);
             float scale = 0.2f;
 
-            Entity queen = ecb.Instantiate(prefabs.GetPrefab(HiveType.Standard));
-            ecb.SetComponent(queen, LocalTransform.FromPosition(startPos).WithScale(scale));
+            Entity seed = ecb.Instantiate(prefabs.GetPrefab(HiveType.Standard));
+            ecb.SetComponent(seed, LocalTransform.FromPosition(startPos).WithScale(scale));
+            ecb.RemoveComponent<HiveComponent>(seed);
+            ecb.AddComponent<SwarmTag>(seed);
 
-            ecb.AddComponent(queen, new SwarmVelocityComponent { Value = float2.zero });
-            ecb.AddComponent(queen, new CaravanQueenComponent
+            ecb.AddComponent(seed, new SwarmVelocityComponent { Value = float2.zero });
+            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = true,  Radius = 15.0f, Damage = 9999.0f });
+            ecb.AddComponent(seed, new HiveSeedComponent
             {
                 Destination = destinationPos,
                 Speed = 5.0f,
@@ -81,22 +75,32 @@ partial struct HiveDirectorSystem : ISystem
                 IncubationTimer = 30.0f,
                 Scale = scale
             });
+            ecb.AddComponent(seed, new HealthComponent { MaxValue = 500, Value = 500 });
+            ecb.AddBuffer<DamageEvent>(seed);
+            ecb.AddComponent<DeadTag>(seed);
+            ecb.SetComponentEnabled<DeadTag>(seed, false);
 
-            for (int i = 0; i < 30; i++) // dont hard code the value later
+            var terrainGrid = SystemAPI.GetSingleton<TerrainGridComponent>();
+            int2 startGrid = new int2((int)math.round(startPos.x), (int)math.round(startPos.y)) - terrainGrid.WorldOrigin;
+            int2 endGrid = new int2((int)math.round(destinationPos.x), (int)math.round(destinationPos.y)) - terrainGrid.WorldOrigin;
+
+            NativeList<float2> path = new NativeList<float2>(Allocator.Temp);
+
+            BurstPathfinder.CalculateAStar(startGrid, endGrid, terrainGrid.Grid, terrainGrid.GridWidth, terrainGrid.GridHeight, terrainGrid.WorldOrigin, false, ref path);
+
+            var waypointBuffer = ecb.AddBuffer<CaravanWaypoint>(seed);
+
+            if (path.Length > 1) path.RemoveAt(0);
+            for (int i = 0; i < path.Length; i++)
             {
-                Entity guard = ecb.Instantiate(swarmPrefab);
-                float angle = rng.NextFloat(0, math.PI * 2);
-                float dist = math.sqrt(rng.NextFloat()) * 5.0f;
-                float3 spawnPos = startPos + new float3(math.cos(angle) * dist, math.sin(angle) * dist, 0);
-
-                ecb.SetComponent(guard, LocalTransform.FromPosition(spawnPos));
+                waypointBuffer.Add(new CaravanWaypoint { Value = path[i] });
             }
-
             UnityEngine.Debug.LogWarning("WARNING: A HIVE SEED HAS DEPARTED!");
+            path.Dispose();
         }
     }
 
-    public struct CaravanQueenComponent : IComponentData
+    public struct HiveSeedComponent : IComponentData
     {
         public float3 Destination;
         public float Speed;
@@ -105,10 +109,9 @@ partial struct HiveDirectorSystem : ISystem
         public float Scale;
     }
 
-    //[InternalBuffer
-    //apacity(20)]
-    //public struct CaravanWaypoint : IBufferElementData
-    //{
-    //    public float2 Value;
-    //}
+    [InternalBufferCapacity(20)]
+    public struct CaravanWaypoint : IBufferElementData
+    {
+        public float2 Value;
+    }
 }

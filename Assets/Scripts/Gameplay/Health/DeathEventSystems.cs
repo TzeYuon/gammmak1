@@ -111,9 +111,9 @@ public partial struct HiveDeathEventSystem : ISystem
             unsafe
             {
                 int newIndex = spawnData.ExpansionSpotCount;
-                if (SystemAPI.HasComponent<HiveDirectorSystem.CaravanQueenComponent>(entity))
+                if (SystemAPI.HasComponent<HiveDirectorSystem.HiveSeedComponent>(entity))
                 {
-                    var queen = SystemAPI.GetComponent<HiveDirectorSystem.CaravanQueenComponent>(entity);
+                    var queen = SystemAPI.GetComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
                     if (newIndex < 10)
                     {
                         spawnData.ExpansionSpotsX[newIndex] = queen.Destination.x;

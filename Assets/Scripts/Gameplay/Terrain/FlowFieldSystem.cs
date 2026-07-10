@@ -77,7 +77,7 @@ partial struct FlowFieldSystem : ISystem
                 _targetPositions.Add(gridPos);
             }
 
-            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<CaravanQueenComponent>())
+            foreach (var transform in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<HiveSeedComponent>())
             {
                 int2 gridPos = new int2(
                     (int)math.round(transform.ValueRO.Position.x),
