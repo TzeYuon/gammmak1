@@ -27,7 +27,7 @@ public class ThreatVisualiser : MonoBehaviour
 
         // 3. Read the data
         var heatmap = entityManager.GetComponentData<FineEnemyHeatmapComponent>(entity);
-        var arr = heatmap.ThreatGrid;
+        var arr = heatmap.Grid;
 
         // 4. Draw the Grid
         // A 100x100 grid is 10,000 cells. Drawing 10,000 empty cubes will lag the Unity Editor.
@@ -41,7 +41,7 @@ public class ThreatVisualiser : MonoBehaviour
             for (int y = 0; y < heatmap.GridHeight; y++)
             {
                 int flatIndex = x + (y * heatmap.GridWidth);
-                int threat = arr[flatIndex];
+                int threat = arr[flatIndex].Threat;
 
                 if (threat > 0)
                 {

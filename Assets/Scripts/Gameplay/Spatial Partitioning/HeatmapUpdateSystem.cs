@@ -1,3 +1,4 @@
+using System.Threading;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -34,16 +35,14 @@ partial struct HeatmapUpdateSystem : ISystem
         }
 
         fineEnemyHeatmap.ValueRO.Map.Clear();
-        ClearArray(fineEnemyHeatmap.ValueRW.DensityGrid);
-        ClearArray(fineEnemyHeatmap.ValueRW.ThreatGrid);
+        ClearHeatmapArray(fineEnemyHeatmap.ValueRW.Grid);
 
         var swarmHeatmapHandle = new SwarmHeatmapJob
         {
             WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
-            DensityGrid = fineEnemyHeatmap.ValueRO.DensityGrid,
-            ThreatGrid = fineEnemyHeatmap.ValueRO.ThreatGrid,
+            Grid = fineEnemyHeatmap.ValueRO.Grid,
             FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
             FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
             FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
@@ -54,8 +53,7 @@ partial struct HeatmapUpdateSystem : ISystem
             WorldOrigin = fineEnemyHeatmap.ValueRO.WorldOrigin,
 
             FineMap = fineEnemyHeatmap.ValueRO.Map.AsParallelWriter(),
-            DensityGrid = fineEnemyHeatmap.ValueRO.DensityGrid,
-            ThreatGrid = fineEnemyHeatmap.ValueRO.ThreatGrid,
+            Grid = fineEnemyHeatmap.ValueRO.Grid,
             FineCellSize = fineEnemyHeatmap.ValueRO.CellSize,
             FineGridWidth = fineEnemyHeatmap.ValueRO.GridWidth,
             FineGridHeight = fineEnemyHeatmap.ValueRO.GridHeight,
@@ -64,12 +62,12 @@ partial struct HeatmapUpdateSystem : ISystem
         state.Dependency = hiveHeatmapHandle;
     }
 
-    public void ClearArray(NativeArray<int> myArray)
+    public void ClearHeatmapArray(NativeArray<HeatmapData> myArray)
     {
         unsafe
         {
             void* pointer = NativeArrayUnsafeUtility.GetUnsafePtr(myArray);
-            long sizeInBytes = myArray.Length * sizeof(int);
+            long sizeInBytes = myArray.Length * sizeof(HeatmapData);
             UnsafeUtility.MemClear(pointer, sizeInBytes);
         }
     }
@@ -89,8 +87,7 @@ public partial struct SwarmHeatmapJob : IJobEntity
     public int2 WorldOrigin;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
-    [NativeDisableParallelForRestriction] public NativeArray<int> DensityGrid;
-    [NativeDisableParallelForRestriction] public NativeArray<int> ThreatGrid;
+    [NativeDisableParallelForRestriction] public NativeArray<HeatmapData> Grid;
     public float FineCellSize;
     public int FineGridWidth;
     public int FineGridHeight;
@@ -108,8 +105,13 @@ public partial struct SwarmHeatmapJob : IJobEntity
         {
             int fineCellIndex = GridUtility.CellToIndex(fineCell, FineGridWidth);
             FineMap.Add(fineCellIndex, entity);
-            DensityGrid.InterlockedAdd(fineCellIndex, 1);
-            ThreatGrid.InterlockedAdd(fineCellIndex, enemyValue.Value);
+
+            unsafe
+            {
+                HeatmapData* heatmapPtr = (HeatmapData*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(Grid);
+                Interlocked.Add(ref heatmapPtr[fineCellIndex].Density, 1);
+                Interlocked.Add(ref heatmapPtr[fineCellIndex].Threat, enemyValue.Value);
+            }
         }
     }
 }
@@ -121,8 +123,7 @@ public partial struct HiveHeatmapJob : IJobEntity
     public int2 WorldOrigin;
 
     public NativeParallelMultiHashMap<int, Entity>.ParallelWriter FineMap;
-    [NativeDisableParallelForRestriction] public NativeArray<int> DensityGrid;
-    [NativeDisableParallelForRestriction] public NativeArray<int> ThreatGrid;
+    [NativeDisableParallelForRestriction] public NativeArray<HeatmapData> Grid;
     public float FineCellSize;
     public int FineGridWidth;
     public int FineGridHeight;
@@ -152,8 +153,13 @@ public partial struct HiveHeatmapJob : IJobEntity
                     {
                         int fineCellIndex = GridUtility.CellToIndex(checkCell, FineGridWidth);
                         FineMap.Add(fineCellIndex, entity);
-                        DensityGrid.InterlockedAdd(fineCellIndex, 1);
-                        ThreatGrid.InterlockedAdd(fineCellIndex, enemyValue.Value);
+
+                        unsafe
+                        {
+                            HeatmapData* heatmapPtr = (HeatmapData*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(Grid);
+                            Interlocked.Add(ref heatmapPtr[fineCellIndex].Density, 1);
+                            Interlocked.Add(ref heatmapPtr[fineCellIndex].Threat, enemyValue.Value);
+                        }
                     }
                 }
             }

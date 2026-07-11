@@ -48,7 +48,7 @@ partial struct ProjectileSystem : ISystem
         var homingHandle = new HomingFlightJob 
         { 
             DeltaTime = deltaTime,
-            Map = fineHeatmap.DensityGrid,
+            Map = fineHeatmap.Grid,
             WorldOrigin = fineHeatmap.WorldOrigin,
             GridWidth = fineHeatmap.GridWidth,
             GridHeight = fineHeatmap.GridHeight,
@@ -124,7 +124,7 @@ public partial struct LinearFlightJob : IJobEntity
 public partial struct HomingFlightJob : IJobEntity
 {
     public float DeltaTime;
-    [ReadOnly] public NativeArray<int> Map;
+    [ReadOnly] public NativeArray<HeatmapData> Map;
     public int2 WorldOrigin;
     public int GridWidth;
     public int GridHeight;
@@ -155,7 +155,7 @@ public partial struct HomingFlightJob : IJobEntity
                 // Bounds check
                 if (!GridUtility.IsWithinBounds(checkCell, GridWidth, GridHeight)) continue;
 
-                int density = Map[GridUtility.CellToIndex(checkCell, GridWidth)];
+                int density = Map[GridUtility.CellToIndex(checkCell, GridWidth)].Density;
                 if (density <= 0) continue;
 
                 float2 cellWorldPos = GridUtility.CellToWorldPosCenter(checkCell, WorldOrigin, CellSize);

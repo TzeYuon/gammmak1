@@ -6,8 +6,7 @@ using Unity.Entities;
 partial struct HeatmapInitSystem : ISystem
 {
     private NativeParallelMultiHashMap<int, Entity> fineEnemyHashmap;
-    private NativeArray<int> densityArray;
-    private NativeArray<int> threatArray;
+    private NativeArray<HeatmapData> heatmapArray;
 
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -24,13 +23,11 @@ partial struct HeatmapInitSystem : ISystem
 
         fineEnemyHashmap = new NativeParallelMultiHashMap<int, Entity>(10000, Allocator.Persistent);
         int fineEnemySize = settings.FineWidth * settings.FineHeight;
-        densityArray = new NativeArray<int>(fineEnemySize, Allocator.Persistent);
-        threatArray = new NativeArray<int>(fineEnemySize, Allocator.Persistent);
+        heatmapArray = new NativeArray<HeatmapData>(fineEnemySize, Allocator.Persistent);
         state.EntityManager.AddComponentData(e, new FineEnemyHeatmapComponent
         {
             Map = fineEnemyHashmap,
-            DensityGrid = densityArray,
-            ThreatGrid = threatArray,
+            Grid = heatmapArray,
             WorldOrigin = settings.WorldOrigin,
             CellSize = settings.FineCellSize,
             GridWidth = settings.FineWidth,
@@ -44,7 +41,6 @@ partial struct HeatmapInitSystem : ISystem
     public void OnDestroy(ref SystemState state)
     {
         if (fineEnemyHashmap.IsCreated) fineEnemyHashmap.Dispose();
-        if (densityArray.IsCreated) densityArray.Dispose();
-        if (threatArray.IsCreated) threatArray.Dispose();
+        if (heatmapArray.IsCreated) heatmapArray.Dispose();
     }
 }
