@@ -38,7 +38,7 @@ MonoBehaviour:
         Weight: 1
     EnemyPool:
       Pool:
-      - Item: {fileID: 11400000, guid: 3a490bdbcb0c7b44788a4d3f8a58c389, type: 2}
+      - Item: {fileID: 11400000, guid: b9a646cf0aca34b4cb013eeaa9299ed1, type: 2}
         Weight: 1
     StandardRewardPool:
       Pool:

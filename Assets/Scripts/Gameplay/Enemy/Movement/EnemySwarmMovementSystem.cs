@@ -36,7 +36,7 @@ partial struct EnemySwarmMovementSystem : ISystem
             GridHeight = terrainGrid.GridHeight,
             WorldOrigin = terrainGrid.WorldOrigin,
 
-            Heatmap = fineEnemyHeatmap.DensityGrid,
+            Heatmap = fineEnemyHeatmap.Grid,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
             HeatmapCellSize = fineEnemyHeatmap.CellSize,
             HeatmapGridWidth = fineEnemyHeatmap.GridWidth,
@@ -54,7 +54,7 @@ partial struct EnemySwarmMovementSystem : ISystem
             GridHeight = terrainGrid.GridHeight,
             WorldOrigin = terrainGrid.WorldOrigin,
 
-            Heatmap = fineEnemyHeatmap.DensityGrid,
+            Heatmap = fineEnemyHeatmap.Grid,
             HeatmapWorldOrigin = fineEnemyHeatmap.WorldOrigin,
             HeatmapCellSize = fineEnemyHeatmap.CellSize,
             HeatmapGridWidth = fineEnemyHeatmap.GridWidth,
@@ -81,7 +81,7 @@ public partial struct FlowFieldMovementJob : IJobEntity
     public int GridHeight;
     public int2 WorldOrigin;
 
-    [ReadOnly] public NativeArray<int> Heatmap;
+    [ReadOnly] public NativeArray<HeatmapData> Heatmap;
     public int2 HeatmapWorldOrigin;
     public float HeatmapCellSize;
     public int HeatmapGridWidth;
@@ -184,10 +184,10 @@ public partial struct FlowFieldMovementJob : IJobEntity
         if (GridUtility.IsWithinBounds(curPos.xy, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth, HeatmapGridHeight))
         {
             int heatmapIndex = GridUtility.WorldPosToIndex(curPos, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth);
-            int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1] : 100;
-            int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1] : 100;
-            int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth] : 100;
-            int densityDown = GridUtility.IsWithinBounds(heatmapIndex - HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - HeatmapGridWidth] : 100;
+            int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1].Density : 100;
+            int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1].Density : 100;
+            int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth].Density : 100;
+            int densityDown = GridUtility.IsWithinBounds(heatmapIndex - HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - HeatmapGridWidth].Density : 100;
 
             float gradientX = densityRight - densityLeft;
             float gradientY = densityUp - densityDown;
@@ -269,7 +269,7 @@ public partial struct SiegePathMovementJob : IJobEntity
     public int GridHeight;
     public int2 WorldOrigin;
 
-    [ReadOnly] public NativeArray<int> Heatmap;
+    [ReadOnly] public NativeArray<HeatmapData> Heatmap;
     public int2 HeatmapWorldOrigin;
     public float HeatmapCellSize;
     public int HeatmapGridWidth;
@@ -423,10 +423,10 @@ public partial struct SiegePathMovementJob : IJobEntity
         if (GridUtility.IsWithinBounds(curPos.xy, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth, HeatmapGridHeight))
         {
             int heatmapIndex = GridUtility.WorldPosToIndex(curPos, HeatmapWorldOrigin, HeatmapCellSize, HeatmapGridWidth);
-            int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1] : 100;
-            int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1] : 100;
-            int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth] : 100;
-            int densityDown = GridUtility.IsWithinBounds(heatmapIndex - HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - HeatmapGridWidth] : 100;
+            int densityRight = GridUtility.IsWithinBounds(heatmapIndex + 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + 1].Density : 100;
+            int densityLeft = GridUtility.IsWithinBounds(heatmapIndex - 1, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - 1].Density : 100;
+            int densityUp = GridUtility.IsWithinBounds(heatmapIndex + HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex + HeatmapGridWidth].Density : 100;
+            int densityDown = GridUtility.IsWithinBounds(heatmapIndex - HeatmapGridWidth, HeatmapGridWidth, HeatmapGridHeight) ? Heatmap[heatmapIndex - HeatmapGridWidth].Density : 100;
 
             float gradientX = densityRight - densityLeft;
             float gradientY = densityUp - densityDown;
