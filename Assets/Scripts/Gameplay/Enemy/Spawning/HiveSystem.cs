@@ -26,7 +26,7 @@ partial struct HiveSystem : ISystem
         float elapsedTime = (float)SystemAPI.Time.ElapsedTime;
         float deltaTime = SystemAPI.Time.DeltaTime;
         var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
-                           .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
+                           .CreateCommandBuffer(state.WorldUnmanaged);
 
         int currentEnemyCount = swarmQuery.CalculateEntityCount();
         
@@ -61,24 +61,25 @@ partial struct HiveSystem : ISystem
                     int spawnCount = (int)math.floor(spawner.SpawnCount * difficultyState.SpawnCountMult);
                     for (int b = 0; b < spawnCount; b++)
                     {
-                        Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
+                        Entity spawnedEnemy = ecb.Instantiate(prefab);
 
                         float angle = rng.NextFloat(0, math.PI * 2);
                         float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
                         float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
-                        ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                        ecb.SetComponent(spawnedEnemy, LocalTransform.FromPosition(spawnPos));
 
                         // set up siege enemy if correct type
                         if (spawner.Type == EnemyType.Siege)
                         {
-                            ecb.AddComponent(entity.Index, spawnedEnemy, new PathFollowerComponent
+                            ecb.AddComponent(spawnedEnemy, new PathFollowerComponent
                             {
                                 TargetPath = entity,
                                 CurrentProgress = 0,
                             });
                         }
+                        ecb.SetComponent(spawnedEnemy, LocalTransform.FromPosition(spawnPos));
                     }
 
                     spawnerBuffer.RemoveAt(i);
@@ -119,19 +120,19 @@ partial struct HiveSystem : ISystem
                     Entity prefab = enemyPrefabDatabase.GetPrefab(enemyType);
                     for (int i = 0; i < amountToSpawn; i++)
                     {
-                        Entity spawnedEnemy = ecb.Instantiate(entity.Index, prefab);
+                        Entity spawnedEnemy = ecb.Instantiate(prefab);
 
                         float angle = rng.NextFloat(0, math.PI * 2);
                         float dist = math.sqrt(rng.NextFloat()) * spawnRadius;
                         float2 randomOffset = new float2(math.cos(angle), math.sin(angle)) * dist;
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
-                        ecb.SetComponent(entity.Index, spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                        ecb.SetComponent(spawnedEnemy, LocalTransform.FromPosition(spawnPos));
 
                         // set up siege enemy if correct type
                         if (enemyType == EnemyType.Siege)
                         {
-                            ecb.AddComponent(entity.Index, spawnedEnemy, new PathFollowerComponent
+                            ecb.AddComponent(spawnedEnemy, new PathFollowerComponent
                             {
                                 TargetPath = entity,
                                 CurrentProgress = 0,

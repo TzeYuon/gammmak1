@@ -26,9 +26,11 @@ public struct LevelSpawnData : IComponentData
     public float3 MothershipSpawn;
     public unsafe fixed float HiveSpawnsX[8];
     public unsafe fixed float HiveSpawnsY[8];
-
-    public int TotalHiveSpots;
     public int ActiveHiveCount;
+
+    public unsafe fixed float ExpansionSpotsX[8];
+    public unsafe fixed float ExpansionSpotsY[8];
+    public int ExpansionSpotCount;
 }
 
 /// <summary>

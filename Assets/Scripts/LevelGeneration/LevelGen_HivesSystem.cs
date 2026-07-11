@@ -98,7 +98,7 @@ partial struct LevelGen_HivesSystem : ISystem
             var rng = new Unity.Mathematics.Random(levelBlueprint.Seed);
 
             // Spawn hives at given spots
-            for (int i = 0; i < spawnData.TotalHiveSpots; i++)
+            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
             {
                 Entity hiveEntity = state.EntityManager.Instantiate(hivePrefab);
 
@@ -150,6 +150,8 @@ partial struct LevelGen_HivesSystem : ISystem
                 {
                     state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, false);
                 }
+                state.EntityManager.AddComponent<ActiveHiveTag>(hiveEntity);
+                state.EntityManager.SetComponentEnabled<ActiveHiveTag>(hiveEntity, true);
             }
 
             hivePool.Dispose();

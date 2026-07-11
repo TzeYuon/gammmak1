@@ -100,7 +100,6 @@ partial struct LevelGen_TerrainSystem : ISystem
                 case TerrainType.Asteroids:
                     // Default
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.TotalHiveSpots = 1;
                     spawnData.ActiveHiveCount = 1;
                     spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
                     break;
@@ -108,53 +107,59 @@ partial struct LevelGen_TerrainSystem : ISystem
                 case TerrainType.Cavern:
                     // Maybe can spawn new hives periodically while starting with <8?
                     spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                    spawnData.TotalHiveSpots = 8;
                     spawnData.ActiveHiveCount = 2;
                     spawnData.HiveSpawnsX[0] = Xtl; spawnData.HiveSpawnsY[0] = Ytl;
                     spawnData.HiveSpawnsX[1] = Xtr; spawnData.HiveSpawnsY[1] = Ytr;
-                    spawnData.HiveSpawnsX[2] = Xbr; spawnData.HiveSpawnsY[2] = Ybr;
-                    spawnData.HiveSpawnsX[3] = Xbl; spawnData.HiveSpawnsY[3] = Ybl;
-                    spawnData.HiveSpawnsX[4] = Xt; spawnData.HiveSpawnsY[4] = Yt;
-                    spawnData.HiveSpawnsX[5] = Xr; spawnData.HiveSpawnsY[5] = Yr;
-                    spawnData.HiveSpawnsX[6] = Xl; spawnData.HiveSpawnsY[6] = Yl;
-                    spawnData.HiveSpawnsX[7] = Xb; spawnData.HiveSpawnsY[7] = Yb;
+                    spawnData.ExpansionSpotCount = 6;
+                    spawnData.ExpansionSpotsX[0] = Xbr; spawnData.ExpansionSpotsY[0] = Ybr;
+                    spawnData.ExpansionSpotsX[1] = Xbl; spawnData.ExpansionSpotsY[1] = Ybl;
+                    spawnData.ExpansionSpotsX[2] = Xt; spawnData.ExpansionSpotsY[2] = Yt;
+                    spawnData.ExpansionSpotsX[3] = Xr; spawnData.ExpansionSpotsY[3] = Yr;
+                    spawnData.ExpansionSpotsX[4] = Xl; spawnData.ExpansionSpotsY[4] = Yl;
+                    spawnData.ExpansionSpotsX[5] = Xb; spawnData.ExpansionSpotsY[5] = Yb;
                     break;
                 case TerrainType.OneTunnel:
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.TotalHiveSpots = 1;
                     spawnData.ActiveHiveCount = 1;
                     spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
+                    spawnData.ExpansionSpotCount = 0;
                     break;
 
                 case TerrainType.Maze:
                     spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.TotalHiveSpots = 4;
                     spawnData.ActiveHiveCount = 2;
                     spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
                     spawnData.HiveSpawnsX[1] = Xbr; spawnData.HiveSpawnsY[1] = Ybr;
-                    spawnData.HiveSpawnsX[2] = Xtl; spawnData.HiveSpawnsY[2] = Ytl;
-                    spawnData.HiveSpawnsX[3] = Xt; spawnData.HiveSpawnsY[3] = Yt;
+                    spawnData.ExpansionSpotCount = 2;
+                    spawnData.ExpansionSpotsX[0] = Xtl; spawnData.ExpansionSpotsY[0] = Ytl;
+                    spawnData.ExpansionSpotsX[1] = Xt; spawnData.ExpansionSpotsY[1] = Yt;
                     break;
 
                 default:
                     spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                    spawnData.TotalHiveSpots = 4;
                     spawnData.ActiveHiveCount = 4;
                     spawnData.HiveSpawnsX[0] = Xtl; spawnData.HiveSpawnsY[0] = Ytl;
                     spawnData.HiveSpawnsX[1] = Xtr; spawnData.HiveSpawnsY[1] = Ytr;
                     spawnData.HiveSpawnsX[2] = Xbr; spawnData.HiveSpawnsY[2] = Ybr;
                     spawnData.HiveSpawnsX[3] = Xbl; spawnData.HiveSpawnsY[3] = Ybl;
+                    spawnData.ExpansionSpotCount = 0;
                     break;
             }
         }
 
-        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.TotalHiveSpots + 1, Allocator.Temp);
+        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.ActiveHiveCount + spawnData.ExpansionSpotCount + 1, Allocator.Temp);
         spawnPoints[0] = spawnData.MothershipSpawn;
+
+        int pointIndex = 1;
         unsafe
         {
-            for (int i = 0; i < spawnData.TotalHiveSpots; i++)
+            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
             {
-                spawnPoints[i + 1] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
+                spawnPoints[pointIndex++] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
+            }
+            for (int i = 0; i < spawnData.ExpansionSpotCount; i++)
+            {
+                spawnPoints[pointIndex++] = new float3(spawnData.ExpansionSpotsX[i], spawnData.ExpansionSpotsY[i], 0);
             }
         }
 
