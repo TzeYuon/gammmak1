@@ -17,7 +17,7 @@ partial struct HiveDirectorSystem : ISystem
         state.RequireForUpdate<ActiveHiveTag>();
         state.RequireForUpdate<HivePrefabDatabase>();
 
-        eventTimer = 10.0f; // Change this
+        eventTimer = 120.0f;
         rng = new Random(6767);
     }
 
@@ -66,7 +66,7 @@ partial struct HiveDirectorSystem : ISystem
             ecb.AddComponent<SwarmTag>(seed);
 
             ecb.AddComponent(seed, new SwarmVelocityComponent { Value = float2.zero });
-            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = false,  Radius = 15.0f, Damage = 9999.0f });
+            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = true,  Radius = 15.0f, Damage = 9999.0f });
             ecb.AddComponent(seed, new HiveSeedComponent
             {
                 Destination = destinationPos,
@@ -95,7 +95,7 @@ partial struct HiveDirectorSystem : ISystem
             {
                 waypointBuffer.Add(new CaravanWaypoint { Value = path[i] });
             }
-            UnityEngine.Debug.LogWarning("WARNING: A HIVE SEED HAS DEPARTED!");
+            //UnityEngine.Debug.LogWarning("WARNING: A HIVE SEED HAS DEPARTED!");
             path.Dispose();
         }
     }
