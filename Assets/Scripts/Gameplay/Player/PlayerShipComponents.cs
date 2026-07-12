@@ -73,3 +73,21 @@ public struct ArcAngleOverride : IComponentData
 {
     public float Value;
 }
+
+// Shield components
+public struct ShieldComponent : IComponentData
+{
+    public float CurrentCapacity;
+    public float MaxCapacity;
+    public float RegenPerSecond;
+
+    public float Radius;
+    public float DamagePerSecond; // How much damage it deals to a bug
+    public float BonusShieldEfficiency; // Capacity loss = damage dealt * (1 - Shield efficiency)
+}
+
+[MaterialProperty("_ShieldOpacity")]
+public struct ShieldOpacityOverride : IComponentData
+{
+    public float Value;
+}

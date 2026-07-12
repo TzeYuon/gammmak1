@@ -105,6 +105,21 @@ public partial struct ShipSpawnerSystem : ISystem
             ecb.SetComponent(newShip, shipBlueprint.ShipRevealFogRadius);
             ecb.SetComponent(newShip, shipBlueprint.ShipCollectionRadiusStat);
 
+            // set shield if present
+            if (shipBlueprint.HasShield) 
+            {
+                var shieldEntity = ecb.Instantiate(shipBlueprint.ShieldPrefab);
+
+                // parent to ship
+                ecb.AddComponent(shieldEntity, new Parent { Value = newShip });
+
+                // add shield components
+                ecb.AddComponent(shieldEntity, shipBlueprint.ShieldComponent); 
+                ecb.AddComponent(shieldEntity, new ShieldOpacityOverride{ Value = 1 });
+
+                ecb.AppendToBuffer(newShip, new LinkedEntityGroup { Value = shieldEntity });
+            }
+
             // spawn weapons
             if (!weaponBufferLookup.HasBuffer(shipBlueprintEntity)) continue;
             var weaponBuffer = weaponBufferLookup[shipBlueprintEntity];

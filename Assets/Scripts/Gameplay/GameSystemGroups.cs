@@ -59,6 +59,7 @@ public partial class ActionAndMovementGroup : ComponentSystemGroup { }
 public partial class CollisionAndDamageGroup : ComponentSystemGroup { }
 /*
     ProcessAOESystem
+    ShieldSystem
     PlayerShipCollisionSystem
     BiomassCollectionSystem
 */

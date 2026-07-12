@@ -74,7 +74,11 @@ public enum ShipStat
     CollectionRadius,
     WeaponCapacity,
     RevealFogRadius,
-    DamageReduction
+    DamageReduction,
+    ShieldMaxCapacity,
+    ShieldRegenPerSecond,
+    ShieldDamage,
+    ShieldEfficiencyBonus,
 }
 
 [System.Serializable]
@@ -176,6 +180,15 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseRevealFogRadius = 25f;
     public float BaseCollectionRadius = 5f;
 
+    [Header("Base Shield Stats")]
+    public bool HasShield = true;
+    public float ShieldRadius;
+    public float BaseShieldMaxCapacity;
+    public float BaseShieldRegenPerSecond;
+    public float BaseShieldDamage;
+    [Tooltip("1 means shield takes no capacity to deal damage, 0 means shield takes capacity equals to damage dealt")]
+    public float BaseShieldEfficiencyBonus = 0;
+
     public void ResetToBase()
     {
         foreach (ShipSystem system in ShipSystems)
@@ -247,6 +260,10 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.RevealFogRadius: baseValue = BaseRevealFogRadius; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
             case ShipStat.WeaponCapacity: baseValue = BaseWeaponCapacity; break;
+            case ShipStat.ShieldMaxCapacity: baseValue = BaseShieldMaxCapacity; break;
+            case ShipStat.ShieldRegenPerSecond: baseValue = BaseShieldRegenPerSecond; break;
+            case ShipStat.ShieldDamage: baseValue = BaseShieldDamage; break;
+            case ShipStat.ShieldEfficiencyBonus: baseValue = BaseShieldEfficiencyBonus; break;
         }
 
         float flatBonus = 0f;
@@ -285,7 +302,7 @@ public class ShipBlueprintData : ScriptableObject
     /// <summary>
     /// Syncs the weapon mounts on the prefab of the ship and clears all weapons
     /// </summary>
-    [ContextMenu("Sync Weapon Mounts From Prefab")]
+    [ContextMenu("Sync Variables From Prefab")]
     public void SyncMounts()
     {
         if (ShipPrefab == null)
