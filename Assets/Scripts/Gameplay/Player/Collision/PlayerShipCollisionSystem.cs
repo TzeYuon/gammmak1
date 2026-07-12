@@ -34,6 +34,7 @@ partial struct PlayerShipCollisionSystem : ISystem
             SwarmDamageLookup = swarmDamageLookup,
             CollisionRadiusLookup = collisionRadiusLookup,
             ECB = ecb,
+            DeltaTime = SystemAPI.Time.DeltaTime,
             WorldOrigin = fineMap.WorldOrigin,
             CellSize = fineMap.CellSize,
             GridWidth = fineMap.GridWidth,
@@ -63,6 +64,8 @@ public partial struct ContactDamageJob : IJobEntity
     [ReadOnly] public ComponentLookup<CollisionRadius> CollisionRadiusLookup;
 
     public EntityCommandBuffer.ParallelWriter ECB;
+
+    public float DeltaTime;
 
     public int2 WorldOrigin;
     public float CellSize;
@@ -180,7 +183,7 @@ public partial struct ContactDamageJob : IJobEntity
                             var enemyHealth = HealthLookup[enemyEntity];
                             if (enemyHealth.Value <= 0) continue;
 
-                            var damage = SwarmDamageLookup[enemyEntity].Damage;
+                            var damage = SwarmDamageLookup[enemyEntity].DamagePerSecond * DeltaTime;
 
                             ECB.AppendToBuffer(chunkIndex, entity, new DamageEvent { Value = damage });
                             ECB.AppendToBuffer(chunkIndex, enemyEntity, new DamageEvent { Value = damage });

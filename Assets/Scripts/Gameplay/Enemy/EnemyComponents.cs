@@ -45,7 +45,7 @@ public struct SwarmMovementStatsComponent : IComponentData
 
 public struct SwarmDamageComponent : IComponentData
 {
-    public float Damage;
+    public float DamagePerSecond;
 }
 
 public struct SwarmVelocityComponent : IComponentData

@@ -8,7 +8,7 @@ class EnemyAuthoring : MonoBehaviour
     [SerializeField] float damageReduction = 0;
     [SerializeField] float baseSpeed;
     [SerializeField] float hitboxRadius;
-    [SerializeField] float damage;
+    [SerializeField] float damagePerSecond;
 
     [Header("Weapon Targeting Variables")]
     [SerializeField] int value;
@@ -39,7 +39,7 @@ class EnemyAuthoring : MonoBehaviour
             // damage
             AddComponent(entity, new SwarmDamageComponent
             {
-                Damage = authoring.damage,
+                DamagePerSecond = authoring.damagePerSecond,
             });
 
             // weapon targeting
