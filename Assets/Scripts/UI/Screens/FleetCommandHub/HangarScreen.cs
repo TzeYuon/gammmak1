@@ -392,6 +392,7 @@ public class HangarContextMenu
     public void Hide()
     {
         container.style.display = DisplayStyle.None;
+        WeaponMountContext.UpdateViewingWeapon(null);
     }
 
     public void ShowWeaponMount(WeaponMount mount)

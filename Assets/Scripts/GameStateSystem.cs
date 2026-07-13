@@ -54,7 +54,7 @@ public partial class GameStateSystem : SystemBase
         if (stateData.CurrentState != previousState)
         {
             OnStateChanged?.Invoke(previousState, stateData.CurrentState);
-            previousState = stateData.CurrentState;   
+            previousState = stateData.CurrentState;
         }
     }
 

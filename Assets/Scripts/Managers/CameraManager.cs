@@ -53,14 +53,14 @@ public class CameraManager : MonoBehaviour
 
         void UpdateZoom()
         {
-            cameraTargetZoom -= zoomDir * zoomSpeed * Time.unscaledDeltaTime;
+            cameraTargetZoom -= zoomDir * zoomSpeed * Time.deltaTime;
             cameraTargetZoom = Mathf.Clamp(cameraTargetZoom, minZoom, maxZoom);
             cameraComponent.orthographicSize = Mathf.Lerp(cameraComponent.orthographicSize, cameraTargetZoom, Time.unscaledDeltaTime * 5);
         }
 
         void UpdateMove()
         {
-            float dt = Time.unscaledDeltaTime;
+            float dt = Time.deltaTime;
             Vector2 moveInput = Vector3.zero;
 
             float zoomRatio = cameraComponent.orthographicSize / minZoom;

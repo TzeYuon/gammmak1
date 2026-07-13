@@ -12,6 +12,10 @@ public class FleetCommandHubScreen : UIScreen
 
     private Label upgradeCoreCounter;
 
+    private EntityManager entityManager;
+    private EntityQuery inputQuery;
+    private EntityQuery gameStateQuery;
+
     public FleetCommandHubScreen(
         UIScreenManager manager, 
         VisualElement root, 
@@ -31,6 +35,14 @@ public class FleetCommandHubScreen : UIScreen
 
         upgradeCoreCounter = root.Q<Label>("UpgradeCoreCounter");
         UpdateUpgradeCoreCounter();
+
+        var world = World.DefaultGameObjectInjectionWorld;
+        if (world != null)
+        {
+            entityManager = world.EntityManager;
+            inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
+            gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
+        }
     }
 
     protected override void OnHide()
@@ -45,6 +57,24 @@ public class FleetCommandHubScreen : UIScreen
         weaponsScreen.Hide();
         starmapScreen.Hide();
         UpdateUpgradeCoreCounter();
+    }
+
+    public override void DoUpdate()
+    {
+        // exit if not in fleet command
+        if (gameStateQuery.IsEmptyIgnoreFilter) return;
+        gameStateQuery.CompleteDependency();
+        var gameState = gameStateQuery.GetSingleton<GameStateSingleton>();
+        if (gameState.CurrentState != GameState.FleetCommandHub) return;
+
+        if (inputQuery.IsEmptyIgnoreFilter) return;
+        var inputData = inputQuery.GetSingleton<PlayerInputData>();
+
+        // check if pause was pressed
+        if (inputData.WasPressed(PlayerAction.Cancel))
+        {
+            ChangeGameState(GameState.Paused);
+        }
     }
 
     private void ShowScreen(IUIScreen screenToShow)
@@ -62,5 +92,13 @@ public class FleetCommandHubScreen : UIScreen
     {
         if (playerSaveData == null) return;
         upgradeCoreCounter.text = $"CORES: {playerSaveData.UpgradeCoresRemaining}";
+    }
+
+    private void ChangeGameState(GameState targetState)
+    {
+        if (gameStateQuery.IsEmptyIgnoreFilter) return;
+        gameStateQuery.CompleteDependency();
+        var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
+        gameState.ValueRW.CurrentState = targetState;
     }
 }

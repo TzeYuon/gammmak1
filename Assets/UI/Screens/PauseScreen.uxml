@@ -1,7 +1,9 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <engine:VisualElement name="Container" style="flex-grow: 1; justify-content: center; align-self: center;">
-        <engine:Button text="Resume" name="ResumeButton" />
-        <engine:Button text="Settings" name="SettingsButton" />
-        <engine:Button text="Exit" name="ExitButton" />
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <engine:VisualElement name="Container" style="flex-grow: 1; justify-content: center; align-self: center; background-color: rgba(8, 12, 26, 0.85); width: 100%; height: 100%;">
+        <engine:Button text="RESUME" name="ResumeButton" class="button text" style="align-self: center; font-size: 30px;"/>
+        <engine:Button text="Settings" name="SettingsButton" style="display: none;"/>
+        <engine:Button text="MAIN MENU" name="ExitButton" class="button text" style="font-size: 30px; align-self: center;"/>
     </engine:VisualElement>
 </engine:UXML>

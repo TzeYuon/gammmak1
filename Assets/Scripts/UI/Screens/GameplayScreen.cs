@@ -10,7 +10,6 @@ public class GameplayScreen : UIScreen
     private PlayerSaveData playerSaveData;
 
     private EntityManager entityManager;
-    private EntityQuery inputQuery;
 
     private Camera camera;
 
@@ -61,7 +60,6 @@ public class GameplayScreen : UIScreen
             if (world != null)
             {
                 entityManager = world.EntityManager;
-                inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
                 economyQuery = entityManager.CreateEntityQuery(typeof(PlayerEconomy));
                 queueQuery = entityManager.CreateEntityQuery(typeof(SpawnQueueSingleton));
                 gameStateQuery = entityManager.CreateEntityQuery(typeof(GameStateSingleton));
@@ -82,18 +80,12 @@ public class GameplayScreen : UIScreen
 
             victoryContinueButton.clicked += () =>
             {
-                if (gameStateQuery.IsEmptyIgnoreFilter) return;
-                gameStateQuery.CompleteDependency();
-                var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-                gameState.ValueRW.CurrentState = GameState.FleetCommandHub;
+                ChangeGameState(GameState.FleetCommandHub);
             };
 
             defeatContinueButton.clicked += () =>
             {
-                if (gameStateQuery.IsEmptyIgnoreFilter) return;
-                gameStateQuery.CompleteDependency();
-                var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-                gameState.ValueRW.CurrentState = GameState.MainMenu;
+                ChangeGameState(GameState.MainMenu);
             };
 
             // init rewards
@@ -111,6 +103,7 @@ public class GameplayScreen : UIScreen
         GameStateSystem.OnStateChanged -= HandleStateChange;
         EconomyEventSystem.OnBiomassChanged -= UpdateReinforcementBtns;
         RewardManager.OnRewardGranted -= OnRewardGranted;
+        FleetCommandSystem.OnSelectionBoxChanged -= OnSelectionBoxChanged;
     }
 
     protected override void OnShow()
@@ -124,6 +117,7 @@ public class GameplayScreen : UIScreen
         GameStateSystem.OnStateChanged += HandleStateChange;
         EconomyEventSystem.OnBiomassChanged += UpdateReinforcementBtns;
         RewardManager.OnRewardGranted += OnRewardGranted;
+        FleetCommandSystem.OnSelectionBoxChanged += OnSelectionBoxChanged;
 
         void RebuildReinforcementPopup()
         {
@@ -201,6 +195,32 @@ public class GameplayScreen : UIScreen
             }
         }
     }
+    
+    private void OnSelectionBoxChanged(float2 min, float2 max)
+    {
+        if (float2.Equals(min, 0) && float2.Equals(max, 0))
+        {
+            // Hide selection box
+            selectionBox.style.display = DisplayStyle.None;
+            return;
+        }
+
+        Vector2 uiMin = WorldToUI(min);
+        Vector2 uiMax = WorldToUI(max);
+        
+        float left = uiMin.x;
+        float top = uiMax.y;
+
+        float width = uiMax.x - uiMin.x;
+        float height = uiMin.y - uiMax.y;
+
+        selectionBox.style.left = left;
+        selectionBox.style.top = top;
+        selectionBox.style.width = width;
+        selectionBox.style.height = height;
+
+        selectionBox.style.display = DisplayStyle.Flex;
+    }
 
     void UpdateReinforcementBtns(float amount)
     {
@@ -212,50 +232,8 @@ public class GameplayScreen : UIScreen
 
     public override void DoUpdate()
     {
-        if (inputQuery.IsEmptyIgnoreFilter) return;
-        var inputData = inputQuery.GetSingleton<PlayerInputData>();
-
-        UpdateSelectionBox();
         UpdateBiomassCounter();
-        UpdateReinforcementPopup();
         UpdateSurgeWarning();
-
-        void UpdateSelectionBox()
-        {
-            if (inputData.IsHeld(PlayerAction.Primary))
-            {
-                selectionBox.style.display = DisplayStyle.Flex;
-
-                Vector2 uiStart = WorldToUI(inputData.MouseStartDragPosition);
-                Vector2 uiCurrent = WorldToUI(inputData.MouseWorldPosition);
-
-                float left = math.min(uiStart.x, uiCurrent.x);
-                float top = math.min(uiStart.y, uiCurrent.y);
-                float width = math.abs(uiStart.x - uiCurrent.x);
-                float height = math.abs(uiStart.y - uiCurrent.y);
-
-                selectionBox.style.left = left;
-                selectionBox.style.top = top;
-                selectionBox.style.width = width;
-                selectionBox.style.height = height;
-            }
-            else
-            {
-                // Hide selection box
-                selectionBox.style.display = DisplayStyle.None;
-            }
-        }
-
-        void UpdateReinforcementPopup()
-        {
-            if (gameStateQuery.IsEmptyIgnoreFilter) return;
-            gameStateQuery.CompleteDependency();
-            var gameState = gameStateQuery.GetSingleton<GameStateSingleton>();
-            if (gameState.CurrentState != GameState.Gameplay)
-            {
-                return;
-            }
-        }
 
         void UpdateBiomassCounter()
         {
@@ -263,7 +241,7 @@ public class GameplayScreen : UIScreen
             var economy = economyQuery.GetSingleton<PlayerEconomy>();
             biomassCounter.text = "Biomass: " + economy.TotalBiomass;
         }
-        
+      
         void UpdateSurgeWarning()
         {
             if (surgeStateQuery.IsEmptyIgnoreFilter) return;
@@ -331,5 +309,13 @@ public class GameplayScreen : UIScreen
     private void ToggleReinforcementPopup(bool show)
     {
         reinforcementPanel.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private void ChangeGameState(GameState targetState)
+    {
+        if (gameStateQuery.IsEmptyIgnoreFilter) return;
+        gameStateQuery.CompleteDependency();
+        var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
+        gameState.ValueRW.CurrentState = targetState;
     }
 }

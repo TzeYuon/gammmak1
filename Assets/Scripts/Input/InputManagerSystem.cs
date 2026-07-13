@@ -44,17 +44,20 @@ public partial class InputManagerSystem : SystemBase
             if (mainCamera == null) return;
         }
 
-        var inputData = SystemAPI.GetSingleton<PlayerInputData>();
+        ref var input = ref SystemAPI.GetSingletonRW<PlayerInputData>().ValueRW;
+        var gameState = SystemAPI.GetSingleton<GameStateSingleton>();
+        var curState = gameState.CurrentState;
 
-        // update current and previous inputs
-        inputData.PreviousState = inputData.CurrentState;
+        // update inputs
+        PlayerAction rawInput = PlayerAction.None;
+        if (gameInput.Gameplay.PrimaryAction.IsPressed()) rawInput |= PlayerAction.Primary;
+        if (gameInput.Gameplay.SecondaryAction.IsPressed()) rawInput |= PlayerAction.Secondary;
+        if (gameInput.Gameplay.SelectionModifier.IsPressed()) rawInput |= PlayerAction.SelectionModifier;
+        if (gameInput.Gameplay.Cancel.IsPressed()) rawInput |= PlayerAction.Cancel;
 
-        PlayerAction newState = PlayerAction.None;
-        if (gameInput.Gameplay.PrimaryAction.IsPressed()) newState |= PlayerAction.Primary;
-        if (gameInput.Gameplay.SecondaryAction.IsPressed()) newState |= PlayerAction.Secondary;
-        if (gameInput.Gameplay.SelectionModifier.IsPressed()) newState |= PlayerAction.SelectionModifier;
-        if (gameInput.Gameplay.ToggleReinforcementPopup.IsPressed()) newState |= PlayerAction.ToggleReinforcementPopup;
-        inputData.CurrentState = newState;
+        input.PreviousHardware = input.HardwareState;
+        input.HardwareState = rawInput;
+        input.CurrentState = rawInput;
 
         // Requires camera for mouse pos
         if (CameraManager.Instance != null)
@@ -62,20 +65,21 @@ public partial class InputManagerSystem : SystemBase
             // Handle camera update
             Vector2 screenMousePos = Mouse.current.position.ReadValue();
             float2 mousePos = (Vector2)mainCamera.ScreenToWorldPoint(screenMousePos);
-            inputData.MouseWorldPosition = mousePos;
+            input.MouseWorldPosition = mousePos;
 
-            bool cameraPan = gameInput.Gameplay.CameraPan.IsPressed();
-            Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
-            float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
-            CameraManager.Instance.UpdateCamera(screenMousePos, mousePos, cameraMove, cameraPan, cameraZoom);
-
-            if (inputData.WasPressed(PlayerAction.Primary)) // Set start drag position when mouse first pressed
+            if (curState == GameState.Gameplay)
             {
-                inputData.MouseStartDragPosition = mousePos;
+                bool cameraPan = gameInput.Gameplay.CameraPan.IsPressed();
+                Vector2 cameraMove = gameInput.Gameplay.CameraMovement.ReadValue<Vector2>();
+                float cameraZoom = gameInput.Gameplay.CameraZoom.ReadValue<float>();
+                CameraManager.Instance.UpdateCamera(screenMousePos, mousePos, cameraMove, cameraPan, cameraZoom);
+            }
+
+            if (input.WasPressed(PlayerAction.Primary)) // Set start drag position when mouse first pressed
+            {
+                input.MouseStartDragPosition = mousePos;
             }
         }
-
-        SystemAPI.SetSingleton(inputData);
     }
 
     void EnterGameplayScene()
@@ -112,7 +116,7 @@ public enum PlayerAction : uint
     Primary = 1 << 0,
     Secondary = 1 << 1,
     SelectionModifier = 1 << 2,
-    ToggleReinforcementPopup = 1 << 3,
+    Cancel = 1 << 4,
 }
 
 public struct PlayerInputData : IComponentData
@@ -121,7 +125,8 @@ public struct PlayerInputData : IComponentData
     public float2 MouseStartDragPosition;
 
     public PlayerAction CurrentState;
-    public PlayerAction PreviousState;
+    public PlayerAction HardwareState;
+    public PlayerAction PreviousHardware; 
 
     public bool IsHeld(PlayerAction action)
     {
@@ -130,11 +135,17 @@ public struct PlayerInputData : IComponentData
 
     public bool WasPressed(PlayerAction action)
     {
-        return (CurrentState & action) != 0 && (PreviousState & action) == 0;
+        return (CurrentState & action) != 0 && (PreviousHardware & action) == 0;
     }
 
     public bool WasReleased(PlayerAction action)
     {
-        return (CurrentState & action) == 0 && (PreviousState & action) != 0;
+        return (CurrentState & action) == 0 && (PreviousHardware & action) != 0;
+    }
+
+    public void ClearState(PlayerAction action)
+    {
+        // removes the state for the rest of the frame
+        CurrentState &= ~action;
     }
 }

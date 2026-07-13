@@ -63,7 +63,7 @@ public class UIScreenManager : MonoBehaviour
         GameStateSystem.OnStateChanged -= OnStateChanged;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (CurScreen != null)
         {
@@ -81,7 +81,7 @@ public class UIScreenManager : MonoBehaviour
         {
             CurScreen.Hide();
             ScreenHistory.Pop();
-            ShowRootScreen(ScreenHistory.Pop());
+            CurScreen = ScreenHistory.Peek();
         }
     }
 
@@ -133,13 +133,18 @@ public class UIScreenManager : MonoBehaviour
         switch (state)
         {
             case GameState.Gameplay:
-                ShowRootScreen(GameplayScreen);
+                if (prevState == GameState.Paused) BackToPrevScreen();
+                else ShowRootScreen(GameplayScreen);
                 break;
             case GameState.MainMenu:
                 ShowRootScreen(MenuScreen);
                 break;
             case GameState.FleetCommandHub:
-                ShowRootScreen(FleetCommandHubScreen);
+                if (prevState == GameState.Paused) BackToPrevScreen();
+                else ShowRootScreen(FleetCommandHubScreen);
+                break;
+            case GameState.Paused:
+                Show(PauseScreen, true);
                 break;
         }
     }

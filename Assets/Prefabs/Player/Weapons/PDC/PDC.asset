@@ -17,7 +17,7 @@ MonoBehaviour:
   WeaponID: 1
   WeaponPrefab: {fileID: 90229467165131139, guid: 0d329c13581d0534d87d3b68894b1b88, type: 3}
   EquipCost: 1
-  UpgradeLevel: 1
+  UpgradeLevel: 0
   Upgrades:
   - Cost: 100
     Description: 
@@ -42,8 +42,8 @@ MonoBehaviour:
   BaseRange: 30
   DensityBias: 0
   ThreatBias: 0
-  AngleBias: 100
-  DistanceBias: 1000
+  AngleBias: 0
+  DistanceBias: 2
   BaseDamage: 0.5
   BaseFireRate: 11
   BaseSpreadDegrees: 5
