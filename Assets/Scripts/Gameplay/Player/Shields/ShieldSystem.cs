@@ -67,9 +67,10 @@ public partial struct ShieldJob : IJobEntity
         in LocalToWorld transform)
     {
         // Regen capacity
-        if (shield.CurrentCapacity < shield.MaxCapacity)
+        shield.TimeSinceLastHit += DeltaTime;
+        if (shield.TimeSinceLastHit >= shield.RechargeDelay && shield.CurrentCapacity < shield.MaxCapacity)
         {
-            shield.CurrentCapacity = math.min(shield.MaxCapacity, shield.CurrentCapacity + (shield.RegenPerSecond * DeltaTime));
+            shield.CurrentCapacity = math.min(shield.MaxCapacity, shield.CurrentCapacity + (shield.RechargePerSecond * DeltaTime));
         }
 
         if (shield.CurrentCapacity <= 0) return; // Shield inactive
@@ -82,6 +83,8 @@ public partial struct ShieldJob : IJobEntity
 
         float damageDealt = shield.DamagePerSecond * DeltaTime;
         float capacityCostPerEnemy = (damageDealt) * (1 - shield.BonusShieldEfficiency);
+
+        bool tookDamageThisFrame = false;
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
             for (int y = -radiusCells; y <= radiusCells; y++)
@@ -108,6 +111,8 @@ public partial struct ShieldJob : IJobEntity
 
                         if (distSq <= radius * radius)
                         {
+                            tookDamageThisFrame = true;
+
                             // calculate how much capacity left
                             float fraction = capacityCostPerEnemy > 0 
                                 ? math.min(1, shield.CurrentCapacity / capacityCostPerEnemy)
@@ -125,6 +130,11 @@ public partial struct ShieldJob : IJobEntity
                     } while (Map.TryGetNextValue(out enemy, ref it));
                 }
             }
+        }
+
+        if (tookDamageThisFrame)
+        {
+            shield.TimeSinceLastHit = 0f;
         }
     }
 }

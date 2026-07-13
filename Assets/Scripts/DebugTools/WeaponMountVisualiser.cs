@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class WeaponMountVisualiser : MonoBehaviour
 {
-    [Header("Firing Arc (Rotate Transform to Aim!)")]
+    [Header("Firing Arc")]
     [Range(0, 180)]
     public float MaxAngleLimit = 90f; // 90 = a 180-degree hemisphere
 

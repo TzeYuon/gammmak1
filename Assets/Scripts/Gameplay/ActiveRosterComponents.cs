@@ -46,6 +46,7 @@ public struct RosterShipBlueprint : IComponentData
 
     // Shield
     public bool HasShield;
+    public float2 ShieldOffset;
     public Entity ShieldPrefab;
     public ShieldComponent ShieldComponent;
 }

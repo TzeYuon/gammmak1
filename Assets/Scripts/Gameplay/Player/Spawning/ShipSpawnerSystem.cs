@@ -113,6 +113,9 @@ public partial struct ShipSpawnerSystem : ISystem
                 // parent to ship
                 ecb.AddComponent(shieldEntity, new Parent { Value = newShip });
 
+                // position with offset
+                ecb.SetComponent(shieldEntity, LocalTransform.FromPosition(new float3(shipBlueprint.ShieldOffset, 0)));
+
                 // add shield components
                 ecb.AddComponent(shieldEntity, shipBlueprint.ShieldComponent); 
                 ecb.AddComponent(shieldEntity, new ShieldOpacityOverride{ Value = 1 });

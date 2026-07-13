@@ -40,13 +40,13 @@ MonoBehaviour:
       Description: 
       Effects:
       - StatType: 2
-        ModifierType: 1
+        ModifierType: 0
         Value: 1
       - StatType: 3
-        ModifierType: 1
+        ModifierType: 0
         Value: 0.2
       - StatType: 4
-        ModifierType: 1
+        ModifierType: 0
         Value: 1
       - StatType: 0
         ModifierType: 0
@@ -83,6 +83,45 @@ MonoBehaviour:
         Value: 20
       - StatType: 8
         ModifierType: 0
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+  - SystemID: 3
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 200
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 500
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 900
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
         Value: 0.2
       - StatType: 0
         ModifierType: 0
@@ -159,19 +198,15 @@ MonoBehaviour:
   BaseWeaponCapacity: 6
   Mounts:
   - Position: {x: -1.227, y: 0.085}
-    OriginalRotation: {x: 0, y: 0, z: 0.3420201, w: 0.9396927}
-    MaxAngle: 180
+    OriginalRotation: {x: 0, y: 0, z: 0.27639228, w: 0.96104497}
+    MaxAngle: 72.7
     EquippedWeapon: {fileID: 0}
   - Position: {x: 1.227, y: 0.085}
-    OriginalRotation: {x: 0, y: 0, z: -0.3420201, w: 0.9396927}
-    MaxAngle: 180
+    OriginalRotation: {x: 0, y: 0, z: -0.2763922, w: 0.96104497}
+    MaxAngle: 72.7
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.336, y: 0.548}
-    OriginalRotation: {x: 0, y: 0, z: -0.15419307, w: 0.98804075}
-    MaxAngle: 70
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: -0.336, y: 0.548}
-    OriginalRotation: {x: 0, y: 0, z: 0.15419307, w: 0.98804075}
+  - Position: {x: 0, y: 0.547}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 70
     EquippedWeapon: {fileID: 0}
   BaseCost: 15
@@ -182,3 +217,11 @@ MonoBehaviour:
   BaseTurnSpeed: 5
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5
+  HasShield: 1
+  ShieldOffset: {x: 0, y: 0.5}
+  ShieldRadius: 2.3
+  ShieldRechargeDelay: 0.5
+  BaseShieldMaxCapacity: 100
+  BaseShieldRegenPerSecond: 4
+  ShieldDamage: 50
+  ShieldEfficiencyBonus: 0.2

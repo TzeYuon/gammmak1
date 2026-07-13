@@ -79,11 +79,14 @@ public struct ShieldComponent : IComponentData
 {
     public float CurrentCapacity;
     public float MaxCapacity;
-    public float RegenPerSecond;
+    public float RechargePerSecond;
 
     public float Radius;
     public float DamagePerSecond; // How much damage it deals to a bug
     public float BonusShieldEfficiency; // Capacity loss = damage dealt * (1 - Shield efficiency)
+
+    public float RechargeDelay;
+    public float TimeSinceLastHit;
 }
 
 [MaterialProperty("_ShieldOpacity")]

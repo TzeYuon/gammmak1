@@ -189,15 +189,19 @@ public class LevelHandoff : MonoBehaviour
 
                 // Shield
                 HasShield = blueprint.HasShield,
+                ShieldOffset = blueprint.ShieldOffset,
                 ShieldComponent = new ShieldComponent
                 {
                     MaxCapacity = shieldCapacity,
                     CurrentCapacity = shieldCapacity,
-                    RegenPerSecond = blueprint.GetStat(ShipStat.ShieldRegenPerSecond),
+                    RechargePerSecond = blueprint.GetStat(ShipStat.ShieldRegenPerSecond),
                     
                     Radius = blueprint.ShieldRadius,
                     DamagePerSecond = blueprint.GetStat(ShipStat.ShieldDamage),
                     BonusShieldEfficiency = blueprint.GetStat(ShipStat.ShieldEfficiencyBonus),
+
+                    RechargeDelay = blueprint.ShieldRechargeDelay,
+                    TimeSinceLastHit = 0
                 },
                 ShieldPrefab = shieldPrefabEntity,
             });
