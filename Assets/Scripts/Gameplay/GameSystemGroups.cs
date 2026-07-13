@@ -68,6 +68,7 @@ public partial class CollisionAndDamageGroup : ComponentSystemGroup { }
 [UpdateAfter(typeof(CollisionAndDamageGroup))]
 public partial class LateGameplayGroup : ComponentSystemGroup { }
 /*
+    GamePauseSystem
     ProcessDamageSystem
     LevelWinLossSystem
     EconomyEventSystem

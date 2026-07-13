@@ -8,22 +8,28 @@ using UnityEngine;
 
 [BurstCompile]
 [UpdateInGroup(typeof(CommandAndSpawnGroup))]
-partial struct FleetCommandSystem : ISystem
+partial class FleetCommandSystem : SystemBase
 {
     bool moveStarted;
     float2 moveTarget;
     quaternion moveTargetRotation;
     NativeArray<float2> validPositions;
 
+    bool isSelecting;
+    public static event Action<float2, float2> OnSelectionBoxChanged;
+
     [BurstCompile]
-    public void OnCreate(ref SystemState state)
+    protected override void OnCreate()
     {
-        state.RequireForUpdate<PlayerInputData>();
+        RequireForUpdate<PlayerInputData>();
     }
 
     //[BurstCompile]
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
+        var gameState = SystemAPI.GetSingletonRW<GameStateSingleton>();
+        if (gameState.ValueRO.CurrentState != GameState.Gameplay) return;
+
         ref var input = ref SystemAPI.GetSingletonRW<PlayerInputData>().ValueRW;
         float2 mousePos = input.MouseWorldPosition;
 
@@ -35,18 +41,52 @@ partial struct FleetCommandSystem : ISystem
         float cellSize = obstacleGridComponent.CellSize;
 
         // Handle ship selection
-        if (input.WasReleased(PlayerAction.Primary))
+        if (input.WasPressed(PlayerAction.Primary))
         {
-            float2 startPos = input.MouseStartDragPosition;
-            state.Dependency = new CheckSelectionBoxJob
-            {
-                Min = math.min(mousePos, startPos),
-                Max = math.max(mousePos, startPos),
-                AddToSelection = input.IsHeld(PlayerAction.SelectionModifier)
-            }.ScheduleParallel(state.Dependency);
+            isSelecting = true;
         }
 
-        state.Dependency.Complete();
+        if (isSelecting)
+        {
+            if (input.WasPressed(PlayerAction.Cancel))
+            {
+                HideSelectionBox();
+                input.ClearState(PlayerAction.Cancel);
+            }
+            else if (input.IsHeld(PlayerAction.Primary))
+            {
+                float2 startPos = input.MouseStartDragPosition;
+                float2 min = math.min(mousePos, startPos);
+                float2 max = math.max(mousePos, startPos);
+
+                // update box
+                OnSelectionBoxChanged?.Invoke(min, max);
+            }
+            else if (input.WasReleased(PlayerAction.Primary))
+            {
+                float2 startPos = input.MouseStartDragPosition;
+                float2 min = math.min(mousePos, startPos);
+                float2 max = math.max(mousePos, startPos);
+                Dependency = new CheckSelectionBoxJob
+                {
+                    Min = min,
+                    Max = max,
+                    AddToSelection = input.IsHeld(PlayerAction.SelectionModifier)
+                }.ScheduleParallel(Dependency);
+
+                HideSelectionBox();
+            }
+            else
+            {
+                HideSelectionBox();
+            }
+        }
+        else
+        {
+            HideSelectionBox();
+        }
+
+        Dependency.Complete();
 
         // Handle ship move command
         int selectedCount = SystemAPI.QueryBuilder().WithAll<SelectedTag, PlayerTag>().Build().CalculateEntityCount();
@@ -54,7 +94,7 @@ partial struct FleetCommandSystem : ISystem
         {
             // no ships can be assigned to move, cancel move
             moveStarted = false;
-            state.Dependency = new HideProjectionJob().ScheduleParallel(state.Dependency);
+            Dependency = new HideProjectionJob().ScheduleParallel(Dependency);
             return;
         }
 
@@ -87,6 +127,17 @@ partial struct FleetCommandSystem : ISystem
 
         if (!moveStarted) return;
 
+        // cancel move command
+        if (input.WasPressed(PlayerAction.Cancel))
+        {
+            moveStarted = false;
+            input.ClearState(PlayerAction.Cancel);
+
+            var cancelJob = new CancelMoveCommandJob();
+            Dependency = cancelJob.ScheduleParallel(Dependency);
+            return;
+        }
+
         // Check if player wants to add desired rotation
         Vector2 drag = mousePos - moveTarget;
         bool useRotation = math.lengthsq(drag) > 0.25f;
@@ -94,7 +145,7 @@ partial struct FleetCommandSystem : ISystem
         // set desired rotation
         if (useRotation) moveTargetRotation = quaternion.RotateZ(math.atan2(drag.y, drag.x) - (math.PI / 2f));
 
-        if (input.WasReleased(PlayerAction.Secondary) && moveStarted) // move command triggered
+        if (input.WasReleased(PlayerAction.Secondary)) // move command triggered
         {
             var moveJob = new AssignMoveCommandJob
             {
@@ -102,10 +153,10 @@ partial struct FleetCommandSystem : ISystem
                 UseRotation = useRotation,
                 TargetRotation = moveTargetRotation
             };
-            state.Dependency = moveJob.ScheduleParallel(state.Dependency);
+            Dependency = moveJob.ScheduleParallel(Dependency);
 
             // dispose valid positions array
-            validPositions.Dispose(state.Dependency);
+            validPositions.Dispose(Dependency);
 
             moveStarted = false;
         }
@@ -117,7 +168,7 @@ partial struct FleetCommandSystem : ISystem
                 UseRotation = useRotation,
                 TargetRotation = moveTargetRotation
             };
-            state.Dependency = projectionJob.ScheduleParallel(state.Dependency);
+            Dependency = projectionJob.ScheduleParallel(Dependency);
         }
 
         static NativeArray<float2> GenerateBFSFormationPositions(
@@ -227,10 +278,17 @@ partial struct FleetCommandSystem : ISystem
             // no valid target found use raymarch
             return GridUtility.GetLastSafePointOnLine(start, target, obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize);
         }
+
+        void HideSelectionBox()
+        {
+            isSelecting = false;
+            // clear selection box
+            OnSelectionBoxChanged?.Invoke(0, 0);
+        }
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
+    protected override void OnDestroy()
     {
         if (validPositions.IsCreated) validPositions.Dispose();
     }
@@ -325,6 +383,19 @@ public partial struct AssignMoveCommandJob : IJobEntity
         command.TargetRotation = TargetRotation;
 
         commandEnabled.ValueRW = true;
+        projectionEnabled.ValueRW = false;
+    }
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag), typeof(SelectedTag))]
+[WithDisabled(typeof(DeadTag))]
+[WithPresent(typeof(MoveCommandProjection))]
+public partial struct CancelMoveCommandJob : IJobEntity
+{
+    private void Execute(
+        EnabledRefRW<MoveCommandProjection> projectionEnabled)
+    {
         projectionEnabled.ValueRW = false;
     }
 }

@@ -9,9 +9,9 @@
     <Style src="project://database/Assets/UI/Styles/sliderStyles.uss?fileID=7433441132597879392&amp;guid=2e1252ec56222c446830454bf619999a&amp;type=3#sliderStyles"/>
     <engine:VisualElement name="Container" style="flex-grow: 1;">
         <engine:Instance template="MenuScreen" name="MenuScreen" class="screen" style="position: absolute;"/>
-        <engine:Instance template="PauseScreen" name="PauseScreen" class="screen"/>
-        <engine:Instance template="SettingsScreen" name="SettingsScreen" class="screen"/>
         <engine:Instance template="GameplayScreen" name="GameplayScreen" class="screen"/>
         <engine:Instance template="FleetCommandHubScreen" name="FleetCommandHubScreen" style="position: absolute; width: 100%; height: 100%;"/>
+        <engine:Instance template="PauseScreen" name="PauseScreen" class="screen"/>
+        <engine:Instance template="SettingsScreen" name="SettingsScreen" class="screen"/>
     </engine:VisualElement>
 </engine:UXML>

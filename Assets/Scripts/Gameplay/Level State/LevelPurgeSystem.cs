@@ -28,7 +28,7 @@ partial struct LevelPurgeSystem : ISystem
         var currentState = SystemAPI.GetSingleton<GameStateSingleton>().CurrentState;
         if (currentState != previousState)
         {
-            bool justExitedGameplay = previousState == GameState.Victory || previousState == GameState.Defeat;
+            bool justExitedGameplay = previousState == GameState.Victory || previousState == GameState.Defeat || currentState == GameState.MainMenu;
 
             if (justExitedGameplay)
             {
