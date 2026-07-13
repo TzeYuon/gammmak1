@@ -115,6 +115,7 @@ public class LevelHandoff : MonoBehaviour
         var shipVisualDB = entityManager.GetComponentData<ShipVisualDatabase>(databaseEntity);
         Entity ghostPrefabEntity = shipVisualDB.GhostVisualPrefab;
         Entity arcPrefabEntity = shipVisualDB.ArcVisualPrefab;
+        Entity shieldPrefabEntity = shipVisualDB.ShieldVisualPrefab;
         var graphicsSystem = world.GetExistingSystemManaged<EntitiesGraphicsSystem>();
         BatchMaterialID hologramMatID = graphicsSystem.RegisterMaterial(ghostMaterial);
 
@@ -144,6 +145,9 @@ public class LevelHandoff : MonoBehaviour
             float stoppingDistance = (speed * speed) / (2.0f * acceleration);
             float finalBrakingRadius = stoppingDistance * 1.25f;
             finalBrakingRadius = Mathf.Max(finalBrakingRadius, 1.0f);
+
+            // Shield stats
+            float shieldCapacity = blueprint.GetStat(ShipStat.ShieldMaxCapacity);
 
             entityManager.AddComponentData(blueprintEntity, new LevelEntityTag());
 
@@ -181,7 +185,25 @@ public class LevelHandoff : MonoBehaviour
                 ShipCollectionRadiusStat = new ShipCollectionRadiusComponent
                 {
                     RadiusSq = collectionRadius * collectionRadius
-                }
+                },
+
+                // Shield
+                HasShield = blueprint.HasShield,
+                ShieldOffset = blueprint.ShieldOffset,
+                ShieldComponent = new ShieldComponent
+                {
+                    MaxCapacity = shieldCapacity,
+                    CurrentCapacity = shieldCapacity,
+                    RechargePerSecond = blueprint.GetStat(ShipStat.ShieldRegenPerSecond),
+                    
+                    Radius = blueprint.ShieldRadius,
+                    DamagePerSecond = blueprint.GetStat(ShipStat.ShieldDamage),
+                    BonusShieldEfficiency = blueprint.GetStat(ShipStat.ShieldEfficiencyBonus),
+
+                    RechargeDelay = blueprint.ShieldRechargeDelay,
+                    TimeSinceLastHit = 0
+                },
+                ShieldPrefab = shieldPrefabEntity,
             });
 
             // Create weapon blueprints for each weapon mount on the ship
@@ -305,7 +327,7 @@ public class LevelHandoff : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"[Handoff] {blueprint.ShipName} is missing a ShipMesh in its ScriptableObject!");
+                Debug.LogWarning($"[Handoff] {blueprint.ShipName} is missing a ShipMesh in its ScriptableObject");
             }
 
             for (int m = 0; m < blueprint.Mounts.Count; m++)

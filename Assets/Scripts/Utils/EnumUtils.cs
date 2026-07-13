@@ -24,6 +24,14 @@ public static class EnumUtils
                 return "Weapon Capacity";
             case ShipStat.DamageReduction:
                 return "Damage Reduction";
+            case ShipStat.ShieldMaxCapacity:
+                return "Shield Max Capacity";
+            case ShipStat.ShieldRegenPerSecond:
+                return "Shield Recharge Rate";
+            case ShipStat.ShieldDamage:
+                return "Shield Damage";
+            case ShipStat.ShieldEfficiencyBonus:
+                return "Shield Efficiency";
             default:
                 return stat.ToString();
         }

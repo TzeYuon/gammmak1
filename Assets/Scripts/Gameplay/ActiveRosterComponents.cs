@@ -43,6 +43,12 @@ public struct RosterShipBlueprint : IComponentData
     public ShipMovementStatsComponent ShipMovementStats;
     public ShipRevealFogRadius ShipRevealFogRadius;
     public ShipCollectionRadiusComponent ShipCollectionRadiusStat;
+
+    // Shield
+    public bool HasShield;
+    public float2 ShieldOffset;
+    public Entity ShieldPrefab;
+    public ShieldComponent ShieldComponent;
 }
 
 public struct RosterWeaponBlueprint : IBufferElementData

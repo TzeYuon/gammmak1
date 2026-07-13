@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: CurrentSave
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveData
   startingUpgradeCores: 200
-  UpgradeCoresRemaining: 100
+  UpgradeCoresRemaining: 200
   startingAvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
+  - {fileID: 11400000, guid: cb7b39492b5217f428f7cd818164442f, type: 2}
   AvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}

@@ -87,6 +87,45 @@ MonoBehaviour:
       - StatType: 0
         ModifierType: 0
         Value: 2
+  - SystemID: 3
+    UpgradeLevel: 0
+    Upgrades:
+    - Cost: 200
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 500
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 900
+      Description: 
+      Effects:
+      - StatType: 9
+        ModifierType: 0
+        Value: 0.2
+      - StatType: 10
+        ModifierType: 1
+        Value: 0.2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
   - SystemID: 4
     UpgradeLevel: 0
     Upgrades:
@@ -190,3 +229,11 @@ MonoBehaviour:
   BaseTurnSpeed: 6
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5
+  HasShield: 1
+  ShieldOffset: {x: 0, y: 0.51}
+  ShieldRadius: 1.6
+  ShieldRechargeDelay: 1
+  BaseShieldMaxCapacity: 100
+  BaseShieldRegenPerSecond: 2
+  ShieldDamage: 50
+  ShieldEfficiencyBonus: 0

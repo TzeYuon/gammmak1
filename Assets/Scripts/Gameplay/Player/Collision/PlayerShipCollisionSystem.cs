@@ -1,6 +1,5 @@
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -19,7 +18,6 @@ partial struct PlayerShipCollisionSystem : ISystem
     {
         FineEnemyHeatmapComponent fineMap = SystemAPI.GetSingleton<FineEnemyHeatmapComponent>();
         ComponentLookup<LocalTransform> transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
-        ComponentLookup<HealthComponent> healthLookup = SystemAPI.GetComponentLookup<HealthComponent>(true);
         ComponentLookup<SwarmDamageComponent> swarmDamageLookup = SystemAPI.GetComponentLookup<SwarmDamageComponent>(true);
         ComponentLookup<CollisionRadius> collisionRadiusLookup = SystemAPI.GetComponentLookup<CollisionRadius>(true);
 
@@ -30,7 +28,6 @@ partial struct PlayerShipCollisionSystem : ISystem
         {
             Map = fineMap.Map,
             TransformLookup = transformLookup,
-            HealthLookup = healthLookup,
             SwarmDamageLookup = swarmDamageLookup,
             CollisionRadiusLookup = collisionRadiusLookup,
             ECB = ecb,
@@ -59,7 +56,6 @@ public partial struct ContactDamageJob : IJobEntity
 {
     [ReadOnly] public NativeParallelMultiHashMap<int, Entity> Map;
     [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
-    [ReadOnly] public ComponentLookup<HealthComponent> HealthLookup;
     [ReadOnly] public ComponentLookup<SwarmDamageComponent> SwarmDamageLookup;
     [ReadOnly] public ComponentLookup<CollisionRadius> CollisionRadiusLookup;
 
@@ -115,8 +111,6 @@ public partial struct ContactDamageJob : IJobEntity
 
                         float combinedOuterRadius = maxRadius + enemyRadius;
                         if (distSq > combinedOuterRadius * combinedOuterRadius) continue;
-
-                        if (!HealthLookup.HasComponent(enemyEntity)) continue;
 
                         float3 offset3D = new(ePos - pos, 0);
                         float3 localOffset3D = math.rotate(inverseShipRot, offset3D);
@@ -180,10 +174,7 @@ public partial struct ContactDamageJob : IJobEntity
 
                         if (isHit)
                         {
-                            var enemyHealth = HealthLookup[enemyEntity];
-                            if (enemyHealth.Value <= 0) continue;
-
-                            var damage = SwarmDamageLookup[enemyEntity].DamagePerSecond * DeltaTime;
+                            var damage = SwarmDamageLookup[enemyEntity].DamagePerSecond;
 
                             ECB.AppendToBuffer(chunkIndex, entity, new DamageEvent { Value = damage });
                             ECB.AppendToBuffer(chunkIndex, enemyEntity, new DamageEvent { Value = damage });

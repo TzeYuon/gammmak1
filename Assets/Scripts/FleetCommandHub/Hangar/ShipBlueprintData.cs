@@ -46,12 +46,12 @@ public enum ShipClass : byte
 public enum ShipSystemID : byte
 {
     None = 0,
-    Engine,
-    Hull,
-    Shields,
-    Weapons,
-    Collector,
-    Sensors
+    Engine = 1,
+    Hull = 2,
+    Shields = 3,
+    Weapons = 4,
+    Collector = 5,
+    Sensors = 6,
 }
 
 [System.Serializable]
@@ -66,15 +66,21 @@ public class WeaponMount
 
 public enum ShipStat
 {
-    Cost,
-    MaxHealth,
-    Speed,
-    Acceleration,
-    TurnSpeed,
-    CollectionRadius,
-    WeaponCapacity,
-    RevealFogRadius,
-    DamageReduction
+    Cost = 0,
+    MaxHealth = 1,
+    Speed = 2,
+    Acceleration = 3,
+    TurnSpeed = 4,
+    CollectionRadius = 5,
+    WeaponCapacity = 6,
+    RevealFogRadius = 7,
+    DamageReduction = 8,
+    ShieldMaxCapacity = 9,
+    ShieldRegenPerSecond = 10,
+    ShieldDamage = 11,
+    ShieldEfficiencyBonus = 12,
+    ShieldRechargeDelay = 13,
+    ShieldRadius = 14,
 }
 
 [System.Serializable]
@@ -176,6 +182,17 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseRevealFogRadius = 25f;
     public float BaseCollectionRadius = 5f;
 
+    [Header("Base Shield Stats")]
+    public bool HasShield = true;
+    public Vector2 ShieldOffset;
+    public float ShieldRadius;
+    public float ShieldRechargeDelay = 1;
+    public float BaseShieldMaxCapacity;
+    public float BaseShieldRegenPerSecond;
+    public float ShieldDamage;
+    [Tooltip("1 means shield takes no capacity to deal damage, 0 means shield takes capacity equals to damage dealt")]
+    public float ShieldEfficiencyBonus = 0;
+
     public void ResetToBase()
     {
         foreach (ShipSystem system in ShipSystems)
@@ -247,6 +264,12 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.RevealFogRadius: baseValue = BaseRevealFogRadius; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
             case ShipStat.WeaponCapacity: baseValue = BaseWeaponCapacity; break;
+            case ShipStat.ShieldMaxCapacity: baseValue = BaseShieldMaxCapacity; break;
+            case ShipStat.ShieldRegenPerSecond: baseValue = BaseShieldRegenPerSecond; break;
+            case ShipStat.ShieldDamage: return ShieldDamage;
+            case ShipStat.ShieldEfficiencyBonus: return ShieldEfficiencyBonus;
+            case ShipStat.ShieldRechargeDelay: return ShieldRechargeDelay;
+            case ShipStat.ShieldRadius: return ShieldRadius;
         }
 
         float flatBonus = 0f;
@@ -285,7 +308,7 @@ public class ShipBlueprintData : ScriptableObject
     /// <summary>
     /// Syncs the weapon mounts on the prefab of the ship and clears all weapons
     /// </summary>
-    [ContextMenu("Sync Weapon Mounts From Prefab")]
+    [ContextMenu("Sync Variables From Prefab")]
     public void SyncMounts()
     {
         if (ShipPrefab == null)
@@ -306,6 +329,18 @@ public class ShipBlueprintData : ScriptableObject
                 MaxAngle = vis.MaxAngleLimit,
                 EquippedWeapon = null,
             });
+        }
+
+        ShieldVisualiser shield = ShipPrefab.GetComponentInChildren<ShieldVisualiser>(true);
+        if (shield != null)
+        {
+            HasShield = true;
+            ShieldRadius = shield.VisualRadius;
+            ShieldOffset = shield.transform.localPosition;
+        }
+        else
+        {
+            HasShield = false;
         }
 
         EditorUtility.SetDirty(this);

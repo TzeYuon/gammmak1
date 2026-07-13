@@ -14,6 +14,7 @@ class ShipDatabaseAuthoring : MonoBehaviour
     [Header("Ship visual prefabs")]
     [SerializeField] private GameObject ghostPrefab;
     [SerializeField] private GameObject arcVisualPrefab;
+    [SerializeField] private GameObject shieldVisualPrefab;
 
     class Baker : Baker<ShipDatabaseAuthoring>
     {
@@ -57,6 +58,7 @@ class ShipDatabaseAuthoring : MonoBehaviour
             {
                 GhostVisualPrefab = GetEntity(authoring.ghostPrefab, TransformUsageFlags.Dynamic),
                 ArcVisualPrefab = GetEntity(authoring.arcVisualPrefab, TransformUsageFlags.Dynamic),
+                ShieldVisualPrefab = GetEntity(authoring.shieldVisualPrefab, TransformUsageFlags.Dynamic),
             });
         }
     }
@@ -66,6 +68,7 @@ public partial struct ShipVisualDatabase : IComponentData
 {
     public Entity GhostVisualPrefab;
     public Entity ArcVisualPrefab;
+    public Entity ShieldVisualPrefab;
 }
 
 public partial struct MothershipPrefabDatabase : IComponentData

@@ -336,6 +336,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6ffb12206990c074d97210cf561f2889, type: 2}
   ghostPrefab: {fileID: 4422588013955516274, guid: 370b6404094a91447b8781a4b604d05d, type: 3}
   arcVisualPrefab: {fileID: 4422588013955516274, guid: beb6968d1a19d3442ab2c7e003838317, type: 3}
+  shieldVisualPrefab: {fileID: 5715642080276578497, guid: 4acc82b7403cd6244aaba89b467d1100, type: 3}
 --- !u!114 &2130700924
 MonoBehaviour:
   m_ObjectHideFlags: 0

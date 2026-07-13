@@ -186,3 +186,9 @@ MonoBehaviour:
   BaseTurnSpeed: 7
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5
+  HasShield: 0
+  ShieldRadius: 0
+  BaseShieldMaxCapacity: 0
+  BaseShieldRegenPerSecond: 0
+  BaseShieldDamage: 0
+  BaseShieldEfficiencyBonus: 0
