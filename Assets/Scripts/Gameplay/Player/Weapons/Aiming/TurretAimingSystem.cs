@@ -53,8 +53,6 @@ public partial struct RotateJob : IJobEntity
         in ShipReference ship
         )
     {
-        quaternion desiredLocalRotation;
-
         if (state.HasTarget)
         {
             float2 turretWorldPos = weaponWorld.Position.xy;
@@ -62,14 +60,8 @@ public partial struct RotateJob : IJobEntity
             float desiredWorldAngle = math.atan2(dirToTarget.y, dirToTarget.x) - (math.PI / 2f);
             quaternion desiredWorldRot = quaternion.RotateZ(desiredWorldAngle);
             quaternion parentWorldRot = WorldLookup[ship.Value].Rotation;
-            desiredLocalRotation = math.mul(math.inverse(parentWorldRot), desiredWorldRot);
+            quaternion desiredLocalRotation = math.mul(math.inverse(parentWorldRot), desiredWorldRot);
+            transform.Rotation = math.slerp(transform.Rotation, desiredLocalRotation, turret.TurnSpeed * DeltaTime);
         }
-        else
-        {
-            // Return to base rotation
-            desiredLocalRotation = arc.RestingRotation;
-        }
-
-        transform.Rotation = math.slerp(transform.Rotation, desiredLocalRotation, turret.TurnSpeed * DeltaTime);
     }
 }

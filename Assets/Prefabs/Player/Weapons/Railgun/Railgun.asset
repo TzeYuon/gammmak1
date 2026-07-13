@@ -41,7 +41,7 @@ MonoBehaviour:
   ThreatBias: 1
   AngleBias: 1
   DistanceBias: 0
-  BaseDamage: 10
+  BaseDamage: 50
   BaseFireRate: 0.2
   BaseSpreadDegrees: 0
   BaseProjectileCount: 1

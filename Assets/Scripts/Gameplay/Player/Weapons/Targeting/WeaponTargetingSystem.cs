@@ -122,32 +122,12 @@ public partial struct HeatmapTargetingJob : IJobEntity
         float2 weaponPos = weaponWorld.Position.xy;
         float rangeSq = stats.RangeSq;
 
-        // Validate current target if exists, deletes existing target if it is not valid anymore, does not recalculate instantly if not valid
+        // Validate current hitscan target if exists, deletes existing target if it is not valid anymore, does not recalculate instantly if not valid
         // Assumes still in range since targets are only stored for 10 frames
-        if (state.HasTarget)
+        if (state.HasTarget && stats.RequireTargetEntity)
         {
-            bool isStillValid = true;
-
-            if (stats.RequireTargetEntity)
-            {
-                // check if target is still alive
-                if (!DeadLookup.EntityExists(state.TargetEntity) || DeadLookup.IsComponentEnabled(state.TargetEntity))
-                {
-                    isStillValid = false;
-                }
-            }
-            else
-            {
-                // check if there are still enemies in target pos
-                int targetIndex = GridUtility.WorldPosToIndex(state.TargetPos, HeatmapWorldOrigin, CellSize, GridWidth);
-                if (Grid[targetIndex].Density <= 0)
-                {
-                    isStillValid = false;
-                }
-            }
-
-            // Drop the target if it became invalid
-            if (!isStillValid)
+            // check if target is still alive
+            if (!DeadLookup.EntityExists(state.TargetEntity) || DeadLookup.IsComponentEnabled(state.TargetEntity))
             {
                 state.HasTarget = false;
                 state.TargetEntity = Entity.Null;
