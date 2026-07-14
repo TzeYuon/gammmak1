@@ -230,8 +230,8 @@ partial class FleetCommandSystem : SystemBase
         {
             var validPositions = new NativeArray<float2>(totalCount, allocator);
 
-            float angleStep = 0.1f;
-            float radiusStep = 0.02f;
+            float angleStep = 0.2f;
+            float radiusStep = 0.05f;
 
             for (int i = 0; i < totalCount; i++)
             {
@@ -242,7 +242,7 @@ partial class FleetCommandSystem : SystemBase
                 float currentAngle = 0f;
                 float currentSpiralRadius = 0f;
 
-                int maxAttempts = 1000; 
+                int maxAttempts = 5000; 
                 int attempts = 0;
 
                 while (!placed && attempts < maxAttempts)
