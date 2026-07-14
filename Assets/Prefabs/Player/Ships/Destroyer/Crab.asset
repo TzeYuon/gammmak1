@@ -18,195 +18,18 @@ MonoBehaviour:
   ShipPrefab: {fileID: 6753536424006035904, guid: 5963e98675602bb479f76d9f459384be, type: 3}
   ShipMesh: {fileID: 813736933392761622, guid: 3dc863576112f5841a2183bed54c2c35, type: 3}
   ShipSystems:
-  - SystemID: 1
+  - Definition: {fileID: 11400000, guid: 2748c375f8a435545a0c9d3d62face3a, type: 2}
+    UpgradeLevel: 1
+  - Definition: {fileID: 11400000, guid: 3388b2c6bb744214c85a40882e14288e, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 2
-        ModifierType: 0
-        Value: 0.5
-      - StatType: 3
-        ModifierType: 0
-        Value: 0.1
-      - StatType: 4
-        ModifierType: 0
-        Value: 0.5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 2
-        ModifierType: 0
-        Value: 1
-      - StatType: 3
-        ModifierType: 0
-        Value: 0.2
-      - StatType: 4
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 2
+  - Definition: {fileID: 11400000, guid: af6f772acee652b4ea5351ad0ea60681, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 1
-        ModifierType: 0
-        Value: 10
-      - StatType: 8
-        ModifierType: 0
-        Value: 0.15
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-    - Cost: 300
-      Description: 
-      Effects:
-      - StatType: 1
-        ModifierType: 0
-        Value: 20
-      - StatType: 8
-        ModifierType: 0
-        Value: 0.15
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-  - SystemID: 3
+  - Definition: {fileID: 11400000, guid: 5cf3f188002e76e42a6119e33bf39d01, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 9
-        ModifierType: 0
-        Value: 0.2
-      - StatType: 10
-        ModifierType: 1
-        Value: 0.2
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-    - Cost: 500
-      Description: 
-      Effects:
-      - StatType: 9
-        ModifierType: 0
-        Value: 0.2
-      - StatType: 10
-        ModifierType: 1
-        Value: 0.2
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-    - Cost: 900
-      Description: 
-      Effects:
-      - StatType: 9
-        ModifierType: 0
-        Value: 0.2
-      - StatType: 10
-        ModifierType: 1
-        Value: 0.2
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-  - SystemID: 4
+  - Definition: {fileID: 11400000, guid: 3966b4853806a534ca1b13168f7ce4c9, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 400
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-    - Cost: 600
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 2
-  - SystemID: 5
+  - Definition: {fileID: 11400000, guid: 79b1c99325bbf154c88dc12327cc2dd3, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 5
-        ModifierType: 1
-        Value: 0.25
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 5
-        ModifierType: 1
-        Value: 0.25
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 6
-    UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 300
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
   BaseWeaponCapacity: 4
   Mounts:
   - Position: {x: -0.8, y: -0.15}
@@ -229,7 +52,6 @@ MonoBehaviour:
   BaseMaxHealth: 17
   BaseDamageReduction: 0
   BaseSpeed: 3
-  BaseAcceleration: 1
   BaseTurnSpeed: 3
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5

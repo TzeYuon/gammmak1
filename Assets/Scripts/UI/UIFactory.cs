@@ -114,7 +114,7 @@ public static class UIFactory
         }
     }
 
-    public static VisualElement BuildSystemItem(ShipSystem system)
+    public static VisualElement BuildSystemItem(ShipSystemState system)
     {
         VisualElement systemItem = UIScreenManager.UIAssetsDatabase.ShipSystemItem.Instantiate();
 
@@ -127,7 +127,7 @@ public static class UIFactory
         return systemItem;
     }
 
-    public static void UpdateSystemItem(ShipSystem system, VisualElement systemItem)
+    public static void UpdateSystemItem(ShipSystemState system, VisualElement systemItem)
     {
         // update upgrade pips
         PipContainerVisualElement pipContainer = systemItem.Q<PipContainerVisualElement>("PipContainer");
@@ -139,7 +139,7 @@ public static class UIFactory
         if (system.CanBeUpgraded())
         {
             string allEffectsText = "";
-            foreach (var effect in system.Upgrades[system.UpgradeLevel].Effects)
+            foreach (var effect in system.Definition.Upgrades[system.UpgradeLevel].Effects)
             {
                 allEffectsText += effect.GetDescription() + "\n";
             }

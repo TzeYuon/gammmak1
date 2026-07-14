@@ -138,7 +138,7 @@ public class ShipDetailsElement
     private Dictionary<WeaponMount, WeaponMountElement> weaponMountButtons = new();
 
     private ScrollView systemsScrollView;
-    private List<(ShipSystem system, VisualElement element)> systemItems = new();
+    private List<(ShipSystemState system, VisualElement element)> systemItems = new();
 
     public ShipBlueprintData CurrentShip;
 
@@ -250,7 +250,7 @@ public class ShipDetailsElement
         shipDescription.text = stats.TrimEnd();
     }
 
-    void OnSytemItemUpgradeClicked(ShipSystem system, VisualElement systemItem)
+    void OnSytemItemUpgradeClicked(ShipSystemState system, VisualElement systemItem)
     {
         if (system == null) return;
         if (!system.CanBeUpgraded()) return;
@@ -272,7 +272,7 @@ public class ShipDetailsElement
         UpdateShipStatsDescription(); // stats were affected
     }
 
-    void OnSytemItemRefundClicked(ShipSystem system, VisualElement systemItem)
+    void OnSytemItemRefundClicked(ShipSystemState system, VisualElement systemItem)
     {
         if (system == null) return;
         if (!CurrentShip.CanRefundSystem(system, out string reason))
