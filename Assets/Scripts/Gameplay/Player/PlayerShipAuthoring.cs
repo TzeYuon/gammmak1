@@ -9,7 +9,6 @@ class PlayerShipAuthoring : MonoBehaviour
 
     [Header("Movement Stats")]
     [SerializeField] float MaxSpeed = 15f;
-    [SerializeField] float Acceleration = 10;
     [SerializeField] float TurnSpeed = 15;
 
     [Header("Biomass Collection Stats")]
@@ -24,18 +23,11 @@ class PlayerShipAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            // Calculate braking distance
-            float stoppingDistance = (authoring.MaxSpeed * authoring.MaxSpeed) / (2.0f * authoring.Acceleration);
-            float finalBrakingRadius = stoppingDistance * 1.25f;
-            finalBrakingRadius = Mathf.Max(finalBrakingRadius, 1.0f);
-
             // Ship movement stats
             AddComponent(entity, new ShipMovementStatsComponent
             {
                 MaxSpeed = authoring.MaxSpeed,
-                Acceleration = authoring.Acceleration,
                 TurnSpeed = authoring.TurnSpeed,
-                BrakingDistance = finalBrakingRadius,
             });
 
             AddComponent(entity, new ShipVelocity

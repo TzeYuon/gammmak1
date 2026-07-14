@@ -34,9 +34,7 @@ public struct ShipWaypoint : IBufferElementData
 public struct ShipMovementStatsComponent : IComponentData
 {
     public float MaxSpeed;
-    public float Acceleration;
     public float TurnSpeed;
-    public float BrakingDistance;
 }
 
 public struct ShipVelocity : IComponentData

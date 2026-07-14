@@ -139,13 +139,6 @@ public class LevelHandoff : MonoBehaviour
             float revealFogRadius = blueprint.GetStat(ShipStat.RevealFogRadius);
             float collectionRadius = blueprint.GetStat(ShipStat.CollectionRadius);
 
-            // Calculate braking distance
-            float speed = blueprint.GetStat(ShipStat.Speed);
-            float acceleration = blueprint.GetStat(ShipStat.Acceleration);
-            float stoppingDistance = (speed * speed) / (2.0f * acceleration);
-            float finalBrakingRadius = stoppingDistance * 1.25f;
-            finalBrakingRadius = Mathf.Max(finalBrakingRadius, 1.0f);
-
             // Shield stats
             float shieldCapacity = blueprint.GetStat(ShipStat.ShieldMaxCapacity);
 
@@ -170,10 +163,8 @@ public class LevelHandoff : MonoBehaviour
 
                 ShipMovementStats = new ShipMovementStatsComponent
                 {
-                    MaxSpeed = speed,
-                    Acceleration = acceleration,
+                    MaxSpeed = blueprint.GetStat(ShipStat.Speed),
                     TurnSpeed = blueprint.GetStat(ShipStat.TurnSpeed),
-                    BrakingDistance = finalBrakingRadius
                 },
 
                 ShipRevealFogRadius = new ShipRevealFogRadius

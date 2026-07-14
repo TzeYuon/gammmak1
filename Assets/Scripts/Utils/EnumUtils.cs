@@ -12,8 +12,6 @@ public static class EnumUtils
                 return "Hull";
             case ShipStat.Speed:
                 return "Max Speed";
-            case ShipStat.Acceleration:
-                return "Acceleration";
             case ShipStat.TurnSpeed:
                 return "Turn Speed";
             case ShipStat.CollectionRadius:

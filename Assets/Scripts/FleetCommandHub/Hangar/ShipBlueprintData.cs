@@ -69,7 +69,7 @@ public enum ShipStat
     Cost = 0,
     MaxHealth = 1,
     Speed = 2,
-    Acceleration = 3,
+
     TurnSpeed = 4,
     CollectionRadius = 5,
     WeaponCapacity = 6,
@@ -83,66 +83,21 @@ public enum ShipStat
     ShieldRadius = 14,
 }
 
-[System.Serializable]
-public class ShipSystemUpgradeEffect
-{
-    public ShipStat StatType;
-    public ModifierType ModifierType;
-    public float Value;
-
-    public string GetDescription()
-    {
-        float displayValue = Value;
-        string statName = EnumUtils.GetStatName(StatType);
-
-        string sign = displayValue > 0 ? "+" : "";
-
-        if (ModifierType == ModifierType.PercentAdd)
-            return $"{sign}{Mathf.RoundToInt(displayValue * 100f)}% {statName}";
-        else
-            return $"{sign}{displayValue} {statName}";
-    }
-}
 
 [System.Serializable]
-public class ShipSystemUpgrade
+public class ShipSystemState
 {
-    public int Cost;
-    public string Description;
+    public ShipSystemDefinition Definition;
+    [HideInInspector] public int UpgradeLevel;
 
-    public List<ShipSystemUpgradeEffect> Effects = new();
-}
+    public ShipSystemID SystemID => Definition.SystemID;
+    public int MaxUpgradeLevel => Definition != null ? Definition.MaxUpgradeLevel : 0;
 
-[System.Serializable]
-public class ShipSystem
-{
-    public ShipSystemID SystemID;
+    public bool CanBeUpgraded() => Definition != null && UpgradeLevel < MaxUpgradeLevel;
+    public bool CanBeRefunded() => UpgradeLevel > 0;
 
-    public int UpgradeLevel;
-    public int MaxUpgradeLevel { get { return Upgrades.Count; } }
-    public List<ShipSystemUpgrade> Upgrades = new();
-
-    public bool CanBeUpgraded()
-    {
-        return UpgradeLevel < MaxUpgradeLevel;
-    }
-
-    public bool CanBeRefunded()
-    {
-        return UpgradeLevel > 0;
-    }
-
-    public int GetUpgradeCost()
-    {
-        if (UpgradeLevel >= MaxUpgradeLevel) return 0;
-        return Upgrades[UpgradeLevel].Cost;
-    }
-
-    public int GetRefundValue()
-    {
-        if (UpgradeLevel <= 0) return 0;
-        return Upgrades[UpgradeLevel - 1].Cost;
-    }
+    public int GetUpgradeCost() => Definition != null ? Definition.GetUpgradeCost(UpgradeLevel) : 0;
+    public int GetRefundValue() => Definition != null ? Definition.GetRefundValue(UpgradeLevel) : 0;
 }
 
 [CreateAssetMenu(fileName = "NewShipBlueprint", menuName = "FleetCommand/Ship Blueprint")]
@@ -154,7 +109,7 @@ public class ShipBlueprintData : ScriptableObject
     public GameObject ShipPrefab;
     public Mesh ShipMesh;
 
-    public List<ShipSystem> ShipSystems = new();
+    public List<ShipSystemState> ShipSystems = new();
 
     public int BaseWeaponCapacity;
     public int WeaponCapacity { get { return Mathf.RoundToInt(GetStat(ShipStat.WeaponCapacity)); } }
@@ -177,7 +132,6 @@ public class ShipBlueprintData : ScriptableObject
     public float BaseMaxHealth = 10f;
     public float BaseDamageReduction = 0f;
     public float BaseSpeed = 15f;
-    public float BaseAcceleration = 15f;
     public float BaseTurnSpeed = 15f;
     public float BaseRevealFogRadius = 25f;
     public float BaseCollectionRadius = 5f;
@@ -195,7 +149,7 @@ public class ShipBlueprintData : ScriptableObject
 
     public void ResetToBase()
     {
-        foreach (ShipSystem system in ShipSystems)
+        foreach (ShipSystemState system in ShipSystems)
         {
             system.UpgradeLevel = 0;
         }
@@ -223,7 +177,7 @@ public class ShipBlueprintData : ScriptableObject
         else return remainingCap >= data.EquipCost;
     }
 
-    public bool CanRefundSystem(ShipSystem system, out string reason)
+    public bool CanRefundSystem(ShipSystemState system, out string reason)
     {
         reason = "";
         if (!system.CanBeRefunded())
@@ -259,7 +213,6 @@ public class ShipBlueprintData : ScriptableObject
             case ShipStat.MaxHealth: baseValue = BaseMaxHealth; break;
             case ShipStat.DamageReduction: baseValue = BaseDamageReduction; break;
             case ShipStat.Speed: baseValue = BaseSpeed; break;
-            case ShipStat.Acceleration: baseValue = BaseAcceleration; break;
             case ShipStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
             case ShipStat.RevealFogRadius: baseValue = BaseRevealFogRadius; break;
             case ShipStat.CollectionRadius: baseValue = BaseCollectionRadius; break;
@@ -276,13 +229,13 @@ public class ShipBlueprintData : ScriptableObject
         float percentBonus = 0f;
 
         // add all bonuses from all ship systems
-        foreach (ShipSystem system in ShipSystems)
+        foreach (ShipSystemState system in ShipSystems)
         {
             for (int i = 0; i < system.UpgradeLevel; i++)
             {
-                if (i >= system.Upgrades.Count) break; // Safety check
+                if (i >= system.Definition.Upgrades.Count) break; // Safety check
 
-                foreach (var effect in system.Upgrades[i].Effects)
+                foreach (var effect in system.Definition.Upgrades[i].Effects)
                 {
                     if (effect.StatType == statType)
                     {

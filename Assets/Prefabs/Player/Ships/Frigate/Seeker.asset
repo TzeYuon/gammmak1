@@ -18,156 +18,16 @@ MonoBehaviour:
   ShipPrefab: {fileID: 6753536424006035904, guid: 05b87862407b5ee438d530c20cf4a420, type: 3}
   ShipMesh: {fileID: 8375409519023519079, guid: b435369c67d450c459bfa4f894ebed89, type: 3}
   ShipSystems:
-  - SystemID: 1
+  - Definition: {fileID: 11400000, guid: d20ec5eb21eb9b0428bc8e55e30056cd, type: 2}
     UpgradeLevel: 1
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 2
-        ModifierType: 0
-        Value: 0.5
-      - StatType: 3
-        ModifierType: 0
-        Value: 0.1
-      - StatType: 4
-        ModifierType: 0
-        Value: 0.5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 2
-        ModifierType: 0
-        Value: 1
-      - StatType: 3
-        ModifierType: 0
-        Value: 0.2
-      - StatType: 4
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 2
+  - Definition: {fileID: 11400000, guid: e06a3366b4304ce4da3f6a30f0484f93, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 1
-        ModifierType: 0
-        Value: 5
-      - StatType: 8
-        ModifierType: 0
-        Value: 0.1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 1
-        ModifierType: 0
-        Value: 10
-      - StatType: 8
-        ModifierType: 0
-        Value: 0.1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 4
+  - Definition: {fileID: 11400000, guid: 8305ba558060a1f429accc5ff5a3591c, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 400
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 600
-      Description: 
-      Effects:
-      - StatType: 6
-        ModifierType: 0
-        Value: 1
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 5
+  - Definition: {fileID: 11400000, guid: 8dc82c993c1298f4f9bbe74fed621aa7, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 5
-        ModifierType: 1
-        Value: 0.5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 5
-        ModifierType: 1
-        Value: 0.5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-  - SystemID: 6
+  - Definition: {fileID: 11400000, guid: 3680c94a8aa3f8d438c81dbb3f411fe0, type: 2}
     UpgradeLevel: 0
-    Upgrades:
-    - Cost: 100
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 200
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
-    - Cost: 300
-      Description: 
-      Effects:
-      - StatType: 7
-        ModifierType: 0
-        Value: 5
-      - StatType: 0
-        ModifierType: 0
-        Value: 1
   BaseWeaponCapacity: 2
   Mounts:
   - Position: {x: 0, y: 0.45}
@@ -182,13 +42,14 @@ MonoBehaviour:
   BaseMaxHealth: 10
   BaseDamageReduction: 0
   BaseSpeed: 7
-  BaseAcceleration: 3
   BaseTurnSpeed: 7
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5
   HasShield: 0
+  ShieldOffset: {x: 0, y: 0}
   ShieldRadius: 0
+  ShieldRechargeDelay: 1
   BaseShieldMaxCapacity: 0
   BaseShieldRegenPerSecond: 0
-  BaseShieldDamage: 0
-  BaseShieldEfficiencyBonus: 0
+  ShieldDamage: 0
+  ShieldEfficiencyBonus: 0

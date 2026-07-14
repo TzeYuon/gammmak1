@@ -122,6 +122,8 @@ public partial struct MoveShipJob : IJobEntity
         float2 currentPos = transform.Position.xy;
         float2 targetPos = command.MoveTarget;
 
+        float brakingDistance = 1;
+
         if (moveEnabled.ValueRO)
         {
             // move to next waypoint if close enough
@@ -146,9 +148,9 @@ public partial struct MoveShipJob : IJobEntity
                 float speed = stats.MaxSpeed;
 
                 // Slow down smoothly when approaching the final destination
-                if (isFinalTarget && distToTarget < stats.BrakingDistance)
+                if (isFinalTarget && distToTarget < brakingDistance)
                 {
-                    float slowdownMultiplier = math.max(0.1f, distToTarget / stats.BrakingDistance);
+                    float slowdownMultiplier = math.max(0.1f, distToTarget / brakingDistance);
                     speed *= slowdownMultiplier;
                 }
 
@@ -158,7 +160,7 @@ public partial struct MoveShipJob : IJobEntity
 
             // rotation
             quaternion desiredRot = transform.Rotation;
-            if (isFinalTarget && command.UseTargetRotation && distToTarget < stats.BrakingDistance)
+            if (isFinalTarget && command.UseTargetRotation && distToTarget < brakingDistance)
             {
                 // rotate towards target rotation
                 desiredRot = command.TargetRotation;
