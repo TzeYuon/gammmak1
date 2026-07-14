@@ -77,6 +77,10 @@ public partial struct ShipSpawnerSystem : ISystem
         var shipBlueprintLookupReadOnly = SystemAPI.GetComponentLookup<RosterShipBlueprint>(true);
         var weaponBufferLookup = SystemAPI.GetBufferLookup<RosterWeaponBlueprint>(true);
 
+        // to randomise spawn point slightly
+        uint seed = (uint)(SystemAPI.Time.ElapsedTime * 1000.0) + 1u;
+        var rng = new Unity.Mathematics.Random(seed);
+
         // process all requests in current frame
         while (spawnQueue.TryDequeue(out SpawnRequest request))
         {
@@ -94,10 +98,16 @@ public partial struct ShipSpawnerSystem : ISystem
             int cost = shipBlueprint.BiomassCost;
             if (economy.ValueRO.TotalBiomass < cost) continue;
             else economy.ValueRW.TotalBiomass -= cost;
-            
+
+            // random position
+            float2 offsetDir = rng.NextFloat2Direction();
+            float offsetDist = rng.NextFloat(0.0f, 1.0f);
+            float3 spawnPosition = mothershipPosition;
+            spawnPosition.xy += offsetDir * offsetDist;
+
             // Spawn ship
             Entity newShip = ecb.Instantiate(prefabToSpawn);
-            ecb.SetComponent(newShip, LocalTransform.FromPosition(mothershipPosition));
+            ecb.SetComponent(newShip, LocalTransform.FromPosition(spawnPosition));
 
             // Set ship stats
             ecb.SetComponent(newShip, shipBlueprint.ShipHealthComponent);

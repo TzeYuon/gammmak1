@@ -13,7 +13,7 @@ partial class FleetCommandSystem : SystemBase
     bool moveStarted;
     float2 moveTarget;
     quaternion moveTargetRotation;
-    NativeArray<float2> validPositions;
+    NativeParallelHashMap<Entity, float2> assignedPositions;
 
     bool isSelecting;
     public static event Action<float2, float2> OnSelectionBoxChanged;
@@ -24,7 +24,7 @@ partial class FleetCommandSystem : SystemBase
         RequireForUpdate<PlayerInputData>();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     protected override void OnUpdate()
     {
         var gameState = SystemAPI.GetSingletonRW<GameStateSingleton>();
@@ -89,7 +89,8 @@ partial class FleetCommandSystem : SystemBase
         Dependency.Complete();
 
         // Handle ship move command
-        int selectedCount = SystemAPI.QueryBuilder().WithAll<SelectedTag, PlayerTag>().Build().CalculateEntityCount();
+        var selectedQuery = SystemAPI.QueryBuilder().WithAll<SelectedTag, PlayerTag>().WithDisabled<DeadTag>().Build();
+        int selectedCount = selectedQuery.CalculateEntityCount();
         if (selectedCount == 0)
         {
             // no ships can be assigned to move, cancel move
@@ -113,16 +114,60 @@ partial class FleetCommandSystem : SystemBase
             moveStarted = true;
             moveTarget = ValidateMoveTarget(centerOfMass.xy, math.round(mousePos));
 
-            // create positions to assign to ships when move command is given
-            float shipSpacing = 1f;
-            if (validPositions.IsCreated) validPositions.Dispose();
-            validPositions = GenerateBFSFormationPositions(
+            var selectedEntities = selectedQuery.ToEntityArray(Allocator.Temp);
+            var avoidanceLookup = SystemAPI.GetComponentLookup<ShipMovementStatsComponent>(true);
+
+            // collect all selected ships data
+            var placementData = new NativeArray<ShipPlacementData>(selectedCount, Allocator.Temp);
+            for (int i = 0; i < selectedCount; i++)
+            {
+                Entity ship = selectedEntities[i];
+
+                float radius = 1.0f;
+                float2 offset = 0;
+                if (avoidanceLookup.HasComponent(ship)) 
+                {
+                    radius = avoidanceLookup[ship].AvoidanceRadius;
+                    offset = avoidanceLookup[ship].AvoidanceOffset;
+                }
+
+                placementData[i] = new ShipPlacementData
+                {
+                    ShipEntity = ship,
+                    Radius = radius,
+                    LocalOffset = offset,
+                };
+            }
+
+            // sort by size
+            placementData.Sort();
+
+            // generate positions in spiral
+            float shipSpacing = 0f;
+            var generatedPositions = GenerateSpiralFormation(
                 selectedCount,
                 moveTarget,
+                placementData,
                 shipSpacing,
                 obstacleGrid, worldOrigin, gridWidth, gridHeight, cellSize,
-                Allocator.Persistent
+                Allocator.Temp
             );
+
+            // clear previous assigned position if any
+            if (assignedPositions.IsCreated) assignedPositions.Dispose();
+            assignedPositions = new NativeParallelHashMap<Entity, float2>(selectedCount, Allocator.Persistent);
+
+            // place positions into hashmap
+            for (int i = 0; i < selectedCount; i++)
+            {
+                float2 finalPos = generatedPositions[i] - placementData[i].LocalOffset;
+                assignedPositions.Add(placementData[i].ShipEntity, finalPos);
+            }
+
+            // cleanup temp arrays
+            placementData.Dispose();
+            generatedPositions.Dispose();
+            selectedEntities.Dispose();
         }
 
         if (!moveStarted) return;
@@ -149,14 +194,14 @@ partial class FleetCommandSystem : SystemBase
         {
             var moveJob = new AssignMoveCommandJob
             {
-                ValidPositions = validPositions,
+                AssignedPositions = assignedPositions,
                 UseRotation = useRotation,
                 TargetRotation = moveTargetRotation
             };
             Dependency = moveJob.ScheduleParallel(Dependency);
 
             // dispose valid positions array
-            validPositions.Dispose(Dependency);
+            assignedPositions.Dispose(Dependency);
 
             moveStarted = false;
         }
@@ -164,17 +209,18 @@ partial class FleetCommandSystem : SystemBase
         {
             var projectionJob = new AssignProjectionJob
             {
-                ValidPositions = validPositions,
+                AssignedPositions = assignedPositions,
                 UseRotation = useRotation,
                 TargetRotation = moveTargetRotation
             };
             Dependency = projectionJob.ScheduleParallel(Dependency);
         }
 
-        static NativeArray<float2> GenerateBFSFormationPositions(
+        static NativeArray<float2> GenerateSpiralFormation(
             int totalCount,
             float2 center,
-            float shipSpacing,
+            NativeArray<ShipPlacementData> shipRadii,
+            float padding,
             NativeArray<int> obstacleGrid,
             int2 worldOrigin,
             int gridWidth,
@@ -184,58 +230,63 @@ partial class FleetCommandSystem : SystemBase
         {
             var validPositions = new NativeArray<float2>(totalCount, allocator);
 
-            var queue = new NativeQueue<int2>(Allocator.Temp);
-            var visited = new NativeHashSet<int2>(totalCount * 4, Allocator.Temp);
+            float angleStep = 0.1f;
+            float radiusStep = 0.02f;
 
-            queue.Enqueue(int2.zero);
-            visited.Add(int2.zero);
-
-            int foundCount = 0;
-
-            NativeArray<int2> directions = new NativeArray<int2>(4, Allocator.Temp);
-            directions[0] = new int2(1, 0);
-            directions[1] = new int2(-1, 0);
-            directions[2] = new int2(0, 1);
-            directions[3] = new int2(0, -1);
-
-            while (queue.Count > 0 && foundCount < totalCount)
+            for (int i = 0; i < totalCount; i++)
             {
-                int2 virtualCoord = queue.Dequeue();
+                float currentShipRadius = shipRadii[i].Radius;
+                float currentRequiredSpace = currentShipRadius + padding;
 
-                float2 offset = new float2(virtualCoord.x * shipSpacing, virtualCoord.y * shipSpacing);
+                bool placed = false;
+                float currentAngle = 0f;
+                float currentSpiralRadius = 0f;
 
-                float2 worldPos = center + offset;
+                int maxAttempts = 1000; 
+                int attempts = 0;
 
-                int2 obstacleCell = GridUtility.WorldPosToCell(worldPos, worldOrigin, obstacleCellSize);
-
-                bool isSafe = GridUtility.IsWithinBounds(obstacleCell, gridWidth, gridHeight) &&
-                              GridUtility.IsTerrainPassable(worldPos, obstacleGrid, worldOrigin, gridWidth, gridHeight, obstacleCellSize);
-
-                if (isSafe)
+                while (!placed && attempts < maxAttempts)
                 {
-                    validPositions[foundCount] = worldPos;
-                    foundCount++;
+                    attempts++;
 
-                    for (int i = 0; i < 4; i++)
+                    float2 offset = new float2(math.cos(currentAngle), math.sin(currentAngle)) * currentSpiralRadius;
+                    float2 testPos = center + offset;
+
+                    currentAngle += angleStep;
+                    currentSpiralRadius += radiusStep;
+
+                    // check terrain
+                    int2 obstacleCell = GridUtility.WorldPosToCell(testPos, worldOrigin, obstacleCellSize);
+                    if (!GridUtility.IsWithinBounds(obstacleCell, gridWidth, gridHeight) || 
+                        !GridUtility.IsTerrainPassable(testPos, obstacleGrid, worldOrigin, gridWidth, gridHeight, obstacleCellSize))
                     {
-                        int2 neighbor = virtualCoord + directions[i];
-                        if (visited.Add(neighbor))
+                        continue;
+                    }
+
+                    // check overlap with other ships
+                    bool overlapsOtherShip = false;
+                    for (int j = 0; j < i; j++)
+                    {
+                        float distSq = math.distancesq(testPos, validPositions[j]);
+                        float minSafeDist = currentRequiredSpace + shipRadii[j].Radius;
+                        if (distSq < minSafeDist * minSafeDist)
                         {
-                            queue.Enqueue(neighbor);
+                            overlapsOtherShip = true;
+                            break;
                         }
                     }
+
+                    if (overlapsOtherShip) continue;
+
+                    validPositions[i] = testPos;
+                    placed = true;
+                }
+
+                if (!placed) // could not find location, place in the centre
+                {
+                    validPositions[i] = center;
                 }
             }
-
-            for (int i = foundCount; i < totalCount; i++)
-            {
-                validPositions[i] = foundCount > 0 ? validPositions[foundCount - 1] : center;
-            }
-
-            // Cleanup
-            directions.Dispose();
-            queue.Dispose();
-            visited.Dispose();
 
             return validPositions;
         }
@@ -290,7 +341,7 @@ partial class FleetCommandSystem : SystemBase
     [BurstCompile]
     protected override void OnDestroy()
     {
-        if (validPositions.IsCreated) validPositions.Dispose();
+        if (assignedPositions.IsCreated) assignedPositions.Dispose();
     }
 }
 
@@ -319,6 +370,18 @@ public partial struct CheckSelectionBoxJob : IJobEntity
     }
 }
 
+public struct ShipPlacementData : IComparable<ShipPlacementData>
+{
+    public Entity ShipEntity;
+    public float Radius;
+    public float2 LocalOffset;
+
+    public int CompareTo(ShipPlacementData other)
+    {
+        return other.Radius.CompareTo(this.Radius);
+    }
+}
+
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
 [WithPresent(typeof(MoveCommandProjection))]
@@ -338,23 +401,24 @@ public partial struct HideProjectionJob : IJobEntity
 [WithPresent(typeof(MoveCommandProjection))]
 public partial struct AssignProjectionJob : IJobEntity
 {
-    [ReadOnly] public NativeArray<float2> ValidPositions;
+    [ReadOnly] public NativeParallelHashMap<Entity, float2> AssignedPositions;
     public bool UseRotation;
     public quaternion TargetRotation;
 
     private void Execute(
-        [EntityIndexInQuery] int index,
+        Entity entity,
         ref MoveCommandProjection projection,
         EnabledRefRW<MoveCommandProjection> projectionEnabled)
     {
-        // safety check
-        if (index >= ValidPositions.Length) return;
 
-        projection.MoveTarget = ValidPositions[index];
-        projection.UseTargetRotation = UseRotation;
-        projection.TargetRotation = TargetRotation;
+        if (AssignedPositions.TryGetValue(entity, out float2 assignedPos))
+        {
+            projection.MoveTarget = assignedPos;
+            projection.UseTargetRotation = UseRotation;
+            projection.TargetRotation = TargetRotation;
 
-        projectionEnabled.ValueRW = true;
+            projectionEnabled.ValueRW = true;
+        }
     }
 }
 
@@ -364,26 +428,27 @@ public partial struct AssignProjectionJob : IJobEntity
 [WithPresent(typeof(MoveCommand))]
 public partial struct AssignMoveCommandJob : IJobEntity
 {
-    [ReadOnly] public NativeArray<float2> ValidPositions;
+    [ReadOnly] public NativeParallelHashMap<Entity, float2> AssignedPositions;
     public bool UseRotation;
     public quaternion TargetRotation;
 
     private void Execute(
-        [EntityIndexInQuery] int index,
+        Entity entity,
         ref MoveCommand command,
         EnabledRefRW<MoveCommand> commandEnabled,
         EnabledRefRW<MoveCommandProjection> projectionEnabled)
     {
-        if (index >= ValidPositions.Length) return;
+        if (AssignedPositions.TryGetValue(entity, out float2 assignedPos))
+        {
+            command.MoveTarget = assignedPos;
+            command.Recalculate = true;
+            command.ForcePath = false;
+            command.UseTargetRotation = UseRotation;
+            command.TargetRotation = TargetRotation;
 
-        command.MoveTarget = ValidPositions[index];
-        command.Recalculate = true;
-        command.ForcePath = false;
-        command.UseTargetRotation = UseRotation;
-        command.TargetRotation = TargetRotation;
-
-        commandEnabled.ValueRW = true;
-        projectionEnabled.ValueRW = false;
+            commandEnabled.ValueRW = true;
+            projectionEnabled.ValueRW = false;
+        }
     }
 }
 

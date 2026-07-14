@@ -163,6 +163,8 @@ public class LevelHandoff : MonoBehaviour
 
                 ShipMovementStats = new ShipMovementStatsComponent
                 {
+                    AvoidanceRadius = blueprint.AvoidanceRadius,
+                    AvoidanceOffset = blueprint.AvoidanceOffset,
                     MaxSpeed = blueprint.GetStat(ShipStat.Speed),
                     TurnSpeed = blueprint.GetStat(ShipStat.TurnSpeed),
                 },
