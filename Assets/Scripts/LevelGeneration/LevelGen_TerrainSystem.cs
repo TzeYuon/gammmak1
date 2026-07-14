@@ -57,8 +57,6 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         if (blueprint.GridWidth <= 0)
         {
-            blueprint.GridWidth = 200;
-            blueprint.GridHeight = 200;
             blueprint.NoiseScale = 0.15f;
             blueprint.WallThreshold = 0.75f;
             blueprint.PoisonThreshold = 0.78f;
@@ -67,103 +65,134 @@ partial struct LevelGen_TerrainSystem : ISystem
         }
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
+        switch(blueprint.TerrainType)
+        {
+            case TerrainType.Maze:
+                blueprint.GridWidth = 500;
+                blueprint.GridHeight = 500;
+                break;
+            case TerrainType.Cavern:
+                blueprint.GridWidth = 500;
+                blueprint.GridHeight = 500;
+                break;
+            default:
+                blueprint.GridWidth = 300;
+                blueprint.GridHeight = 300;
+                break;
+        }
         int width = blueprint.GridWidth;
         int height = blueprint.GridHeight;
         int safezoneRadius = 20;
         int2 worldOrigin = new int2(1000 - width / 2, 1000 - height / 2);
         LevelSpawnData spawnData = new LevelSpawnData();
 
-        // Set camera bounds to current map size
+        // Set camera bounds
         CameraManager.Instance.SetMapBounds(new Vector2(width / 2f, height / 2f));
 
-        float Xtl = 1000 - width / 2 + safezoneRadius;
-        float Ytl = 1000 + height / 2 - safezoneRadius;
-        float Xtr = 1000 + width / 2 - safezoneRadius;
-        float Ytr = 1000 + height / 2 - safezoneRadius;
-        float Xbr = 1000 + width / 2 - safezoneRadius;
-        float Ybr = 1000 - height / 2 + safezoneRadius;
-        float Xbl = 1000 - width / 2 + safezoneRadius;
-        float Ybl = 1000 - height / 2 + safezoneRadius;
-        float Xt = 1000;
-        float Yt = 1000 + height / 2 - safezoneRadius;
-        float Xr = 1000 + width / 2 - safezoneRadius;
-        float Yr = 1000;
-        float Xl = 1000 - width / 2 + safezoneRadius;
-        float Yl = 1000;
-        float Xb = 1000;
-        float Yb = 1000 - height / 2 + safezoneRadius;
+        List<float3> spawnPool = new List<float3>();
+        float Xtl = worldOrigin.x + safezoneRadius;
+        float Ytl = worldOrigin.y + height - safezoneRadius;
+        float Xtr = worldOrigin.x + width - safezoneRadius;
+        float Ytr = worldOrigin.y + height - safezoneRadius;
+        float Xbr = worldOrigin.x + width - safezoneRadius;
+        float Ybr = worldOrigin.y + safezoneRadius;
+        float Xbl = worldOrigin.x + safezoneRadius;
+        float Ybl = worldOrigin.y + safezoneRadius;
+        float Xt = worldOrigin.x + width / 2;
+        float Yt = worldOrigin.y + height - safezoneRadius;
+        float Xr = worldOrigin.x + width - safezoneRadius;
+        float Yr = worldOrigin.y + height / 2;
+        float Xl = worldOrigin.x + safezoneRadius;
+        float Yl = worldOrigin.y + height / 2;
+        float Xb = worldOrigin.x + width / 2;
+        float Yb = worldOrigin.y + safezoneRadius;
+        float Xc = worldOrigin.x + width / 2;
+        float Yc = worldOrigin.y + height / 2;
 
-        unsafe
+        
+        switch (blueprint.TerrainType)
         {
-            switch (blueprint.TerrainType)
-            {
-                case TerrainType.Asteroids:
-                    // Default
-                    spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.ActiveHiveCount = 1;
-                    spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
-                    break;
+            case TerrainType.Asteroids:
+                // Default
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnData.ActiveHiveCount = 1;
+                break;
 
-                case TerrainType.Cavern:
-                    // Maybe can spawn new hives periodically while starting with <8?
-                    spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                    spawnData.ActiveHiveCount = 2;
-                    spawnData.HiveSpawnsX[0] = Xtl; spawnData.HiveSpawnsY[0] = Ytl;
-                    spawnData.HiveSpawnsX[1] = Xtr; spawnData.HiveSpawnsY[1] = Ytr;
-                    spawnData.ExpansionSpotCount = 6;
-                    spawnData.ExpansionSpotsX[0] = Xbr; spawnData.ExpansionSpotsY[0] = Ybr;
-                    spawnData.ExpansionSpotsX[1] = Xbl; spawnData.ExpansionSpotsY[1] = Ybl;
-                    spawnData.ExpansionSpotsX[2] = Xt; spawnData.ExpansionSpotsY[2] = Yt;
-                    spawnData.ExpansionSpotsX[3] = Xr; spawnData.ExpansionSpotsY[3] = Yr;
-                    spawnData.ExpansionSpotsX[4] = Xl; spawnData.ExpansionSpotsY[4] = Yl;
-                    spawnData.ExpansionSpotsX[5] = Xb; spawnData.ExpansionSpotsY[5] = Yb;
-                    break;
-                case TerrainType.OneTunnel:
-                    spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.ActiveHiveCount = 1;
-                    spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
-                    spawnData.ExpansionSpotCount = 0;
-                    break;
+            case TerrainType.Cavern:
+                // Maybe can spawn new hives periodically while starting with <8?
+                spawnPool.Add(new float3(Xc, Yc, 0));
+                spawnPool.Add(new float3(Xtl, Ytl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnPool.Add(new float3(Xbr, Ybr, 0)); 
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xt, Yt, 0)); 
+                spawnPool.Add(new float3(Xr, Yr, 0));
+                spawnPool.Add(new float3(Xl, Yl, 0)); 
+                spawnPool.Add(new float3(Xb, Yb, 0));
+                spawnData.ActiveHiveCount = 4;
+                break;
 
-                case TerrainType.Maze:
-                    spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
-                    spawnData.ActiveHiveCount = 2;
-                    spawnData.HiveSpawnsX[0] = Xtr; spawnData.HiveSpawnsY[0] = Ytr;
-                    spawnData.HiveSpawnsX[1] = Xbr; spawnData.HiveSpawnsY[1] = Ybr;
-                    spawnData.ExpansionSpotCount = 2;
-                    spawnData.ExpansionSpotsX[0] = Xtl; spawnData.ExpansionSpotsY[0] = Ytl;
-                    spawnData.ExpansionSpotsX[1] = Xt; spawnData.ExpansionSpotsY[1] = Yt;
-                    break;
+            case TerrainType.OneTunnel:
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnData.ActiveHiveCount = 1;
+                break;
 
-                default:
-                    spawnData.MothershipSpawn = new float3(1000, 1000, 0);
-                    spawnData.ActiveHiveCount = 4;
-                    spawnData.HiveSpawnsX[0] = Xtl; spawnData.HiveSpawnsY[0] = Ytl;
-                    spawnData.HiveSpawnsX[1] = Xtr; spawnData.HiveSpawnsY[1] = Ytr;
-                    spawnData.HiveSpawnsX[2] = Xbr; spawnData.HiveSpawnsY[2] = Ybr;
-                    spawnData.HiveSpawnsX[3] = Xbl; spawnData.HiveSpawnsY[3] = Ybl;
-                    spawnData.ExpansionSpotCount = 0;
-                    break;
-            }
-        }
+            case TerrainType.Maze:
+                spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnPool.Add(new float3(Xbr, Ybr, 0));
+                spawnPool.Add(new float3(Xtl, Ytl, 0));
+                spawnPool.Add(new float3(Xt, Yt, 0));
+                spawnData.ActiveHiveCount = 2;
+                break;
 
-        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnData.ActiveHiveCount + spawnData.ExpansionSpotCount + 1, Allocator.Temp);
-        spawnPoints[0] = spawnData.MothershipSpawn;
-
-        int pointIndex = 1;
-        unsafe
-        {
-            for (int i = 0; i < spawnData.ActiveHiveCount; i++)
-            {
-                spawnPoints[pointIndex++] = new float3(spawnData.HiveSpawnsX[i], spawnData.HiveSpawnsY[i], 0);
-            }
-            for (int i = 0; i < spawnData.ExpansionSpotCount; i++)
-            {
-                spawnPoints[pointIndex++] = new float3(spawnData.ExpansionSpotsX[i], spawnData.ExpansionSpotsY[i], 0);
-            }
+            default:
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnPool.Add(new float3(Xtl, Ytl, 0));
+                spawnPool.Add(new float3(Xbr, Ybr, 0));
+                spawnPool.Add(new float3(Xc, Yc, 0));
+                spawnData.ActiveHiveCount = 4;
+                break;
         }
 
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
+
+        for (int i = 0; i < spawnPool.Count; i++)
+        {
+            int swapIdx = rng.NextInt(i, spawnPool.Count);
+            float3 temp = spawnPool[i];
+            spawnPool[i] = spawnPool[swapIdx];
+            spawnPool[swapIdx] = temp;
+        }
+
+        unsafe
+        {
+            for (int i = 0; i < spawnPool.Count - 1; i++)
+            {
+                if (i < spawnData.ActiveHiveCount)
+                {
+                    spawnData.HiveSpawnsX[i] = spawnPool[i].x;
+                    spawnData.HiveSpawnsY[i] = spawnPool[i].y;
+                }
+                else
+                {
+                    spawnData.ExpansionSpotsX[i - spawnData.ActiveHiveCount] = spawnPool[i].x;
+                    spawnData.ExpansionSpotsY[i - spawnData.ActiveHiveCount] = spawnPool[i].y;
+                }
+            }
+
+            spawnData.MothershipSpawn = spawnPool[spawnPool.Count - 1];
+        }
+
+        NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnPool.Count, Allocator.Temp);
+        for (int i = 0; i < spawnPool.Count; i++)
+        {
+            spawnPoints[i] = spawnPool[i];
+        }
         float randomOffset = rng.NextFloat(0f, 9999f);
 
         int totalCells = width * height;
