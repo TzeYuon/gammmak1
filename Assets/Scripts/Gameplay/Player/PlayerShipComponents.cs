@@ -33,6 +33,8 @@ public struct ShipWaypoint : IBufferElementData
 }
 public struct ShipMovementStatsComponent : IComponentData
 {
+    public float AvoidanceRadius;
+    public float2 AvoidanceOffset;
     public float MaxSpeed;
     public float TurnSpeed;
 }

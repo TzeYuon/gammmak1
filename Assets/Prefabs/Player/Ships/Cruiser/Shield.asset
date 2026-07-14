@@ -42,6 +42,8 @@ MonoBehaviour:
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 70
     EquippedWeapon: {fileID: 0}
+  AvoidanceRadius: 1.23
+  AvoidanceOffset: {x: 0, y: 0.5}
   BaseCost: 15
   BaseMaxHealth: 20
   BaseDamageReduction: 0

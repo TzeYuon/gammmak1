@@ -26,8 +26,6 @@ public partial struct ShipMovementSystem : ISystem
         if (!SystemAPI.TryGetSingleton<TerrainGridComponent>(out var terrainGridComponent)) return;
         if (!terrainGridComponent.Grid.IsCreated) return;
 
-        var allShipTransforms = shipQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
-
         var pathfindJob = new CalculateShipPathsJob
         {
             Grid = terrainGridComponent.Grid,
@@ -37,10 +35,17 @@ public partial struct ShipMovementSystem : ISystem
         };
         state.Dependency = pathfindJob.ScheduleParallel(state.Dependency);
 
+        int shipCount = shipQuery.CalculateEntityCount();
+        var avoidanceArray = new NativeArray<ShipAvoidanceData>(shipCount, Allocator.TempJob);
+        state.Dependency = new GatherShipDataJob
+        {
+            AvoidanceArray = avoidanceArray
+        }.ScheduleParallel(state.Dependency);
+
         MoveShipJob moveJob = new MoveShipJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
-            AllShipTransforms = allShipTransforms,
+            AllShipData = avoidanceArray,
             ObstacleGrid = terrainGridComponent.Grid,
             CellSize = terrainGridComponent.CellSize,
             GridWidth = terrainGridComponent.GridWidth,
@@ -49,7 +54,7 @@ public partial struct ShipMovementSystem : ISystem
         };
         state.Dependency = moveJob.ScheduleParallel(state.Dependency);
 
-        allShipTransforms.Dispose(state.Dependency);
+        avoidanceArray.Dispose(state.Dependency);
     }
 }
 
@@ -97,13 +102,47 @@ public partial struct CalculateShipPathsJob : IJobEntity
     }
 }
 
+public struct ShipAvoidanceData
+{
+    public Entity ShipEntity;
+    public float2 Position;
+    public float Radius;
+}
+
+[BurstCompile]
+[WithAll(typeof(PlayerTag))]
+[WithAbsent(typeof(MothershipTag))]
+public partial struct GatherShipDataJob : IJobEntity
+{
+    public NativeArray<ShipAvoidanceData> AvoidanceArray;
+
+    private void Execute(
+        [EntityIndexInQuery] int queryIndex,
+        Entity entity,
+        in LocalTransform transform,
+        in ShipMovementStatsComponent stats)
+    {
+        float3 localOffset3D = new float3(stats.AvoidanceOffset, 0f);
+        float3 worldOffset3D = math.rotate(transform.Rotation, localOffset3D);
+
+        float2 worldOffsetPosition = transform.Position.xy + worldOffset3D.xy;
+
+        AvoidanceArray[queryIndex] = new ShipAvoidanceData
+        {
+            ShipEntity = entity,
+            Position = worldOffsetPosition,
+            Radius = stats.AvoidanceRadius,
+        };
+    }
+}
+
 [BurstCompile]
 [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct MoveShipJob : IJobEntity
 {
     public float DeltaTime;
 
-    [ReadOnly] public NativeArray<LocalTransform> AllShipTransforms;
+    [ReadOnly] public NativeArray<ShipAvoidanceData> AllShipData;
     [ReadOnly] public NativeArray<int> ObstacleGrid;
     public float CellSize;
     public int GridWidth;
@@ -111,6 +150,7 @@ public partial struct MoveShipJob : IJobEntity
     public int2 WorldOrigin;
 
     private void Execute(
+        in Entity entity,
         ref LocalTransform transform,
         ref DynamicBuffer<ShipWaypoint> waypoints,
         in ShipMovementStatsComponent stats,
@@ -200,28 +240,30 @@ public partial struct MoveShipJob : IJobEntity
             // player ship avoidance
             // always happens even without move command
             float2 avoidanceForce = float2.zero;
-            float avoidRadius = 1f;
-            float avoidRadiusSq = 1;
-            float avoidanceWeight = 1;
-
-            for (int i = 0; i < AllShipTransforms.Length; i++)
+            float avoidanceRadius = stats.AvoidanceRadius;
+            float avoidanceWeight = 5.0f;
+            for (int i = 0; i < AllShipData.Length; i++)
             {
-                float2 otherPos = AllShipTransforms[i].Position.xy;
-                if (math.all(currentPos == otherPos)) continue; // Skip self
+                if (entity == AllShipData[i].ShipEntity) continue;
+
+                float2 otherPos = AllShipData[i].Position;
+                float otherRadius = AllShipData[i].Radius;
+
+                float combinedRadius = avoidanceRadius + otherRadius;
+                float combinedRadiusSq = combinedRadius * combinedRadius;
 
                 float2 offset = currentPos - otherPos;
                 float distSq = math.lengthsq(offset);
 
-                if (distSq < avoidRadiusSq && distSq > 0.001f)
+                if (distSq < combinedRadiusSq && distSq > 0.0001f)
                 {
                     float dist = math.sqrt(distSq);
-                    float pushStrength = (avoidRadius - dist) / avoidRadius;
-                    avoidanceForce += (offset / dist) * pushStrength;
+                    float penetrationDepth = (combinedRadius - dist) / combinedRadius;
+
+                    float pushStrength = penetrationDepth * penetrationDepth;
+                    avoidanceForce += avoidanceWeight * pushStrength * (offset / dist);
                 }
             }
-
-            int2 currentCell = GridUtility.WorldPosToCell(currentPos, WorldOrigin, CellSize);
-            int flatIndex = GridUtility.CellToIndex(currentCell, GridWidth);
 
             // Terrain avoidance
             // always happens even without move command
@@ -260,6 +302,7 @@ public partial struct MoveShipJob : IJobEntity
             avoidanceForce += wallAvoidanceForce * 3.0f;
 
             // Check if movement would result in the ship entering the walls
+            int2 currentCell = GridUtility.WorldPosToCell(currentPos, WorldOrigin, CellSize);
             float2 nextPosition = currentPos + avoidanceWeight * DeltaTime * avoidanceForce;
             int2 nextCell = GridUtility.WorldPosToCell(nextPosition, WorldOrigin, CellSize);
             if (!GridUtility.IsTerrainPassable(nextCell, ObstacleGrid, GridWidth, GridHeight))

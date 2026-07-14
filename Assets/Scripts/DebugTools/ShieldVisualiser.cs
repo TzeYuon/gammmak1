@@ -5,11 +5,14 @@ using UnityEditor;
 
 public class ShieldVisualiser : MonoBehaviour
 {
+    public bool Enabled = true;
     public float VisualRadius = 2.0f;
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
+        if (!Enabled) return;
+
         Vector3 center = transform.position;
         Vector3 forward = transform.up;
         Vector3 normal = Vector3.forward;

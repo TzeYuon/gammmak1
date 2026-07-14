@@ -83,7 +83,6 @@ public enum ShipStat
     ShieldRadius = 14,
 }
 
-
 [System.Serializable]
 public class ShipSystemState
 {
@@ -126,6 +125,10 @@ public class ShipBlueprintData : ScriptableObject
     }
     public int RemainingWeaponCapacity { get { return WeaponCapacity - UsedWeaponCapacity; } }
     public List<WeaponMount> Mounts = new();
+
+    [Header("Avoidance")]
+    public float AvoidanceRadius;
+    public Vector2 AvoidanceOffset;
 
     [Header("Base Stats")]
     public float BaseCost = 5f;
@@ -268,6 +271,13 @@ public class ShipBlueprintData : ScriptableObject
         {
             Debug.LogError($"No ShipVisualPrefab assigned to Ship Blueprint");
             return;
+        }
+
+        RadiusVisualiser radius = ShipPrefab.GetComponentInChildren<RadiusVisualiser>(true);
+        if (radius != null)
+        {
+            AvoidanceRadius = radius.VisualRadius;
+            AvoidanceOffset = radius.transform.localPosition;
         }
 
         var visualizers = ShipPrefab.GetComponentsInChildren<WeaponMountVisualiser>(true);
