@@ -154,7 +154,9 @@ public partial struct ProjectileFiringJob : IJobEntity
     {
         state.FireTimer -= DeltaTime;
         if (state.FireTimer > 0 || !state.HasTarget || stats.FireRate == 0) return;
-        state.FireTimer = 1 / stats.FireRate;
+        var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
+        float baseCooldown = 1.0f / stats.FireRate;
+        state.FireTimer = baseCooldown * rng.NextFloat(0.9f, 1.1f);
 
         float3 weaponForward = localToWorld.Up;
         float2 targetPos = state.TargetPos;
@@ -162,7 +164,6 @@ public partial struct ProjectileFiringJob : IJobEntity
 
         if (TurretLookup.HasComponent(entity) && math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
 
-        var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
         float baseAngle = math.atan2(weaponForward.y, weaponForward.x);
         float3 spawnPoint = math.transform(localToWorld.Value, new float3(projectileWeapon.WeaponStartOffset, 0));
 

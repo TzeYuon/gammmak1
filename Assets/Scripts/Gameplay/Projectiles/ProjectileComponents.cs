@@ -19,10 +19,12 @@ public struct ProjectileMovement : IComponentData
 /// </summary>
 public struct LinearFlight : IComponentData { }
 
+public struct HomingPositionFlight : IComponentData { }
+
 /// <summary>
 /// Steers towards target position
 /// </summary>
-public struct HomingFlight : IComponentData 
+public struct HomingAutoFlight : IComponentData 
 {
     public float DistanceBias;
     public float AngleBias;

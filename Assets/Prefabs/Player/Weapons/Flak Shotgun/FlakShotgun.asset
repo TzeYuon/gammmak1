@@ -45,13 +45,13 @@ MonoBehaviour:
       Value: 1
   IgnoreObstacles: 0
   RequireTargetEntity: 0
-  BaseRange: 50
-  DensityBias: 1
+  BaseRange: 20
+  DensityBias: 0
   ThreatBias: 0
   AngleBias: 0
   DistanceBias: 1
-  BaseDamage: 10
-  BaseFireRate: 1
+  BaseDamage: 3
+  BaseFireRate: 2
   BaseSpreadDegrees: 10
   BaseProjectileCount: 5
   BaseProjectileSpeed: 120
