@@ -45,7 +45,9 @@ partial struct ProjectileSystem : ISystem
         // Movement
         var linearHandle = new LinearFlightJob { DeltaTime = deltaTime }.ScheduleParallel(state.Dependency);
 
-        var homingHandle = new HomingFlightJob 
+        var homingPositionHandle = new HomingPositionFlightJob { DeltaTime = deltaTime }.ScheduleParallel(linearHandle);
+
+        var homingAutoHandle = new HomingAutoFlightJob 
         { 
             DeltaTime = deltaTime,
             Map = fineHeatmap.Grid,
@@ -53,10 +55,10 @@ partial struct ProjectileSystem : ISystem
             GridWidth = fineHeatmap.GridWidth,
             GridHeight = fineHeatmap.GridHeight,
             CellSize = fineHeatmap.CellSize,
-        }.ScheduleParallel(linearHandle);
+        }.ScheduleParallel(homingPositionHandle);
 
         // Trigger
-        var timerHandle = new TimerTriggerJob { ElapsedTime = elapsedTime }.ScheduleParallel(homingHandle);
+        var timerHandle = new TimerTriggerJob { ElapsedTime = elapsedTime }.ScheduleParallel(homingAutoHandle);
 
         var coordHandle = new CoordinateTriggerJob().ScheduleParallel(timerHandle);
 
@@ -121,7 +123,45 @@ public partial struct LinearFlightJob : IJobEntity
 }
 
 [BurstCompile]
-public partial struct HomingFlightJob : IJobEntity
+[WithAll(typeof(HomingPositionFlight))]
+public partial struct HomingPositionFlightJob : IJobEntity
+{
+    public float DeltaTime;
+
+    private void Execute(
+        ref LocalTransform transform,
+        ref ProjectileMovement movement,
+        in ProjectileMovementStats stats,
+        in ProjectileTriggerStats trigger
+        )
+    {
+        float2 currentPos = transform.Position.xy;
+        float2 currentHeading = transform.Up().xy;
+        
+        float2 targetPos = trigger.TargetPos.xy;
+
+        // Rotate projectile towards target
+        float2 desiredDir = math.normalize(targetPos - currentPos);
+        float currentAngle = math.atan2(currentHeading.y, currentHeading.x);
+        float targetAngle = math.atan2(desiredDir.y, desiredDir.x);
+        float angleDiff = targetAngle - currentAngle;
+        while (angleDiff > math.PI) angleDiff -= math.PI * 2f;
+        while (angleDiff < -math.PI) angleDiff += math.PI * 2f;
+        float maxTurnThisFrame = stats.TurnSpeed * DeltaTime;
+        float actualTurn = math.clamp(angleDiff, -maxTurnThisFrame, maxTurnThisFrame);
+        float finalAngle = currentAngle + actualTurn;
+        float2 newDir = new float2(math.cos(finalAngle), math.sin(finalAngle));
+
+        // Apply move and rotate
+        transform.Position.xy += DeltaTime * stats.Speed * newDir;
+        transform.Rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
+
+        movement.MovedThisFrame = transform.Position.xy - currentPos;
+    }
+}
+
+[BurstCompile]
+public partial struct HomingAutoFlightJob : IJobEntity
 {
     public float DeltaTime;
     [ReadOnly] public NativeArray<HeatmapData> Map;
@@ -134,7 +174,7 @@ public partial struct HomingFlightJob : IJobEntity
         ref LocalTransform transform,
         ref ProjectileMovement movement,
         in ProjectileMovementStats stats,
-        in HomingFlight homing
+        in HomingAutoFlight homing
         )
     {
         float2 currentPos = transform.Position.xy;
@@ -297,7 +337,7 @@ public partial struct CoordinateTriggerJob : IJobEntity
     {
         if (state.IsTriggered) return;
 
-        if (math.distancesq(transform.Position.xy, stats.TargetPos) <= 0.1f)
+        if (math.distancesq(transform.Position.xy, stats.TargetPos) <= stats.HitRadius)
         {
             state.IsTriggered = true;
         }

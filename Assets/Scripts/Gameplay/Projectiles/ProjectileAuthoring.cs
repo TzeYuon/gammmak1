@@ -2,7 +2,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public enum MovementType { Linear, Homing }
+public enum MovementType { Linear, HomingAuto, HomingPosition }
 public enum TriggerType { Contact, Coordinate, Timer }
 public enum PayloadType { Kinetic, Explosive }
 
@@ -33,13 +33,17 @@ class ProjectileAuthoring : MonoBehaviour
             // Movement
             if (authoring.Movement == MovementType.Linear)
                 AddComponent<LinearFlight>(entity);
-            else
+            else if (authoring.Movement == MovementType.HomingAuto)
             {
-                AddComponent(entity, new HomingFlight
+                AddComponent(entity, new HomingAutoFlight
                 {
                     DistanceBias = 0,
                     AngleBias = 0,
                 });
+            }
+            else if (authoring.Movement == MovementType.HomingPosition)
+            {
+                AddComponent<HomingPositionFlight>(entity);
             }
 
             // TRIGGER
