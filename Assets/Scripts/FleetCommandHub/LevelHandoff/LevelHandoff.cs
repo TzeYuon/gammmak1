@@ -155,6 +155,11 @@ public class LevelHandoff : MonoBehaviour
                 GhostEntity = ghostPrefab,
                 BiomassCost = Mathf.RoundToInt(blueprint.GetStat(ShipStat.Cost)),
 
+                ShipIDComponent = new ShipIDComponent
+                {
+                    ShipID = blueprint.ShipID,
+                },
+
                 ShipHealthComponent = new HealthComponent
                 {
                     MaxValue = health,

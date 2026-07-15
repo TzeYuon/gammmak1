@@ -52,4 +52,27 @@ public static class EnumUtils
             _ => stat.ToString(),
         };
     }
+
+    public static string GetAbbrShipName(ShipID shipID)
+    {
+        return shipID switch
+        {
+            ShipID.Rodent => "RODENT",
+            ShipID.Seeker => "SEEKER",
+
+            // Destroyer class
+            ShipID.Explorer => "EXPLORER",
+            ShipID.Crab => "CRAB",
+
+            // Cruiser class
+            ShipID.Sword => "SWORD",
+            ShipID.Shield => "SHIELD",
+
+            // Battleship class
+            ShipID.Bastion => "BASTION",
+            ShipID.Invincible => "INVINCIBLE",
+
+            _ => "No name defined"
+        };
+    }
 }

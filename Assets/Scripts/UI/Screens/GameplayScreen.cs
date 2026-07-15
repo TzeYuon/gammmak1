@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEditor;
@@ -14,6 +15,8 @@ public class GameplayScreen : UIScreen
     private Camera camera;
 
     private VisualElement selectionBox;
+
+    private SelectedShipsDisplay selectedShipsDisplay;
 
     private Label biomassCounter;
     private EntityQuery economyQuery;
@@ -41,6 +44,8 @@ public class GameplayScreen : UIScreen
         InitInput();
 
         selectionBox = root.Q<VisualElement>("SelectionBox");
+
+        selectedShipsDisplay = new SelectedShipsDisplay(root.Q<VisualElement>("SelectedShipsContainer"));
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
@@ -235,6 +240,8 @@ public class GameplayScreen : UIScreen
         UpdateBiomassCounter();
         UpdateSurgeWarning();
 
+        selectedShipsDisplay.Update();
+
         void UpdateBiomassCounter()
         {
             economyQuery.CompleteDependency();
@@ -317,5 +324,96 @@ public class GameplayScreen : UIScreen
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
         gameState.ValueRW.CurrentState = targetState;
+    }
+}
+
+public class SelectedShipsDisplay
+{
+    private EntityManager entityManager;
+    private EntityQuery selectedQuery;
+
+    private VisualElement selectionContainer;
+    private int lastSelectedCount = -1;
+
+    public SelectedShipsDisplay(VisualElement root)
+    {
+        selectionContainer = root; // Create this in UI Builder!
+
+        var world = World.DefaultGameObjectInjectionWorld;
+        if (world != null)
+        {
+            entityManager = world.EntityManager;
+            selectedQuery = entityManager.CreateEntityQuery(
+                ComponentType.ReadOnly<SelectedTag>(),
+                ComponentType.ReadOnly<ShipIDComponent>(),
+                ComponentType.Exclude<DeadTag>()
+            );
+        }
+    }
+
+    public void Update()
+    {
+        if (selectedQuery.IsEmptyIgnoreFilter) return;
+
+        int currentSelectedCount = selectedQuery.CalculateEntityCount();
+        if (currentSelectedCount == lastSelectedCount) return;
+
+        lastSelectedCount = currentSelectedCount;
+        RebuildSelectionUI();
+    }
+
+    private void RebuildSelectionUI()
+    {
+        selectionContainer.Clear();
+
+        if (lastSelectedCount == 0) return;
+
+        var selectedEntities = selectedQuery.ToEntityArray(Allocator.Temp);
+        var shipTypes = selectedQuery.ToComponentDataArray<ShipIDComponent>(Allocator.Temp);
+
+        Dictionary<ShipID, List<Entity>> groupedSelection = new Dictionary<ShipID, List<Entity>>();
+
+        for (int i = 0; i < selectedEntities.Length; i++)
+        {
+            ShipID typeID = shipTypes[i].ShipID;
+            if (!groupedSelection.ContainsKey(typeID))
+            {
+                groupedSelection[typeID] = new List<Entity>();
+            }
+            groupedSelection[typeID].Add(selectedEntities[i]);
+        }
+
+        foreach (var group in groupedSelection)
+        {
+            List<Entity> groupEntities = group.Value;
+            VisualElement selectedUnitItem = UIFactory.BuildSelectedUnitItem(group.Key, groupEntities.Count);
+
+            selectedUnitItem.RegisterCallback<ClickEvent>(evt =>
+            {
+                HandleGroupClicked(groupEntities);
+            });
+
+            selectionContainer.Add(selectedUnitItem);
+        }
+
+        selectedEntities.Dispose();
+        shipTypes.Dispose();
+    }
+
+    private void HandleGroupClicked(List<Entity> clickedGroup)
+    {
+        var allSelected = selectedQuery.ToEntityArray(Allocator.Temp);
+
+        foreach (var entity in allSelected)
+        {
+            if (!clickedGroup.Contains(entity))
+            {
+                entityManager.SetComponentEnabled<SelectedTag>(entity, false);
+            }
+        }
+
+        allSelected.Dispose();
+
+        lastSelectedCount = -1;
     }
 }

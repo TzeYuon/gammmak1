@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <engine:VisualElement name="SelectedUnitContainer" style="flex-grow: 0; width: 170px; height: 72px; background-color: rgba(0, 255, 255, 0.05); margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; flex-direction: row; border-left-color: rgba(0, 255, 255, 0.43); border-right-color: rgba(0, 255, 255, 0.43); border-top-color: rgba(0, 255, 255, 0.43); border-bottom-color: rgba(0, 255, 255, 0.43); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;">
+        <engine:VisualElement name="UnitIcon" style="flex-grow: 0; width: 70px; height: 70px; padding-top: 12px; padding-right: 12px; padding-bottom: 12px; padding-left: 12px;">
+            <engine:VisualElement style="flex-grow: 1;"/>
+        </engine:VisualElement>
+        <engine:VisualElement style="flex-grow: 1;">
+            <engine:Label text="Label" name="ShipNameLbl" class="text"/>
+            <engine:Label text="Label" name="ShipCountLbl" class="text"/>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

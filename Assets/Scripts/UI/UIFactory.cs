@@ -190,4 +190,17 @@ public static class UIFactory
         nodeElement.Init(node);
         return nodeElement;
     }
+
+    public static VisualElement BuildSelectedUnitItem(ShipID shipID, int count)
+    {
+        VisualElement selectedUnitItem = UIScreenManager.UIAssetsDatabase.SelectedUnitItem.Instantiate().Q<VisualElement>("SelectedUnitContainer");
+
+        Label shipNameLbl = selectedUnitItem.Q<Label>("ShipNameLbl");
+        shipNameLbl.text = EnumUtils.GetAbbrShipName(shipID);
+
+        Label countLbl = selectedUnitItem.Q<Label>("ShipCountLbl");
+        countLbl.text = "" + count;
+
+        return selectedUnitItem;
+    }
 }
