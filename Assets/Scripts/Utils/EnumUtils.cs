@@ -63,13 +63,16 @@ public static class EnumUtils
             // Destroyer class
             ShipID.Explorer => "EXPLORER",
             ShipID.Crab => "CRAB",
+            ShipID.Bell => "BELL",
 
             // Cruiser class
             ShipID.Sword => "SWORD",
             ShipID.Shield => "SHIELD",
+            ShipID.Wall => "WALL",
+            ShipID.Bastion => "BASTION",
 
             // Battleship class
-            ShipID.Bastion => "BASTION",
+            ShipID.Angel => "ANGEL",
             ShipID.Invincible => "INVINCIBLE",
 
             _ => "No name defined"
