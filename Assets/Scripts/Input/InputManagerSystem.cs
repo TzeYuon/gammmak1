@@ -70,6 +70,8 @@ public partial class InputManagerSystem : SystemBase
         if (gameInput.Gameplay.SecondaryAction.IsPressed()) rawInput |= PlayerAction.Secondary;
         if (gameInput.Gameplay.SelectionModifier.IsPressed()) rawInput |= PlayerAction.SelectionModifier;
         if (gameInput.Gameplay.Cancel.IsPressed()) rawInput |= PlayerAction.Cancel;
+        if (gameInput.Gameplay.SplitSelection.IsPressed()) rawInput |= PlayerAction.SplitSelection;
+        if (gameInput.Gameplay.SelectAll.IsPressed()) rawInput |= PlayerAction.SelectAll;
 
         input.PreviousHardware = input.HardwareState;
         input.HardwareState = rawInput;
@@ -148,6 +150,8 @@ public enum PlayerAction : uint
     Secondary = 1 << 1,
     SelectionModifier = 1 << 2,
     Cancel = 1 << 4,
+    SplitSelection = 1 << 5,
+    SelectAll = 1 << 6
 }
 
 public struct PlayerInputData : IComponentData

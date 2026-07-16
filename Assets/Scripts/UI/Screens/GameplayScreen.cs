@@ -45,7 +45,7 @@ public class GameplayScreen : UIScreen
 
         selectionBox = root.Q<VisualElement>("SelectionBox");
 
-        selectedShipsDisplay = new SelectedShipsDisplay(root.Q<VisualElement>("SelectedShipsContainer"));
+        selectedShipsDisplay = new SelectedShipsDisplay(root.Q<VisualElement>("SelectedShipsDisplay"));
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
@@ -273,21 +273,18 @@ public class GameplayScreen : UIScreen
     {
         victoryScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
-        Time.timeScale = 0.2f;
     }
 
     private void TriggerLoss()
     {
         defeatScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
-        Time.timeScale = 0.2f;
     }
 
     private void HideVictoryLoss()
     {
         victoryScreen.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.None;
-        Time.timeScale = 1f;
     }
 
     private void HandleStateChange(GameState prevState, GameState gameState)
@@ -330,31 +327,48 @@ public class GameplayScreen : UIScreen
 public class SelectedShipsDisplay
 {
     private EntityManager entityManager;
+    private EntityQuery inputQuery;
     private EntityQuery selectedQuery;
 
     private VisualElement selectionContainer;
     private int lastSelectedCount = -1;
 
+    private Button selectAllBtn;
+    private Button splitSelectionBtn;
+
     public SelectedShipsDisplay(VisualElement root)
     {
-        selectionContainer = root; // Create this in UI Builder!
+        selectionContainer = root.Q<VisualElement>("SelectedShipsContainer");
+
+        selectAllBtn = root.Q<Button>("SelectAllBtn");
+        selectAllBtn.clicked += () =>
+        {
+            OnSelectAllClicked();
+        };
+
+        splitSelectionBtn = root.Q<Button>("SplitSelectionBtn");
+        splitSelectionBtn.clicked += () =>
+        {
+            OnSplitSelectionClicked();
+        };
 
         var world = World.DefaultGameObjectInjectionWorld;
         if (world != null)
         {
             entityManager = world.EntityManager;
+            inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
             selectedQuery = entityManager.CreateEntityQuery(
                 ComponentType.ReadOnly<SelectedTag>(),
                 ComponentType.ReadOnly<ShipIDComponent>(),
                 ComponentType.Exclude<DeadTag>()
             );
         }
+
+        RebuildSelectionUI();
     }
 
     public void Update()
     {
-        if (selectedQuery.IsEmptyIgnoreFilter) return;
-
         int currentSelectedCount = selectedQuery.CalculateEntityCount();
         if (currentSelectedCount == lastSelectedCount) return;
 
@@ -365,6 +379,9 @@ public class SelectedShipsDisplay
     private void RebuildSelectionUI()
     {
         selectionContainer.Clear();
+
+        // only show button when there are selected to split
+        EnableSplitSelectionBtn(lastSelectedCount != 0);
 
         if (lastSelectedCount == 0) return;
 
@@ -415,5 +432,22 @@ public class SelectedShipsDisplay
         allSelected.Dispose();
 
         lastSelectedCount = -1;
+    }
+
+    void EnableSplitSelectionBtn(bool toggle)
+    {
+        splitSelectionBtn.SetEnabled(toggle);
+    }
+
+    private void OnSelectAllClicked()
+    {
+        Entity commandEntity = entityManager.CreateEntity();
+        entityManager.AddComponent<SelectAllCommand>(commandEntity);
+    }
+
+    private void OnSplitSelectionClicked()
+    {
+        Entity commandEntity = entityManager.CreateEntity();
+        entityManager.AddComponent<SplitCommand>(commandEntity);
     }
 }

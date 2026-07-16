@@ -163,6 +163,24 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SplitSelection"",
+                    ""type"": ""Button"",
+                    ""id"": ""9a982d1d-592b-4eb0-a625-d5fec1f9c43e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectAll"",
+                    ""type"": ""Button"",
+                    ""id"": ""6f1c5565-ff48-4c96-a72f-e952468af9ed"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -317,6 +335,28 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f0974e49-c805-410f-81ef-97b9c138600b"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""SplitSelection"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b4af9a30-f215-4d14-b49f-fb07ef564356"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectAll"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -932,6 +972,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         m_Gameplay_SelectionModifier = m_Gameplay.FindAction("SelectionModifier", throwIfNotFound: true);
         m_Gameplay_ToggleReinforcementPopup = m_Gameplay.FindAction("ToggleReinforcementPopup", throwIfNotFound: true);
         m_Gameplay_Cancel = m_Gameplay.FindAction("Cancel", throwIfNotFound: true);
+        m_Gameplay_SplitSelection = m_Gameplay.FindAction("SplitSelection", throwIfNotFound: true);
+        m_Gameplay_SelectAll = m_Gameplay.FindAction("SelectAll", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1034,6 +1076,8 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_SelectionModifier;
     private readonly InputAction m_Gameplay_ToggleReinforcementPopup;
     private readonly InputAction m_Gameplay_Cancel;
+    private readonly InputAction m_Gameplay_SplitSelection;
+    private readonly InputAction m_Gameplay_SelectAll;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1077,6 +1121,14 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Gameplay/Cancel".
         /// </summary>
         public InputAction @Cancel => m_Wrapper.m_Gameplay_Cancel;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/SplitSelection".
+        /// </summary>
+        public InputAction @SplitSelection => m_Wrapper.m_Gameplay_SplitSelection;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/SelectAll".
+        /// </summary>
+        public InputAction @SelectAll => m_Wrapper.m_Gameplay_SelectAll;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1127,6 +1179,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
+            @SplitSelection.started += instance.OnSplitSelection;
+            @SplitSelection.performed += instance.OnSplitSelection;
+            @SplitSelection.canceled += instance.OnSplitSelection;
+            @SelectAll.started += instance.OnSelectAll;
+            @SelectAll.performed += instance.OnSelectAll;
+            @SelectAll.canceled += instance.OnSelectAll;
         }
 
         /// <summary>
@@ -1162,6 +1220,12 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
+            @SplitSelection.started -= instance.OnSplitSelection;
+            @SplitSelection.performed -= instance.OnSplitSelection;
+            @SplitSelection.canceled -= instance.OnSplitSelection;
+            @SelectAll.started -= instance.OnSelectAll;
+            @SelectAll.performed -= instance.OnSelectAll;
+            @SelectAll.canceled -= instance.OnSelectAll;
         }
 
         /// <summary>
@@ -1529,6 +1593,20 @@ public partial class @GameInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SplitSelection" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSplitSelection(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectAll" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectAll(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
