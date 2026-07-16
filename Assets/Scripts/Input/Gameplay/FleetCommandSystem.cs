@@ -144,7 +144,7 @@ partial class FleetCommandSystem : SystemBase
 
             // generate positions in spiral
             float shipSpacing = 0f;
-            var generatedPositions = GenerateSpiralFormation(
+            var generatedPositions = GenerateFormation(
                 selectedCount,
                 moveTarget,
                 placementData,
@@ -216,7 +216,7 @@ partial class FleetCommandSystem : SystemBase
             Dependency = projectionJob.ScheduleParallel(Dependency);
         }
 
-        static NativeArray<float2> GenerateSpiralFormation(
+        static NativeArray<float2> GenerateFormation(
             int totalCount,
             float2 center,
             NativeArray<ShipPlacementData> shipRadii,
@@ -229,66 +229,131 @@ partial class FleetCommandSystem : SystemBase
             Allocator allocator)
         {
             var validPositions = new NativeArray<float2>(totalCount, allocator);
-
-            float angleStep = 0.2f;
-            float radiusStep = 0.05f;
-
+            float sweepResolution = 0.5f; // how much to step outwards per ring
             for (int i = 0; i < totalCount; i++)
             {
                 float currentShipRadius = shipRadii[i].Radius;
-                float currentRequiredSpace = currentShipRadius + padding;
-
                 bool placed = false;
-                float currentAngle = 0f;
-                float currentSpiralRadius = 0f;
 
-                int maxAttempts = 5000; 
-                int attempts = 0;
+                float currentRadius = 0f;
 
-                while (!placed && attempts < maxAttempts)
+                int radiusAttempts = 0;
+                int maxRadiusAttempts = 200;
+
+                while (!placed && radiusAttempts < maxRadiusAttempts)
                 {
-                    attempts++;
-
-                    float2 offset = new float2(math.cos(currentAngle), math.sin(currentAngle)) * currentSpiralRadius;
-                    float2 testPos = center + offset;
-
-                    currentAngle += angleStep;
-                    currentSpiralRadius += radiusStep;
-
-                    // check terrain
-                    int2 obstacleCell = GridUtility.WorldPosToCell(testPos, worldOrigin, obstacleCellSize);
-                    if (!GridUtility.IsWithinBounds(obstacleCell, gridWidth, gridHeight) || 
-                        !GridUtility.IsTerrainPassable(testPos, obstacleGrid, worldOrigin, gridWidth, gridHeight, obstacleCellSize))
+                    if (currentRadius == 0f)
                     {
+                        // check center
+                        if (IsValidSpot(
+                            center, 
+                            shipRadii,
+                            currentShipRadius, 
+                            padding, 
+                            validPositions, 
+                            i, 
+                            obstacleGrid, 
+                            worldOrigin, 
+                            gridWidth, 
+                            gridHeight, 
+                            obstacleCellSize))
+                        {
+                            validPositions[i] = center;
+                            placed = true;
+                            break;
+                        }
+                        currentRadius += sweepResolution;
+                        radiusAttempts++;
                         continue;
                     }
 
-                    // check overlap with other ships
-                    bool overlapsOtherShip = false;
-                    for (int j = 0; j < i; j++)
+                    // check entire circumference at current radius
+                    float circumference = 2f * math.PI * currentRadius;
+                    int angleSteps = (int)math.ceil(circumference / sweepResolution);
+                    float angleStep = (2f * math.PI) / angleSteps;
+
+                    for (int a = 0; a < angleSteps; a++)
                     {
-                        float distSq = math.distancesq(testPos, validPositions[j]);
-                        float minSafeDist = currentRequiredSpace + shipRadii[j].Radius;
-                        if (distSq < minSafeDist * minSafeDist)
+                        float currentAngle = a * angleStep;
+                        float2 offset = new float2(math.cos(currentAngle), math.sin(currentAngle)) * currentRadius;
+                        float2 testPos = center + offset;
+
+                        if (IsValidSpot(
+                            testPos,
+                            shipRadii,
+                            currentShipRadius, 
+                            padding, 
+                            validPositions, 
+                            i, 
+                            obstacleGrid,
+                            worldOrigin, 
+                            gridWidth, 
+                            gridHeight, 
+                            obstacleCellSize))
                         {
-                            overlapsOtherShip = true;
+                            validPositions[i] = testPos;
+                            placed = true;
                             break;
                         }
                     }
 
-                    if (overlapsOtherShip) continue;
-
-                    validPositions[i] = testPos;
-                    placed = true;
+                    // step outwards by sweep resolution
+                    currentRadius += sweepResolution;
+                    radiusAttempts++;
                 }
 
-                if (!placed) // could not find location, place in the centre
+                if (!placed)
                 {
-                    validPositions[i] = center;
+                    // fallback to use previously assigned position
+                    validPositions[i] = validPositions[i - 1];
                 }
             }
 
             return validPositions;
+        }
+
+        static bool IsValidSpot(
+            float2 testPos,
+            NativeArray<ShipPlacementData> shipRadii,
+            float shipRadius, 
+            float padding,
+            NativeArray<float2> placedPositions, 
+            int placedCount,
+            NativeArray<int> obstacleGrid, 
+            int2 worldOrigin, 
+            int gridWidth, 
+            int gridHeight, 
+            float obstacleCellSize)
+        {
+            float requiredSpace = shipRadius + padding;
+
+            // check overlap with other ships
+            for (int j = 0; j < placedCount; j++)
+            {
+                float distSq = math.distancesq(testPos, placedPositions[j]);
+                float minSafeDist = requiredSpace + shipRadii[j].Radius;
+                if (distSq < minSafeDist * minSafeDist)
+                    return false;
+            }
+
+            // Check terrain and bounds in radius
+            int radiusCells = (int)math.ceil(requiredSpace / obstacleCellSize);
+            int2 centerCell = GridUtility.WorldPosToCell(testPos, worldOrigin, obstacleCellSize);
+            for (int x = -radiusCells; x <= radiusCells; x++)
+            {
+                for (int y = -radiusCells; y <= radiusCells; y++)
+                {
+                    int2 checkCell = centerCell + new int2(x, y);
+
+                    if (!GridUtility.IsWithinBounds(checkCell, gridWidth, gridHeight))
+                        return false; // out of bounds
+
+                    if (!GridUtility.IsTerrainPassable(checkCell, obstacleGrid, gridWidth, gridHeight))
+                        return false; // hit wall
+                }
+            }
+
+            return true;
         }
 
         Vector2 ValidateMoveTarget(Vector2 start, Vector2 target)

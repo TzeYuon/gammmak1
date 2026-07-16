@@ -112,6 +112,7 @@ public struct ShipAvoidanceData
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
 [WithAbsent(typeof(MothershipTag))]
+[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct GatherShipDataJob : IJobEntity
 {
     public NativeArray<ShipAvoidanceData> AvoidanceArray;
@@ -120,18 +121,22 @@ public partial struct GatherShipDataJob : IJobEntity
         [EntityIndexInQuery] int queryIndex,
         Entity entity,
         in LocalTransform transform,
-        in ShipMovementStatsComponent stats)
+        in ShipMovementStatsComponent stats,
+        EnabledRefRW<MoveCommand> moveEnabled)
     {
         float3 localOffset3D = new float3(stats.AvoidanceOffset, 0f);
         float3 worldOffset3D = math.rotate(transform.Rotation, localOffset3D);
 
         float2 worldOffsetPosition = transform.Position.xy + worldOffset3D.xy;
 
+        float avoidance = stats.AvoidanceRadius;
+        if (moveEnabled.ValueRO) avoidance = 0;
+
         AvoidanceArray[queryIndex] = new ShipAvoidanceData
         {
             ShipEntity = entity,
             Position = worldOffsetPosition,
-            Radius = stats.AvoidanceRadius,
+            Radius = avoidance,
         };
     }
 }
