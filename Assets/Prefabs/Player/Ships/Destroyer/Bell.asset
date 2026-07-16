@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7c9f7cf10519c248b38583a980873b0, type: 3}
+  m_Name: Bell
+  m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
+  ShipName: Bell
+  ShipClass: 2
+  ShipID: 53
+  ShipPrefab: {fileID: 6753536424006035904, guid: ef3ea448bf36f4f4a92a6943adc7b593, type: 3}
+  ShipMesh: {fileID: 8330056501644901671, guid: 005be5a7d6120cb42935feff4329032a, type: 3}
+  ShipSystems:
+  - Definition: {fileID: 11400000, guid: 2748c375f8a435545a0c9d3d62face3a, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: 3388b2c6bb744214c85a40882e14288e, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: af6f772acee652b4ea5351ad0ea60681, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: 5cf3f188002e76e42a6119e33bf39d01, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: 3966b4853806a534ca1b13168f7ce4c9, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: 79b1c99325bbf154c88dc12327cc2dd3, type: 2}
+    UpgradeLevel: 0
+  BaseWeaponCapacity: 4
+  Mounts:
+  - Position: {x: -0.466, y: -0.001}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 52.4
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0.466, y: -0.001}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 52.4
+    EquippedWeapon: {fileID: 0}
+  AvoidanceRadius: 0.9
+  AvoidanceOffset: {x: 0, y: -0.09}
+  BaseCost: 7
+  BaseMaxHealth: 15
+  BaseDamageReduction: 0.1
+  BaseSpeed: 4
+  BaseTurnSpeed: 3
+  BaseRevealFogRadius: 25
+  BaseCollectionRadius: 5
+  HasShield: 1
+  ShieldOffset: {x: 0, y: 0}
+  ShieldRadius: 2
+  ShieldRechargeDelay: 1
+  BaseShieldMaxCapacity: 50
+  BaseShieldRegenPerSecond: 2
+  ShieldDamage: 50
+  ShieldEfficiencyBonus: 0.1

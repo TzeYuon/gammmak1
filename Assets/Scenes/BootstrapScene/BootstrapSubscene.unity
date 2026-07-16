@@ -319,7 +319,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPrefabAuthoring
   mothershipPrefab: {fileID: 6753536424006035904, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
   allGameShips:
-  - {fileID: 11400000, guid: 60fc3a112153fa740b8b01a9f03f8615, type: 2}
+  - {fileID: 11400000, guid: d9d725c8240092e4e8a8060c41db4ff3, type: 2}
   - {fileID: 11400000, guid: f5ee039ca95bcd444a158c1f4417a0ff, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
   - {fileID: 11400000, guid: 4a162e963042f15449797f8c6e0ad823, type: 2}
@@ -327,6 +327,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: cb7b39492b5217f428f7cd818164442f, type: 2}
   - {fileID: 11400000, guid: 49d1512f0bdf5e04dae07211a87f4080, type: 2}
+  - {fileID: 11400000, guid: 87f9b5d7d1e47344395df6119c8729c6, type: 2}
+  - {fileID: 11400000, guid: 6d156ffcffac2b1478d504da1443508e, type: 2}
+  - {fileID: 11400000, guid: 0aea8937257cc214e8f59aa3d197392a, type: 2}
   allGameWeapons:
   - {fileID: 11400000, guid: 8876621301a73ef448b6c59a05e87ba8, type: 2}
   - {fileID: 11400000, guid: 5a59caa2d1fda104a9cca917bef2fd33, type: 2}
