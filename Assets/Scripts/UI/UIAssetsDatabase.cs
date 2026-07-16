@@ -15,4 +15,6 @@ public class UIAssetsDatabase : ScriptableObject
 
     public VisualTreeAsset ReinforcementBtn;
     public VisualTreeAsset RewardItem;
+
+    public VisualTreeAsset SelectedUnitItem;
 }

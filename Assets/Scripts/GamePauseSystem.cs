@@ -2,8 +2,7 @@ using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
 
-[UpdateInGroup(typeof(CommandAndSpawnGroup))]
-[UpdateAfter(typeof(FleetCommandSystem))]
+[UpdateInGroup(typeof(LateGameplayGroup))]
 public partial struct GamePauseSystem : ISystem
 {
     [BurstCompile]
@@ -13,7 +12,7 @@ public partial struct GamePauseSystem : ISystem
         state.RequireForUpdate<GameStateSingleton>();
     }
 
-    //[BurstCompile]
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var input = SystemAPI.GetSingleton<PlayerInputData>();
