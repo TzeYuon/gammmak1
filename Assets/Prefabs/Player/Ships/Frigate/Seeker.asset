@@ -19,7 +19,7 @@ MonoBehaviour:
   ShipMesh: {fileID: 8375409519023519079, guid: b435369c67d450c459bfa4f894ebed89, type: 3}
   ShipSystems:
   - Definition: {fileID: 11400000, guid: d20ec5eb21eb9b0428bc8e55e30056cd, type: 2}
-    UpgradeLevel: 0
+    UpgradeLevel: 1
   - Definition: {fileID: 11400000, guid: e06a3366b4304ce4da3f6a30f0484f93, type: 2}
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 8305ba558060a1f429accc5ff5a3591c, type: 2}
@@ -28,10 +28,14 @@ MonoBehaviour:
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 3680c94a8aa3f8d438c81dbb3f411fe0, type: 2}
     UpgradeLevel: 0
-  BaseWeaponCapacity: 1
+  BaseWeaponCapacity: 2
   Mounts:
-  - Position: {x: 0, y: 0}
+  - Position: {x: 0, y: 0.45}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 180
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0, y: -0.3}
+    OriginalRotation: {x: 0, y: 0, z: 1, w: 0}
     MaxAngle: 180
     EquippedWeapon: {fileID: 0}
   AvoidanceRadius: 0.6

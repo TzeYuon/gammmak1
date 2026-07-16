@@ -39,7 +39,6 @@ public struct RosterShipBlueprint : IComponentData
     public int BiomassCost; // Cost after upgrades
 
     // Ship stats after upgrades
-    public ShipIDComponent ShipIDComponent;
     public HealthComponent ShipHealthComponent;
     public ShipMovementStatsComponent ShipMovementStats;
     public ShipRevealFogRadius ShipRevealFogRadius;

@@ -1,9 +1,5 @@
 .button:hover {
     color: rgb(0, 255, 255);
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
 }
 
 .button:active {

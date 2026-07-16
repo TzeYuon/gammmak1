@@ -3,12 +3,6 @@ using Unity.Mathematics;
 using Unity.Rendering;
 
 public struct PlayerTag : IComponentData { }
-
-public struct ShipIDComponent : IComponentData 
-{ 
-    public ShipID ShipID;
-}
-
 public struct MothershipTag : IComponentData { }
 public struct SelectedTag : IComponentData, IEnableableComponent { }
 

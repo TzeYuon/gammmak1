@@ -31,35 +31,6 @@ partial struct HiveSeedMovementSystem : ISystem
 
             if (health.ValueRO.Value <= 0 || SystemAPI.IsComponentEnabled<DeadTag>(entity))
             {
-                if (SystemAPI.HasSingleton<LevelSpawnData>())
-                {
-                    ref var spawnData = ref SystemAPI.GetSingletonRW<LevelSpawnData>().ValueRW;
-                    unsafe
-                    {
-                        int newIndex = spawnData.ExpansionSpotCount;
-                        if (newIndex < 8)
-                        {
-                            spawnData.ExpansionSpotsX[newIndex] = seed.ValueRO.Destination.x;
-                            spawnData.ExpansionSpotsY[newIndex] = seed.ValueRO.Destination.y;
-                            spawnData.ExpansionSpotCount++;
-                        }
-                    }
-                }
-                float explodeRadius = explosion.ValueRO.Radius;
-                float explodeDamage = explosion.ValueRO.Damage;
-                bool targetSwarm = explosion.ValueRO.TargetSwarm;
-
-                foreach (var (targetTransform, targetBuffer, targetEntity) in SystemAPI.Query<RefRO<LocalTransform>, DynamicBuffer<DamageEvent>>().WithAll<HealthComponent>().WithEntityAccess())
-                {
-                    if (math.distance(targetTransform.ValueRO.Position, curPos) < explodeRadius)
-                    {
-                        bool isSwarm = SystemAPI.HasComponent<SwarmTag>(targetEntity);
-                        if (!targetSwarm && isSwarm) continue;
-
-                        targetBuffer.Add(new DamageEvent { Value = explodeDamage });
-                    }
-                }
-
                 ecb.DestroyEntity(entity);
                 continue;
             }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEditor;
@@ -15,8 +14,6 @@ public class GameplayScreen : UIScreen
     private Camera camera;
 
     private VisualElement selectionBox;
-
-    private SelectedShipsDisplay selectedShipsDisplay;
 
     private Label biomassCounter;
     private EntityQuery economyQuery;
@@ -44,8 +41,6 @@ public class GameplayScreen : UIScreen
         InitInput();
 
         selectionBox = root.Q<VisualElement>("SelectionBox");
-
-        selectedShipsDisplay = new SelectedShipsDisplay(root.Q<VisualElement>("SelectedShipsDisplay"));
 
         biomassCounter = root.Q<Label>("BiomassCounter");
 
@@ -240,8 +235,6 @@ public class GameplayScreen : UIScreen
         UpdateBiomassCounter();
         UpdateSurgeWarning();
 
-        selectedShipsDisplay.Update();
-
         void UpdateBiomassCounter()
         {
             economyQuery.CompleteDependency();
@@ -273,18 +266,21 @@ public class GameplayScreen : UIScreen
     {
         victoryScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
+        Time.timeScale = 0.2f;
     }
 
     private void TriggerLoss()
     {
         defeatScreen.style.display = DisplayStyle.Flex;
         biomassCounter.style.display = DisplayStyle.None;
+        Time.timeScale = 0.2f;
     }
 
     private void HideVictoryLoss()
     {
         victoryScreen.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.None;
+        Time.timeScale = 1f;
     }
 
     private void HandleStateChange(GameState prevState, GameState gameState)
@@ -321,133 +317,5 @@ public class GameplayScreen : UIScreen
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
         gameState.ValueRW.CurrentState = targetState;
-    }
-}
-
-public class SelectedShipsDisplay
-{
-    private EntityManager entityManager;
-    private EntityQuery inputQuery;
-    private EntityQuery selectedQuery;
-
-    private VisualElement selectionContainer;
-    private int lastSelectedCount = -1;
-
-    private Button selectAllBtn;
-    private Button splitSelectionBtn;
-
-    public SelectedShipsDisplay(VisualElement root)
-    {
-        selectionContainer = root.Q<VisualElement>("SelectedShipsContainer");
-
-        selectAllBtn = root.Q<Button>("SelectAllBtn");
-        selectAllBtn.clicked += () =>
-        {
-            OnSelectAllClicked();
-        };
-
-        splitSelectionBtn = root.Q<Button>("SplitSelectionBtn");
-        splitSelectionBtn.clicked += () =>
-        {
-            OnSplitSelectionClicked();
-        };
-
-        var world = World.DefaultGameObjectInjectionWorld;
-        if (world != null)
-        {
-            entityManager = world.EntityManager;
-            inputQuery = entityManager.CreateEntityQuery(typeof(PlayerInputData));
-            selectedQuery = entityManager.CreateEntityQuery(
-                ComponentType.ReadOnly<SelectedTag>(),
-                ComponentType.ReadOnly<ShipIDComponent>(),
-                ComponentType.Exclude<DeadTag>()
-            );
-        }
-
-        RebuildSelectionUI();
-    }
-
-    public void Update()
-    {
-        int currentSelectedCount = selectedQuery.CalculateEntityCount();
-        if (currentSelectedCount == lastSelectedCount) return;
-
-        lastSelectedCount = currentSelectedCount;
-        RebuildSelectionUI();
-    }
-
-    private void RebuildSelectionUI()
-    {
-        selectionContainer.Clear();
-
-        // only show button when there are selected to split
-        EnableSplitSelectionBtn(lastSelectedCount != 0);
-
-        if (lastSelectedCount == 0) return;
-
-        var selectedEntities = selectedQuery.ToEntityArray(Allocator.Temp);
-        var shipTypes = selectedQuery.ToComponentDataArray<ShipIDComponent>(Allocator.Temp);
-
-        Dictionary<ShipID, List<Entity>> groupedSelection = new Dictionary<ShipID, List<Entity>>();
-
-        for (int i = 0; i < selectedEntities.Length; i++)
-        {
-            ShipID typeID = shipTypes[i].ShipID;
-            if (!groupedSelection.ContainsKey(typeID))
-            {
-                groupedSelection[typeID] = new List<Entity>();
-            }
-            groupedSelection[typeID].Add(selectedEntities[i]);
-        }
-
-        foreach (var group in groupedSelection)
-        {
-            List<Entity> groupEntities = group.Value;
-            VisualElement selectedUnitItem = UIFactory.BuildSelectedUnitItem(group.Key, groupEntities.Count);
-
-            selectedUnitItem.RegisterCallback<ClickEvent>(evt =>
-            {
-                HandleGroupClicked(groupEntities);
-            });
-
-            selectionContainer.Add(selectedUnitItem);
-        }
-
-        selectedEntities.Dispose();
-        shipTypes.Dispose();
-    }
-
-    private void HandleGroupClicked(List<Entity> clickedGroup)
-    {
-        var allSelected = selectedQuery.ToEntityArray(Allocator.Temp);
-
-        foreach (var entity in allSelected)
-        {
-            if (!clickedGroup.Contains(entity))
-            {
-                entityManager.SetComponentEnabled<SelectedTag>(entity, false);
-            }
-        }
-
-        allSelected.Dispose();
-
-        lastSelectedCount = -1;
-    }
-
-    void EnableSplitSelectionBtn(bool toggle)
-    {
-        splitSelectionBtn.SetEnabled(toggle);
-    }
-
-    private void OnSelectAllClicked()
-    {
-        Entity commandEntity = entityManager.CreateEntity();
-        entityManager.AddComponent<SelectAllCommand>(commandEntity);
-    }
-
-    private void OnSplitSelectionClicked()
-    {
-        Entity commandEntity = entityManager.CreateEntity();
-        entityManager.AddComponent<SplitCommand>(commandEntity);
     }
 }

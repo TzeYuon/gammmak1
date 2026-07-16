@@ -3,19 +3,14 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public partial class InputManagerSystem : SystemBase
 {
-    private UIDocument mainUIDocument;
-
     private GameInputActions gameInput;
     private Camera mainCamera;
 
     private bool hasSubscribedEvents = false;
-
-    private bool isClickConsumedByUI = false;
 
     protected override void OnCreate()
     {
@@ -53,25 +48,12 @@ public partial class InputManagerSystem : SystemBase
         var gameState = SystemAPI.GetSingleton<GameStateSingleton>();
         var curState = gameState.CurrentState;
 
-        // check if mouse is over UI
-        bool isPointerOverUI = IsPointerOverUI();
-        bool primaryIsPressed = gameInput.Gameplay.PrimaryAction.IsPressed();        
-        bool primaryWasPressedThisFrame = primaryIsPressed && !input.HardwareState.HasFlag(PlayerAction.Primary);
-        if (primaryIsPressed)
-        {
-            // click was used over UI, consume the click only for this frame
-            if (primaryWasPressedThisFrame && isPointerOverUI) isClickConsumedByUI = true;
-        }
-        else isClickConsumedByUI = false;
-
         // update inputs
         PlayerAction rawInput = PlayerAction.None;
-        if (primaryIsPressed && !isClickConsumedByUI) rawInput |= PlayerAction.Primary;
+        if (gameInput.Gameplay.PrimaryAction.IsPressed()) rawInput |= PlayerAction.Primary;
         if (gameInput.Gameplay.SecondaryAction.IsPressed()) rawInput |= PlayerAction.Secondary;
         if (gameInput.Gameplay.SelectionModifier.IsPressed()) rawInput |= PlayerAction.SelectionModifier;
         if (gameInput.Gameplay.Cancel.IsPressed()) rawInput |= PlayerAction.Cancel;
-        if (gameInput.Gameplay.SplitSelection.IsPressed()) rawInput |= PlayerAction.SplitSelection;
-        if (gameInput.Gameplay.SelectAll.IsPressed()) rawInput |= PlayerAction.SelectAll;
 
         input.PreviousHardware = input.HardwareState;
         input.HardwareState = rawInput;
@@ -125,21 +107,6 @@ public partial class InputManagerSystem : SystemBase
                 break;
         }
     }
-
-    private bool IsPointerOverUI()
-    {
-        if (mainUIDocument == null) mainUIDocument = UnityEngine.Object.FindAnyObjectByType<UIDocument>(FindObjectsInactive.Include);
-        if (mainUIDocument == null) return false;
-
-        Vector2 mousePos = Mouse.current.position.ReadValue();
-        Vector2 uiPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
-
-        VisualElement picked = mainUIDocument.rootVisualElement.panel.Pick(uiPos);
-
-        if (picked == null) return false;
-
-        return true;
-    }
 }
 
 [Flags]
@@ -150,8 +117,6 @@ public enum PlayerAction : uint
     Secondary = 1 << 1,
     SelectionModifier = 1 << 2,
     Cancel = 1 << 4,
-    SplitSelection = 1 << 5,
-    SelectAll = 1 << 6
 }
 
 public struct PlayerInputData : IComponentData
