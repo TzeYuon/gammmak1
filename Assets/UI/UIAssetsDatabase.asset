@@ -20,4 +20,3 @@ MonoBehaviour:
   MapNode: {fileID: 9197481963319205126, guid: 158798af0f857954c87bb07adcfe004b, type: 3}
   ReinforcementBtn: {fileID: 9197481963319205126, guid: be20c929358ed6e40b0a00d9028d35d4, type: 3}
   RewardItem: {fileID: 9197481963319205126, guid: 273988b032fe4c24e917f55e002c158f, type: 3}
-  SelectedUnitItem: {fileID: 9197481963319205126, guid: 2e358257fc7fb104d8f2eeb7362a9338, type: 3}

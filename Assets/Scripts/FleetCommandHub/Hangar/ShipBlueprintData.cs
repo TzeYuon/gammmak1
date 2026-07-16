@@ -18,16 +18,13 @@ public enum ShipID : byte
     // Destroyer class
     Explorer = 51,
     Crab = 52,
-    Bell = 53,
 
     // Cruiser class
     Sword = 101,
     Shield = 102,
-    Wall = 103,
-    Bastion = 104,
 
     // Battleship class
-    Angel = 151,
+    Bastion = 151,
     Invincible = 152,
 
     // Dreadnought class

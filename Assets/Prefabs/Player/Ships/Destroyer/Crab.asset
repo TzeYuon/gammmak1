@@ -30,15 +30,19 @@ MonoBehaviour:
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 79b1c99325bbf154c88dc12327cc2dd3, type: 2}
     UpgradeLevel: 0
-  BaseWeaponCapacity: 5
+  BaseWeaponCapacity: 4
   Mounts:
-  - Position: {x: -0.541, y: 0.087}
+  - Position: {x: -0.8, y: -0.15}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 45
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.541, y: 0.087}
+  - Position: {x: 0.8, y: -0.15}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 45
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0, y: 0.3}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 25
     EquippedWeapon: {fileID: 0}
   - Position: {x: 0, y: -0.214}
     OriginalRotation: {x: 0, y: 0, z: 1, w: 0}

@@ -15,63 +15,167 @@ MonoBehaviour:
   ShipName: Invincible
   ShipClass: 4
   ShipID: 152
-  ShipPrefab: {fileID: 6753536424006035904, guid: de9f227bb93de954b8a951bd59184ae5, type: 3}
-  ShipMesh: {fileID: -3049195594603592409, guid: d9c9f8993fac2c84a9674e4233cac1d9, type: 3}
+  ShipPrefab: {fileID: 6753536424006035904, guid: d918c34749f34514b81b6b57f7412aec, type: 3}
+  ShipMesh: {fileID: 0}
   ShipSystems:
-  - Definition: {fileID: 11400000, guid: debc276a9440a4248ba133751887599d, type: 2}
+  - SystemID: 1
     UpgradeLevel: 0
-  - Definition: {fileID: 11400000, guid: cf3614ede07be3f4eb6ff134f99955ff, type: 2}
+    Upgrades:
+    - Cost: 200
+      Description: 
+      Effects:
+      - StatType: 2
+        ModifierType: 0
+        Value: 1
+      - StatType: 3
+        ModifierType: 0
+        Value: 0.5
+      - StatType: 4
+        ModifierType: 0
+        Value: 1
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 400
+      Description: 
+      Effects:
+      - StatType: 2
+        ModifierType: 0
+        Value: 2
+      - StatType: 3
+        ModifierType: 0
+        Value: 1
+      - StatType: 4
+        ModifierType: 0
+        Value: 2
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+  - SystemID: 2
     UpgradeLevel: 0
-  - Definition: {fileID: 11400000, guid: c2173e2f7939f2f499666563a053d7ce, type: 2}
+    Upgrades:
+    - Cost: 300
+      Description: 
+      Effects:
+      - StatType: 1
+        ModifierType: 0
+        Value: 15
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 450
+      Description: 
+      Effects:
+      - StatType: 1
+        ModifierType: 0
+        Value: 20
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+    - Cost: 700
+      Description: 
+      Effects:
+      - StatType: 1
+        ModifierType: 0
+        Value: 30
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+  - SystemID: 4
     UpgradeLevel: 0
-  - Definition: {fileID: 11400000, guid: 4fac9ee70b5945f41bfeb074a57c04e2, type: 2}
+    Upgrades:
+    - Cost: 300
+      Description: 
+      Effects:
+      - StatType: 6
+        ModifierType: 0
+        Value: 1
+      - StatType: 0
+        ModifierType: 0
+        Value: 3
+    - Cost: 450
+      Description: 
+      Effects:
+      - StatType: 6
+        ModifierType: 0
+        Value: 1
+      - StatType: 0
+        ModifierType: 0
+        Value: 3
+    - Cost: 600
+      Description: 
+      Effects:
+      - StatType: 6
+        ModifierType: 0
+        Value: 1
+      - StatType: 0
+        ModifierType: 0
+        Value: 4
+    - Cost: 600
+      Description: 
+      Effects:
+      - StatType: 6
+        ModifierType: 0
+        Value: 1
+      - StatType: 0
+        ModifierType: 0
+        Value: 2
+  - SystemID: 6
     UpgradeLevel: 0
-  - Definition: {fileID: 11400000, guid: f22f11aeb37e73c468349be6cb1e5e25, type: 2}
-    UpgradeLevel: 0
-  BaseWeaponCapacity: 12
+    Upgrades:
+    - Cost: 200
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
+    - Cost: 300
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
+    - Cost: 400
+      Description: 
+      Effects:
+      - StatType: 7
+        ModifierType: 0
+        Value: 5
+      - StatType: 0
+        ModifierType: 0
+        Value: 1
+  BaseWeaponCapacity: 7
   Mounts:
-  - Position: {x: 0, y: 1.312}
+  - Position: {x: 0, y: 3}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.325, y: 0.855}
-    OriginalRotation: {x: 0, y: 0, z: -0.28175533, w: 0.9594863}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: -0.325, y: 0.855}
-    OriginalRotation: {x: 0, y: 0, z: 0.28175536, w: 0.95948625}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.739, y: 0.275}
-    OriginalRotation: {x: 0, y: 0, z: -0.34284, w: 0.9393938}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: -0.739, y: 0.275}
-    OriginalRotation: {x: 0, y: 0, z: 0.34284008, w: 0.9393938}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: 1.206, y: -0.585}
-    OriginalRotation: {x: 0, y: 0, z: -0.34284, w: 0.9393938}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  - Position: {x: -1.206, y: -0.585}
-    OriginalRotation: {x: 0, y: 0, z: 0.34284008, w: 0.9393938}
-    MaxAngle: 40
-    EquippedWeapon: {fileID: 0}
-  AvoidanceRadius: 1.61
-  AvoidanceOffset: {x: 0, y: 0.174}
-  BaseCost: 38
+    MaxAngle: 0
+    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+  - Position: {x: 2, y: 2}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 0
+    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+  - Position: {x: -2, y: 2}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 0
+    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+  - Position: {x: 3, y: 0}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 0
+    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+  - Position: {x: -3, y: 0}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 0
+    EquippedWeapon: {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
+  BaseCost: 20
   BaseMaxHealth: 30
-  BaseDamageReduction: 0
   BaseSpeed: 4
+  BaseAcceleration: 2
   BaseTurnSpeed: 3
   BaseRevealFogRadius: 25
-  BaseCollectionRadius: 0
-  HasShield: 1
-  ShieldOffset: {x: 0, y: 0.221}
-  ShieldRadius: 2
-  ShieldRechargeDelay: 1
-  BaseShieldMaxCapacity: 0
-  BaseShieldRegenPerSecond: 0
-  ShieldDamage: 0
-  ShieldEfficiencyBonus: 0
+  BaseCollectionRadius: 5
