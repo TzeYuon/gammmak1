@@ -199,7 +199,7 @@ public static class UIFactory
         shipNameLbl.text = EnumUtils.GetAbbrShipName(shipID);
 
         Label countLbl = selectedUnitItem.Q<Label>("ShipCountLbl");
-        countLbl.text = "" + count;
+        countLbl.text = "x" + count;
 
         return selectedUnitItem;
     }
