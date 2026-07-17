@@ -61,7 +61,7 @@ public class LevelHandoff : MonoBehaviour
             {
                 trickleBuffer.Add(new TrickleSpawnerData
                 {
-                    Type = trickle.Type,
+                    EnemyType = trickle.Type,
                     SpawnCount = trickle.SpawnCount,
                     Interval = trickle.Interval,
                     NextSpawnTime = trickle.Interval,
@@ -358,6 +358,7 @@ public class LevelHandoff : MonoBehaviour
         // Copy relevant level generation details over to component
         return new LevelBlueprint
         {
+            Layer = currentLevel.Layer,
             NodeType = currentLevel.NodeType,
             RewardType = currentLevel.RewardType,
             ThreatLevel = currentLevel.ThreatLevel,

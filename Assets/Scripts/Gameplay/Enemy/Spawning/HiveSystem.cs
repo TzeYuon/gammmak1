@@ -33,6 +33,7 @@ partial struct HiveSystem : ISystem
         DifficultyState difficultyState = SystemAPI.GetSingleton<DifficultyState>();
 
         EnemyPrefabDatabase enemyPrefabDatabase = SystemAPI.GetSingleton<EnemyPrefabDatabase>();
+        DynamicBuffer<EnemyBlueprint> blueprintBuffer = SystemAPI.GetSingletonBuffer<EnemyBlueprint>();
         var rng = Random.CreateFromIndex((uint)SystemAPI.Time.ElapsedTime * 531);
 
         // Exceeded amount
@@ -56,8 +57,15 @@ partial struct HiveSystem : ISystem
                 {
                     spawner.NextSpawnTime = elapsedTime + (spawner.Interval / difficultyState.SpawnRateMult); // Reset timer
 
+                    // get prefab
+                    int blueprintIndex = (int)spawner.EnemyType;
+                    var blueprint = blueprintBuffer[blueprintIndex];
+                    Entity prefab = blueprint.Prefab;
+                    
+                    // get updated stats from difficulty scaling
+                    HealthComponent scaledHealthComponent = blueprint.ScaledHealthComponent;
+
                     // spawn trickle amount
-                    Entity prefab = enemyPrefabDatabase.GetPrefab(spawner.Type);
                     int spawnCount = (int)math.floor(spawner.SpawnCount * difficultyState.SpawnCountMult);
                     for (int b = 0; b < spawnCount; b++)
                     {
@@ -69,9 +77,10 @@ partial struct HiveSystem : ISystem
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
                         ecb.SetComponent(spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                        ecb.SetComponent(spawnedEnemy, scaledHealthComponent);
 
                         // set up siege enemy if correct type
-                        if (spawner.Type == EnemyType.Siege)
+                        if (spawner.EnemyType == EnemyType.Siege)
                         {
                             ecb.AddComponent(spawnedEnemy, new PathFollowerComponent
                             {
@@ -116,8 +125,16 @@ partial struct HiveSystem : ISystem
                     int amountToSpawn = math.min(spawnCount, surgeRW.SurgePendingSpawns);
                     surgeRW.SurgeSpawnAccumulator -= amountToSpawn;
 
-                    var enemyType = surgeRW.SurgeEnemyType;
-                    Entity prefab = enemyPrefabDatabase.GetPrefab(enemyType);
+                    // get prefab
+                    EnemyType enemyType = surge.ValueRO.SurgeEnemyType;
+                    int blueprintIndex = (int)enemyType;
+                    var blueprint = blueprintBuffer[blueprintIndex];
+                    Entity prefab = blueprint.Prefab;
+
+                    // get updated stats from difficulty scaling
+                    HealthComponent scaledHealthComponent = blueprint.ScaledHealthComponent;
+
+                    // spawn surge enemies
                     for (int i = 0; i < amountToSpawn; i++)
                     {
                         Entity spawnedEnemy = ecb.Instantiate(prefab);
@@ -128,6 +145,7 @@ partial struct HiveSystem : ISystem
                         float3 spawnPos = hivePosition + math.float3(randomOffset, 0);
 
                         ecb.SetComponent(spawnedEnemy, LocalTransform.FromPosition(spawnPos));
+                        ecb.SetComponent(spawnedEnemy, scaledHealthComponent);
 
                         // set up siege enemy if correct type
                         if (enemyType == EnemyType.Siege)

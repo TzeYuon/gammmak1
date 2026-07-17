@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -32,36 +34,42 @@ partial struct LevelGen_HivesSystem : ISystem
             || !SystemAPI.TryGetSingletonRW<DifficultyConfig>(out var difficultyConfig)
             || !SystemAPI.TryGetSingletonRW<DifficultyState>(out var difficultyState)
             || !SystemAPI.TryGetSingletonRW<GlobalSurgeState>(out var surgeState)
-            || !SystemAPI.TryGetSingleton<HivePrefabDatabase>(out var prefabDatabase)
+            || !SystemAPI.TryGetSingleton<HivePrefabDatabase>(out var hivePrefabDatabase)
+            || !SystemAPI.TryGetSingleton<EnemyPrefabDatabase>(out var enemyPrefabDatabase)
             || gameState.CurrentState != GameState.Generating) 
             return;
 
         // mark as complete
         status.ValueRW.HivesGenerated = true;
 
+        // multiplier from levels completed
+        float layerMult = 1f + (levelBlueprint.Layer * 0.15f);
+
         // set difficulty config
         float threatLevelMult = levelBlueprint.ThreatLevel switch
         {
-            ThreatLevel.Low => 0.7f,
-            ThreatLevel.Medium => 0.9f,
-            ThreatLevel.High => 1.5f,
-            ThreatLevel.Boss => 2f,
+            ThreatLevel.Low => 1f,
+            ThreatLevel.Medium => 1.3f,
+            ThreatLevel.High => 1.7f,
+            ThreatLevel.Boss => 2.2f,
             _ => 1.0f // Fallback
         };
 
-        // Base values
+        // Base difficulty values
         float baseDifficultyPerMinute = 0.05f;
         float baseDifficultyPerHiveDestroyed = 0.10f;
-        float baseMaxSpawnRateMult = 3.0f;
-        float baseMaxSpawnCountMult = 4.0f;
+        float baseMaxSpawnRateMult = 2.5f;
+        float baseMaxSpawnCountMult = 3.0f;
+        float baseMaxEnemyHealthMult = 1.5f;
         float baseSurgeInterval = 30; // TEMPORARY: hardcode to 30s between surges
 
         // set config
         ref var config = ref difficultyConfig.ValueRW;
-        config.DifficultyPerMinute = baseDifficultyPerMinute * threatLevelMult;
-        config.DifficultyPerHiveDestroyed = baseDifficultyPerHiveDestroyed * threatLevelMult;
-        config.MaxSpawnRateMult = baseMaxSpawnRateMult * threatLevelMult;
-        config.MaxSpawnCountMult = baseMaxSpawnCountMult * threatLevelMult;
+        config.DifficultyPerMinute = baseDifficultyPerMinute * threatLevelMult * layerMult;
+        config.DifficultyPerHiveDestroyed = baseDifficultyPerHiveDestroyed * threatLevelMult * layerMult;
+        config.MaxSpawnRateMult = baseMaxSpawnRateMult * threatLevelMult * layerMult;
+        config.MaxSpawnCountMult = baseMaxSpawnCountMult * threatLevelMult * layerMult;
+        config.MaxEnemyHealthMult = baseMaxEnemyHealthMult * threatLevelMult * layerMult;
 
         // reset difficulty state
         ref var diffState = ref difficultyState.ValueRW;
@@ -69,16 +77,46 @@ partial struct LevelGen_HivesSystem : ISystem
         diffState.HivesDestroyed = 0;
         diffState.SpawnRateMult = 1;
         diffState.SpawnCountMult = 1;
-
+        diffState.EnemyHealthMult = 1;
+        
         // reset surge state
         ref var sState = ref surgeState.ValueRW;
         sState.TriggerSurgeThisFrame = false;
         sState.SurgeTimer = baseSurgeInterval; 
         sState.CurrentInterval = baseSurgeInterval;
 
+        // create enemy blueprint singleton
+        Entity blueprintDatabaseEntity = state.EntityManager.CreateEntity();
+        state.EntityManager.AddComponent<LevelEntityTag>(blueprintDatabaseEntity);
+        state.EntityManager.AddComponent<EnemyBlueprintDatabase>(blueprintDatabaseEntity);
+
+        var blueprintBuffer = state.EntityManager.AddBuffer<EnemyBlueprint>(blueprintDatabaseEntity);
+        var baseStatsLookup = SystemAPI.GetComponentLookup<EnemyBaseStats>(true);
+
+        // Generate enemy blueprints
+        for (int i = 0; i < (int)EnemyType.Count; i++)
+        {
+            EnemyType type = (EnemyType)i; // cast int to enum
+         
+            Entity prefab = enemyPrefabDatabase.GetPrefab(type);
+            if (prefab == Entity.Null)
+            {
+                blueprintBuffer.Add(new EnemyBlueprint { Type = type });
+                continue;
+            }
+
+            var baseStats = baseStatsLookup[prefab];
+            blueprintBuffer.Add(new EnemyBlueprint
+            {
+                Type = type,
+                Prefab = prefab,
+                BaseHealthComponent = baseStats.BaseHealthComponent,
+                ScaledHealthComponent = baseStats.BaseHealthComponent,
+            });
+        }
 
         // Generate hives
-        var hivePrefab = prefabDatabase.GetPrefab(HiveType.Standard);
+        var hivePrefab = hivePrefabDatabase.GetPrefab(HiveType.Standard);
         var spawnData = SystemAPI.GetSingleton<LevelSpawnData>();
 
         unsafe

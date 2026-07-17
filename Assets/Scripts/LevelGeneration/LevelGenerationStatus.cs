@@ -38,6 +38,8 @@ public struct LevelSpawnData : IComponentData
 /// </summary>
 public struct LevelBlueprint : IComponentData
 {
+    public int Layer;
+
     public uint Seed;
     public TerrainType TerrainType;
 
@@ -67,3 +69,14 @@ public struct HiveBlueprint : IComponentData
     public Entity RecipeEntity;
     public HiveSurgeComponent HiveSurgeComponent;
 }
+
+public struct EnemyBlueprint : IBufferElementData
+{
+    public EnemyType Type;
+    public Entity Prefab;
+
+    public HealthComponent BaseHealthComponent;
+    public HealthComponent ScaledHealthComponent;
+}
+
+public struct EnemyBlueprintDatabase : IComponentData { }

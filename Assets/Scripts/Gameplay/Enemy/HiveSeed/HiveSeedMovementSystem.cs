@@ -72,7 +72,7 @@ partial struct HiveSeedMovementSystem : ISystem
 
                     ecb.AppendToBuffer(newHive, new TrickleSpawnerData
                     {
-                        Type = EnemyType.Standard,
+                        EnemyType = EnemyType.Standard,
                         SpawnCount = 5,
                         Interval = 2.0f,
                         NextSpawnTime = 5.0f

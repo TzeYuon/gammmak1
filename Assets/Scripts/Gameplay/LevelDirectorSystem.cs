@@ -36,6 +36,7 @@ public partial struct LevelDirectorSystem : ISystem
 
         difficultyState.SpawnRateMult = math.min(difficultyFactor, config.MaxSpawnRateMult);
         difficultyState.SpawnCountMult = math.min(difficultyFactor, config.MaxSpawnCountMult);
+        difficultyState.EnemyHealthMult = math.min(difficultyFactor, config.MaxEnemyHealthMult);
 
         // Update surge state and stats
         ref GlobalSurgeState surgeState = ref SystemAPI.GetSingletonRW<GlobalSurgeState>().ValueRW;
@@ -47,6 +48,20 @@ public partial struct LevelDirectorSystem : ISystem
             surgeState.TriggerSurgeThisFrame = true;
             surgeState.SurgeTimer = surgeState.CurrentInterval;
         }
+
+        // update enemy blueprint stats
+        DynamicBuffer<EnemyBlueprint> blueprintBuffer = SystemAPI.GetSingletonBuffer<EnemyBlueprint>();
+        for (int i = 0; i < blueprintBuffer.Length; i++)
+        {
+            var blueprint = blueprintBuffer[i];
+            if (blueprint.Prefab == Entity.Null) continue;
+
+            // update new health based on mult
+            blueprint.ScaledHealthComponent.MaxValue = blueprint.BaseHealthComponent.MaxValue * difficultyState.EnemyHealthMult;
+            blueprint.ScaledHealthComponent.Value = blueprint.BaseHealthComponent.MaxValue * difficultyState.EnemyHealthMult;
+
+            blueprintBuffer[i] = blueprint;
+        }
     }
 }
 
@@ -56,6 +71,7 @@ public struct DifficultyConfig : IComponentData
     public float DifficultyPerHiveDestroyed;
     public float MaxSpawnRateMult;
     public float MaxSpawnCountMult;
+    public float MaxEnemyHealthMult;
 }
 
 public struct DifficultyState : IComponentData
@@ -76,8 +92,7 @@ public struct DifficultyState : IComponentData
     /// </summary>
     public float SpawnCountMult;
     
-    //public float EnemyHealthMult;
-    //public float MaxEnemyHealthMult;
+    public float EnemyHealthMult;
 }
 
 public struct GlobalSurgeState : IComponentData

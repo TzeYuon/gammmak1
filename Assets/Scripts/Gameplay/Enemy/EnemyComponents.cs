@@ -22,7 +22,7 @@ public struct ActiveHiveTag : IComponentData, IEnableableComponent { }
 [InternalBufferCapacity(4)]
 public struct TrickleSpawnerData : IBufferElementData
 {
-    public EnemyType Type;
+    public EnemyType EnemyType;
     public int SpawnCount;
     public float Interval;
     public float NextSpawnTime;
@@ -32,6 +32,11 @@ public struct TrickleSpawnerData : IBufferElementData
 public struct SiegePathWaypointElement : IBufferElementData
 {
     public float2 Position;
+}
+
+public struct EnemyBaseStats : IComponentData
+{
+    public HealthComponent BaseHealthComponent;
 }
 
 public struct SwarmMovementStatsComponent : IComponentData

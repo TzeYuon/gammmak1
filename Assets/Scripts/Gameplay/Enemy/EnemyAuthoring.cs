@@ -36,6 +36,17 @@ class EnemyAuthoring : MonoBehaviour
                 NoiseWeight = authoring.noiseWeight,
             });
 
+            // base stats for scaling during level
+            AddComponent(entity, new EnemyBaseStats
+            {
+                BaseHealthComponent = new HealthComponent
+                {
+                    MaxValue = authoring.maxHealth,
+                    Value = authoring.maxHealth,
+                    FlatDamageReduction = authoring.damageReduction
+                }
+            });
+
             // damage
             AddComponent(entity, new SwarmDamageComponent
             {

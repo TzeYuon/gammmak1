@@ -61,7 +61,8 @@ public enum EnemyType : byte
     Siege,
     Locust,
     Spitter,
-    Bomb
+    Bomb,
+    Count // flag to get around burst restrictions
 }
 
 public struct EnemyPrefabDatabase : IComponentData
