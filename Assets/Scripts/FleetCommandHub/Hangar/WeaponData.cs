@@ -4,12 +4,27 @@ using UnityEngine;
 public enum WeaponID : byte
 {
     None = 0,
-    PDC = 1,
-    Laser = 2,
-    Missile = 3,
-    Railgun = 4,
-    SuperHeavyGun = 5,
-    FlakShotgun = 6,
+
+    Cannon = 1, // machine gun like weapon to shoot down basic enemies
+    StormCannon = 2, // faster firing weapon to cover the battlefield with projectiles
+
+    PointDefenseLaser = 3, // shoots down fast moving enemies with hitscan lasers
+    ArgusDefenseGrid = 4, // fires faster and longer range than point defense lasers
+
+    HeavyLaser = 5, // uses hitscan weapons to attack high priority targets
+    TachyonLaser = 6, // hitscan weapon that does more damage than heavylaser
+
+    TrebuchetMissiles = 7, // fires missiles that shoots through walls to hit a specific tile, explodes with a medium radius
+    PigeonMissiles = 8, // fires multiple missiles that seeks closest enemies and explodes with a medium radius
+
+    Railgun = 9, // shoots a projectile that can hit multiple enemies, dealing high damage
+    GungnirLance = 10, // shoots an even larger projectile that can hit multiple enemies, dealing more damage and hitting more enemies
+
+    Artillery = 11, // shoots an explosive projectile that explodes in a large radius on collision
+    SuperHeavyArtillery = 12, // does more damage and a larger explosion radius than artillery
+
+    SquallLauncher = 13, // shoots like a shotgun with projectiles that explode 
+    TempestLauncher = 14, // shoots faster and larger number of projectiles
 }
 
 public enum WeaponStat
@@ -25,6 +40,7 @@ public enum WeaponStat
     PierceCount = 8,
     TriggerTime = 9,
     ProjectileCount = 10,
+    TurnSpeed = 11,
 }
 
 public enum ModifierType : byte
@@ -81,6 +97,10 @@ public class WeaponData : ScriptableObject
     public int UpgradeLevel;
     public int MaxUpgradeLevel { get { return Upgrades.Count; } }
     public List<WeaponUpgrade> Upgrades = new();
+
+    [Header("Turret Stats")]
+    public bool HasTurret = true;
+    public float BaseTurnSpeed = 5;
 
     [Header("Base Targeting Stats")]
     public bool IgnoreObstacles = false;
@@ -166,6 +186,7 @@ public class WeaponData : ScriptableObject
             case WeaponStat.PierceCount: baseValue = BasePierceCount; break;
             case WeaponStat.TriggerTime: baseValue = BaseTriggerTime; break;
             case WeaponStat.ProjectileCount: baseValue = BaseProjectileCount; break;
+            case WeaponStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
         }
 
         float flatBonus = 0f;

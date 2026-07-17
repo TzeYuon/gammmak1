@@ -154,6 +154,11 @@ public partial struct ShipSpawnerSystem : ISystem
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponCombatStats);
                 ecb.SetComponent(weapon, weaponBlueprint.WeaponFiringArc);
 
+                if (weaponBlueprint.HasTurret)
+                {
+                    ecb.AddComponent(weapon, weaponBlueprint.TurretComponent);
+                }
+
                 ecb.AppendToBuffer(newShip, new LinkedEntityGroup { Value = weapon });
             }
 

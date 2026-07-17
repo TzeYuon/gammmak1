@@ -62,4 +62,8 @@ public struct RosterWeaponBlueprint : IBufferElementData
     public WeaponTargetingStats WeaponTargetingStats;
     public WeaponCombatStats WeaponCombatStats;
     public WeaponFiringArc WeaponFiringArc;
+
+    // turret stats
+    public bool HasTurret;
+    public TurretComponent TurretComponent;
 }

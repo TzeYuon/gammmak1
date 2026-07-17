@@ -13,41 +13,46 @@ MonoBehaviour:
   m_Name: Railgun
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   WeaponName: Railgun
-  AbbrWpnName: RAL
-  WeaponID: 4
-  WeaponPrefab: {fileID: 90229467165131139, guid: d4b8a55dcfe4af043a72d86d88bb0399, type: 3}
-  EquipCost: 4
+  AbbrWpnName: RL
+  WeaponID: 9
+  WeaponPrefab: {fileID: 90229467165131139, guid: 97a48946e28c9e3448cbf15a51a2f15c, type: 3}
+  EquipCost: 2
   UpgradeLevel: 0
   Upgrades:
-  - Cost: 400
+  - Cost: 100
     Description: 
     Effects:
-    - StatType: 2
+    - StatType: 0
       ModifierType: 1
-      Value: 0.2
-    - StatType: 4
-      ModifierType: 1
-      Value: 0.05
-  - Cost: 700
-    Description: 
-    Effects:
+      Value: 0.1
     - StatType: 1
       ModifierType: 1
-      Value: 0.2
+      Value: 0.05
+  - Cost: 300
+    Description: 
+    Effects:
+    - StatType: 0
+      ModifierType: 1
+      Value: 0.1
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.1
+  HasTurret: 1
+  BaseTurnSpeed: 5
   IgnoreObstacles: 1
   RequireTargetEntity: 0
   BaseRange: 50
-  DensityBias: 2
-  ThreatBias: 1
-  AngleBias: 1
+  DensityBias: 1
+  ThreatBias: 0
+  AngleBias: 0
   DistanceBias: 0
-  BaseDamage: 50
-  BaseFireRate: 0.2
+  BaseDamage: 3
+  BaseFireRate: 1
   BaseSpreadDegrees: 0
   BaseProjectileCount: 1
   BaseProjectileSpeed: 200
   BaseProjectileTurnSpeed: 0
-  BaseHitRadius: 5
+  BaseHitRadius: 1
   BaseExplosionRadius: 0
-  BasePierceCount: 100
+  BasePierceCount: 200
   BaseTriggerTime: 0

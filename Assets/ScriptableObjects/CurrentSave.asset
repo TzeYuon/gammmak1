@@ -20,16 +20,18 @@ MonoBehaviour:
   AvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
-  - {fileID: 11400000, guid: 4a162e963042f15449797f8c6e0ad823, type: 2}
-  - {fileID: 11400000, guid: 49d1512f0bdf5e04dae07211a87f4080, type: 2}
   startingAvailableWeapons:
-  - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
-  - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  - {fileID: 11400000, guid: 5a59caa2d1fda104a9cca917bef2fd33, type: 2}
+  - {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
+  - {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
+  - {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
+  - {fileID: 11400000, guid: bc9c366273a411e4b80094f0a8ed2ec5, type: 2}
+  - {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
   AvailableWeapons:
-  - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
-  - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  - {fileID: 11400000, guid: 5a59caa2d1fda104a9cca917bef2fd33, type: 2}
+  - {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
+  - {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
+  - {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
+  - {fileID: 11400000, guid: bc9c366273a411e4b80094f0a8ed2ec5, type: 2}
+  - {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
   startingActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
@@ -38,6 +40,6 @@ MonoBehaviour:
   ActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
-  - {fileID: 11400000, guid: 4a162e963042f15449797f8c6e0ad823, type: 2}
-  - {fileID: 11400000, guid: 49d1512f0bdf5e04dae07211a87f4080, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   Mothership: {fileID: 11400000, guid: 16e5c9a0ba05ebc49a3f09d7e1da11b4, type: 2}

@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681c4939461914b4282861a89dd09ee1, type: 3}
+  m_Name: HeavyLaser
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  WeaponName: Heavy Laser
+  AbbrWpnName: HL
+  WeaponID: 5
+  WeaponPrefab: {fileID: 90229467165131139, guid: 6824d0c84e5ca3147ad6ece6dd2c1844, type: 3}
+  EquipCost: 2
+  UpgradeLevel: 0
+  Upgrades:
+  - Cost: 100
+    Description: 
+    Effects:
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.2
+    - StatType: 2
+      ModifierType: 1
+      Value: 0.1
+  - Cost: 300
+    Description: 
+    Effects:
+    - StatType: 1
+      ModifierType: 1
+      Value: 0.2
+    - StatType: 2
+      ModifierType: 1
+      Value: 0.1
+  HasTurret: 0
+  BaseTurnSpeed: 0
+  IgnoreObstacles: 0
+  RequireTargetEntity: 1
+  BaseRange: 40
+  DensityBias: 0
+  ThreatBias: 1
+  AngleBias: 0
+  DistanceBias: 0
+  BaseDamage: 10
+  BaseFireRate: 0.6
+  BaseSpreadDegrees: 0
+  BaseProjectileCount: 0
+  BaseProjectileSpeed: 0
+  BaseProjectileTurnSpeed: 0
+  BaseHitRadius: 0
+  BaseExplosionRadius: 0
+  BasePierceCount: 0
+  BaseTriggerTime: 0

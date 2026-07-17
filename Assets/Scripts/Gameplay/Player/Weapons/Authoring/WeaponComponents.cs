@@ -56,6 +56,7 @@ public struct ProjectileWeapon : IComponentData
 {
     public Entity ProjectilePrefab;
     public float2 WeaponStartOffset;
+    public float4 VFXColour;
 }
 
 public struct WeaponState : IComponentData

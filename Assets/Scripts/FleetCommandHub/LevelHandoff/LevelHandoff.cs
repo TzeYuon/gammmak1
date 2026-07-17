@@ -302,7 +302,13 @@ public class LevelHandoff : MonoBehaviour
                     {
                         RestingRotation = mount.OriginalRotation,
                         MaxAngle = mount.MaxAngle,
-                    }
+                    },
+
+                    HasTurret = weapon.HasTurret,
+                    TurretComponent = new TurretComponent
+                    {
+                        TurnSpeed = weapon.GetStat(WeaponStat.TurnSpeed),
+                    },
                 });
             }
 

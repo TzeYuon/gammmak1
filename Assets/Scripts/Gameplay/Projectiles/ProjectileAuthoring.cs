@@ -37,7 +37,7 @@ class ProjectileAuthoring : MonoBehaviour
             {
                 AddComponent(entity, new HomingAutoFlight
                 {
-                    DistanceBias = 0,
+                    DistanceBias = 1,
                     AngleBias = 0,
                 });
             }

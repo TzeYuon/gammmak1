@@ -174,7 +174,8 @@ public partial struct HomingAutoFlightJob : IJobEntity
         ref LocalTransform transform,
         ref ProjectileMovement movement,
         in ProjectileMovementStats stats,
-        in HomingAutoFlight homing
+        in HomingAutoFlight homing,
+        in ProjectileTriggerStats trigger
         )
     {
         float2 currentPos = transform.Position.xy;
@@ -184,7 +185,7 @@ public partial struct HomingAutoFlightJob : IJobEntity
         int2 centerCell = GridUtility.WorldPosToCell(currentPos, WorldOrigin, CellSize);
 
         float bestScore = -1f;
-        float2 bestTargetPos = currentPos + currentHeading * stats.Speed;
+        float2 bestTargetPos = trigger.TargetPos.xy;
 
         for (int x = -radiusCells; x <= radiusCells; x++)
         {
@@ -223,7 +224,7 @@ public partial struct HomingAutoFlightJob : IJobEntity
             }
         }
 
-        // Rotate projectile towards target
+        // Rotate projectile towards target 
         float2 desiredDir = math.normalize(bestTargetPos - currentPos);
         float currentAngle = math.atan2(currentHeading.y, currentHeading.x);
         float targetAngle = math.atan2(desiredDir.y, desiredDir.x);

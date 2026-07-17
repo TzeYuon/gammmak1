@@ -28,7 +28,7 @@ MonoBehaviour:
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 3680c94a8aa3f8d438c81dbb3f411fe0, type: 2}
     UpgradeLevel: 0
-  BaseWeaponCapacity: 1
+  BaseWeaponCapacity: 6
   Mounts:
   - Position: {x: 0, y: 0}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}

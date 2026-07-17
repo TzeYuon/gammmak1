@@ -189,7 +189,7 @@ public partial struct ProjectileFiringJob : IJobEntity
             {
                 Speed = stats.ProjectileSpeed,
                 TurnSpeed = stats.ProjectileTurnSpeed,
-                HomingRange = 60f
+                HomingRange = 20
             });
 
             ECB.SetComponent(chunkIndex, projectile, new ProjectileTriggerState
@@ -227,7 +227,7 @@ public partial struct ProjectileFiringJob : IJobEntity
         {
             Position = spawnPoint,
             Type = (uint)VFXType.MuzzleFlash,
-            Colour = new float4(1, 1, 0, 1),
+            Colour = projectileWeapon.VFXColour,
             CustomData = new float4(baseAngle - (math.PI / 2f), 0, 0, 0)
         });
     }

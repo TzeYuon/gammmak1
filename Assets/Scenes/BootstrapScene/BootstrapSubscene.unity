@@ -331,12 +331,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6d156ffcffac2b1478d504da1443508e, type: 2}
   - {fileID: 11400000, guid: 0aea8937257cc214e8f59aa3d197392a, type: 2}
   allGameWeapons:
-  - {fileID: 11400000, guid: 8876621301a73ef448b6c59a05e87ba8, type: 2}
-  - {fileID: 11400000, guid: 5a59caa2d1fda104a9cca917bef2fd33, type: 2}
-  - {fileID: 11400000, guid: d05fabf235075ec41abe6f68b0b5daf7, type: 2}
-  - {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
-  - {fileID: 11400000, guid: 899c5c1bd7bc0294ea8e0c96f221c916, type: 2}
-  - {fileID: 11400000, guid: 6ffb12206990c074d97210cf561f2889, type: 2}
+  - {fileID: 11400000, guid: cc1f26977fa3891489df65a2d3b2f6df, type: 2}
+  - {fileID: 11400000, guid: d6a419ec700134e4bbd1e8be9d9263a3, type: 2}
+  - {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
+  - {fileID: 11400000, guid: acf07b1db7af8a04aa785a9e7162b092, type: 2}
+  - {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
+  - {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
+  - {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
+  - {fileID: 11400000, guid: 4f795852c0a2e0444a5cfc5bf65fc914, type: 2}
+  - {fileID: 11400000, guid: 7954108357981524197d78383f0b232d, type: 2}
+  - {fileID: 11400000, guid: a29ab8c7555c67b4faa0b9ae5ff2d4a3, type: 2}
+  - {fileID: 11400000, guid: d2c46820f1e8f9748acc234a3dcfa80a, type: 2}
+  - {fileID: 11400000, guid: 812a5fa6d4bba4a4d921307178aeb3d5, type: 2}
+  - {fileID: 11400000, guid: bc9c366273a411e4b80094f0a8ed2ec5, type: 2}
+  - {fileID: 11400000, guid: 57b16e831b4657e4099416088873847f, type: 2}
   ghostPrefab: {fileID: 4422588013955516274, guid: 370b6404094a91447b8781a4b604d05d, type: 3}
   arcVisualPrefab: {fileID: 4422588013955516274, guid: beb6968d1a19d3442ab2c7e003838317, type: 3}
   shieldVisualPrefab: {fileID: 5715642080276578497, guid: 4acc82b7403cd6244aaba89b467d1100, type: 3}
