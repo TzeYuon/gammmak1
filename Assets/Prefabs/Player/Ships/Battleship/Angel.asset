@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7c9f7cf10519c248b38583a980873b0, type: 3}
+  m_Name: Angel
+  m_EditorClassIdentifier: Assembly-CSharp::ShipBlueprintData
+  ShipName: Angel
+  ShipClass: 4
+  ShipID: 151
+  ShipPrefab: {fileID: 6753536424006035904, guid: 655f6bfee9cbf8e42a2ef1e40ed7514d, type: 3}
+  ShipMesh: {fileID: -7786390875159896513, guid: 0820b62f8fe11b84285aaf9908dc7a32, type: 3}
+  ShipSystems:
+  - Definition: {fileID: 11400000, guid: debc276a9440a4248ba133751887599d, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: cf3614ede07be3f4eb6ff134f99955ff, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: c2173e2f7939f2f499666563a053d7ce, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: 4fac9ee70b5945f41bfeb074a57c04e2, type: 2}
+    UpgradeLevel: 0
+  - Definition: {fileID: 11400000, guid: f22f11aeb37e73c468349be6cb1e5e25, type: 2}
+    UpgradeLevel: 0
+  BaseWeaponCapacity: 8
+  Mounts:
+  - Position: {x: 0, y: 0.45}
+    OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
+    MaxAngle: 40
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: -0.669, y: 0.321}
+    OriginalRotation: {x: 0, y: 0, z: 0.28175536, w: 0.95948625}
+    MaxAngle: 40
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 0.669, y: 0.321}
+    OriginalRotation: {x: 0, y: 0, z: -0.28175533, w: 0.9594863}
+    MaxAngle: 40
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: -1.178, y: -0.27}
+    OriginalRotation: {x: 0, y: 0, z: 0.34284008, w: 0.9393938}
+    MaxAngle: 40
+    EquippedWeapon: {fileID: 0}
+  - Position: {x: 1.178, y: -0.27}
+    OriginalRotation: {x: 0, y: 0, z: -0.34284, w: 0.9393938}
+    MaxAngle: 40
+    EquippedWeapon: {fileID: 0}
+  AvoidanceRadius: 1.45
+  AvoidanceOffset: {x: 0, y: -0.194}
+  BaseCost: 35
+  BaseMaxHealth: 70
+  BaseDamageReduction: 0.2
+  BaseSpeed: 4
+  BaseTurnSpeed: 3
+  BaseRevealFogRadius: 25
+  BaseCollectionRadius: 0
+  HasShield: 1
+  ShieldOffset: {x: 0, y: -0.227}
+  ShieldRadius: 4
+  ShieldRechargeDelay: 0.3
+  BaseShieldMaxCapacity: 200
+  BaseShieldRegenPerSecond: 4
+  ShieldDamage: 50
+  ShieldEfficiencyBonus: 0.2

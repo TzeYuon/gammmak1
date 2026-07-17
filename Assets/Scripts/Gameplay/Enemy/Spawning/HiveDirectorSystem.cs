@@ -62,9 +62,11 @@ partial struct HiveDirectorSystem : ISystem
 
             Entity seed = ecb.Instantiate(prefabs.GetPrefab(HiveType.Standard));
             ecb.SetComponent(seed, LocalTransform.FromPosition(startPos).WithScale(scale));
+            ecb.RemoveComponent<HiveComponent>(seed);
             ecb.AddComponent<SwarmTag>(seed);
+
             ecb.AddComponent(seed, new SwarmVelocityComponent { Value = float2.zero });
-            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = false,  Radius = 900f, Damage = 9999.0f });
+            ecb.AddComponent(seed, new ExplosionOnDeath { TargetSwarm = true,  Radius = 15.0f, Damage = 9999.0f });
             ecb.AddComponent(seed, new HiveSeedComponent
             {
                 Destination = destinationPos,

@@ -110,6 +110,7 @@ public partial struct ShipSpawnerSystem : ISystem
             ecb.SetComponent(newShip, LocalTransform.FromPosition(spawnPosition));
 
             // Set ship stats
+            ecb.SetComponent(newShip, shipBlueprint.ShipIDComponent);
             ecb.SetComponent(newShip, shipBlueprint.ShipHealthComponent);
             ecb.SetComponent(newShip, shipBlueprint.ShipMovementStats);
             ecb.SetComponent(newShip, shipBlueprint.ShipRevealFogRadius);

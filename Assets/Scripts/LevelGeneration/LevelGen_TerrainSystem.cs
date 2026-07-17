@@ -188,7 +188,6 @@ partial struct LevelGen_TerrainSystem : ISystem
             spawnData.MothershipSpawn = spawnPool[spawnPool.Count - 1];
         }
 
-        spawnData.ExpansionSpotCount = spawnPool.Count - spawnData.ActiveHiveCount - 1;
         NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnPool.Count, Allocator.Temp);
         for (int i = 0; i < spawnPool.Count; i++)
         {

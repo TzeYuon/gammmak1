@@ -16,10 +16,10 @@ MonoBehaviour:
   ShipClass: 2
   ShipID: 51
   ShipPrefab: {fileID: 6753536424006035904, guid: b79ebb98dc298b240bd035f1525e0050, type: 3}
-  ShipMesh: {fileID: 2959584457716230763, guid: a0b34e4b829507c43a8e1c5ae1c3b392, type: 3}
+  ShipMesh: {fileID: 935877085284440058, guid: 22bae693b45b5944dba44c213b3ad7fa, type: 3}
   ShipSystems:
   - Definition: {fileID: 11400000, guid: 2748c375f8a435545a0c9d3d62face3a, type: 2}
-    UpgradeLevel: 1
+    UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 3388b2c6bb744214c85a40882e14288e, type: 2}
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: af6f772acee652b4ea5351ad0ea60681, type: 2}
@@ -44,8 +44,8 @@ MonoBehaviour:
     OriginalRotation: {x: 0, y: 0, z: 1, w: 0}
     MaxAngle: 115.9
     EquippedWeapon: {fileID: 0}
-  AvoidanceRadius: 1.17
-  AvoidanceOffset: {x: 0, y: 0.197}
+  AvoidanceRadius: 0.96
+  AvoidanceOffset: {x: 0, y: 0.15}
   BaseCost: 7
   BaseMaxHealth: 15
   BaseDamageReduction: 0
@@ -54,8 +54,8 @@ MonoBehaviour:
   BaseRevealFogRadius: 25
   BaseCollectionRadius: 5
   HasShield: 1
-  ShieldOffset: {x: 0, y: 0.4}
-  ShieldRadius: 2
+  ShieldOffset: {x: 0, y: 0.22}
+  ShieldRadius: 1.51
   ShieldRechargeDelay: 1
   BaseShieldMaxCapacity: 25
   BaseShieldRegenPerSecond: 1
