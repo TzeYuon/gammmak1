@@ -50,7 +50,8 @@ MonoBehaviour:
   BaseFireRate: 0.2
   BaseSpreadDegrees: 0
   BaseProjectileCount: 1
-  BaseProjectileSpeed: 70
+  BaseBurstInterval: 0.02
+  BaseProjectileSpeed: 90
   BaseProjectileTurnSpeed: 10
   BaseHitRadius: 3
   BaseExplosionRadius: 4

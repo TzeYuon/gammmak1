@@ -41,6 +41,7 @@ public enum WeaponStat
     TriggerTime = 9,
     ProjectileCount = 10,
     TurnSpeed = 11,
+    BurstInterval = 12,
 }
 
 public enum ModifierType : byte
@@ -130,6 +131,7 @@ public class WeaponData : ScriptableObject
 
     [Header("Projectile Stats (Ignore if Hitscan)")]
     public int BaseProjectileCount = 1;
+    public float BaseBurstInterval = 0.02f;
     public float BaseProjectileSpeed = 50f;
     public float BaseProjectileTurnSpeed = 5;
     public float BaseHitRadius = 1.0f;
@@ -187,6 +189,7 @@ public class WeaponData : ScriptableObject
             case WeaponStat.TriggerTime: baseValue = BaseTriggerTime; break;
             case WeaponStat.ProjectileCount: baseValue = BaseProjectileCount; break;
             case WeaponStat.TurnSpeed: baseValue = BaseTurnSpeed; break;
+            case WeaponStat.BurstInterval: baseValue = BaseBurstInterval; break;
         }
 
         float flatBonus = 0f;

@@ -153,28 +153,45 @@ public partial struct ProjectileFiringJob : IJobEntity
         )
     {
         state.FireTimer -= DeltaTime;
-        if (state.FireTimer > 0 || !state.HasTarget || stats.FireRate == 0) return;
+
+        // currently in burst, tick down sub timer
+        if (state.BurstRemaining > 0)
+        {
+            state.SubFireTimer -= DeltaTime;
+        }
+
         var rng = Random.CreateFromIndex((uint)entity.Index * 197u + RandomSeed);
-        float baseCooldown = 1.0f / stats.FireRate;
-        state.FireTimer = baseCooldown * rng.NextFloat(0.9f, 1.1f);
 
-        float3 weaponForward = localToWorld.Up;
-        float2 targetPos = state.TargetPos;
-        float3 dirToTarget = math.normalize(new float3(targetPos, localToWorld.Position.z) - localToWorld.Position);
+        // start new burst
+        if (state.BurstRemaining <= 0 && state.FireTimer <= 0f && state.HasTarget && stats.FireRate > 0f)
+        {
+            float baseCooldown = 1.0f / stats.FireRate;
+            state.FireTimer = baseCooldown * rng.NextFloat(0.9f, 1.1f);
 
-        if (TurretLookup.HasComponent(entity) && math.dot(weaponForward, dirToTarget) < 0.95f) return; // mostly facing target
+            state.BurstRemaining = stats.ProjectileCount;
+            state.SubFireTimer = 0f;
+        }
 
-        float baseAngle = math.atan2(weaponForward.y, weaponForward.x);
-        float3 spawnPoint = math.transform(localToWorld.Value, new float3(projectileWeapon.WeaponStartOffset, 0));
+        if (state.BurstRemaining > 0 && state.SubFireTimer <= 0f)
+        {
+            // reset timer for next shot in burst
+            state.SubFireTimer = stats.BurstInterval;
+            state.BurstRemaining--;
 
-        for (int i = 0; i < stats.ProjectileCount; i++) {
+            // get orientation
+            float3 weaponForward = localToWorld.Up;
+            float2 targetPos = state.TargetPos;
+            float3 spawnPoint = math.transform(localToWorld.Value, new float3(projectileWeapon.WeaponStartOffset, 0));
+            float baseAngle = math.atan2(weaponForward.y, weaponForward.x);
+     
             Entity projectile = ECB.Instantiate(chunkIndex, projectileWeapon.ProjectilePrefab);
 
             // Add spread
             float randomAngleOffset = math.radians(rng.NextFloat(-stats.Spread, stats.Spread));
             float finalAngle = baseAngle + randomAngleOffset;
             quaternion rotation = quaternion.RotateZ(finalAngle - (math.PI / 2f));
-            
+
+            // transfer components to new instantiated projectile
             ECB.SetComponent(chunkIndex, projectile, LocalTransform.FromPositionRotation(
                 spawnPoint,
                 rotation)
@@ -219,16 +236,15 @@ public partial struct ProjectileFiringJob : IJobEntity
             if (!stats.IgnoreObstacles)
             {
                 ECB.AddComponent(chunkIndex, projectile, new CollideWithObstacles());
-            } 
-        }
+            }
 
-        // TEMPORARY: All weapons have the same vfx
-        VFXWriter.Enqueue(new VFXPayload
-        {
-            Position = spawnPoint,
-            Type = (uint)VFXType.MuzzleFlash,
-            Colour = projectileWeapon.VFXColour,
-            CustomData = new float4(baseAngle - (math.PI / 2f), 0, 0, 0)
-        });
+            VFXWriter.Enqueue(new VFXPayload
+            {
+                Position = spawnPoint,
+                Type = (uint)VFXType.MuzzleFlash,
+                Colour = projectileWeapon.VFXColour,
+                CustomData = new float4(finalAngle - (math.PI / 2f), 0, 0, 0)
+            });
+        }
     }
 }

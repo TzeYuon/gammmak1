@@ -28,12 +28,12 @@ MonoBehaviour:
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 3680c94a8aa3f8d438c81dbb3f411fe0, type: 2}
     UpgradeLevel: 0
-  BaseWeaponCapacity: 6
+  BaseWeaponCapacity: 1
   Mounts:
   - Position: {x: 0, y: 0}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 180
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
   AvoidanceRadius: 0.6
   AvoidanceOffset: {x: 0, y: 0.132}
   BaseCost: 5

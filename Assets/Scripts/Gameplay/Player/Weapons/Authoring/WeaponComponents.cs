@@ -36,6 +36,7 @@ public struct WeaponCombatStats : IComponentData
 
     public bool IgnoreObstacles;
     public int ProjectileCount;
+    public float BurstInterval;
     public float ProjectileSpeed;
     public float ProjectileTurnSpeed;
     public float HitRadius;
@@ -62,6 +63,11 @@ public struct ProjectileWeapon : IComponentData
 public struct WeaponState : IComponentData
 {
     public float FireTimer;
+
+    public int BurstRemaining; // projectiles left this fire
+    public float BurstInterval; // interval between projectiles in one burst
+    public float SubFireTimer; // timer to track interval
+
     public float2 TargetPos;
     public Entity TargetEntity;
     public bool HasTarget;

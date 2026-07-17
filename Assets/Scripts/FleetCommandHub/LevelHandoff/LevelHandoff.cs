@@ -289,6 +289,7 @@ public class LevelHandoff : MonoBehaviour
                         Spread = weapon.GetStat(WeaponStat.Spread),
                         IgnoreObstacles = weapon.IgnoreObstacles,
                         ProjectileCount = weapon.GetStatInt(WeaponStat.ProjectileCount),
+                        BurstInterval = weapon.GetStat(WeaponStat.BurstInterval),
                         ProjectileSpeed = weapon.GetStat(WeaponStat.ProjectileSpeed),
                         ProjectileTurnSpeed = weapon.GetStat(WeaponStat.ProjectileTurnSpeed),
                         HitRadius = weapon.GetStat(WeaponStat.HitRadius),
