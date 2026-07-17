@@ -17,7 +17,6 @@ public partial struct ShipMovementSystem : ISystem
         shipQuery = SystemAPI.QueryBuilder()
             .WithAll<PlayerTag, LocalTransform>()
             .WithDisabled<DeadTag>()
-            .WithAbsent<MothershipTag>()
             .Build();
     }
 
@@ -113,7 +112,6 @@ public struct ShipAvoidanceData
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
 [WithAbsent(typeof(MothershipTag))]
-[WithDisabled(typeof(DeadTag))]
 [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct GatherShipDataJob : IJobEntity
 {

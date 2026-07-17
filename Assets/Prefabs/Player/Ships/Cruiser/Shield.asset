@@ -19,7 +19,7 @@ MonoBehaviour:
   ShipMesh: {fileID: -7032258052330908258, guid: 90c01b1a20c677c4b9f814940042f1fa, type: 3}
   ShipSystems:
   - Definition: {fileID: 11400000, guid: b40c306963fd55a478a2adaba97aeb43, type: 2}
-    UpgradeLevel: 1
+    UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 0257084037795464585804f9c4ee3596, type: 2}
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 162209d4b2dcd914888d9aed1374c219, type: 2}
@@ -50,10 +50,10 @@ MonoBehaviour:
   BaseSpeed: 6
   BaseTurnSpeed: 5
   BaseRevealFogRadius: 25
-  BaseCollectionRadius: 5
+  BaseCollectionRadius: 0
   HasShield: 1
   ShieldOffset: {x: 0, y: 0.5}
-  ShieldRadius: 2.3
+  ShieldRadius: 3
   ShieldRechargeDelay: 0.5
   BaseShieldMaxCapacity: 200
   BaseShieldRegenPerSecond: 4

@@ -1,8 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEditor.Rendering.LookDev;
+using Unity.Mathematics;
 
 [BurstCompile]
 [UpdateInGroup(typeof(LateGameplayGroup))]
@@ -15,7 +14,6 @@ public partial struct SwarmDeathEventSystem : ISystem
         queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
         state.RequireForUpdate<BiomassConfig>();
         state.RequireForUpdate<GlobalVFXQueue>();
-        state.RequireForUpdate<LevelSpawnData>();
     }
 
     [BurstCompile]
@@ -33,9 +31,6 @@ public partial struct SwarmDeathEventSystem : ISystem
 
         var explodeLookup = SystemAPI.GetComponentLookup<ExplosionOnDeath>(true);
 
-        var spawnDataComp = SystemAPI.GetSingletonRW<LevelSpawnData>();
-        ref var spawnData = ref spawnDataComp.ValueRW;
-
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, SwarmTag>().WithEntityAccess())
         {
             var position = transform.ValueRO.Position;
@@ -47,49 +42,19 @@ public partial struct SwarmDeathEventSystem : ISystem
                 Colour = new float4(1, 0, 0, 0), 
             });
 
-            bool isSeed = SystemAPI.HasComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
-            if (isSeed)
-            {
-                unsafe
-                {
-                    int newIndex = spawnData.ExpansionSpotCount;
-                    var queen = SystemAPI.GetComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
-
-                    if (newIndex < 8)
-                    {
-                        spawnData.ExpansionSpotsX[newIndex] = queen.Destination.x;
-                        spawnData.ExpansionSpotsY[newIndex] = queen.Destination.y;
-                        spawnData.ExpansionSpotCount++;
-                    }
-                }
-            }
-
             // Explode if entity has relevant component
             if (explodeLookup.HasComponent(entity))
             {
                 ExplosionOnDeath explosion = explodeLookup[entity];
                 Entity explosionEntity = ecb.CreateEntity();
                 ecb.AddComponent(explosionEntity, LocalTransform.FromPosition(position));
-                if (isSeed)
+                ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
                 {
-                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetPlayer
-                    {
-                        Position = position,
-                        Damage = explosion.Damage,
-                        RadiusSq = explosion.Radius,
-                        Colour = new float4(1, 0, 0, 0)
-                    });
-                }
-                else
-                {
-                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
-                    {
-                        Position = position,
-                        Damage = explosion.Damage,
-                        RadiusSq = explosion.Radius,
-                        Colour = new float4(1, 0, 0, 0)
-                    });
-                }
+                    Position = position,
+                    Damage = explosion.Damage,
+                    RadiusSq = explosion.Radius,
+                    Colour = new float4(1, 0, 0, 0)
+                });
             }
 
             // Random chance to drop biomass
@@ -149,7 +114,7 @@ public partial struct HiveDeathEventSystem : ISystem
                 if (SystemAPI.HasComponent<HiveDirectorSystem.HiveSeedComponent>(entity))
                 {
                     var queen = SystemAPI.GetComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
-                    if (newIndex < 8)
+                    if (newIndex < 10)
                     {
                         spawnData.ExpansionSpotsX[newIndex] = queen.Destination.x;
                         spawnData.ExpansionSpotsY[newIndex] = queen.Destination.y;
@@ -159,11 +124,13 @@ public partial struct HiveDeathEventSystem : ISystem
                 else
                 {
                     difficultyState.ValueRW.HivesDestroyed++;
+
                     if (newIndex < 8)
                     {
                         spawnData.ExpansionSpotsX[newIndex] = transform.ValueRO.Position.x;
                         spawnData.ExpansionSpotsY[newIndex] = transform.ValueRO.Position.y;
                         spawnData.ExpansionSpotCount++;
+
                         if (spawnData.ActiveHiveCount > 0) spawnData.ActiveHiveCount--;
                     }
                 }
