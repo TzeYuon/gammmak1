@@ -28,9 +28,9 @@ MonoBehaviour:
         Weight: 1
     TerrainPool:
       Pool:
-      - Item: 0
+      - Item: 8
         Weight: 1
-      - Item: 6
+      - Item: 8
         Weight: 1
     ObjectivePool:
       Pool:

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -146,7 +145,19 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xbr, Ybr, 0));
                 spawnPool.Add(new float3(Xtl, Ytl, 0));
                 spawnPool.Add(new float3(Xt, Yt, 0));
+                spawnPool.Add(new float3(Xl, Yl, 0));
+                spawnPool.Add(new float3(Xr, Yr, 0));
+                spawnPool.Add(new float3(Xb, Yb, 0));
                 spawnData.ActiveHiveCount = 2;
+                break;
+
+            case TerrainType.Shattered:
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnPool.Add(new float3(Xtl, Ytl, 0));
+                spawnPool.Add(new float3(Xbr, Ybr, 0));
+                spawnPool.Add(new float3(Xc, Yc, 0));
+                spawnData.ActiveHiveCount = 3;
                 break;
 
             default:
@@ -268,38 +279,94 @@ partial struct LevelGen_TerrainSystem : ISystem
                             break;
 
                         case TerrainType.TwoRing:
-                            // Logic
-                            float dx = x - centerX;
-                            float dy = y - centerY;
-                            float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
-                            if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
-
-                            float innerRingRadius = 35f;
-                            float outerRingRadius = 70f;
-                            float radiusThickness = 7f;
-
-                            float distToInner = math.abs(distToCenter - innerRingRadius);
-                            float distToOuter = math.abs(distToCenter - outerRingRadius);
-
-                            // Inner Ring Logic (Entrances at 0, 120, 240)
-                            if (distToInner < radiusThickness)
                             {
-                                float modInner = angleDeg % 120f;
-                                bool isInnerGap = (modInner < 12f || modInner > 108f);
+                                // Logic
+                                float dx = x - centerX;
+                                float dy = y - centerY;
+                                float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
+                                if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
 
-                                if (isInnerGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
+                                float innerRingRadius = 35f;
+                                float outerRingRadius = 70f;
+                                float radiusThickness = 7f;
+
+                                float distToInner = math.abs(distToCenter - innerRingRadius);
+                                float distToOuter = math.abs(distToCenter - outerRingRadius);
+
+                                // Inner Ring Logic (Entrances at 0, 120, 240)
+                                if (distToInner < radiusThickness)
+                                {
+                                    float modInner = angleDeg % 120f;
+                                    bool isInnerGap = (modInner < 12f || modInner > 108f);
+
+                                    if (isInnerGap) elevation -= 1.0f;
+                                    else elevation += 2.0f;
+                                }
+
+                                // Outer Ring Logic (Entrances at 60, 180, 300)
+                                if (distToOuter < radiusThickness)
+                                {
+                                    float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
+                                    float modOuter = shiftedAngle % 120f;
+                                    bool isOuterGap = (modOuter < 9f || modOuter > 111f);
+
+                                    if (isOuterGap) elevation -= 1.0f;
+                                    else elevation += 2.0f;
+                                }
+                                break;
                             }
 
-                            // Outer Ring Logic (Entrances at 60, 180, 300)
-                            if (distToOuter < radiusThickness)
-                            {
-                                float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
-                                float modOuter = shiftedAngle % 120f;
-                                bool isOuterGap = (modOuter < 9f || modOuter > 111f);
+                        case TerrainType.Shattered:
+                            float shatterScale = 0.05f;
 
-                                if (isOuterGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
+                            float2 scaledPos = new float2(x + randomOffset, y + randomOffset) * shatterScale;
+
+                            int2 cellIndex = new int2((int)math.floor(scaledPos.x), (int)math.floor(scaledPos.y));
+                            float2 cellFraction = scaledPos - cellIndex;
+
+                            float minDist1 = 1.0f; // Closest point
+                            float minDist2 = 1.0f; // Second closest point
+
+                            // Check the 9 surrounding noise cells
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                for (int dy = -1; dy <= 1; dy++)
+                                {
+                                    int2 neighborOffset = new int2(dx, dy);
+
+                                    float rawNoiseX = noise.snoise(new float2(cellIndex.x + dx, cellIndex.y + dy) * 15.2f);
+                                    float rawNoiseY = noise.snoise(new float2(cellIndex.x + dx, cellIndex.y + dy) * 32.7f);
+
+                                    float seedX = (rawNoiseX * 0.5f) + 0.5f;
+                                    float seedY = (rawNoiseY * 0.5f) + 0.5f;
+                                    float2 randomSeed = new float2(seedX, seedY);
+
+                                    float2 toSeed = neighborOffset + randomSeed - cellFraction;
+                                    float dist = math.length(toSeed);
+
+                                    if (dist < minDist1)
+                                    {
+                                        minDist2 = minDist1;
+                                        minDist1 = dist;
+                                    }
+                                    else if (dist < minDist2)
+                                    {
+                                        minDist2 = dist;
+                                    }
+                                }
+                            }
+
+                            float edgeDistance = minDist2 - minDist1;
+
+                            float surfaceDetail = noise.snoise(scaledPos * 3.0f) * 0.15f;
+
+                            if (edgeDistance + surfaceDetail < 0.25f)
+                            {
+                                elevation = 0.0f; // Empty space
+                            }
+                            else
+                            {
+                                elevation = 1.0f; // Wall
                             }
                             break;
                     }
@@ -308,7 +375,10 @@ partial struct LevelGen_TerrainSystem : ISystem
             }
 
             // Cellular automata
-            for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius, spawnPoints, worldOrigin);
+            if (blueprint.TerrainType != TerrainType.Shattered)
+            {
+                for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius, spawnPoints, worldOrigin);
+            }
         }
 
         int borderThickness = 1;
@@ -559,11 +629,9 @@ partial struct LevelGen_TerrainSystem : ISystem
         int mazeW = width / blockSize;
         int mazeH = height / blockSize;
 
-        // DFS Maze algorithms require ODD dimensions to calculate walls properly
         if (mazeW % 2 == 0) mazeW--;
         if (mazeH % 2 == 0) mazeH--;
 
-        // 2. GENERATE A MINIATURE MAZE
         int[,] miniMaze = new int[mazeW, mazeH];
         for (int x = 0; x < mazeW; x++)
         {
@@ -585,7 +653,6 @@ partial struct LevelGen_TerrainSystem : ISystem
             foreach (var d in dirs)
             {
                 int2 n = curr + d;
-                // Check if the jump target is inside bounds and is currently a wall
                 if (n.x > 0 && n.x < mazeW - 1 && n.y > 0 && n.y < mazeH - 1)
                 {
                     if (miniMaze[n.x, n.y] == 1) valid.Add(d);
@@ -597,38 +664,34 @@ partial struct LevelGen_TerrainSystem : ISystem
                 int2 chosen = valid[rng.NextInt(0, valid.Length)];
                 int2 next = curr + chosen;
 
-                miniMaze[next.x, next.y] = 0; // Carve destination
-                miniMaze[curr.x + chosen.x / 2, curr.y + chosen.y / 2] = 0; // Carve wall in between
+                miniMaze[next.x, next.y] = 0; 
+                miniMaze[curr.x + chosen.x / 2, curr.y + chosen.y / 2] = 0; 
 
                 stack.Push(next);
             }
             else
             {
-                stack.Pop(); // Dead end! Backtrack.
+                stack.Pop(); 
             }
             valid.Dispose();
         }
 
-        // 3. "BRAIDING" (Crucial for RTS Games!)
-        // Standard mazes have zero loops. We punch random holes in the walls so ships don't get trapped in dead-ends!
         for (int x = 1; x < mazeW - 1; x++)
         {
             for (int y = 1; y < mazeH - 1; y++)
             {
-                if (miniMaze[x, y] == 1 && rng.NextFloat() < 0.15f) // 15% chance to destroy a wall piece
+                if (miniMaze[x, y] == 1 && rng.NextFloat() < 0.15f)
                 {
                     miniMaze[x, y] = 0;
                 }
             }
         }
 
-        // 4. SCALE IT UP TO THE REAL GRID
         for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height; y++) grid[x, y] = 1; // Default big grid to solid rock
+            for (int y = 0; y < height; y++) grid[x, y] = 1; 
         }
 
-        // Center the scaled maze on the big grid
         int offsetX = (width - (mazeW * blockSize)) / 2;
         int offsetY = (height - (mazeH * blockSize)) / 2;
 
@@ -636,9 +699,8 @@ partial struct LevelGen_TerrainSystem : ISystem
         {
             for (int my = 0; my < mazeH; my++)
             {
-                if (miniMaze[mx, my] == 0) // If the miniature tile is an open corridor
+                if (miniMaze[mx, my] == 0) 
                 {
-                    // Paint a chunky 4x4 square of open space on the real grid!
                     for (int bx = 0; bx < blockSize; bx++)
                     {
                         for (int by = 0; by < blockSize; by++)
@@ -648,7 +710,7 @@ partial struct LevelGen_TerrainSystem : ISystem
 
                             if (realX >= 0 && realX < width && realY >= 0 && realY < height)
                             {
-                                grid[realX, realY] = 0; // Dig out the wide corridor
+                                grid[realX, realY] = 0; 
                             }
                         }
                     }
