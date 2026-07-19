@@ -56,10 +56,10 @@ MonoBehaviour:
     EliteAnomalyChance: 0
     AnomalyPool:
       Pool: []
-  - NumLayers: 2
+  - NumLayers: 4
     NumNodes:
-      min: 2
-      max: 3
+      min: 3
+      max: 4
     NodePool:
       Pool:
       - Item: 0
@@ -134,9 +134,7 @@ MonoBehaviour:
         Weight: 1
     TerrainPool:
       Pool:
-      - Item: 3
-        Weight: 1
-      - Item: 2
+      - Item: 5
         Weight: 1
     ObjectivePool:
       Pool:
@@ -160,29 +158,25 @@ MonoBehaviour:
     EliteAnomalyChance: 0
     AnomalyPool:
       Pool: []
-  - NumLayers: 2
+  - NumLayers: 4
     NumNodes:
       min: 3
-      max: 5
+      max: 4
     NodePool:
       Pool:
       - Item: 0
         Weight: 1
     ThreatPool:
       Pool:
-      - Item: 1
-        Weight: 1
       - Item: 2
-        Weight: 4
+        Weight: 1
       - Item: 3
-        Weight: 3
+        Weight: 2
     TerrainPool:
       Pool:
+      - Item: 8
+        Weight: 1
       - Item: 1
-        Weight: 1
-      - Item: 2
-        Weight: 1
-      - Item: 4
         Weight: 1
       - Item: 3
         Weight: 1
@@ -242,8 +236,6 @@ MonoBehaviour:
         Weight: 1
     TerrainPool:
       Pool:
-      - Item: 5
-        Weight: 1
       - Item: 7
         Weight: 1
     ObjectivePool:

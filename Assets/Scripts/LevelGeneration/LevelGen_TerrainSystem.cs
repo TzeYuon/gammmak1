@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -146,7 +145,19 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xbr, Ybr, 0));
                 spawnPool.Add(new float3(Xtl, Ytl, 0));
                 spawnPool.Add(new float3(Xt, Yt, 0));
+                spawnPool.Add(new float3(Xl, Yl, 0));
+                spawnPool.Add(new float3(Xr, Yr, 0));
+                spawnPool.Add(new float3(Xb, Yb, 0));
                 spawnData.ActiveHiveCount = 2;
+                break;
+
+            case TerrainType.Shattered:
+                spawnPool.Add(new float3(Xbl, Ybl, 0));
+                spawnPool.Add(new float3(Xtr, Ytr, 0));
+                spawnPool.Add(new float3(Xtl, Ytl, 0));
+                spawnPool.Add(new float3(Xbr, Ybr, 0));
+                spawnPool.Add(new float3(Xc, Yc, 0));
+                spawnData.ActiveHiveCount = 3;
                 break;
 
             default:
@@ -268,38 +279,94 @@ partial struct LevelGen_TerrainSystem : ISystem
                             break;
 
                         case TerrainType.TwoRing:
-                            // Logic
-                            float dx = x - centerX;
-                            float dy = y - centerY;
-                            float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
-                            if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
-
-                            float innerRingRadius = 35f;
-                            float outerRingRadius = 70f;
-                            float radiusThickness = 7f;
-
-                            float distToInner = math.abs(distToCenter - innerRingRadius);
-                            float distToOuter = math.abs(distToCenter - outerRingRadius);
-
-                            // Inner Ring Logic (Entrances at 0, 120, 240)
-                            if (distToInner < radiusThickness)
                             {
-                                float modInner = angleDeg % 120f;
-                                bool isInnerGap = (modInner < 12f || modInner > 108f);
+                                // Logic
+                                float dx = x - centerX;
+                                float dy = y - centerY;
+                                float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
+                                if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
 
-                                if (isInnerGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
+                                float innerRingRadius = 35f;
+                                float outerRingRadius = 70f;
+                                float radiusThickness = 7f;
+
+                                float distToInner = math.abs(distToCenter - innerRingRadius);
+                                float distToOuter = math.abs(distToCenter - outerRingRadius);
+
+                                // Inner Ring Logic (Entrances at 0, 120, 240)
+                                if (distToInner < radiusThickness)
+                                {
+                                    float modInner = angleDeg % 120f;
+                                    bool isInnerGap = (modInner < 12f || modInner > 108f);
+
+                                    if (isInnerGap) elevation -= 1.0f;
+                                    else elevation += 2.0f;
+                                }
+
+                                // Outer Ring Logic (Entrances at 60, 180, 300)
+                                if (distToOuter < radiusThickness)
+                                {
+                                    float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
+                                    float modOuter = shiftedAngle % 120f;
+                                    bool isOuterGap = (modOuter < 9f || modOuter > 111f);
+
+                                    if (isOuterGap) elevation -= 1.0f;
+                                    else elevation += 2.0f;
+                                }
+                                break;
                             }
 
-                            // Outer Ring Logic (Entrances at 60, 180, 300)
-                            if (distToOuter < radiusThickness)
-                            {
-                                float shiftedAngle = (angleDeg + 360f - 60f) % 360f;
-                                float modOuter = shiftedAngle % 120f;
-                                bool isOuterGap = (modOuter < 9f || modOuter > 111f);
+                        case TerrainType.Shattered:
+                            float shatterScale = 0.05f;
 
-                                if (isOuterGap) elevation -= 1.0f;
-                                else elevation += 2.0f;
+                            float2 scaledPos = new float2(x + randomOffset, y + randomOffset) * shatterScale;
+
+                            int2 cellIndex = new int2((int)math.floor(scaledPos.x), (int)math.floor(scaledPos.y));
+                            float2 cellFraction = scaledPos - cellIndex;
+
+                            float minDist1 = 1.0f; // Closest point
+                            float minDist2 = 1.0f; // Second closest point
+
+                            // Check the 9 surrounding noise cells
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                for (int dy = -1; dy <= 1; dy++)
+                                {
+                                    int2 neighborOffset = new int2(dx, dy);
+
+                                    float rawNoiseX = noise.snoise(new float2(cellIndex.x + dx, cellIndex.y + dy) * 15.2f);
+                                    float rawNoiseY = noise.snoise(new float2(cellIndex.x + dx, cellIndex.y + dy) * 32.7f);
+
+                                    float seedX = (rawNoiseX * 0.5f) + 0.5f;
+                                    float seedY = (rawNoiseY * 0.5f) + 0.5f;
+                                    float2 randomSeed = new float2(seedX, seedY);
+
+                                    float2 toSeed = neighborOffset + randomSeed - cellFraction;
+                                    float dist = math.length(toSeed);
+
+                                    if (dist < minDist1)
+                                    {
+                                        minDist2 = minDist1;
+                                        minDist1 = dist;
+                                    }
+                                    else if (dist < minDist2)
+                                    {
+                                        minDist2 = dist;
+                                    }
+                                }
+                            }
+
+                            float edgeDistance = minDist2 - minDist1;
+
+                            float surfaceDetail = noise.snoise(scaledPos * 3.0f) * 0.15f;
+
+                            if (edgeDistance + surfaceDetail < 0.25f)
+                            {
+                                elevation = 0.0f; // Empty space
+                            }
+                            else
+                            {
+                                elevation = 1.0f; // Wall
                             }
                             break;
                     }
@@ -308,7 +375,10 @@ partial struct LevelGen_TerrainSystem : ISystem
             }
 
             // Cellular automata
-            for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius, spawnPoints, worldOrigin);
+            if (blueprint.TerrainType != TerrainType.Shattered)
+            {
+                for (int i = 0; i < 3; i++) grid = SmoothAsteroidCaves(grid, width, height, safezoneRadius, spawnPoints, worldOrigin);
+            }
         }
 
         int borderThickness = 1;
@@ -526,7 +596,10 @@ partial struct LevelGen_TerrainSystem : ISystem
 
         queue.Enqueue(new Vector2Int(startX, startY));
         mapFlags[startX, startY] = 1;
-        Vector2Int[] neighbors = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+        Vector2Int[] neighbors = {
+            Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right,
+            new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1), new Vector2Int(-1, -1)
+        };
 
         while (queue.Count > 0)
         {
@@ -551,34 +624,96 @@ partial struct LevelGen_TerrainSystem : ISystem
 
     private void CarveMaze(int[,] grid, int width, int height, Unity.Mathematics.Random rng)
     {
-        // Fill the entire map with walls
-        for (int x = 0; x < width; x++)
+        int blockSize = 4;
+
+        int mazeW = width / blockSize;
+        int mazeH = height / blockSize;
+
+        if (mazeW % 2 == 0) mazeW--;
+        if (mazeH % 2 == 0) mazeH--;
+
+        int[,] miniMaze = new int[mazeW, mazeH];
+        for (int x = 0; x < mazeW; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < mazeH; y++) miniMaze[x, y] = 1; // 1 = Wall
+        }
+
+        int2[] dirs = { new int2(0, 2), new int2(2, 0), new int2(0, -2), new int2(-2, 0) };
+        Stack<int2> stack = new Stack<int2>();
+
+        int2 startPos = new int2(1, 1);
+        miniMaze[startPos.x, startPos.y] = 0;
+        stack.Push(startPos);
+
+        while (stack.Count > 0)
+        {
+            int2 curr = stack.Peek();
+            NativeList<int2> valid = new NativeList<int2>(Allocator.Temp);
+
+            foreach (var d in dirs)
             {
-                grid[x, y] = 1;
+                int2 n = curr + d;
+                if (n.x > 0 && n.x < mazeW - 1 && n.y > 0 && n.y < mazeH - 1)
+                {
+                    if (miniMaze[n.x, n.y] == 1) valid.Add(d);
+                }
+            }
+
+            if (valid.Length > 0)
+            {
+                int2 chosen = valid[rng.NextInt(0, valid.Length)];
+                int2 next = curr + chosen;
+
+                miniMaze[next.x, next.y] = 0; 
+                miniMaze[curr.x + chosen.x / 2, curr.y + chosen.y / 2] = 0; 
+
+                stack.Push(next);
+            }
+            else
+            {
+                stack.Pop(); 
+            }
+            valid.Dispose();
+        }
+
+        for (int x = 1; x < mazeW - 1; x++)
+        {
+            for (int y = 1; y < mazeH - 1; y++)
+            {
+                if (miniMaze[x, y] == 1 && rng.NextFloat() < 0.15f)
+                {
+                    miniMaze[x, y] = 0;
+                }
             }
         }
 
-        int numWorms = 50;
-        int maxLifespan = 500; // Max length of tunnel
-
-        int2[] directions = { new int2(0, 1), new int2(1, 0), new int2(0, -1), new int2(-1, 0) };
-
-        for (int i = 0; i < numWorms; i++)
+        for (int x = 0; x < width; x++)
         {
-            int2 wormPos = new int2(rng.NextInt(20, width - 20), rng.NextInt(20, height - 20));
+            for (int y = 0; y < height; y++) grid[x, y] = 1; 
+        }
 
-            for (int life = 0; life < maxLifespan; life++)
+        int offsetX = (width - (mazeW * blockSize)) / 2;
+        int offsetY = (height - (mazeH * blockSize)) / 2;
+
+        for (int mx = 0; mx < mazeW; mx++)
+        {
+            for (int my = 0; my < mazeH; my++)
             {
-                grid[wormPos.x, wormPos.y] = 0;
-
-                int2 dir = directions[rng.NextInt(0, 4)];
-
-                int2 nextPos = wormPos + dir;
-                if (nextPos.x > 3 && nextPos.x < width - 3 && nextPos.y > 3 && nextPos.y < height - 3)
+                if (miniMaze[mx, my] == 0) 
                 {
-                    wormPos = nextPos;
+                    for (int bx = 0; bx < blockSize; bx++)
+                    {
+                        for (int by = 0; by < blockSize; by++)
+                        {
+                            int realX = offsetX + (mx * blockSize) + bx;
+                            int realY = offsetY + (my * blockSize) + by;
+
+                            if (realX >= 0 && realX < width && realY >= 0 && realY < height)
+                            {
+                                grid[realX, realY] = 0; 
+                            }
+                        }
+                    }
                 }
             }
         }

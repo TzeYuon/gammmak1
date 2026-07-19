@@ -15,7 +15,7 @@ public struct BurstPathfinder
         NativeArray<int> gCostMap = new NativeArray<int>(gridWidth * gridHeight, Allocator.Temp);
         NativeArray<int2> parentMap = new NativeArray<int2>(gridWidth * gridHeight, Allocator.Temp);
 
-        for (int i = 0; i < gCostMap.Length; i++) gCostMap[i] = 99999;
+        for (int i = 0; i < gCostMap.Length; i++) gCostMap[i] = 999999;
 
         PathNode startNode = new PathNode { Position = startGrid, GCost = 0, HCost = (int) math.distance(startGrid, endGrid) };
         openList.Enqueue(startNode);
@@ -30,7 +30,7 @@ public struct BurstPathfinder
         int loops = 0;
         bool found = false;
 
-        while (openList.Count > 0 && loops < 10000)
+        while (openList.Count > 0 && loops < 100000)
         {
             loops++;
             PathNode curr = openList.Dequeue();
