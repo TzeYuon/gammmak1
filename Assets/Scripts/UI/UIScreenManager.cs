@@ -22,6 +22,7 @@ public class UIScreenManager : MonoBehaviour
     public IUIScreen MenuScreen { get; private set; }
     public IUIScreen SettingsScreen { get; private set; }
     public IUIScreen PauseScreen { get; private set; }
+    public IUIScreen HowToPlayScreen { get; private set; }
     public IUIScreen GameplayScreen { get; private set; }
     public IUIScreen FleetCommandHubScreen { get; private set; }
 
@@ -38,6 +39,7 @@ public class UIScreenManager : MonoBehaviour
         MenuScreen = new MenuScreen(this, Root.Q<VisualElement>("MenuScreen"), sceneManager);
         SettingsScreen = new SettingsScreen(this, Root.Q<VisualElement>("SettingsScreen"));
         PauseScreen = new PauseScreen(this, Root.Q<VisualElement>("PauseScreen"));
+        HowToPlayScreen = new HowToPlayScreen(this, Root.Q<VisualElement>("HowToPlayScreen"));
         GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"), playerSaveData);
         FleetCommandHubScreen = new FleetCommandHubScreen(this, Root.Q<VisualElement>("FleetCommandHubScreen"), playerSaveData, hangarShipPreviewManager);
 
@@ -48,6 +50,7 @@ public class UIScreenManager : MonoBehaviour
             MenuScreen,
             SettingsScreen,
             PauseScreen,
+            HowToPlayScreen,
             GameplayScreen,
             FleetCommandHubScreen,
         };
@@ -137,14 +140,19 @@ public class UIScreenManager : MonoBehaviour
                 else ShowRootScreen(GameplayScreen);
                 break;
             case GameState.MainMenu:
-                ShowRootScreen(MenuScreen);
+                if (prevState == GameState.HowToPlay) BackToPrevScreen();
+                else ShowRootScreen(MenuScreen);
                 break;
             case GameState.FleetCommandHub:
                 if (prevState == GameState.Paused) BackToPrevScreen();
                 else ShowRootScreen(FleetCommandHubScreen);
                 break;
             case GameState.Paused:
-                Show(PauseScreen, true);
+                if (prevState == GameState.HowToPlay) BackToPrevScreen();
+                else Show(PauseScreen, true);
+                break;
+            case GameState.HowToPlay:
+                Show(HowToPlayScreen, true);
                 break;
         }
     }

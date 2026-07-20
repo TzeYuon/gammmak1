@@ -9,6 +9,7 @@ public enum GameState : byte
     Generating, // Generating next level
     Gameplay, // Main gameplay screen (RTS)
     Paused,
+    HowToPlay,
     Victory,
     Defeat
 }
@@ -25,6 +26,26 @@ public partial class GameStateSystem : SystemBase
 
     public static event Action<GameState, GameState> OnStateChanged;
     private GameState previousState = GameState.MainMenu;
+
+    public static int GetStateDepth(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.MainMenu:
+            case GameState.FleetCommandHub:
+            case GameState.Gameplay:
+                return 0;
+
+            case GameState.Paused:
+                return 1;
+
+            case GameState.HowToPlay:
+                return 2;
+
+            default:
+                return 0;
+        }
+    }
 
     protected override void OnCreate()
     {
@@ -90,6 +111,7 @@ public partial class GameStateSystem : SystemBase
                 break;
 
             case GameState.Paused:
+            case GameState.HowToPlay:
                 UnityEngine.Time.timeScale = 0f;
                 break;
 

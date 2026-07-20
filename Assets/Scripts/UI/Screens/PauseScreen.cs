@@ -13,6 +13,7 @@ public class PauseScreen : UIScreen
     public PauseScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
         Root.Q<Button>("ResumeButton").clicked += OnResumeClicked;
+        Root.Q<Button>("HowToPlayButton").clicked += OnHowToPlayClicked;
         Root.Q<Button>("ExitButton").clicked += OnExitClicked;
 
         var world = World.DefaultGameObjectInjectionWorld;
@@ -43,7 +44,7 @@ public class PauseScreen : UIScreen
 
     public override void DoUpdate()
     {
-        // exit if not paused
+        // exit if not in how to play
         if (gameStateQuery.IsEmptyIgnoreFilter) return;
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingleton<GameStateSingleton>();
@@ -73,14 +74,28 @@ public class PauseScreen : UIScreen
     {
         if (gameState == GameState.Paused)
         {
-            // store prev state to return to after exiting pause
-            this.prevState = prevState;
+            int prevDepth = GameStateSystem.GetStateDepth(prevState);
+            int newDepth = GameStateSystem.GetStateDepth(gameState);
+
+            // only store prev state if it is before current depth
+            if (prevDepth < newDepth)
+            {
+                this.prevState = prevState;
+            }
         }
     }
 
     void OnResumeClicked()
     {
         ExitPauseMenu();
+    }
+
+    void OnHowToPlayClicked()
+    {
+        if (gameStateQuery.IsEmptyIgnoreFilter) return;
+        gameStateQuery.CompleteDependency();
+        var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
+        gameState.ValueRW.CurrentState = GameState.HowToPlay;
     }
 
     void OnExitClicked()
