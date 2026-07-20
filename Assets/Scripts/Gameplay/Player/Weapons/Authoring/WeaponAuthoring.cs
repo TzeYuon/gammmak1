@@ -16,6 +16,8 @@ class WeaponAuthoring : MonoBehaviour
     // vfx
     public Color VFXColour;
 
+    // sfx
+    public SFXType SoundEffect;
     class Baker : Baker<WeaponAuthoring>
     {
         public override void Bake(WeaponAuthoring authoring)
@@ -36,7 +38,8 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new HitscanWeapon()
                 {
                     WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
-                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3)
+                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3),
+                    AudioType = authoring.SoundEffect
                 });
             }
             else

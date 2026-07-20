@@ -460,6 +460,27 @@ partial struct LevelGen_TerrainSystem : ISystem
         flowComp.ValueRW.GridWidth = width;
         flowComp.ValueRW.GridHeight = height;
         flowComp.ValueRW.CellSize = 1;
+
+
+        if (AudioManager.Instance != null && AudioManager.Instance.Database != null)
+        {
+            if (blueprint.TerrainType == TerrainType.Cavern)
+            {
+                AudioManager.Instance.PlayBGM(AudioManager.Instance.Database.BossFightMusic1);
+            }
+            else if (blueprint.TerrainType == TerrainType.Maze)
+            {
+                AudioManager.Instance.PlayBGM(AudioManager.Instance.Database.BossFightMusic2);
+            }
+            else
+            {
+                AudioManager.Instance.PlayBGM(AudioManager.Instance.Database.LevelMusic);
+            }
+        }
+        else
+        {
+            Debug.LogError("AudioManager or AudioDB is missing! Cannot play music.");
+        }
     }
 
     // HELPER FUNCTIONS

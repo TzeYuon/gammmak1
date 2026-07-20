@@ -15,6 +15,7 @@ public partial struct WeaponFiringSystem : ISystem
         state.RequireForUpdate<FineEnemyHeatmapComponent>();
         state.RequireForUpdate<WeaponState>();
         state.RequireForUpdate<GlobalVFXQueue>();
+        state.RequireForUpdate<GlobalAudioQueue>();
     }
 
     [BurstCompile]
@@ -30,6 +31,7 @@ public partial struct WeaponFiringSystem : ISystem
         NativeParallelMultiHashMap<int, Entity> map = fineEntityMap.Map;
 
         var vfxWriter = SystemAPI.GetSingletonRW<GlobalVFXQueue>().ValueRW.Queue.AsParallelWriter();
+        var audioWriter = SystemAPI.GetSingleton<GlobalAudioQueue>().Queue.AsParallelWriter();
 
         ComponentLookup<TurretComponent> turretLookup = SystemAPI.GetComponentLookup<TurretComponent>(true);
 
@@ -40,6 +42,7 @@ public partial struct WeaponFiringSystem : ISystem
             DeltaTime = deltaTime,
             ECB = ecb,
             VFXWriter = vfxWriter,
+            AudioWriter = audioWriter,
             FineHeatmap = map,
             WorldOrigin = fineEntityMap.WorldOrigin,
             CellSize = fineEntityMap.CellSize,
@@ -55,6 +58,7 @@ public partial struct WeaponFiringSystem : ISystem
             TurretLookup = turretLookup,
             RandomSeed = randomSeed,
             VFXWriter = vfxWriter,
+            AudioWriter = audioWriter,
         }.ScheduleParallel(hitscan);
 
         state.Dependency = projectile;
@@ -76,6 +80,7 @@ public partial struct HitscanFiringJob : IJobEntity
     public int GridWidth;
 
     public NativeQueue<VFXPayload>.ParallelWriter VFXWriter;
+    public NativeQueue<AudioEvent>.ParallelWriter AudioWriter;
 
     [ReadOnly] public ComponentLookup<TurretComponent> TurretLookup;
 
@@ -127,6 +132,8 @@ public partial struct HitscanFiringJob : IJobEntity
             Colour = weapon.VFXColour,
             CustomData = new float4(angleRadians - (math.PI / 2f), 0, 0, 0)
         });
+
+        AudioWriter.Enqueue(new AudioEvent { Type = SFXType.HeavyLaser }); // TEMPORARY: All weapons have the same sfx
     }
 }
 
@@ -142,6 +149,7 @@ public partial struct ProjectileFiringJob : IJobEntity
     public uint RandomSeed;
 
     public NativeQueue<VFXPayload>.ParallelWriter VFXWriter;
+    public NativeQueue<AudioEvent>.ParallelWriter AudioWriter;
 
     private void Execute(
         Entity entity,
@@ -245,6 +253,8 @@ public partial struct ProjectileFiringJob : IJobEntity
                 Colour = projectileWeapon.VFXColour,
                 CustomData = new float4(finalAngle - (math.PI / 2f), 0, 0, 0)
             });
+
+            AudioWriter.Enqueue(new AudioEvent { Type = SFXType.Cannon });
         }
     }
 }
