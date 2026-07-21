@@ -85,13 +85,21 @@ public class GameplayScreen : UIScreen
 
             victoryContinueButton.clicked += () =>
             {
-                if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(AudioManager.Instance.Database.MainMenuMusic, 1.0f);
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.StopBGM();
+                    AudioManager.Instance.PlayBGM(AudioManager.Instance.Database.MainMenuMusic);
+                }
                 ChangeGameState(GameState.FleetCommandHub);
             };
 
             defeatContinueButton.clicked += () =>
             {
-                if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX(AudioManager.Instance.Database.MainMenuMusic, 1.0f);
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.StopBGM();
+                    AudioManager.Instance.PlayBGM(AudioManager.Instance.Database.MainMenuMusic);
+                }
                 ChangeGameState(GameState.MainMenu);
             };
 

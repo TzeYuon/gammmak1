@@ -38,7 +38,10 @@ public class AudioManager : MonoBehaviour
 
     public void PlayBGM(AudioClip clip)
     {
-        if (bgmSource.clip == clip) return;
+        if (clip == null) return;
+        if (bgmSource.clip == clip && bgmSource.isPlaying) return;
+
+        StopBGM();
         bgmSource.clip = clip;
         bgmSource.loop = true;
         bgmSource.Play();
@@ -46,6 +49,9 @@ public class AudioManager : MonoBehaviour
 
     public void StopBGM()
     {
-        bgmSource.Stop();
+        if (bgmSource.isPlaying)
+        {
+            bgmSource.Stop();
+        }
     }
 }

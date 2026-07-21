@@ -133,7 +133,7 @@ public partial struct HitscanFiringJob : IJobEntity
             CustomData = new float4(angleRadians - (math.PI / 2f), 0, 0, 0)
         });
 
-        AudioWriter.Enqueue(new AudioEvent { Type = SFXType.HeavyLaser }); // TEMPORARY: All weapons have the same sfx
+        AudioWriter.Enqueue(new AudioEvent { Type = weapon.AudioType });
     }
 }
 
@@ -254,7 +254,7 @@ public partial struct ProjectileFiringJob : IJobEntity
                 CustomData = new float4(finalAngle - (math.PI / 2f), 0, 0, 0)
             });
 
-            AudioWriter.Enqueue(new AudioEvent { Type = SFXType.Cannon });
+            AudioWriter.Enqueue(new AudioEvent { Type = projectileWeapon.AudioType });
         }
     }
 }

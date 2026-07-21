@@ -2,18 +2,28 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-public enum SFXType
+public enum AudioType
 {
     Artillery,
     Cannon,
-    Railgun,
+    GungnirLance,
     HeavyLaser,
-    Explosion
+    PigeonMissiles,
+    PointDefenseLaser,
+    Railgun,
+    SquallLauncher,
+    StormCannon,
+    SuperHeavyArtillery,
+    TachyonLaser,
+    TempestLauncher,
+    TrebuchetMissiles,
+    Explosion,
+    ButtonClick
 }
 
 public struct AudioEvent
 {
-    public SFXType Type;
+    public AudioType Type;
 }
 
 public struct GlobalAudioQueue : IComponentData
@@ -24,17 +34,14 @@ public struct GlobalAudioQueue : IComponentData
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 public partial class AudioPlaybackSystem : SystemBase
 {
-    // Use a dictionary to track the time each sound was last played
-    private Dictionary<SFXType, float> _lastPlayedTimes;
-
-    private float _rapidFireCooldown = 0.05f;
+    private Dictionary<AudioType, float> _lastPlayedTimes;
 
     protected override void OnCreate()
     {
         var queue = new NativeQueue<AudioEvent>(Allocator.Persistent);
         EntityManager.CreateSingleton(new GlobalAudioQueue { Queue = queue });
 
-        _lastPlayedTimes = new Dictionary<SFXType, float>();
+        _lastPlayedTimes = new Dictionary<AudioType, float>();
     }
 
     protected override void OnDestroy()
@@ -54,44 +61,96 @@ public partial class AudioPlaybackSystem : SystemBase
 
         while (audioSingleton.Queue.TryDequeue(out AudioEvent audioEvent))
         {
+            AudioClip clipToPlay = null;
+            float volume = 0.2f;
+            float cooldownForThisWeapon = 0.05f;
+
+            switch (audioEvent.Type)
+            {
+                case AudioType.Artillery:
+                    clipToPlay = AudioManager.Instance.Database.Artillery;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.Cannon:
+                    clipToPlay = AudioManager.Instance.Database.Cannon;
+                    break;
+
+                case AudioType.GungnirLance:
+                    clipToPlay = AudioManager.Instance.Database.GungnirLance;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.HeavyLaser:
+                    clipToPlay = AudioManager.Instance.Database.HeavyLaser;
+                    cooldownForThisWeapon = 0.1f;
+                    break;
+
+                case AudioType.PigeonMissiles:
+                    clipToPlay = AudioManager.Instance.Database.PigeonMissiles;
+                    cooldownForThisWeapon = 0.1f;
+                    break;
+
+                case AudioType.PointDefenseLaser:
+                    clipToPlay = AudioManager.Instance.Database.PointDefenseLaser;
+                    cooldownForThisWeapon = 0.1f;
+                    break;
+
+                case AudioType.Railgun:
+                    clipToPlay = AudioManager.Instance.Database.Railgun;
+                    break;
+
+                case AudioType.SquallLauncher:
+                    clipToPlay = AudioManager.Instance.Database.SquallLauncher;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.StormCannon:
+                    clipToPlay = AudioManager.Instance.Database.StormCannon;
+                    break;
+
+                case AudioType.SuperHeavyArtillery:
+                    clipToPlay = AudioManager.Instance.Database.SuperHeavyArtillery;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.TachyonLaser:
+                    clipToPlay = AudioManager.Instance.Database.TachyonLaser;
+                    cooldownForThisWeapon = 0.1f;
+                    break;
+
+                case AudioType.TempestLauncher:
+                    clipToPlay = AudioManager.Instance.Database.TempestLauncher;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.TrebuchetMissiles:
+                    clipToPlay = AudioManager.Instance.Database.TrebuchetMissiles;
+                    cooldownForThisWeapon = 0.2f;
+                    break;
+
+                case AudioType.Explosion:
+                    clipToPlay = AudioManager.Instance.Database.Explosion;
+                    cooldownForThisWeapon = 0.1f;
+                    break;
+
+                case AudioType.ButtonClick:
+                    clipToPlay = AudioManager.Instance.Database.ButtonClick;
+                    volume = 0.8f;
+                    cooldownForThisWeapon = 0f;
+                    break;
+            }
+
             if (_lastPlayedTimes.TryGetValue(audioEvent.Type, out float lastTime))
             {
-                if (currentTime - lastTime < _rapidFireCooldown)
+                if (currentTime - lastTime < cooldownForThisWeapon)
                 {
                     continue;
                 }
             }
 
-            AudioClip clipToPlay = null;
-            float volume = 1.0f;
-
-            switch (audioEvent.Type)
-            {
-                case SFXType.Railgun:
-                    clipToPlay = AudioManager.Instance.Database.Railgun;
-                    break;
-
-                case SFXType.Cannon:
-                    clipToPlay = AudioManager.Instance.Database.Cannon;
-                    break;
-
-                case SFXType.HeavyLaser:
-                    clipToPlay = AudioManager.Instance.Database.HeavyLaser;
-                    volume = 0.5f;
-                    break;
-
-                case SFXType.Artillery:
-                    clipToPlay = AudioManager.Instance.Database.Artillery;
-                    break;
-
-                case SFXType.Explosion:
-                    clipToPlay = AudioManager.Instance.Database.Explosion;
-                    break;
-            }
-
             if (clipToPlay != null)
             {
-                // Pitch variance to make the sound less repetitive
                 AudioManager.Instance.sfxSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 AudioManager.Instance.PlaySFX(clipToPlay, volume);
 

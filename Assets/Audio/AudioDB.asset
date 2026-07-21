@@ -19,9 +19,9 @@ MonoBehaviour:
   Artillery: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
   Cannon: {fileID: 8300000, guid: 080d9832b15daaa4da4223f6e292b0ca, type: 3}
   GungnirLance: {fileID: 8300000, guid: cd90dc08d10c8cb4c801c83078374efa, type: 3}
-  HeavyLaser: {fileID: 8300000, guid: bc0e4f9ec6696aa4e804ed7812ed46b0, type: 3}
+  HeavyLaser: {fileID: 8300000, guid: de04b5dd492817342a35aeb91cc975ab, type: 3}
   PigeonMissiles: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
-  PointDefenseLaser: {fileID: 8300000, guid: bc0e4f9ec6696aa4e804ed7812ed46b0, type: 3}
+  PointDefenseLaser: {fileID: 8300000, guid: de04b5dd492817342a35aeb91cc975ab, type: 3}
   Railgun: {fileID: 8300000, guid: 5553f20e502ca6548a5771c0a29a3d48, type: 3}
   SquallLauncher: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
   StormCannon: {fileID: 8300000, guid: 080d9832b15daaa4da4223f6e292b0ca, type: 3}

@@ -51,7 +51,7 @@ public struct HitscanWeapon : IComponentData
 {
     public float2 WeaponStartOffset;
     public float4 VFXColour;
-    public SFXType AudioType;
+    public AudioType AudioType;
 }
 
 public struct ProjectileWeapon : IComponentData
@@ -59,7 +59,7 @@ public struct ProjectileWeapon : IComponentData
     public Entity ProjectilePrefab;
     public float2 WeaponStartOffset;
     public float4 VFXColour;
-    public SFXType AudioType;
+    public AudioType AudioType;
 }
 
 public struct WeaponState : IComponentData
