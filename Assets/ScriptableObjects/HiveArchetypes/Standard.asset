@@ -18,4 +18,4 @@ MonoBehaviour:
     Interval: 2
   SurgeType: 0
   SurgeCountIgnoreScaling: 0
-  SurgeCount: 170
+  SurgeCount: 100

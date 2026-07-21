@@ -19,7 +19,7 @@ MonoBehaviour:
   ShipMesh: {fileID: 8733429697405204941, guid: 1fe7586449ae0b241b120a47f3779934, type: 3}
   ShipSystems:
   - Definition: {fileID: 11400000, guid: b40c306963fd55a478a2adaba97aeb43, type: 2}
-    UpgradeLevel: 1
+    UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 0257084037795464585804f9c4ee3596, type: 2}
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 162209d4b2dcd914888d9aed1374c219, type: 2}
@@ -48,7 +48,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 0}
   AvoidanceRadius: 1.45
   AvoidanceOffset: {x: 0, y: 0.317}
-  BaseCost: 20
+  BaseCost: 10
   BaseMaxHealth: 30
   BaseDamageReduction: 0
   BaseSpeed: 4

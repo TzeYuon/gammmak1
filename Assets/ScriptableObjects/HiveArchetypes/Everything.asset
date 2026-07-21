@@ -26,5 +26,5 @@ MonoBehaviour:
     SpawnCount: 30
     Interval: 30
   SurgeType: 2
-  SurgeCountIgnoreScaling: 0
+  SurgeCountIgnoreScaling: 1
   SurgeCount: 1

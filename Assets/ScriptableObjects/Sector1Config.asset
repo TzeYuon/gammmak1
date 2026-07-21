@@ -44,8 +44,6 @@ MonoBehaviour:
       Pool:
       - Item: 2
         Weight: 1
-      - Item: 3
-        Weight: 1
     BaseUpgradeCoreReward: 200
     EliteRewardPool:
       Pool:
@@ -95,7 +93,7 @@ MonoBehaviour:
     StandardRewardPool:
       Pool:
       - Item: 1
-        Weight: 5
+        Weight: 4
       - Item: 2
         Weight: 1
       - Item: 3
@@ -104,7 +102,7 @@ MonoBehaviour:
     EliteRewardPool:
       Pool:
       - Item: 1
-        Weight: 5
+        Weight: 4
       - Item: 2
         Weight: 1
       - Item: 3
@@ -197,7 +195,7 @@ MonoBehaviour:
     StandardRewardPool:
       Pool:
       - Item: 1
-        Weight: 5
+        Weight: 4
       - Item: 2
         Weight: 1
       - Item: 3
@@ -206,7 +204,7 @@ MonoBehaviour:
     EliteRewardPool:
       Pool:
       - Item: 1
-        Weight: 5
+        Weight: 4
       - Item: 2
         Weight: 1
       - Item: 3

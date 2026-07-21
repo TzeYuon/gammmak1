@@ -33,10 +33,10 @@ MonoBehaviour:
   - Position: {x: 0, y: 0}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 180
-    EquippedWeapon: {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   AvoidanceRadius: 0.6
   AvoidanceOffset: {x: 0, y: 0.132}
-  BaseCost: 5
+  BaseCost: 2
   BaseMaxHealth: 10
   BaseDamageReduction: 0
   BaseSpeed: 7

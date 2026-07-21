@@ -73,7 +73,7 @@ public partial struct SwarmDeathEventSystem : ISystem
                 ecb.SetComponent(loot, new BiomassLoot
                 {
                     Value = 1.0f,
-                    TimeRemaining = 5.0f
+                    TimeRemaining = 20.0f
                 });
             }
         }

@@ -52,7 +52,7 @@ MonoBehaviour:
     EquippedWeapon: {fileID: 0}
   AvoidanceRadius: 1.45
   AvoidanceOffset: {x: 0, y: -0.194}
-  BaseCost: 35
+  BaseCost: 17
   BaseMaxHealth: 70
   BaseDamageReduction: 0.2
   BaseSpeed: 4

@@ -16,24 +16,48 @@ MonoBehaviour:
   ShipClass: 5
   ShipID: 0
   ShipPrefab: {fileID: 6753536424006035904, guid: 39a439dcd32c490488da8ae64d0c46c1, type: 3}
+  ShipMesh: {fileID: 0}
   ShipSystems: []
   BaseWeaponCapacity: 0
   Mounts:
   - Position: {x: 3.22, y: 0}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - Position: {x: 1.61, y: 2.7886}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: -0.258819, w: 0.9659259}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - Position: {x: -1.61, y: 2.7886}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: 0.2588191, w: 0.9659258}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - Position: {x: -3.22, y: 0}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - Position: {x: -1.61, y: -2.7886}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: 0.9659258, w: 0.2588191}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - Position: {x: 1.61, y: -2.7886}
-    EquippedWeapon: {fileID: 11400000, guid: 049bd6b8a4f5f9a4fba47f28c04ca54a, type: 2}
+    OriginalRotation: {x: 0, y: 0, z: -0.9659258, w: 0.2588191}
+    MaxAngle: 100
+    EquippedWeapon: {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
+  AvoidanceRadius: 0
+  AvoidanceOffset: {x: 0, y: 0}
   BaseCost: 0
   BaseMaxHealth: 500
+  BaseDamageReduction: 0
   BaseSpeed: 0
-  BaseAcceleration: 0
   BaseTurnSpeed: 0
+  BaseRevealFogRadius: 25
   BaseCollectionRadius: 20
+  HasShield: 0
+  ShieldOffset: {x: 0, y: 0}
+  ShieldRadius: 0
+  ShieldRechargeDelay: 1
+  BaseShieldMaxCapacity: 0
+  BaseShieldRegenPerSecond: 0
+  ShieldDamage: 0
+  ShieldEfficiencyBonus: 0

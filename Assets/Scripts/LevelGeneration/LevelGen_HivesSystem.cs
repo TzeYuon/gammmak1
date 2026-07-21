@@ -61,7 +61,7 @@ partial struct LevelGen_HivesSystem : ISystem
         float baseMaxSpawnRateMult = 2f;
         float baseMaxSpawnCountMult = 2.5f;
         float baseMaxEnemyHealthMult = 1.5f;
-        float baseSurgeInterval = 30; // TEMPORARY: hardcode to 30s between surges
+        float baseSurgeInterval = 40; // TEMPORARY: hardcode to 30s between surges
 
         // set config
         ref var config = ref difficultyConfig.ValueRW;
@@ -82,7 +82,7 @@ partial struct LevelGen_HivesSystem : ISystem
         // reset surge state
         ref var sState = ref surgeState.ValueRW;
         sState.TriggerSurgeThisFrame = false;
-        sState.SurgeTimer = baseSurgeInterval; 
+        sState.SurgeTimer = baseSurgeInterval * 2; // give more time before first surge
         sState.CurrentInterval = baseSurgeInterval;
 
         // create enemy blueprint singleton

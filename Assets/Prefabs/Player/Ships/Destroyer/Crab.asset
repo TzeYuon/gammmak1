@@ -19,7 +19,7 @@ MonoBehaviour:
   ShipMesh: {fileID: 813736933392761622, guid: 3dc863576112f5841a2183bed54c2c35, type: 3}
   ShipSystems:
   - Definition: {fileID: 11400000, guid: 2748c375f8a435545a0c9d3d62face3a, type: 2}
-    UpgradeLevel: 1
+    UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: 3388b2c6bb744214c85a40882e14288e, type: 2}
     UpgradeLevel: 0
   - Definition: {fileID: 11400000, guid: af6f772acee652b4ea5351ad0ea60681, type: 2}
@@ -35,18 +35,18 @@ MonoBehaviour:
   - Position: {x: -0.541, y: 0.087}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 45
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
   - Position: {x: 0.541, y: 0.087}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 45
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
   - Position: {x: 0, y: -0.214}
     OriginalRotation: {x: 0, y: 0, z: 1, w: 0}
     MaxAngle: 90
-    EquippedWeapon: {fileID: 0}
+    EquippedWeapon: {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
   AvoidanceRadius: 1.11
   AvoidanceOffset: {x: 0, y: 0.181}
-  BaseCost: 9
+  BaseCost: 4
   BaseMaxHealth: 17
   BaseDamageReduction: 0
   BaseSpeed: 3

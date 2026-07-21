@@ -59,6 +59,7 @@ public partial struct ShipMovementSystem : ISystem
 }
 
 [BurstCompile]
+[WithDisabled(typeof(DeadTag))]
 public partial struct CalculateShipPathsJob : IJobEntity
 {
     [ReadOnly] public NativeArray<int> Grid;
@@ -112,6 +113,7 @@ public struct ShipAvoidanceData
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
 [WithAbsent(typeof(MothershipTag))]
+[WithDisabled(typeof(DeadTag))]
 [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct GatherShipDataJob : IJobEntity
 {
@@ -142,6 +144,7 @@ public partial struct GatherShipDataJob : IJobEntity
 }
 
 [BurstCompile]
+[WithDisabled(typeof(DeadTag))]
 [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
 public partial struct MoveShipJob : IJobEntity
 {
