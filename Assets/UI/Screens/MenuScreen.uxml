@@ -4,6 +4,7 @@
     <engine:VisualElement name="Container" style="flex-grow: 1; flex-direction: column-reverse; align-self: center; justify-content: flex-start; margin-bottom: 40px; align-items: center;">
         <engine:Button text="EXIT" name="ExitButton" class="button text" style="border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px;"/>
         <engine:Button text="SETTINGS" name="SettingsButton" class="button text" style="width: auto; height: auto; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px; margin-top: 20px; margin-bottom: 20px; display: none;"/>
+        <engine:Button text="HOW TO PLAY" name="HowToPlayButton" class="button text" style="width: auto; height: auto; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px;"/>
         <engine:Button text="START" name="StartButton" class="button text" style="width: auto; height: auto; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; font-size: 40px;"/>
     </engine:VisualElement>
 </engine:UXML>

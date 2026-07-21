@@ -1,0 +1,98 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <engine:VisualElement name="Container" style="flex-grow: 1; background-color: rgb(8, 12, 26); width: 100%; height: 100%;">
+        <engine:Label text="HOW TO PLAY" name="Header" class="text" style="border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); border-bottom-width: 3px; font-size: 40px; -unity-text-align: upper-center; padding-top: 0; padding-right: 0; padding-bottom: 15px; padding-left: 0; margin-top: 15px; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
+        <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+            <engine:VisualElement name="LeftContainer" style="flex-grow: 0; width: 250px; padding-top: 30px; padding-left: 0; padding-right: 0; border-right-width: 3px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); padding-bottom: 30px;">
+                <engine:VisualElement name="NavigationBar" style="flex-grow: 0; padding-right: 15px; padding-left: 15px; padding-top: 0;">
+                    <engine:Button text="BACK" name="BackBtn" class="defeat-continue-button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 25px; margin-left: 0; font-size: 20px; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0;"/>
+                    <engine:Button text="BASIC CONTROLS" name="BasicControlsBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px;"/>
+                    <engine:Button text="ECONOMY" name="EconomyBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px;"/>
+                    <engine:Button text="THE SWARM" name="TheSwarmBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px;"/>
+                    <engine:Button text="HANGAR" name="HangarBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px;"/>
+                    <engine:Button text="STARMAP" name="StarmapBtn" class="text button" style="background-color: rgb(26, 26, 26); margin-top: 0; margin-right: 0; margin-bottom: 15px; margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 4px; padding-left: 0; font-size: 20px;"/>
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="RightContainer" style="flex-grow: 1;">
+                <engine:VisualElement name="BasicControlsContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row; display: flex;">
+                    <engine:VisualElement style="flex-grow: 0; width: 50%;">
+                        <engine:VisualElement name="CameraControls" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="THE CAMERA" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="Move the camera using&#10;1. &lt;color=#FFFF00&gt;WASD&lt;/color&gt;&#10;2. OR Move the &lt;color=#FFFF00&gt;CURSOR&lt;/color&gt; to the edge of the screen&#10;3. OR Hold &lt;color=#FFFF00&gt;MIDDLE MOUSE&lt;/color&gt; and drag&#10;Zoom in and out with the &lt;color=#FFFF00&gt;SCROLLWHEEL&lt;/color&gt;" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="SelectUnits" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="SELECTING YOUR UNITS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- Move the camera using &lt;color=#FFFF00&gt;LEFT CLICKING&lt;/color&gt; and dragging across them&#10;- Selected Units are marked with a green circle around them&#10;- &lt;color=#FFFF00&gt;HOLD SHIFT&lt;/color&gt; while dragging to add to the current selection instead of replacing it" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="ControlUnits" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="CONTROLING YOUR UNITS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- &lt;color=#FFFF00&gt;RIGHT CLICK&lt;/color&gt; to create a move command for currently selected ships&#10;- &lt;color=#FFFF00&gt;HOLDING RIGHT CLICK&lt;/color&gt; and dragging in a direction commands ships to face that direction when reaching their destination&#10;- Ships &lt;color=#FFFF00&gt;AUTOMATICALLY NAVIGATE&lt;/color&gt; to the destination&#10;- Ship weapons &lt;color=#FFFF00&gt;AUTOMATICALLY FIRE&lt;/color&gt; on enemies in range provided they are visible" enable-rich-text="true" name="Label" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;"/>
+                </engine:VisualElement>
+                <engine:VisualElement name="EconomyContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row; display: flex;">
+                    <engine:VisualElement style="flex-grow: 0; width: 50%;">
+                        <engine:VisualElement name="SpawningUnits" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="SPAWNING NEW UNITS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- Click on the buttons on the &lt;color=#FFFF00&gt;BOTTOM LEFT&lt;/color&gt; of the screen to spawn in new units&#10;- Spawning in units costs &lt;color=#FFFF00&gt;BIOMASS&lt;/color&gt;" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="CollectBiomass" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="COLLECTING BIOMASS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- There is a chance for biomass to be dropped from &lt;color=#FFFF00&gt;KILLING ENEMIES&lt;/color&gt;&#10;- Biomass is collected by &lt;color=#FFFF00&gt;UNITS WITHIN RANGE&lt;/color&gt;" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="AdditionalDetails" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="ADDITIONAL DETAILS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- A unit&apos;s &lt;color=#FFFF00&gt;COLLECTION RADIUS&lt;/color&gt; determines how far away they can be to collect biomass&#10;- Generally, smaller units have larger collection radii" enable-rich-text="true" name="Label" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;"/>
+                </engine:VisualElement>
+                <engine:VisualElement name="TheSwarmContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row; display: flex;">
+                    <engine:VisualElement style="flex-grow: 0; width: 50%;">
+                        <engine:VisualElement name="Enemy" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="THE ENEMY" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- Enemies move in large numbers towards nearby player units&#10;- They deal damage &lt;color=#FFFF00&gt;UPON CONTACT&lt;/color&gt; with player units" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="Hives" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="HIVES" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- Hives &lt;color=#FFFF00&gt;SPAWN ENEMIES&lt;/color&gt; constantly&#10;- &lt;color=#FFFF00&gt;DESTROY ALL HIVES TO WIN&lt;/color&gt;" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;"/>
+                </engine:VisualElement>
+                <engine:VisualElement name="HangarContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row; display: flex;">
+                    <engine:VisualElement style="flex-grow: 0; width: 50%;">
+                        <engine:VisualElement name="CustomisingUnits" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="CUSTOMISING UNITS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- &lt;color=#FFFF00&gt;CLICK&lt;/color&gt; on the ship to select it for customisation&#10;- &lt;color=#FFFF00&gt;EQUIP WEAPONS&lt;/color&gt; by clicking on weapon mounts and selecting the weapon from the weapons list&#10;- Ships can hold one weapon in each weapon mount but have limited &lt;color=#FFFF00&gt;WEAPON CAPACITY&lt;/color&gt;&#10;- Each weapon contributes to the total &lt;color=#FFFF00&gt;WEAPON CAPACITY&lt;/color&gt; on the ship, represented by the orange icons" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="Upgrading" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="UPGRADING" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- &lt;color=#FFFF00&gt;UPGRADE CORES&lt;/color&gt; are used to buy upgrades&#10;- &lt;color=#FFFF00&gt;SHIP SYSTEMS&lt;/color&gt; can be upgraded to give stats associated to that system&#10;- &lt;color=#FFFF00&gt;WEAPONS&lt;/color&gt; can be upgraded to improve stats" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="AddToRoster" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="ADDING TO ROSTER" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- Up to &lt;color=#FFFF00&gt;4&lt;/color&gt; ships can be added to the roster&#10;- Only ships in the &lt;color=#FFFF00&gt;ACTIVE ROSTER&lt;/color&gt; can be used in the level" enable-rich-text="true" name="Label" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;"/>
+                </engine:VisualElement>
+                <engine:VisualElement name="StarmapContainer" style="flex-grow: 1; position: absolute; width: 100%; height: 100%; flex-direction: row; display: flex;">
+                    <engine:VisualElement style="flex-grow: 0; width: 50%;">
+                        <engine:VisualElement name="ChoosingLevel" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="CHOOSING A LEVEL" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- &lt;color=#FFFF00&gt;CLICK&lt;/color&gt; on a reachable node to deploy to for the next level" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                        <engine:VisualElement name="LevelDetails" style="flex-grow: 0; padding-bottom: 20px; padding-right: 0; padding-top: 20px; padding-left: 20px; margin-top: 0;">
+                            <engine:Label text="LEVEL DETAILS" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 25px; white-space: normal;"/>
+                            <engine:Label text="- &lt;color=#FFFF00&gt;DIFFICULTY&lt;/color&gt; is represented by the colour of the node&#10;- &lt;color=#FFFF00&gt;REWARD&lt;/color&gt; for completing a level is shown by the icons below the node&#10;- &lt;color=#FFFF00&gt;ENEMY PROFILE&lt;/color&gt; determines the enemy types present on the level&#10;- &lt;color=#FFFF00&gt;TERRAIN&lt;/color&gt; determines the type of map layout the level will have" enable-rich-text="true" class="text" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 20px; white-space: normal;"/>
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;"/>
+                </engine:VisualElement>
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

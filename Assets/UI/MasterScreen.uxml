@@ -1,6 +1,7 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <engine:Template name="FleetCommandHubScreen" src="project://database/Assets/UI/Screens/FleetCommandHub/FleetCommandHubScreen.uxml?fileID=9197481963319205126&amp;guid=680f0ac315f97854a83d026068e8ba09&amp;type=3#FleetCommandHubScreen"/>
     <engine:Template name="GameplayScreen" src="project://database/Assets/UI/Screens/GameplayScreen.uxml?fileID=9197481963319205126&amp;guid=58d1dc654eba0e94ab90ffece08e92d0&amp;type=3#GameplayScreen"/>
+    <engine:Template name="HowToPlayScreen" src="project://database/Assets/UI/Screens/HowToPlayScreen.uxml?fileID=9197481963319205126&amp;guid=132eca67adbb4f64297e6ac8554d73f5&amp;type=3#HowToPlayScreen"/>
     <engine:Template name="MenuScreen" src="project://database/Assets/UI/Screens/MenuScreen.uxml?fileID=9197481963319205126&amp;guid=15a5577b737aed647bc400c0bdb2952a&amp;type=3#MenuScreen"/>
     <engine:Template name="PauseScreen" src="project://database/Assets/UI/Screens/PauseScreen.uxml?fileID=9197481963319205126&amp;guid=d1cab7b4a5c2968498de7e3ca613cff8&amp;type=3#PauseScreen"/>
     <engine:Template name="SettingsScreen" src="project://database/Assets/UI/Screens/SettingsScreen.uxml?fileID=9197481963319205126&amp;guid=80c876cc7c11c9f4e9fedfefadc5803d&amp;type=3#SettingsScreen"/>
@@ -13,5 +14,6 @@
         <engine:Instance template="FleetCommandHubScreen" name="FleetCommandHubScreen" picking-mode="Ignore" style="position: absolute; width: 100%; height: 100%;"/>
         <engine:Instance template="PauseScreen" name="PauseScreen" picking-mode="Ignore" class="screen"/>
         <engine:Instance template="SettingsScreen" name="SettingsScreen" picking-mode="Ignore" class="screen"/>
+        <engine:Instance template="HowToPlayScreen" name="HowToPlayScreen" style="position: absolute; width: 100%; height: 100%;"/>
     </engine:VisualElement>
 </engine:UXML>
