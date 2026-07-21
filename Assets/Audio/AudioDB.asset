@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d994a50cf6904924196b33591da0edb7, type: 3}
+  m_Name: AudioDB
+  m_EditorClassIdentifier: Assembly-CSharp::AudioDB
+  MainMenuMusic: {fileID: 8300000, guid: d5a79f0a64552e345968db0ea3bd2fd2, type: 3}
+  LevelMusic: {fileID: 8300000, guid: dc7a376cf64eaf7429d373ad8c81f364, type: 3}
+  BossFightMusic1: {fileID: 8300000, guid: dc7a376cf64eaf7429d373ad8c81f364, type: 3}
+  BossFightMusic2: {fileID: 8300000, guid: dc7a376cf64eaf7429d373ad8c81f364, type: 3}
+  Artillery: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
+  Cannon: {fileID: 8300000, guid: 080d9832b15daaa4da4223f6e292b0ca, type: 3}
+  GungnirLance: {fileID: 8300000, guid: cd90dc08d10c8cb4c801c83078374efa, type: 3}
+  HeavyLaser: {fileID: 8300000, guid: de04b5dd492817342a35aeb91cc975ab, type: 3}
+  PigeonMissiles: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
+  PointDefenseLaser: {fileID: 8300000, guid: de04b5dd492817342a35aeb91cc975ab, type: 3}
+  Railgun: {fileID: 8300000, guid: 5553f20e502ca6548a5771c0a29a3d48, type: 3}
+  SquallLauncher: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
+  StormCannon: {fileID: 8300000, guid: 080d9832b15daaa4da4223f6e292b0ca, type: 3}
+  SuperHeavyArtillery: {fileID: 8300000, guid: cd90dc08d10c8cb4c801c83078374efa, type: 3}
+  TachyonLaser: {fileID: 8300000, guid: de04b5dd492817342a35aeb91cc975ab, type: 3}
+  TempestLauncher: {fileID: 8300000, guid: cd90dc08d10c8cb4c801c83078374efa, type: 3}
+  TrebuchetMissiles: {fileID: 8300000, guid: 9d713101be26c1c4f82360f2fb7052ca, type: 3}
+  Explosion: {fileID: 8300000, guid: ca0ed6266780c334183cb6a330d3e504, type: 3}
+  ButtonClick: {fileID: 8300000, guid: 95c8d975b51482645b9ff5abd82ad0de, type: 3}

@@ -51,6 +51,7 @@ MonoBehaviour:
   ProjectilePrefab: {fileID: 1688938411433637448, guid: fe9fd1d09c2e0a943a50a5bfaf0ef1b7, type: 3}
   WeaponStartPoint: {fileID: 7043499969739928610}
   VFXColour: {r: 0.8784314, g: 0.2509804, b: 0.2784314, a: 1}
+  SoundEffect: 11
 --- !u!1 &954237318640528480
 GameObject:
   m_ObjectHideFlags: 0

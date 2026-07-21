@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: CurrentSave
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveData
   startingUpgradeCores: 200
-  UpgradeCoresRemaining: 200
+  UpgradeCoresRemaining: 0
   startingAvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
   AvailableShips:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
+  - {fileID: 11400000, guid: 4a162e963042f15449797f8c6e0ad823, type: 2}
   startingAvailableWeapons:
   - {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
@@ -28,8 +29,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 655434c001167004aad11347ed9040f7, type: 2}
   - {fileID: 11400000, guid: 6bd7eb52735bc4d4986c1d517bb302ea, type: 2}
   - {fileID: 11400000, guid: 1e4ee908f9620344ca18f685ab9f10a1, type: 2}
-  - {fileID: 11400000, guid: bc9c366273a411e4b80094f0a8ed2ec5, type: 2}
+  - {fileID: 11400000, guid: d6a419ec700134e4bbd1e8be9d9263a3, type: 2}
   - {fileID: 11400000, guid: 7e1c831c7f68a0048ae8690d68bb5220, type: 2}
+  - {fileID: 11400000, guid: acf07b1db7af8a04aa785a9e7162b092, type: 2}
+  - {fileID: 11400000, guid: 4f795852c0a2e0444a5cfc5bf65fc914, type: 2}
+  - {fileID: 11400000, guid: 7954108357981524197d78383f0b232d, type: 2}
+  - {fileID: 11400000, guid: a29ab8c7555c67b4faa0b9ae5ff2d4a3, type: 2}
+  - {fileID: 11400000, guid: d2c46820f1e8f9748acc234a3dcfa80a, type: 2}
+  - {fileID: 11400000, guid: 812a5fa6d4bba4a4d921307178aeb3d5, type: 2}
+  - {fileID: 11400000, guid: bc9c366273a411e4b80094f0a8ed2ec5, type: 2}
+  - {fileID: 11400000, guid: 57b16e831b4657e4099416088873847f, type: 2}
+  - {fileID: 11400000, guid: cc1f26977fa3891489df65a2d3b2f6df, type: 2}
   startingActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
@@ -38,6 +48,6 @@ MonoBehaviour:
   ActiveRoster:
   - {fileID: 11400000, guid: a1d6f673c96c4b449b725ca90bf7e8ee, type: 2}
   - {fileID: 11400000, guid: 10daa86f2c120dc4191071e1ee3ee03d, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 4a162e963042f15449797f8c6e0ad823, type: 2}
   - {fileID: 0}
   Mothership: {fileID: 11400000, guid: 16e5c9a0ba05ebc49a3f09d7e1da11b4, type: 2}

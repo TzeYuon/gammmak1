@@ -16,6 +16,8 @@ class WeaponAuthoring : MonoBehaviour
     // vfx
     public Color VFXColour;
 
+    // sfx
+    public AudioType SoundEffect;
     class Baker : Baker<WeaponAuthoring>
     {
         public override void Bake(WeaponAuthoring authoring)
@@ -36,7 +38,8 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new HitscanWeapon()
                 {
                     WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
-                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3)
+                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3),
+                    AudioType = authoring.SoundEffect
                 });
             }
             else
@@ -44,7 +47,8 @@ class WeaponAuthoring : MonoBehaviour
                 AddComponent(entity, new ProjectileWeapon {
                     ProjectilePrefab = GetEntity(authoring.ProjectilePrefab, TransformUsageFlags.Dynamic),
                     WeaponStartOffset = new float2(authoring.WeaponStartPoint.position.x, authoring.WeaponStartPoint.position.y),
-                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3)
+                    VFXColour = new float4(authoring.VFXColour.r, authoring.VFXColour.g, authoring.VFXColour.b, 3),
+                    AudioType = authoring.SoundEffect
                 });
             }
 
@@ -61,6 +65,7 @@ public class WeaponAuthoringEditor : Editor
     // Properties
     SerializedProperty p_Firing, p_ProjectilePrefab, p_WeaponStartPoint;
     SerializedProperty p_VFXColour;
+    SerializedProperty p_SoundEffect;
 
     private void OnEnable()
     {
@@ -69,6 +74,7 @@ public class WeaponAuthoringEditor : Editor
         p_WeaponStartPoint = serializedObject.FindProperty("WeaponStartPoint");
 
         p_VFXColour = serializedObject.FindProperty("VFXColour");
+        p_SoundEffect = serializedObject.FindProperty("SoundEffect");
     }
 
     public override void OnInspectorGUI()
@@ -96,6 +102,7 @@ public class WeaponAuthoringEditor : Editor
         EditorGUILayout.BeginVertical("helpbox");
 
         EditorGUILayout.PropertyField(p_VFXColour);
+        EditorGUILayout.PropertyField(p_SoundEffect);
         EditorGUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();
