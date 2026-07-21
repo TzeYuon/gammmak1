@@ -92,6 +92,7 @@ public class WeaponData : ScriptableObject
     public string WeaponName;
     public string AbbrWpnName;
     public WeaponID WeaponID;
+    public string Description;
     public GameObject WeaponPrefab;
     public int EquipCost;
 

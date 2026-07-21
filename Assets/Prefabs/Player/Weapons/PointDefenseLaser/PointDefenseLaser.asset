@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Point Defense Laser
   AbbrWpnName: PD
   WeaponID: 3
+  Description: Fires precise lasers to instantly deal damage to fast enemies.
   WeaponPrefab: {fileID: 90229467165131139, guid: 2967fabdddab9d247ab3464506308d98, type: 3}
   EquipCost: 1
   UpgradeLevel: 0
@@ -50,6 +51,7 @@ MonoBehaviour:
   BaseFireRate: 7
   BaseSpreadDegrees: 0
   BaseProjectileCount: 0
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 0
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0

@@ -15,6 +15,8 @@ MonoBehaviour:
   WeaponName: Railgun
   AbbrWpnName: RL
   WeaponID: 9
+  Description: Fires an unstoppable projectile that penetrates terrain and many enemies,
+    dealing high damage.
   WeaponPrefab: {fileID: 90229467165131139, guid: 97a48946e28c9e3448cbf15a51a2f15c, type: 3}
   EquipCost: 2
   UpgradeLevel: 0
@@ -50,6 +52,7 @@ MonoBehaviour:
   BaseFireRate: 1
   BaseSpreadDegrees: 0
   BaseProjectileCount: 1
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 200
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 1
