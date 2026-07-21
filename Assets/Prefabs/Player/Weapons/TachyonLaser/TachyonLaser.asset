@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Tachyon Laser
   AbbrWpnName: TL
   WeaponID: 6
+  Description: Fires a precise laser that targets enemies with high health.
   WeaponPrefab: {fileID: 90229467165131139, guid: 54f493800d2f679498c3649a0fd5e95a, type: 3}
   EquipCost: 4
   UpgradeLevel: 0
@@ -50,6 +51,7 @@ MonoBehaviour:
   BaseFireRate: 0.6
   BaseSpreadDegrees: 0
   BaseProjectileCount: 0
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 0
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0

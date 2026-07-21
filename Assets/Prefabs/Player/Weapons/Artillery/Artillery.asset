@@ -15,6 +15,8 @@ MonoBehaviour:
   WeaponName: Artillery
   AbbrWpnName: ARTY
   WeaponID: 11
+  Description: Fires explosive shots to deal area-of-effect damage at long range
+    in a moderate radius.
   WeaponPrefab: {fileID: 90229467165131139, guid: 2577c02ec00bc9d4ab46b8cedf86b2a1, type: 3}
   EquipCost: 2
   UpgradeLevel: 0
@@ -50,6 +52,7 @@ MonoBehaviour:
   BaseFireRate: 1
   BaseSpreadDegrees: 0
   BaseProjectileCount: 1
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 110
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 1

@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Tempest Launcher
   AbbrWpnName: TEM
   WeaponID: 14
+  Description: Fires a spread of exploding shrapnel to defend the ship at close range.
   WeaponPrefab: {fileID: 90229467165131139, guid: 26737c3a67f18434b9aba597ab82ebf2, type: 3}
   EquipCost: 6
   UpgradeLevel: 0
@@ -62,6 +63,7 @@ MonoBehaviour:
   BaseFireRate: 1.5
   BaseSpreadDegrees: 10
   BaseProjectileCount: 6
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 110
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 1

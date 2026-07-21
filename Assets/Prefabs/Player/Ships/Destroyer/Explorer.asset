@@ -36,7 +36,7 @@ MonoBehaviour:
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 100
     EquippedWeapon: {fileID: 0}
-  - Position: {x: 0.5, y: 0.02700001}
+  - Position: {x: 0.5, y: 0.027}
     OriginalRotation: {x: 0, y: 0, z: 0, w: 1}
     MaxAngle: 100
     EquippedWeapon: {fileID: 0}
