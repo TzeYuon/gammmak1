@@ -418,6 +418,7 @@ public class WeaponMountContextMenu
     private Label equippedWeaponName;
     private Label viewingWeaponName;
     private VisualElement weaponDetailsContainer;
+    private Label viewingWeaponDescription;
     private Button equipBtn;
     private Button unequipBtn;
 
@@ -442,6 +443,7 @@ public class WeaponMountContextMenu
         equippedWeaponName = currentWeaponContainer.Q<Label>("EquippedWeaponName");
         viewingWeaponName = currentWeaponContainer.Q<Label>("ViewingWeaponName");
         weaponDetailsContainer = currentWeaponContainer.Q<VisualElement>("WeaponDetailsContainer");
+        viewingWeaponDescription = currentWeaponContainer.Q<Label>("ViewingWeaponDescription");
 
         equipBtn = currentWeaponContainer.Q<Button>("EquipBtn");
         equipBtn.clicked += () =>
@@ -667,11 +669,13 @@ public class WeaponMountContextMenu
         if (currentViewingWeapon == null)
         {
             viewingWeaponName.text = "<color=#FF0000>[ NONE ]</color>";
+            viewingWeaponDescription.text = "";
             weaponDetailsContainer.style.display = DisplayStyle.None;
         }
         else 
         {
             viewingWeaponName.text = currentViewingWeapon.WeaponName.ToUpper();
+            viewingWeaponDescription.text = currentViewingWeapon.Description;
             weaponDetailsContainer.style.display = DisplayStyle.Flex;
         }
     }

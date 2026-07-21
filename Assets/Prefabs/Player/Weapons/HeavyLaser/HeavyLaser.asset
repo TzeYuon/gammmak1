@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Heavy Laser
   AbbrWpnName: HL
   WeaponID: 5
+  Description: Fires a precise laser that targets enemies with high health.
   WeaponPrefab: {fileID: 90229467165131139, guid: 6824d0c84e5ca3147ad6ece6dd2c1844, type: 3}
   EquipCost: 2
   UpgradeLevel: 0
@@ -50,6 +51,7 @@ MonoBehaviour:
   BaseFireRate: 0.6
   BaseSpreadDegrees: 0
   BaseProjectileCount: 0
+  BaseBurstInterval: 0.02
   BaseProjectileSpeed: 0
   BaseProjectileTurnSpeed: 0
   BaseHitRadius: 0

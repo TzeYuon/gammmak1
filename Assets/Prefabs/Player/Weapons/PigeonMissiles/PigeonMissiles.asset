@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Pigeon Missiles
   AbbrWpnName: PM
   WeaponID: 8
+  Description: Fires homing explosives to seek nearby targets.
   WeaponPrefab: {fileID: 90229467165131139, guid: 236d98ccb191baa42b59e6472a0da717, type: 3}
   EquipCost: 6
   UpgradeLevel: 0

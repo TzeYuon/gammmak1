@@ -15,6 +15,7 @@ MonoBehaviour:
   WeaponName: Trebuchet Missiles
   AbbrWpnName: TM
   WeaponID: 7
+  Description: Fires explosives that move through terrain to target groups of enemies.
   WeaponPrefab: {fileID: 90229467165131139, guid: c07d690eb9a43784a833890b535774fb, type: 3}
   EquipCost: 3
   UpgradeLevel: 0
