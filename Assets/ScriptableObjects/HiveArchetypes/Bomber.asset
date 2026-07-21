@@ -15,10 +15,10 @@ MonoBehaviour:
   TrickleSpawns:
   - Type: 0
     SpawnCount: 3
-    Interval: 2
+    Interval: 2.5
   - Type: 3
     SpawnCount: 10
-    Interval: 7
+    Interval: 8
   SurgeType: 5
   SurgeCountIgnoreScaling: 0
-  SurgeCount: 10
+  SurgeCount: 6

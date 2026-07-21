@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HiveArchetypeData
   TrickleSpawns:
   - Type: 0
-    SpawnCount: 5
+    SpawnCount: 4
     Interval: 2
   SurgeType: 0
   SurgeCountIgnoreScaling: 0
-  SurgeCount: 250
+  SurgeCount: 170

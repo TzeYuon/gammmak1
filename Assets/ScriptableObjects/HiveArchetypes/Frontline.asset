@@ -15,7 +15,7 @@ MonoBehaviour:
   TrickleSpawns:
   - Type: 0
     SpawnCount: 4
-    Interval: 2.5
+    Interval: 3
   - Type: 1
     SpawnCount: 2
     Interval: 15

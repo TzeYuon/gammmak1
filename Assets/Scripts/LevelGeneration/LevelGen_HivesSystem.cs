@@ -56,10 +56,10 @@ partial struct LevelGen_HivesSystem : ISystem
         };
 
         // Base difficulty values
-        float baseDifficultyPerMinute = 0.05f;
-        float baseDifficultyPerHiveDestroyed = 0.10f;
-        float baseMaxSpawnRateMult = 2.5f;
-        float baseMaxSpawnCountMult = 3.0f;
+        float baseDifficultyPerMinute = 0.02f;
+        float baseDifficultyPerHiveDestroyed = 0.05f;
+        float baseMaxSpawnRateMult = 2f;
+        float baseMaxSpawnCountMult = 2.5f;
         float baseMaxEnemyHealthMult = 1.5f;
         float baseSurgeInterval = 30; // TEMPORARY: hardcode to 30s between surges
 
