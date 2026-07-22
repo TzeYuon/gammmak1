@@ -68,12 +68,16 @@ partial struct LevelGen_PlayerFleetSystem : ISystem
 
             Entity weapon = ecb.Instantiate(weaponPrefab);
             ecb.AddComponent(weapon, new Parent { Value = mothershipEntity });
-            ecb.SetComponent(weapon, LocalTransform.FromPosition(new float3(weaponBlueprint.Position, 0)));
+            ecb.SetComponent(weapon, LocalTransform.FromPositionRotation(new float3(weaponBlueprint.Position, 0), weaponBlueprint.OriginalRotation));
 
             // Set weapon stats
             ecb.SetComponent(weapon, weaponBlueprint.WeaponTargetingStats);
             ecb.SetComponent(weapon, weaponBlueprint.WeaponCombatStats);
-
+            ecb.SetComponent(weapon, weaponBlueprint.WeaponFiringArc);
+            if (weaponBlueprint.HasTurret)
+            {
+                ecb.AddComponent(weapon, weaponBlueprint.TurretComponent);
+            }
             ecb.AppendToBuffer(mothershipEntity, new LinkedEntityGroup { Value = weapon });
         }
     }
