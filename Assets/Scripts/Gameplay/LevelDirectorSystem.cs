@@ -47,6 +47,7 @@ public partial struct LevelDirectorSystem : ISystem
             // Trigger surge
             surgeState.TriggerSurgeThisFrame = true;
             surgeState.SurgeTimer = surgeState.CurrentInterval;
+            surgeState.TotalSurges++;
         }
 
         // update enemy blueprint stats
@@ -109,4 +110,8 @@ public struct GlobalSurgeState : IComponentData
     /// bool to signal to hives to surge for one frame
     /// </summary>
     public bool TriggerSurgeThisFrame;
+    /// <summary>
+    /// Number of total surges that have occurred in the level
+    /// </summary>
+    public int TotalSurges;
 }

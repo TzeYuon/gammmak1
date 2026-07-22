@@ -156,6 +156,7 @@ public partial struct ProcessExplosionsTargetSwarmJob : IJobEntity
 [BurstCompile]
 public partial struct ProcessExplosionsTargetPlayerJob : IJobEntity
 {
+    [DeallocateOnJobCompletion]
     [ReadOnly] public NativeArray<ExplosionEventTargetPlayer> Explosions;
 
     public EntityCommandBuffer.ParallelWriter ECB;

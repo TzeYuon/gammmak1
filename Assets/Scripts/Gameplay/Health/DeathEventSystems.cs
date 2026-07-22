@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -15,6 +14,7 @@ public partial struct SwarmDeathEventSystem : ISystem
         queueQuery = SystemAPI.QueryBuilder().WithAll<GlobalVFXQueue>().Build();
         state.RequireForUpdate<BiomassConfig>();
         state.RequireForUpdate<GlobalVFXQueue>();
+        state.RequireForUpdate<LevelSpawnData>();
     }
 
     [BurstCompile]
@@ -31,6 +31,8 @@ public partial struct SwarmDeathEventSystem : ISystem
         Entity biomassPrefab = prefabSingleton.BiomassPrefab;
 
         var explodeLookup = SystemAPI.GetComponentLookup<ExplosionOnDeath>(true);
+        var spawnDataComp = SystemAPI.GetSingletonRW<LevelSpawnData>();
+        ref var spawnData = ref spawnDataComp.ValueRW;
 
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, SwarmTag>().WithEntityAccess())
         {
@@ -43,20 +45,51 @@ public partial struct SwarmDeathEventSystem : ISystem
                 Colour = new float4(1, 0, 0, 0), 
             });
 
+            bool isSeed = SystemAPI.HasComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
+            if (isSeed)
+            {
+                unsafe
+                {
+                    int newIndex = spawnData.ExpansionSpotCount;
+                    var queen = SystemAPI.GetComponent<HiveDirectorSystem.HiveSeedComponent>(entity);
+
+                    if (newIndex < 8)
+                    {
+                        spawnData.ExpansionSpotsX[newIndex] = queen.Destination.x;
+                        spawnData.ExpansionSpotsY[newIndex] = queen.Destination.y;
+                        spawnData.ExpansionSpotCount++;
+                    }
+                }
+            }
+
             // Explode if entity has relevant component
             if (explodeLookup.HasComponent(entity))
             {
                 ExplosionOnDeath explosion = explodeLookup[entity];
                 Entity explosionEntity = ecb.CreateEntity();
                 ecb.AddComponent(explosionEntity, LocalTransform.FromPosition(position));
-                ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
+                if (isSeed)
                 {
-                    Position = position,
-                    Damage = explosion.Damage,
-                    RadiusSq = explosion.Radius,
-                    Colour = new float4(1, 0, 0, 0)
-                });
+                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetPlayer
+                    {
+                        Position = position,
+                        Damage = explosion.Damage,
+                        RadiusSq = explosion.Radius,
+                        Colour = new float4(1, 0, 0, 0)
+                    });
+                }
+                else
+                {
+                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
+                    {
+                        Position = position,
+                        Damage = explosion.Damage,
+                        RadiusSq = explosion.Radius,
+                        Colour = new float4(1, 0, 0, 0)
+                    });
+                }
             }
+        
 
             // Random chance to drop biomass
             var rng = Random.CreateFromIndex((uint)(entity.Index * SystemAPI.Time.ElapsedTime));

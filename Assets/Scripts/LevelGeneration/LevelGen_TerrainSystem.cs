@@ -139,7 +139,6 @@ partial struct LevelGen_TerrainSystem : ISystem
                 break;
 
             case TerrainType.Maze:
-                spawnData.MothershipSpawn = new float3(1000 - width / 2 + safezoneRadius, 1000 - height / 2 + safezoneRadius, 0);
                 spawnPool.Add(new float3(Xbl, Ybl, 0));
                 spawnPool.Add(new float3(Xtr, Ytr, 0));
                 spawnPool.Add(new float3(Xbr, Ybr, 0));
@@ -199,6 +198,7 @@ partial struct LevelGen_TerrainSystem : ISystem
             spawnData.MothershipSpawn = spawnPool[spawnPool.Count - 1];
         }
 
+        spawnData.ExpansionSpotCount = spawnPool.Count - spawnData.ActiveHiveCount - 1;
         NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnPool.Count, Allocator.Temp);
         for (int i = 0; i < spawnPool.Count; i++)
         {
