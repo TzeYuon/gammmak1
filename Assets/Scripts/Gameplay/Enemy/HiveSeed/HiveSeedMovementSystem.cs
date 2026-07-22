@@ -7,13 +7,10 @@ using static HiveDirectorSystem;
 [UpdateInGroup(typeof(ActionAndMovementGroup))]
 partial struct HiveSeedMovementSystem : ISystem
 {
-    private ComponentLookup<LocalTransform> transformLookup;
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<TerrainGridComponent>();
-        transformLookup = state.GetComponentLookup<LocalTransform>(true);
     }
 
     [BurstCompile]
@@ -23,21 +20,18 @@ partial struct HiveSeedMovementSystem : ISystem
         var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-        transformLookup.Update(ref state);
-
-        foreach (var (seed, transform, velocity, health, explosion, buffer, entity) in SystemAPI.Query<RefRW<HiveSeedComponent>, RefRW<LocalTransform>, RefRW<SwarmVelocityComponent>, RefRO<HealthComponent>, RefRO<ExplosionOnDeath>, DynamicBuffer<CaravanWaypoint>>().WithEntityAccess())
+        foreach (var (seed, transform, buffer, entity) in 
+            SystemAPI.Query<
+                RefRW<HiveSeedComponent>, 
+                RefRW<LocalTransform>, 
+                DynamicBuffer<CaravanWaypoint>>()
+                .WithEntityAccess()
+                .WithNone<DeadTag>())
         {
             float3 curPos = transform.ValueRO.Position;
 
-            if (health.ValueRO.Value <= 0 || SystemAPI.IsComponentEnabled<DeadTag>(entity))
-            {
-                ecb.DestroyEntity(entity);
-                continue;
-            }
-
             if (seed.ValueRO.HasArrived)
             {
-                velocity.ValueRW.Value = float2.zero;
                 seed.ValueRW.IncubationTimer -= deltaTime;
 
                 transform.ValueRW.Scale = math.lerp(seed.ValueRO.Scale, 1.0f, 1.0f - (seed.ValueRO.IncubationTimer / 30.0f));
@@ -83,7 +77,6 @@ partial struct HiveSeedMovementSystem : ISystem
                     ecb.SetComponentEnabled<DeadTag>(newHive, false);
 
                     ecb.DestroyEntity(entity);
-                    //Debug.LogWarning("YOU FAILED! THE SWARM HAS MADE A NEW HIVE!");
                 }
                 continue;
             }
@@ -102,13 +95,11 @@ partial struct HiveSeedMovementSystem : ISystem
             if (math.distance(curPos, targetPos) < 1.0f && buffer.Length == 0)
             {
                 seed.ValueRW.HasArrived = true;
-                //Debug.LogWarning("A NEW HIVE IS SPAWNING! YOU HAVE 30 SECONDS TO DESTROY IT!");
                 continue;
             }
 
             float3 direction = math.normalize(targetPos - curPos);
-            velocity.ValueRW.Value = direction.xy * seed.ValueRO.Speed;
-            transform.ValueRW.Position += math.float3(velocity.ValueRW.Value, 0) * deltaTime;
+            transform.ValueRW.Position += math.float3(direction.xy * seed.ValueRO.Speed, 0) * deltaTime;
         }
     }
 }

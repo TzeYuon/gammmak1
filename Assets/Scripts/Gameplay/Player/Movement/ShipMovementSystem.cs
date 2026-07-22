@@ -113,9 +113,9 @@ public struct ShipAvoidanceData
 
 [BurstCompile]
 [WithAll(typeof(PlayerTag))]
-[WithAbsent(typeof(MothershipTag))]
+[WithNone(typeof(MothershipTag))]
 [WithDisabled(typeof(DeadTag))]
-//[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+[WithPresent(typeof(MoveCommand))]
 public partial struct GatherShipDataJob : IJobEntity
 {
     public NativeArray<ShipAvoidanceData> AvoidanceArray;
@@ -146,7 +146,7 @@ public partial struct GatherShipDataJob : IJobEntity
 
 [BurstCompile]
 [WithDisabled(typeof(DeadTag))]
-//[WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+[WithPresent(typeof(MoveCommand))]
 public partial struct MoveShipJob : IJobEntity
 {
     public float DeltaTime;

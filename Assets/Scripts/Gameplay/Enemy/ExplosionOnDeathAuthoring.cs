@@ -16,7 +16,7 @@ public class ExplosionOnDeathAuthoring : MonoBehaviour
             AddComponent(entity, new ExplosionOnDeath
             {
                 TargetSwarm = authoring.targetSwarm,
-                Radius = authoring.radius,
+                RadiusSq = authoring.radius * authoring.radius,
                 Damage = authoring.damage,
             });
         }
@@ -26,6 +26,6 @@ public class ExplosionOnDeathAuthoring : MonoBehaviour
 public struct ExplosionOnDeath : IComponentData
 {
     public bool TargetSwarm;
-    public float Radius;
+    public float RadiusSq;
     public float Damage;
 }

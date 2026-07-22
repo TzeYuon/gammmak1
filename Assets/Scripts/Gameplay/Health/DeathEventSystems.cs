@@ -68,26 +68,13 @@ public partial struct SwarmDeathEventSystem : ISystem
                 ExplosionOnDeath explosion = explodeLookup[entity];
                 Entity explosionEntity = ecb.CreateEntity();
                 ecb.AddComponent(explosionEntity, LocalTransform.FromPosition(position));
-                if (isSeed)
+                ecb.AddComponent(explosionEntity, new ExplosionEventTargetPlayer
                 {
-                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetPlayer
-                    {
-                        Position = position,
-                        Damage = explosion.Damage,
-                        RadiusSq = explosion.Radius,
-                        Colour = new float4(1, 0, 0, 0)
-                    });
-                }
-                else
-                {
-                    ecb.AddComponent(explosionEntity, new ExplosionEventTargetSwarm
-                    {
-                        Position = position,
-                        Damage = explosion.Damage,
-                        RadiusSq = explosion.Radius,
-                        Colour = new float4(1, 0, 0, 0)
-                    });
-                }
+                    Position = position,
+                    Damage = explosion.Damage,
+                    RadiusSq = explosion.RadiusSq,
+                    Colour = new float4(1, 0, 0, 0)
+                });
             }
         
 
@@ -141,6 +128,7 @@ public partial struct HiveDeathEventSystem : ISystem
 
         foreach (var (transform, entity) in SystemAPI.Query<RefRO<LocalTransform>>().WithAll<DeadTag, HiveComponent>().WithEntityAccess())
         {
+            var position = transform.ValueRO.Position;
 
             unsafe
             {
@@ -161,14 +149,15 @@ public partial struct HiveDeathEventSystem : ISystem
 
                     if (newIndex < 8)
                     {
-                        spawnData.ExpansionSpotsX[newIndex] = transform.ValueRO.Position.x;
-                        spawnData.ExpansionSpotsY[newIndex] = transform.ValueRO.Position.y;
+                        spawnData.ExpansionSpotsX[newIndex] = position.x;
+                        spawnData.ExpansionSpotsY[newIndex] = position.y;
                         spawnData.ExpansionSpotCount++;
 
                         if (spawnData.ActiveHiveCount > 0) spawnData.ActiveHiveCount--;
                     }
                 }
             }
+
             // TODO: Change death visual for hives
             // Create death visual
             vfxQueue.Enqueue(new VFXPayload
