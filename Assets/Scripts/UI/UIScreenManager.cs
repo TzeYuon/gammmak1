@@ -14,6 +14,7 @@ public class UIScreenManager : MonoBehaviour
     [SerializeField] SceneManager sceneManager;
     [SerializeField] PlayerSaveData playerSaveData;
     [SerializeField] HangarShipPreviewManager hangarShipPreviewManager;
+    [SerializeField] AudioManager audioManager;
 
     [SerializeField] UIAssetsDatabase uiAssetsDatabase;
     public static UIAssetsDatabase UIAssetsDatabase { get { return Instance.uiAssetsDatabase; } }
@@ -37,7 +38,7 @@ public class UIScreenManager : MonoBehaviour
 
         Root = GetComponent<UIDocument>().rootVisualElement;
         MenuScreen = new MenuScreen(this, Root.Q<VisualElement>("MenuScreen"), sceneManager);
-        SettingsScreen = new SettingsScreen(this, Root.Q<VisualElement>("SettingsScreen"));
+        SettingsScreen = new SettingsScreen(this, audioManager, Root.Q<VisualElement>("SettingsScreen"));
         PauseScreen = new PauseScreen(this, Root.Q<VisualElement>("PauseScreen"));
         HowToPlayScreen = new HowToPlayScreen(this, Root.Q<VisualElement>("HowToPlayScreen"));
         GameplayScreen = new GameplayScreen(this, Root.Q<VisualElement>("GameplayScreen"), playerSaveData);
@@ -140,6 +141,7 @@ public class UIScreenManager : MonoBehaviour
                 else ShowRootScreen(GameplayScreen);
                 break;
             case GameState.MainMenu:
+                if (prevState == GameState.Settings) BackToPrevScreen();
                 if (prevState == GameState.HowToPlay) BackToPrevScreen();
                 else ShowRootScreen(MenuScreen);
                 break;
@@ -148,8 +150,12 @@ public class UIScreenManager : MonoBehaviour
                 else ShowRootScreen(FleetCommandHubScreen);
                 break;
             case GameState.Paused:
+                if (prevState == GameState.Settings) BackToPrevScreen();
                 if (prevState == GameState.HowToPlay) BackToPrevScreen();
                 else Show(PauseScreen, true);
+                break;
+            case GameState.Settings:
+                Show(SettingsScreen, true);
                 break;
             case GameState.HowToPlay:
                 Show(HowToPlayScreen, true);

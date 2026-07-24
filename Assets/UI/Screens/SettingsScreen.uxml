@@ -1,14 +1,23 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles" />
-    <Style src="project://database/Assets/UI/Styles/sliderStyles.uss?fileID=7433441132597879392&amp;guid=2e1252ec56222c446830454bf619999a&amp;type=3#sliderStyles" />
-    <engine:VisualElement name="Container" style="flex-grow: 1; align-items: center; justify-content: center; align-self: stretch;">
-        <engine:VisualElement name="AudioSettings" style="flex-grow: 0; position: relative; top: auto; left: auto; width: auto; height: auto; align-self: auto; align-items: center; padding-top: 16px; padding-right: 27px; padding-bottom: 27px; padding-left: 27px; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); margin-bottom: 50px;">
-            <engine:Label text="Audio Settings" name="AudioSettingsLabel" enable-rich-text="true" style="font-size: 22px;" />
-            <engine:Slider label="Master" value="42" high-value="100" name="MasterVolumeSlider" class="slider" style="width: 250px; min-height: 40px;" />
-            <engine:Slider label="FX" value="27.6" high-value="100" name="FXVolumeSlider" class="slider" />
-            <engine:Slider label="Music" value="42" high-value="100" name="MusicVolumeSlider" class="slider" />
-            <engine:Slider label="UI" value="42" high-value="100" name="UIVolumeSlider" class="slider" />
+    <Style src="project://database/Assets/UI/Styles/buttonStyles.uss?fileID=7433441132597879392&amp;guid=fb4d964bd72d3fb49a27b9c537745707&amp;type=3#buttonStyles"/>
+    <Style src="project://database/Assets/UI/Styles/sliderStyles.uss?fileID=7433441132597879392&amp;guid=2e1252ec56222c446830454bf619999a&amp;type=3#sliderStyles"/>
+    <Style src="project://database/Assets/UI/Styles/textStyles.uss?fileID=7433441132597879392&amp;guid=0fcfa4debd24b3b4d8af003b3cf8a592&amp;type=3#textStyles"/>
+    <engine:VisualElement name="Container" style="flex-grow: 1; align-items: center; justify-content: center; align-self: stretch; background-color: rgb(8, 12, 26);">
+        <engine:VisualElement name="AudioSettings" style="flex-grow: 0; position: relative; top: auto; left: auto; width: 20%; height: auto; align-self: auto; align-items: center; padding-top: 16px; padding-right: 27px; padding-bottom: 27px; padding-left: 27px; border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; border-left-color: rgba(0, 255, 255, 0.3); border-right-color: rgba(0, 255, 255, 0.3); border-top-color: rgba(0, 255, 255, 0.3); border-bottom-color: rgba(0, 255, 255, 0.3); margin-bottom: 50px;">
+            <engine:Label text="AUDIO" name="AudioSettingsLabel" enable-rich-text="true" class="text" style="font-size: 22px;"/>
+            <engine:VisualElement style="flex-grow: 0; flex-direction: row; justify-content: space-between; width: 90%; margin-top: 6px; margin-bottom: 6px;">
+                <engine:Label text="MASTER" class="text"/>
+                <engine:Slider label="" value="42" high-value="1" name="MasterVolumeSlider" class="slider text" style="width: 60%; min-height: auto;"/>
+            </engine:VisualElement>
+            <engine:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; width: 90%; margin-top: 6px; margin-bottom: 6px;">
+                <engine:Label text="FX" class="text"/>
+                <engine:Slider label="" value="27.6" high-value="1" name="FXVolumeSlider" class="slider text" style="min-height: auto; width: 60%;"/>
+            </engine:VisualElement>
+            <engine:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; width: 90%; margin-top: 6px; margin-bottom: 6px;">
+                <engine:Label text="MUSIC" class="text"/>
+                <engine:Slider label="" value="58.6" high-value="1" name="MusicVolumeSlider" class="slider text" style="min-width: auto; min-height: auto; width: 60%;"/>
+            </engine:VisualElement>
         </engine:VisualElement>
-        <engine:Button text="Exit" name="ExitButton" class="button" />
+        <engine:Button text="BACK" name="BackBtn" class="button text"/>
     </engine:VisualElement>
 </engine:UXML>

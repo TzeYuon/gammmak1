@@ -9,6 +9,7 @@ public enum GameState : byte
     Generating, // Generating next level
     Gameplay, // Main gameplay screen (RTS)
     Paused,
+    Settings,
     HowToPlay,
     Victory,
     Defeat
@@ -39,6 +40,7 @@ public partial class GameStateSystem : SystemBase
             case GameState.Paused:
                 return 1;
 
+            case GameState.Settings:
             case GameState.HowToPlay:
                 return 2;
 
@@ -111,6 +113,7 @@ public partial class GameStateSystem : SystemBase
                 break;
 
             case GameState.Paused:
+            case GameState.Settings:
             case GameState.HowToPlay:
                 UnityEngine.Time.timeScale = 0f;
                 break;

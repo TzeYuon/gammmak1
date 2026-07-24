@@ -12,9 +12,10 @@ public class PauseScreen : UIScreen
 
     public PauseScreen(UIScreenManager manager, VisualElement root) : base(manager, root)
     {
-        Root.Q<Button>("ResumeButton").clicked += OnResumeClicked;
-        Root.Q<Button>("HowToPlayButton").clicked += OnHowToPlayClicked;
-        Root.Q<Button>("ExitButton").clicked += OnExitClicked;
+        Root.Q<Button>("ResumeButton").clicked += ExitPauseMenu;
+        Root.Q<Button>("SettingsButton").clicked += () => ChangeGameState(GameState.Settings);
+        Root.Q<Button>("HowToPlayButton").clicked += () => ChangeGameState(GameState.HowToPlay);
+        Root.Q<Button>("ExitButton").clicked += () => ChangeGameState(GameState.MainMenu);
 
         var world = World.DefaultGameObjectInjectionWorld;
         if (world != null)
@@ -64,10 +65,7 @@ public class PauseScreen : UIScreen
     void ExitPauseMenu()
     {
         // return to previous state
-        if (gameStateQuery.IsEmptyIgnoreFilter) return;
-        gameStateQuery.CompleteDependency();
-        var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-        gameState.ValueRW.CurrentState = prevState;
+        ChangeGameState(prevState);
     }
 
     private void HandleStateChange(GameState prevState, GameState gameState)
@@ -85,24 +83,11 @@ public class PauseScreen : UIScreen
         }
     }
 
-    void OnResumeClicked()
-    {
-        ExitPauseMenu();
-    }
-
-    void OnHowToPlayClicked()
+    void ChangeGameState(GameState state)
     {
         if (gameStateQuery.IsEmptyIgnoreFilter) return;
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-        gameState.ValueRW.CurrentState = GameState.HowToPlay;
-    }
-
-    void OnExitClicked()
-    {
-        if (gameStateQuery.IsEmptyIgnoreFilter) return;
-        gameStateQuery.CompleteDependency();
-        var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-        gameState.ValueRW.CurrentState = GameState.MainMenu;
+        gameState.ValueRW.CurrentState = state;
     }
 }
