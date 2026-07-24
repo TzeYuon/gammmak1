@@ -38,13 +38,13 @@ public class SettingsScreen : UIScreen
 
     protected override void OnShow()
     {
-        master.RegisterCallback<ChangeEvent<float>>(OnMasterVolumeSliderChange);
-        fx.RegisterCallback<ChangeEvent<float>>(OnFXVolumeSliderChange);
-        music.RegisterCallback<ChangeEvent<float>>(OnMusicVolumeSliderChange);
-
         master.value = audioManager.GetVolumeSliderValue(VolumeCategory.Master);
         fx.value = audioManager.GetVolumeSliderValue(VolumeCategory.FX);
         music.value = audioManager.GetVolumeSliderValue(VolumeCategory.Music);
+
+        master.RegisterCallback<ChangeEvent<float>>(OnMasterVolumeSliderChange);
+        fx.RegisterCallback<ChangeEvent<float>>(OnFXVolumeSliderChange);
+        music.RegisterCallback<ChangeEvent<float>>(OnMusicVolumeSliderChange);
 
         GameStateSystem.OnStateChanged -= HandleStateChange;
     }

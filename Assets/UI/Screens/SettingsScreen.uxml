@@ -11,11 +11,11 @@
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; width: 90%; margin-top: 6px; margin-bottom: 6px;">
                 <engine:Label text="FX" class="text"/>
-                <engine:Slider label="" value="27.6" high-value="100" name="FXVolumeSlider" class="slider text" style="min-height: auto; width: 60%;"/>
+                <engine:Slider label="" value="27.6" high-value="1" name="FXVolumeSlider" class="slider text" style="min-height: auto; width: 60%;"/>
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: space-between; width: 90%; margin-top: 6px; margin-bottom: 6px;">
                 <engine:Label text="MUSIC" class="text"/>
-                <engine:Slider label="" value="58.6" high-value="100" name="MusicVolumeSlider" class="slider text" style="min-width: auto; min-height: auto; width: 60%;"/>
+                <engine:Slider label="" value="58.6" high-value="1" name="MusicVolumeSlider" class="slider text" style="min-width: auto; min-height: auto; width: 60%;"/>
             </engine:VisualElement>
         </engine:VisualElement>
         <engine:Button text="BACK" name="BackBtn" class="button text"/>
