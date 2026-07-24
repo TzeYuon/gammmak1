@@ -1045,6 +1045,7 @@ MonoBehaviour:
   sceneManager: {fileID: 265658061}
   playerSaveData: {fileID: 11400000, guid: f3b095d919907a84198ee7e196198de6, type: 2}
   hangarShipPreviewManager: {fileID: 1017577773}
+  audioManager: {fileID: 2078173368}
   uiAssetsDatabase: {fileID: 11400000, guid: f12ab52a10c0c1b4ab43be2442382e86, type: 2}
 --- !u!1 &1329967708
 GameObject:

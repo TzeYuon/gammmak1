@@ -1,5 +1,13 @@
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Audio;
+
+public enum VolumeCategory
+{
+    Master,
+    FX,
+    Music,
+}
 
 public class AudioManager : MonoBehaviour
 {
@@ -12,6 +20,7 @@ public class AudioManager : MonoBehaviour
 
     [Header("Sound Files")]
     public AudioDB Database;
+
     private void Start()
     {
         if (Database != null && Database.MainMenuMusic != null)
@@ -47,23 +56,46 @@ public class AudioManager : MonoBehaviour
         bgmSource.Play();
     }
 
-    public void SetMasterVolume(float sliderValue)
+    public void SetVolume(VolumeCategory category, float sliderValue)
     {
+        string name = "";
+        switch (category) 
+        {
+            case VolumeCategory.Master:
+                name = "MasterVol";
+                break;
+            case VolumeCategory.FX:
+                name = "SFXVol";
+                break;
+            case VolumeCategory.Music:
+                name = "MusicVol";
+                break;
+        }
+
         sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
-        mainMixer.SetFloat("MasterVol", Mathf.Log10(sliderValue) * 20);
+        mainMixer.SetFloat(name, Mathf.Log10(sliderValue) * 20);
     }
 
-    public void SetMusicVolume(float sliderValue)
+    public float GetVolumeSliderValue(VolumeCategory category)
     {
-        sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
-        mainMixer.SetFloat("MusicVol", Mathf.Log10(sliderValue) * 20);
+        string name = "";
+        switch (category)
+        {
+            case VolumeCategory.Master:
+                name = "MasterVol";
+                break;
+            case VolumeCategory.FX:
+                name = "SFXVol";
+                break;
+            case VolumeCategory.Music:
+                name = "MusicVol";
+                break;
+        }
+
+        mainMixer.GetFloat(name, out float value);
+        return Mathf.Pow(10f, value / 20f); ;
     }
 
-    public void SetSFXVolume(float sliderValue)
-    {
-        sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
-        mainMixer.SetFloat("SFXVol", Mathf.Log10(sliderValue) * 20);
-    }
     public void StopBGM()
     {
         if (bgmSource.isPlaying)

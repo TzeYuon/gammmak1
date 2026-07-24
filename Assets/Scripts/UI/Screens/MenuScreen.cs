@@ -54,15 +54,20 @@ public class MenuScreen : UIScreen
 
     void OnHowToPlayClicked()
     {
+        ChangeGameState(GameState.HowToPlay);
+    }
+
+    void ChangeGameState(GameState state)
+    {
         if (gameStateQuery.IsEmptyIgnoreFilter) return;
         gameStateQuery.CompleteDependency();
         var gameState = gameStateQuery.GetSingletonRW<GameStateSingleton>();
-        gameState.ValueRW.CurrentState = GameState.HowToPlay;
+        gameState.ValueRW.CurrentState = state;
     }
 
     void OnSettingsClicked()
     {
-        uiScreenManager.ShowRootScreen(uiScreenManager.SettingsScreen);
+        ChangeGameState(GameState.Settings);
     }
 
     void OnExitClicked()
