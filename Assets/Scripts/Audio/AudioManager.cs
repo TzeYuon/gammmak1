@@ -47,6 +47,23 @@ public class AudioManager : MonoBehaviour
         bgmSource.Play();
     }
 
+    public void SetMasterVolume(float sliderValue)
+    {
+        sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
+        mainMixer.SetFloat("MasterVol", Mathf.Log10(sliderValue) * 20);
+    }
+
+    public void SetMusicVolume(float sliderValue)
+    {
+        sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
+        mainMixer.SetFloat("MusicVol", Mathf.Log10(sliderValue) * 20);
+    }
+
+    public void SetSFXVolume(float sliderValue)
+    {
+        sliderValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
+        mainMixer.SetFloat("SFXVol", Mathf.Log10(sliderValue) * 20);
+    }
     public void StopBGM()
     {
         if (bgmSource.isPlaying)
