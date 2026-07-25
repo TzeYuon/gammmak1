@@ -45,10 +45,6 @@ partial struct HiveSeedMovementSystem : ISystem
                     ecb.AddComponent<ActiveHiveTag>(newHive);
                     ecb.SetComponentEnabled<ActiveHiveTag>(newHive, true);
 
-                    if (SystemAPI.HasSingleton<LevelSpawnData>())
-                    {
-                        SystemAPI.GetSingletonRW<LevelSpawnData>().ValueRW.ActiveHiveCount++;
-                    }
                     ecb.AddComponent(newHive, new HiveComponent
                     {
                         Size = 1.0f
