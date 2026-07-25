@@ -152,8 +152,6 @@ public partial struct HiveDeathEventSystem : ISystem
                         spawnData.ExpansionSpotsX[newIndex] = position.x;
                         spawnData.ExpansionSpotsY[newIndex] = position.y;
                         spawnData.ExpansionSpotCount++;
-
-                        if (spawnData.ActiveHiveCount > 0) spawnData.ActiveHiveCount--;
                     }
                 }
             }

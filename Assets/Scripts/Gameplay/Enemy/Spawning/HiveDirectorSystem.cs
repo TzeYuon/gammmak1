@@ -44,7 +44,11 @@ partial struct HiveDirectorSystem : ISystem
         var spawnDataComp = SystemAPI.GetSingletonRW<LevelSpawnData>();
         ref var spawnData = ref spawnDataComp.ValueRW;
 
-        if (spawnData.ExpansionSpotCount <= 0) return;
+        if (spawnData.ExpansionSpotCount <= 0)
+        {
+            _surgesSinceLastSpawn = 0;
+            return;
+        }
 
         float3 startPos = float3.zero;
         bool foundHive = false;

@@ -108,14 +108,15 @@ partial struct LevelGen_TerrainSystem : ISystem
         float Xc = worldOrigin.x + width / 2;
         float Yc = worldOrigin.y + height / 2;
 
-        
+        int startingHiveCount = 0;
+
         switch (blueprint.TerrainType)
         {
             case TerrainType.Asteroids:
                 // Default
                 spawnPool.Add(new float3(Xbl, Ybl, 0));
                 spawnPool.Add(new float3(Xtr, Ytr, 0));
-                spawnData.ActiveHiveCount = 1;
+                startingHiveCount = 1;
                 break;
 
             case TerrainType.Cavern:
@@ -129,13 +130,13 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xr, Yr, 0));
                 spawnPool.Add(new float3(Xl, Yl, 0)); 
                 spawnPool.Add(new float3(Xb, Yb, 0));
-                spawnData.ActiveHiveCount = 4;
+                startingHiveCount = 3;
                 break;
 
             case TerrainType.OneTunnel:
                 spawnPool.Add(new float3(Xbl, Ybl, 0));
                 spawnPool.Add(new float3(Xtr, Ytr, 0));
-                spawnData.ActiveHiveCount = 1;
+                startingHiveCount = 1;
                 break;
 
             case TerrainType.Maze:
@@ -147,16 +148,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xl, Yl, 0));
                 spawnPool.Add(new float3(Xr, Yr, 0));
                 spawnPool.Add(new float3(Xb, Yb, 0));
-                spawnData.ActiveHiveCount = 2;
-                break;
-
-            case TerrainType.Shattered:
-                spawnPool.Add(new float3(Xbl, Ybl, 0));
-                spawnPool.Add(new float3(Xtr, Ytr, 0));
-                spawnPool.Add(new float3(Xtl, Ytl, 0));
-                spawnPool.Add(new float3(Xbr, Ybr, 0));
-                spawnPool.Add(new float3(Xc, Yc, 0));
-                spawnData.ActiveHiveCount = 3;
+                startingHiveCount = 3;
                 break;
 
             default:
@@ -165,7 +157,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xtl, Ytl, 0));
                 spawnPool.Add(new float3(Xbr, Ybr, 0));
                 spawnPool.Add(new float3(Xc, Yc, 0));
-                spawnData.ActiveHiveCount = 4;
+                startingHiveCount = 2;
                 break;
         }
 
@@ -183,22 +175,23 @@ partial struct LevelGen_TerrainSystem : ISystem
         {
             for (int i = 0; i < spawnPool.Count - 1; i++)
             {
-                if (i < spawnData.ActiveHiveCount)
+                if (i < startingHiveCount)
                 {
                     spawnData.HiveSpawnsX[i] = spawnPool[i].x;
                     spawnData.HiveSpawnsY[i] = spawnPool[i].y;
                 }
                 else
                 {
-                    spawnData.ExpansionSpotsX[i - spawnData.ActiveHiveCount] = spawnPool[i].x;
-                    spawnData.ExpansionSpotsY[i - spawnData.ActiveHiveCount] = spawnPool[i].y;
+                    spawnData.ExpansionSpotsX[i - startingHiveCount] = spawnPool[i].x;
+                    spawnData.ExpansionSpotsY[i - startingHiveCount] = spawnPool[i].y;
                 }
             }
 
             spawnData.MothershipSpawn = spawnPool[spawnPool.Count - 1];
         }
 
-        spawnData.ExpansionSpotCount = spawnPool.Count - spawnData.ActiveHiveCount - 1;
+        spawnData.ExpansionSpotCount = spawnPool.Count - startingHiveCount - 1;
+        spawnData.ActiveHiveCount = startingHiveCount;
         NativeArray<float3> spawnPoints = new NativeArray<float3>(spawnPool.Count, Allocator.Temp);
         for (int i = 0; i < spawnPool.Count; i++)
         {
