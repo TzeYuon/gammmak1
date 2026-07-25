@@ -70,7 +70,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 blueprint.GridWidth = 500;
                 blueprint.GridHeight = 500;
                 break;
-            case TerrainType.Cavern:
+            case TerrainType.TwoRing:
                 blueprint.GridWidth = 500;
                 blueprint.GridHeight = 500;
                 break;
@@ -119,9 +119,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 startingHiveCount = 1;
                 break;
 
-            case TerrainType.Cavern:
-                // Maybe can spawn new hives periodically while starting with <8?
-                spawnPool.Add(new float3(Xc, Yc, 0));
+            case TerrainType.TwoRing:
                 spawnPool.Add(new float3(Xtl, Ytl, 0));
                 spawnPool.Add(new float3(Xtr, Ytr, 0));
                 spawnPool.Add(new float3(Xbr, Ybr, 0)); 
@@ -130,6 +128,7 @@ partial struct LevelGen_TerrainSystem : ISystem
                 spawnPool.Add(new float3(Xr, Yr, 0));
                 spawnPool.Add(new float3(Xl, Yl, 0)); 
                 spawnPool.Add(new float3(Xb, Yb, 0));
+                spawnPool.Add(new float3(Xc, Yc, 0));
                 startingHiveCount = 3;
                 break;
 
@@ -151,6 +150,14 @@ partial struct LevelGen_TerrainSystem : ISystem
                 startingHiveCount = 3;
                 break;
 
+            case TerrainType.Cavern:
+                spawnPool.Add(new float3(Xt, Yt, 0));
+                spawnPool.Add(new float3(Xl, Yl, 0));
+                spawnPool.Add(new float3(Xb, Yb, 0));
+                spawnPool.Add(new float3(Xr, Yr, 0));
+                startingHiveCount = 2;
+                break;
+
             default:
                 spawnPool.Add(new float3(Xbl, Ybl, 0));
                 spawnPool.Add(new float3(Xtr, Ytr, 0));
@@ -162,15 +169,27 @@ partial struct LevelGen_TerrainSystem : ISystem
         }
 
         var rng = Unity.Mathematics.Random.CreateFromIndex(blueprint.Seed);
-
-        for (int i = 0; i < spawnPool.Count; i++)
+        // Mothership in the middle
+        if (TerrainType.TwoRing == blueprint.TerrainType || TerrainType.Ring == blueprint.TerrainType)
         {
-            int swapIdx = rng.NextInt(i, spawnPool.Count);
-            float3 temp = spawnPool[i];
-            spawnPool[i] = spawnPool[swapIdx];
-            spawnPool[swapIdx] = temp;
+            for (int i = 0; i < spawnPool.Count - 1; i++)
+            {
+                int swapIdx = rng.NextInt(0, spawnPool.Count - 1);
+                float3 temp = spawnPool[i];
+                spawnPool[i] = spawnPool[swapIdx];
+                spawnPool[swapIdx] = temp;
+            }
         }
-
+        else
+        {
+            for (int i = 0; i < spawnPool.Count; i++)
+            {
+                int swapIdx = rng.NextInt(i, spawnPool.Count);
+                float3 temp = spawnPool[i];
+                spawnPool[i] = spawnPool[swapIdx];
+                spawnPool[swapIdx] = temp;
+            }
+        }
         unsafe
         {
             for (int i = 0; i < spawnPool.Count - 1; i++)
@@ -259,8 +278,8 @@ partial struct LevelGen_TerrainSystem : ISystem
 
                         case TerrainType.Ring:
                             // Creates a massive hollow ring of walls between dist 35 and 55
-                            float ringThickness = math.abs(distToCenter - 45f);
-                            if (ringThickness < 10f)
+                            float ringThickness = math.abs(distToCenter - 75f);
+                            if (ringThickness < 20f)
                             {
                                 // Carves 4 Entrances (N,S,E,W)
                                 bool isDoor = math.abs(x - centerX) < 12f || math.abs(y - centerY) < 12f;
@@ -279,9 +298,9 @@ partial struct LevelGen_TerrainSystem : ISystem
                                 float angleDeg = 90f - math.degrees(math.atan2(dy, dx));
                                 if (angleDeg < 0f) angleDeg += 360f; // Keep it between 0 and 360
 
-                                float innerRingRadius = 35f;
-                                float outerRingRadius = 70f;
-                                float radiusThickness = 7f;
+                                float innerRingRadius = 75f;
+                                float outerRingRadius = 150f;
+                                float radiusThickness = 15f;
 
                                 float distToInner = math.abs(distToCenter - innerRingRadius);
                                 float distToOuter = math.abs(distToCenter - outerRingRadius);

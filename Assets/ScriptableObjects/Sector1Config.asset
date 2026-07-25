@@ -132,7 +132,7 @@ MonoBehaviour:
         Weight: 1
     TerrainPool:
       Pool:
-      - Item: 5
+      - Item: 3
         Weight: 1
     ObjectivePool:
       Pool:
@@ -174,7 +174,7 @@ MonoBehaviour:
       Pool:
       - Item: 8
         Weight: 1
-      - Item: 1
+      - Item: 5
         Weight: 1
       - Item: 3
         Weight: 1
