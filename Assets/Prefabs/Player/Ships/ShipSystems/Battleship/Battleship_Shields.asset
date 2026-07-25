@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73fe6b4b14c6a224f9195f7b8785feaf, type: 3}
   m_Name: Battleship_Shields
   m_EditorClassIdentifier: Assembly-CSharp::ShipSystemDefinition
-  SystemID: 4
+  SystemID: 3
   Upgrades:
   - Cost: 350
     Description: 
