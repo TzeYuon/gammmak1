@@ -56,8 +56,8 @@ partial struct LevelGen_HivesSystem : ISystem
         };
 
         // Base difficulty values
-        float baseDifficultyPerMinute = 0.02f;
-        float baseDifficultyPerHiveDestroyed = 0.05f;
+        float baseDifficultyPerMinute = 0.005f;
+        float baseDifficultyPerHiveDestroyed = 0.01f;
         float baseMaxSpawnRateMult = 2f;
         float baseMaxSpawnCountMult = 2.5f;
         float baseMaxEnemyHealthMult = 1.5f;
