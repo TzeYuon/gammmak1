@@ -90,8 +90,8 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement style="flex-grow: 1; position: absolute; top: 50%; left: 50%; width: 80%; translate: -50% -50%;">
-            <ui:Label text="" name="HangarWarningLbl" class="text warning" style="white-space: normal; max-width: 100%; height: auto; -unity-text-align: upper-left; padding-bottom: 12px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; width: auto; position: relative; top: auto; left: auto; translate: 0 0%;"/>
+        <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; top: 50%; left: 50%; width: 80%; translate: -50% -50%;">
+            <ui:Label text="" name="HangarWarningLbl" class="text warning" style="white-space: normal; max-width: 100%; height: auto; -unity-text-align: upper-left; padding-bottom: 12px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; width: auto; position: relative; top: auto; left: auto; translate: 0 0%; display: flex;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

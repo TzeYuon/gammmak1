@@ -50,11 +50,13 @@ public class HangarScreen : UIScreen
 
     public void HideWarningImmediate()
     {
+        hangarWarningLbl.parent.style.display = DisplayStyle.None;
         hangarWarningLbl.RemoveFromClassList("warning--visible");
     }
 
     public void ShowWarning(string message)
     {
+        hangarWarningLbl.parent.style.display = DisplayStyle.Flex;
         hangarWarningLbl.text = message;
         hangarWarningLbl.AddToClassList("warning--visible");
 
