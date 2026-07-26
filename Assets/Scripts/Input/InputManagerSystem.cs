@@ -132,7 +132,8 @@ public partial class InputManagerSystem : SystemBase
         if (mainUIDocument == null) return false;
 
         Vector2 mousePos = Mouse.current.position.ReadValue();
-        Vector2 uiPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
+        Vector2 invertedMouse = new Vector2(mousePos.x, Screen.height - mousePos.y);
+        Vector2 uiPos = invertedMouse / mainUIDocument.rootVisualElement.panel.scaledPixelsPerPoint;
 
         VisualElement picked = mainUIDocument.rootVisualElement.panel.Pick(uiPos);
 

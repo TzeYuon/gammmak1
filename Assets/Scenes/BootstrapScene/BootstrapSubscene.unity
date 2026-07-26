@@ -194,8 +194,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeatmapAuthoring
   WorldCentre: {x: 1000, y: 1000}
-  MapWidth: 400
-  MapHeight: 400
+  MapWidth: 600
+  MapHeight: 600
   CellSize: 1
 --- !u!4 &523752878
 Transform:
